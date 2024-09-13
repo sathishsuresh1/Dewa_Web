@@ -1,0 +1,421 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.WorkPermit.WorkPermitPass
+
+
+
+<div>
+    <div class="j113-epass" data-journey="j113-epass">
+        <div class="j113-epass">
+            <div class="m66-preloader j113-epass--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12" id="main-skip">
+                    <div class="m26-page-title title_message">
+                        <div class="m26-page-title__links">
+                            <p class="m26-page-title__backlink j113-epass--main_controls">
+                                <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_OTHERS_LANDING_PAGE)">
+                                    @Translate.Text("Epass.Back")
+                                </a>
+                            </p>
+                        </div>
+                        <h2 class="text__page-title">@Translate.Text("Epass.Applyworkpermit")</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <div id="tracker">
+                        @Html.Sitecore().Placeholder("steptracker")
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row" id="fullpolistwithform">
+                <div class="grid__column grid__column--12 grid__column--form">
+
+                    <div id="PartialViewDiv"></div>
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "ePassForm", @id = "workpermitform", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                        <div class="j113-epass--main_controls">
+                            @Html.Sitecore().Placeholder("POListSelector")
+                        </div>
+                        <input type="hidden" name="PONumber" id="PONumber" />
+                        <input type="hidden" name="POName" id="POName" />
+                        <input type="hidden" name="CompanyName" id="CompanyName" />
+                        <div class="form-field mt24 j113-epass--permPass__mode">
+
+                            <fieldset class="fieldset">
+                                <legend class="legend-color">.</legend>
+                                <p class="form-field__radio grid__column--6 grid__column">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_singlePP"
+                                               name="PassSubmitType" type="radio" value="single"
+                                               aria-describedby="description-for-oq14ux7v4"
+                                               data-parsley-errors-container="#description-for-oq14ux7v4" checked=""
+                                               data-parsley-multiple="j113_radio" data-parsley-id="26">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Single Permit")
+                                        </span>
+                                        <br>
+                                        <span class="form-field__description align-radio-desc--6">@Translate.Text("Epass.Singleperaccess")</span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio grid__column--6 grid__column">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_multiplePP"
+                                               name="PassSubmitType" type="radio" value="multiple"
+                                               aria-describedby="description-for-oq14ux7v4"
+                                               data-parsley-errors-container="#description-for-oq14ux7v4" data-parsley-multiple="j113_radio">
+                                        <span class="form-field__fakeradio focus-enabled">
+
+                                            @Translate.Text("Group Work Permit")
+
+                                        </span>
+                                        <br>
+                                        <span class="form-field__description align-radio-desc--6">@Translate.Text("Epass.Bulkpass")</span>
+                                    </label>
+                                </p>
+                                <div id="description-for-oq14ux7v4" class="form-field__messages">
+                                </div>
+
+                            </fieldset>
+                        </div>
+                        <!--Single Permanent Pass Form-->
+                        @Html.Partial("~/Views/Feature/GatePass/WorkPermit/_PartialWorkPermitPass.cshtml", Model)
+                        <!--Group Permanent Pass Form-->
+                        @Html.Partial("~/Views/Feature/GatePass/WorkPermit/_GroupWorkPermit.cshtml")
+                    }
+                </div>
+            </div>
+
+            <div class="grid__row hidden" id="nopolist">
+                <div class="grid__column grid__column--12" id="main-skip">
+                    <div class="m14-richtext centered">
+                        <h3 class="">@Translate.Text("Epass.Nodataavailable")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    var $emiratesid = jQuery("#form-field-EmiratesID");
+    var $emiratesidexpirydate = jQuery("#form-field-EmiratesIDExpiry");
+    var $fullname = jQuery("#form-field-fullname");
+    var $profession = jQuery("#form-field-profession");
+    var $visa = jQuery("#form-field-visa");
+    var $visaexpiry = jQuery("#form-field-visaexpiry");
+    var $passport = jQuery("#form-field-Passportnumber");
+    var $passportexpiry = jQuery("#form-field-Passportexpiry");
+    var $nationality = jQuery("#form-field-nationality");
+    var $eidattachment = jQuery("#eiddocumentdiv");
+    var $passportattachment = jQuery("#passportdocumentdiv");
+    var $visaattachment = jQuery("#visadocumentdiv");
+    var $dlattachment = jQuery("#drivinglicensedocumentdiv");
+    var $platenumberid = jQuery("#form-field-PlateNumber");
+    var $platecodeid = jQuery("#form-field-PlateCode");
+    var $platecategoryid = jQuery("#form-field-categorycode");
+    var $plateemiratesid = jQuery("#form-field-emirates");
+    var defaultOpts = {
+        closeOnSelect: true,
+        format: 'd mmmm yyyy',
+        formatSubmit: 'd mmmm yyyy',
+        onStart: function () {
+            // set default date
+            var $dp = this.$node,
+                date;
+
+            if ($dp.data('initial-date')) {
+                date = new Date($dp.data('initial-date'));
+                this.set('select', [date.getFullYear(), date.getMonth(), date.getDate()]);
+            }
+        },
+        onOpen: function () {
+            if ($dp.attr('data-scroll') == 'false') {
+                return
+            } else if ($dp.attr('data-scroll') != undefined) {
+                _this.scrollIntoView(this.$node, $dp.attr('data-scroll'));
+            } else {
+                _this.scrollIntoView(this.$node, false);
+            };
+        },
+        onClose: function () {
+            this.component.$node.parsley().validate();
+        }
+    };
+
+    docReady(function () {
+
+        jQuery("#form-field-EmiratesIDExpiry").on("change", function () { checkIDValidation(); });
+        $emiratesid.on('focusout', function () {
+            checkIDValidation();
+        });
+
+        jQuery("#form-field-emirates").on("change", function () { checkRTAValidation(); });
+        $platenumberid.on('focusout', function () {
+            checkRTAValidation();
+        });
+        $platecodeid.on('focusout', function () {
+            checkRTAValidation();
+        });
+        $platecategoryid.change(function () {
+            checkRTAValidation();
+        });
+
+        setTimeout(function () {
+            jQuery("#select2-form-field-nationality-container").attr("style", "padding:5px 12px 8px;");
+            jQuery("#form-field-locations").closest('.form-field--select').find("ul.select2-selection__rendered").attr("style", "padding:5px 12px 8px;");
+        }, 250);
+        var efId = '@Model.eFolderId';
+
+        jQuery('.m43-accountsel__selected').on('DOMSubtreeModified', function () {
+            jQuery('#PONumber').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_number]').html());
+            jQuery('#POName').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_namedesc]').html());
+            jQuery('#CompanyName').val(jQuery('#supplierid').val());
+
+        });
+        setTimeout(function () {
+            jQuery('.m43-accountsel__accounts-list').find('.form-field__radio--accselector:first-child').find('.form-field__fakeradio').click();
+            if (efId == null || efId == '') {
+                jQuery('.button[data-accountupdate="true"]').click();
+            }
+
+
+        }, 1000);
+        if (efId != null && efId != "") {
+                jQuery('#PONumber').val('@Model.PONumber');
+                jQuery('#POName').val('@Model.POName');
+                jQuery('#CompanyName').val('@Model.CompanyName');
+                jQuery("#selectedAccName").html('@Model.POName');
+                jQuery("#selectedAccNumber").html('@Model.PONumber');
+            }
+        //$(".j113-epass--loader").hide();
+        //$('body').removeClass('unscrollable');
+        $(".ePassForm").submit(function () {
+            if (jQuery(".ePassForm").parsley().validate()) {
+                //alert();
+                $(".j113-epass--loader").css('top', $(window).scrollTop().toString() + 'px');
+                $(".j113-epass--loader").show();
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+                return true;
+            }
+        });
+    });
+    //$nationality.select2();
+    function checkIDValidation() {
+        if (jQuery($emiratesid).parsley().isValid()) {
+            if ($emiratesid.val() != "" && $emiratesid.val() != undefined && $emiratesidexpirydate.val() != "" && $emiratesidexpirydate.val() != undefined) {
+                var form = jQuery("#workpermitform");
+                var token = $('input[name="__RequestVerificationToken"]', form).val();
+                var url = "/api/sitecore/epass/CheckidValidation";
+                var response = Icadetails($emiratesid.val(), $emiratesidexpirydate.val(),"", "", "", "", true, epassbeforesendfunc, epasscompletefunc, successfunc,errorfunc);
+
+            }
+        }
+    }
+
+    function checkRTAValidation() {
+        var selVal = jQuery("#form-field-emirates option:selected").val();
+        if (selVal === "DXB") {
+        if (jQuery($platenumberid).parsley().isValid()) {
+            if ($platenumberid.val() != "" && $platenumberid.val() != undefined && jQuery("#form-field-categorycode option:selected").val() != "") {
+                var response = Icadetails("", "",jQuery("#form-field-categorycode option:selected").val(), $platecodeid.val(), $platenumberid.val(), jQuery("#form-field-emirates option:selected").val(), false, epassbeforesendfunc, epasscompletefunc, successrtafunc, errorrtafunc);
+            }
+    }
+        }
+    else
+    {
+    errorrtafunc();
+    }
+    }
+
+
+    jQuery('.j113-epass--select_input').on('change', function () {
+        jQuery('#SubContractorID').val(jQuery(this).val());
+    });
+    function epassbeforesendfunc() {
+        jQuery('#Errormessage').html('');
+        jQuery('.j113-epass--loader').show();
+        jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+        $('body').removeClass('unscrollable').addClass('unscrollable');
+    }
+    function epasscompletefunc() {
+        jQuery('.j113-epass--loader').hide();
+        $('body').removeClass('unscrollable');
+    }
+    function successfunc(response) {
+        if (response != null && response.result != null && response.result.icadetails != null) {
+            $eidattachment.hide();
+            //$fullname.val(response.result.icadetails.fullname);
+            //$fullname.attr('readonly', true);
+            $profession.val(response.result.icadetails.profession);
+            if (response.result.icadetails.fullname != null && response.result.icadetails.fullname != "") {
+                $fullname.val(response.result.icadetails.fullname);
+                $fullname.addClass('disabled');
+                $fullname.prop('readonly', true);
+            }
+            else {
+                $fullname.removeClass('disabled');
+                $fullname.prop('readonly', false);
+            }
+            var isPpExpired = true, isVisaExpired = true;
+            var today = new Date();
+            if (response.result.icadetails.formatpassportexpirydate != null && response.result.icadetails.formatpassportexpirydate != "") {
+                var ppExpiry = new Date(response.result.icadetails.passportexpirydate);
+                isPpExpired = today > ppExpiry;
+            }
+            if (response.result.icadetails.formatvisaexpirydate != null && response.result.icadetails.formatvisaexpirydate != "") {
+                var vExpiry = new Date(response.result.icadetails.visaexpirydate);
+                isVisaExpired = today > vExpiry;
+            }
+
+            if (response.result.icadetails.passportnumber != null && response.result.icadetails.passportnumber != "" && response.result.icadetails.passportnumber != undefined && !isPpExpired) {
+                $passportattachment.hide();
+                $passport.val(response.result.icadetails.passportnumber);
+                $passportexpiry.val(response.result.icadetails.formatpassportexpirydate);
+                $passport.addClass('disabled');
+                $passport.prop('readonly', true);
+                $passportexpiry.addClass('disabled');
+                require(['picker'], function () {
+                    jQuery("#form-field-Passportexpiry").pickadate().pickadate('picker').stop();
+                    $passportexpiry.prop('readonly', true);
+                });
+            }
+            else {
+                $passport.removeClass('disabled');
+                $passport.prop('readonly', false);
+                $passportexpiry.removeClass('disabled');
+                $passportexpiry.prop('readonly', false);
+                $passportattachment.show();
+            }
+
+            if (response.result.icadetails.formatvisanumber != null && response.result.icadetails.formatvisanumber != "" && response.result.icadetails.formatvisanumber != undefined && !isVisaExpired) {
+                $visaattachment.hide();
+                $visa.val(response.result.icadetails.formatvisanumber);
+                $visaexpiry.val(response.result.icadetails.formatvisaexpirydate);
+                $visa.addClass('disabled');
+                $visa.prop('readonly', true);
+                $visaexpiry.addClass('disabled');
+                require(['picker'], function () {
+                    jQuery("#form-field-visaexpiry").pickadate().pickadate('picker').stop();
+                    $visaexpiry.prop('readonly', true);
+                });
+            }
+            else {
+                $visa.removeClass('disabled');
+                $visa.prop('readonly', false);
+                $visaexpiry.removeClass('disabled');
+                revivePicker('form-field-visaexpiry');
+                $visaattachment.show();
+            }
+            if (response.result.icadetails.nationality != null && response.result.icadetails.nationality != "") {
+                $nationality.val(response.result.icadetails.nationality);
+                jQuery("#form-field-nationality").trigger('change');
+                $nationality.closest('.form-field').hide();
+                $('#form-field-nationalityh').val($nationality.val());
+                $('#form-field-nationalityh').closest('.form-field').show();
+            }
+            else {
+                $nationality.removeClass('disabled');
+                $nationality.prop('readonly', false);
+            }
+        }
+        else {
+            errorfunc();
+        }
+    }
+    function errorfunc() {
+        $fullname.val("");
+        $fullname.removeAttr('readonly');
+        $visa.val("");
+        $visa.removeAttr('readonly');
+        $visaexpiry.val("");
+        $visaexpiry.removeClass('disabled');
+        revivePicker('form-field-visaexpiry');
+        $passport.val("");
+        $passport.removeAttr('readonly');
+        $passportexpiry.val("");
+        $passportexpiry.removeClass('disabled');
+        revivePicker('form-field-Passportexpiry');
+        $nationality.val("");
+        $nationality.closest('.form-field').show();
+        $('#form-field-nationalityh').closest('.form-field').hide();
+        jQuery("#form-field-nationality").trigger('change');
+    }
+    function successrtafunc(response) {
+        if (response != null && response.result != null && response.result.rtadetails != null) {
+            $dlattachment.hide();
+        }
+        else {
+            errorrtafunc();
+        }
+    }
+    function errorrtafunc() {
+        $dlattachment.show();
+        }
+    function revivePicker(id) {
+        require(['picker'], function () {
+            if (true) {
+
+                dpOptions = jQuery('#' + id).data('picker-options');
+                dpLabelId = '#' + jQuery('#' + id).parents('.form-field').attr('id');
+
+                if (typeof dpOptions === 'string') {
+                    dpOptions = JSON.parse(dpOptions);
+                } else if (typeof dpOptions !== 'object') {
+                    dpOptions = {};
+                }
+
+                jQuery('#' + id).pickadate(
+                    $.extend(
+                        true, {
+                            container: dpLabelId,
+                            min: new Date()
+                        },
+                        dpOptions,
+                        defaultOpts
+                    )
+                );
+
+                // if dp is has a ref dataset update based on this
+                if (jQuery('#' + id).data('ref')) {
+                    jQuery('#' + id).on('change', _this.setConstraints);
+                }
+
+
+                // IE9clicker (1of2) - as IE9 doesn't have events on pseudoselectors (clicking on calendar icon does not trigger picker)
+                // and as it would be too much work before delivery to update markup of all date fields... go js ugly solution
+                jQuery('#' + id).after('<span data-clicker="' + dpLabelId + '" class="form-field__datepicker-icon-clicker"></span>');
+
+            } else {
+
+                jQuery('#' + id).attr('type', 'date');
+
+                // if dp is has a ref dataset update based on this
+                if (jQuery('#' + id).data('ref')) {
+                    jQuery('#' + id).on('change', _this.setConstraintsMobile);
+                }
+            }
+            jQuery('#' + id).prop('readonly', false);
+        })
+
+        }
+</script>

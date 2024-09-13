@@ -1,0 +1,596 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.DRRG.Models.PVModule
+
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j02-drrg-dashboard">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+
+        <div class="grid__row mb24">
+            <div class="grid__column grid__column--12">
+                <form id="form-application-filter" action="#" method="POST" form-skipvalidation="true" data-form="true">
+                    @Html.AntiForgeryToken()
+                    <div class="form-field form-field--text">
+                        <label for="form-field-SearchText" class="form-field__label">
+                            <span class="aria-only">Text Field</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--search">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-SearchText"
+                                   name="SearchText"
+                                   type="text"
+                                   placeholder="Search by ref. no, type, manufacturer, evaluator, representative"
+                                   aria-describedby="description-for-SearchText"
+                                   data-parsley-errors-container="#description-for-SearchText"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="6"
+                                   aria-invalid="false">
+                            <button type="submit" class="icon-search"><span class="aria-only">Submit</span></button>
+                        </span>
+                        <div id="description-for-SearchText" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form--single_line">
+
+                        <div class="form-field form-field--select form-field--select_new">
+                            <label for="form-field-applicationtype" class="form-field__label">
+                                Equipment Type
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-applicationtype"
+                                        name="applicationtype" aria-describedby="description-for-applicationtype"
+                                        data-parsley-errors-container="#description-for-applicationtype"
+                                        data-parsley-trigger="change" data-parsley-id="12">
+                                    <option value="" selected="">All</option>
+                                    <option value="1">PV Module</option>
+                                    <option value="2">PV Inverter</option>
+                                    <option value="3">@Translate.Text("DRRG_InterfaceProtection")</option>
+                                </select>
+                            </span>
+                            <div id="description-for-applicationtype" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        @*<div class="form-field form-field--select form-field--select_new">
+                                <label for="form-field-manufacturename" class="form-field__label">
+                                    Name of Manufacturer
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-manufacturename"
+                                            name="manufacturename" aria-describedby="description-for-manufacturename" data-parsley-errors-container="#description-for-manufacturename" data-parsley-trigger="change" data-parsley-id="12"></select>
+                                </span>
+                                <div id="description-for-manufacturename" class="form-field__messages">
+                                </div>
+                            </div>*@
+
+                        @*<div class="form-field form-field--select form-field--select_new">
+                                <label for="form-field-evaluator" class="form-field__label">
+                                    Evaluator
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-evaluator"
+                                            name="evaluator" aria-describedby="description-for-evaluator" data-parsley-errors-container="#description-for-evaluator" data-parsley-trigger="change" data-parsley-id="14"></select>
+                                </span>
+                                <div id="description-for-evaluator" class="form-field__messages">
+                                </div>
+                            </div>*@
+
+                        <div class="form-field form-field--select form-field--select_new">
+                            <label for="form-field-status" class="form-field__label">
+                                Status
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-status" name="select" aria-describedby="description-for-status"
+                                        data-parsley-errors-container="#description-for-status"
+                                        data-parsley-trigger="change" data-parsley-id="16">
+                                    <option value="" selected="">All</option>
+                                    <option value="1">Published</option>
+                                    <option value="2">Pending Final Approval</option>
+                                    <option value="3">Under Evaluation</option>
+                                    <option value="4">Deleted</option>
+                                    <option value="5">Rejected</option>
+                                </select>
+                            </span>
+                            <div id="description-for-status" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div id="datepicker-container-fromDate" class="form-field form-field--text">
+                            <label for="form-field-pfbcifr3b" class="form-field__label">
+                                <span class="aria-only">From</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input class="form-field__input form-field__input--text form-field__input--datepicker form-field__input--datepicker-binded" data-el-to="#form-field-toDate" data-el-to_min="0" data-el-to_max="indefinite" id="form-field-fromDate" value="" name="fromDate" type="text" placeholder="Start Date" aria-describedby="description-for-fromDate" data-parsley-errors-container="#description-for-fromDate" data-el="datepicker-past" data-picker-options='{}' />
+                            </span>
+                            <div id="description-for-fromDate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div id="datepicker-container-toDate" class="form-field form-field--text">
+                            <label for="form-field-toDate" class="form-field__label">
+                                <span class="aria-only">To</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input class="form-field__input form-field__input--text form-field__input--datepicker" id="form-field-toDate" value="" name="toDate" type="text" placeholder="End Date" aria-describedby="description-for-toDate" data-parsley-errors-container="#description-for-toDate" data-el="datepicker-future" data-picker-options='{}' />
+                            </span>
+                            <div id="description-for-toDate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        @*<div class="form-field form-field--select form-field--select_new">
+                                <label for="form-field-evaluateddate" class="form-field__label">
+                                    Evaluated Date
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-evaluateddate" name="evaluateddates" aria-describedby="description-for-evaluateddate" data-parsley-errors-container="#description-for-evaluateddate" data-parsley-trigger="change" data-parsley-id="18"></select>
+                                </span>
+                                <div id="description-for-evaluateddate" class="form-field__messages">
+                                </div>
+                            </div>*@
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div id="application-list">
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--centered">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Dashboard)" class="button button--outline button--back backbutton" role="button">@Translate.Text("Back to Home page")</a>
+            </div>
+        </div>
+
+        <div class="m39-modal m39-modal--confirm m39-modal--history" data-component="m39-modal" id="viewhistory">
+            <button data-trigger="true" class="button button--primary btnpopup hidden" type="button" id="_5lug1hq6a_trigger" aria-controls="_5lug1hq6a_content">Trigger</button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_5lug1hq6a_content" aria-labelledby="_5lug1hq6a_trigger">
+                <div class="m39-modal__dialog ">
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title">Reference No. <span id="referenceNumber"></span></div>
+                        <button data-close="true" class="m39-modal__button--close" id="_5lug1hq6a_close" aria-controls="_5lug1hq6a_content">
+                            <span class="aria-only">Close</span>
+                        </button>
+                    </div>
+                    <div class="m39-modal__content" id="log_historyBody">
+
+                    </div>
+                </div>
+            </div>
+            <div class="m39-modal__overlay"> </div>
+        </div>
+
+    </div>
+</div>
+
+<script id="application-item-template" type="text/x-handlebars-template">
+    <div class="pagination-list">
+    </div>
+    <div class="m23-table m23-table--variant2" data-component="m23-table">
+        <h3 class="m23-table__title "></h3>
+        <table class="m23-table__content-table">
+            <thead class="m23-table__content-table-header">
+                <tr class="m23-table__content-table-row" tabindex="0">
+                    <th class="m23-table__content-table-cell--header">Serial No.</th>
+                    <th class="m23-table__content-table-cell--header">Reference No.</th>
+                    <th class="m23-table__content-table-cell--header">Name of Manufacturer</th>
+                    <th class="m23-table__content-table-cell--header">Name of Representative Company</th>
+                    <th class="m23-table__content-table-cell--header">Evaluator</th>
+                    <th class="m23-table__content-table-cell--header">Date Submitted</th>
+                    <th class="m23-table__content-table-cell--header">Status</th>
+                    <th class="m23-table__content-table-cell--header">Processing History</th>
+                </tr>
+            </thead>
+            <tbody class="m23-table__content-table-body">
+                {{#results}}
+                <tr class="m23-table__content-table-row middle" tabindex="0">
+                    <td data-label="Serial No." class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{serialnumber}}
+                        <div class="m23-table__content-table-th-mobile" style="">Serial No.</div>
+                    </td>
+                    <td data-label="Reference No." class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        <a class="link" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Details)?id={{referenceNumber}}">
+                            {{referenceNumber}}
+                            <div class="m23-table__content-table-th-mobile" style="">Reference No.</div>
+                        </a>
+                    </td>
+                    <td data-label="Model" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{manufacturerName}}
+                        <div class="m23-table__content-table-th-mobile" style="">Name of Manufacturer</div>
+                    </td>
+                    <td data-label="Model" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{#if Representativename}}
+                        {{Representativename}}
+                        {{else}}
+                        N/A
+                        {{/if}}
+                        <div class="m23-table__content-table-th-mobile" style="">Name of Representative Company</div>
+                    </td>
+                    <td data-label="Date" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{Evaluator}}
+                        <div class="m23-table__content-table-th-mobile" style="">Evaluator</div>
+                    </td>
+
+                    <td data-label="Date" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{dateSubmitted}}
+                        <div class="m23-table__content-table-th-mobile" style="">Date</div>
+                    </td>
+                    <td data-label="Application Type" class="m23-table__content-table-cell initialized {{status}}" style="min-height: 23.9062px;">
+                        <span class="m23-table__content-table-cell_status {{ifStatus status}}">{{statusText}}</span>
+                        <div class="m23-table__content-table-th-mobile" style="">Status</div>
+                    </td>
+                    <td data-label="Date" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        <a class="link" modal-target="#viewhistory" onclick="handleLogList('{{referenceNumber}}')">View History</a>
+                        @*<div class="m23-table__content-table-th-mobile" style="">Processing History</div>*@
+                    </td>
+                </tr>
+                {{/results}}
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination-list">
+    </div>
+</script>
+<script id="application-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination m34-pagination--variant m34-pagination--variant_end mt24">
+        <span>
+            {{firstitem}} - {{lastitem}} of {{totalitem}}
+        </span>
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="ajaxpage({{previouspagenumber}})" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev"><span class="aria-only">@Translate.Text("Previous")</span></a>
+            {{else}}
+            <a disabled="" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev disabled"><span class="aria-only">@Translate.Text("Previous")</span></a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="ajaxpage({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next"><span class="aria-only">@Translate.Text("Next")</span></a>
+            {{else}}
+            <a disabled="" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next disabled"><span class="aria-only">@Translate.Text("Next")</span></a>
+            {{/if}}
+
+        </div>
+    </div>
+</script>
+<script id="application-norecord-template" type="text/x-handlebars-template">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m40v2-status-message m40v2-status-message--success  icon icon-new-success-message " data-component="m40v2-status-message">
+                <div class="m40v2-status-message__text">@Translate.Text("No record")</div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    docReady(function () {
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('toLowerCase', function (str) {
+            return str.toLowerCase();
+        });
+        Handlebars.registerHelper('ifStatus', function (str) {
+            var txtStatusClass = '';
+            switch (str) {
+                case "Approved":
+                case "ReviwerApproved":
+                    txtStatusClass = "approved";
+                    break;
+                case "Deleted":
+                case "ReviewerRejected":
+                    txtStatusClass = "rejected";
+                    break;
+                case "Rejected":
+                    txtStatusClass = "pending";
+                    break;
+                default:
+                    txtStatusClass = "pending";
+            }
+            return txtStatusClass;
+        });
+        Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        });
+
+        Handlebars.registerHelper('json', function (context) {
+            return JSON.stringify(context);
+        });
+        Handlebars.registerHelper('ifSubmitted', function (v1, options) {
+            if (v1 == 'Submitted') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifRejected', function (v1, options) {
+            if (v1 == 'Rejected') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifApproved', function (v1, options) {
+            if (v1 == 'Approved') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifUpdated', function (v1, options) {
+            if (v1 == 'Updated') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifReviewerApproved', function (v1, options) {
+            if (v1 == 'ReviewerApproved') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifReviewerRejected', function (v1, options) {
+            if (v1 == 'ReviewerRejected') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifDeleted', function (v1, options) {
+            if (v1 == 'Deleted') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        setTimeout(function () {
+            // jQuery('#form-field-applicationtype').change(handleFilterSelection);
+            jQuery('#form-field-manufacturename').change(handleFilterSelection);
+            jQuery('#form-field-evaluator').change(handleFilterSelection);
+            jQuery('#form-field-evaluateddate').change(handleFilterSelection);
+        }, 200);
+        jQuery("#form-field-applicationtype").on('change', function (event) {
+            handleFilterSelection();
+        });
+        jQuery("#form-application-filter").on('submit', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            handleSearchFilter(event);
+        });
+        jQuery(".mymainpassesbutton,.mysubpassesbutton").on('click', function (event) {
+            handleSearchFilter(event);
+        });
+        jQuery('#form-application-filter').submit();
+        function handleSearchFilter(e) {
+            e.preventDefault();
+            ajaxpage(1);
+        }
+
+        jQuery('#form-field-fromDate').change(function () {
+            if (jQuery(this).val() != '' && jQuery('#form-field-toDate').val() != '') {
+                loadTableDataOnFilters();
+            }
+        });
+
+        jQuery('#form-field-toDate').change(function () {
+            if (jQuery(this).val() != '' && jQuery('#form-field-fromDate').val() != '') {
+                loadTableDataOnFilters();
+            }
+        });
+
+        jQuery('#form-field-status').change(function () {
+            if (jQuery(this).val() == "All") {
+                jQuery(this).val() = '';
+            }
+            loadTableDataOnFilters();
+        });
+
+        $('#form-field-SearchText').on("keypress", function (e) {
+            if (e.keyCode == 13) {
+                if ($('#form-field-SearchText').val() != '' && $('#form-field-SearchText').val() != null) {
+                    loadTableDataOnFilters();
+                }
+            }
+        });
+        // jQuery("#form-field-fromDate_root").find(".picker__button--clear").on('click', function () { alert('Hi'); loadTableDataOnFilters(); });
+    });
+
+    function loadTableDataOnFilters() {
+        jQuery('.m66-preloader').show();
+        jQuery('.m66-preloader').css('top', $(window).scrollTop());
+        $('body').removeClass('unscrollable').addClass('unscrollable');
+        ajaxpage(1);
+    }
+
+    function ajaxpage(page, pagesize) {
+        var keyword = jQuery("#form-field-SearchText").val();
+        var applicationtype = jQuery("#form-field-applicationtype option:selected").val();
+        var fromDate = jQuery('#form-field-fromDate').val();
+        var toDate = jQuery('#form-field-toDate').val();
+        var status = jQuery("#form-field-status option:selected").val();
+
+        var url = "/api/Sitecore/DRRGEvaluator/GetApplicationLogList";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            traditional: true,
+            data: AddForgeryToken({
+                pagesize: pagesize,
+                keyword: keyword,
+                applicationtype: applicationtype,
+                statustxt: status,
+                page: page,
+                startDate: fromDate,
+                Endate: toDate,
+            }, "form-application-filter"),
+            beforeSend: function () {
+                jQuery('.m66-preloader').show();
+                jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.m66-preloader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                //debugger;
+                if (response.status && response.Message != null && response.Message.LastRecords != null && response.Message.LastRecords.ApplicationLog != null && response.Message.LastRecords.ApplicationLog.length > 0) {
+                    var context = {
+                        results: response.Message.LastRecords.ApplicationLog,
+                    };
+                    renderApplicationsReceived(context);
+
+                    if (response.Message.LastRecords.ManufacturerList != null) {
+                        handleDropdown("#form-field-manufacturename", response.Message.LastRecords.ManufacturerList, false, "ManufacturerCode");;
+                    }
+
+                    if (response.Message.LastRecords.EvaluatorList != null) {
+                        handleDropdown("#form-field-evaluator", response.Message.LastRecords.EvaluatorList, true, "Evaluator");
+                    }
+
+                    if (response.Message.LastRecords.EvaluatedDate != null) {
+                        handleDropdown("#form-field-evaluateddate", response.Message.LastRecords.EvaluatedDate, true, "Evaluated Date");
+                    }
+
+                    if (response.Message.pagination) {
+                        var pagedata = {
+                            previouspage: function () {
+                                if (response.Message.page > 1)
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            nextpage: function () {
+                                if (response.Message.page < response.Message.totalpage)
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            firstitem: response.Message.firstitem,
+                            lastitem: response.Message.lastitem,
+                            totalitem: response.Message.totalitem,
+                            page: response.Message.page,
+                            previouspagenumber: response.Message.page - 1,
+                            nextpagenumber: response.Message.page + 1,
+                            //pagenumbers: response.Message.pagenumbers,
+                            totalpage: response.Message.totalpage,
+                        }
+                        renderSearchPagination(pagedata);
+
+                    }
+
+                }
+                else {
+                    renderApplicationsNorecordReceived(null);
+                }
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+
+            }
+        });
+    }
+
+    function handleDropdown(element, data, isSingle, title) {
+        $(element).empty();
+        $(element).append('<option value="">select ' + title + '</option>');
+        if (data != null && data.length > 0) {
+            if (isSingle) {
+                $.each(data,
+                    function (index, item) {
+                        if (item != null) {
+                            $(element).append('<option value= ' + item + '>' + item + '</option>');
+                        }
+                    });
+            }
+            else {
+                $.each(data,
+                    function () {
+                        if (this.Value != null) {
+                            $(element).append('<option value= ' + (this.Key != null || this.Key != undefined ? this.Key : "") + '>' + this.Value + '</option>');
+                        }
+                    });
+            }
+        }
+    }
+
+    function handleLogList(referenceId) {
+        $("#referenceNumber").html("");
+        $("#referenceNumber").html(referenceId);
+        $.ajax({
+            url: "/api/Sitecore/DRRGEvaluator/GetApplicationLogHistory",
+            Type: 'get',
+            data: { referenceId: referenceId },
+            success: function (data) {
+                jQuery('#log_historyBody').html("");
+                jQuery('#log_historyBody').html(data);
+                $('.btnpopup').trigger('click')
+            }
+        });
+    }
+
+    function transform(response, Message) {
+        var r = {
+            lstmodule: JSON.parse(Message.lstmodule),
+            //strnamesort: Message.namesort
+        }
+        return r;
+    }
+    function handleFilterSelection() {
+        ajaxpage(1);
+    }
+    function renderApplicationsReceived(context) {
+        var markup = jQuery('#application-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#application-list').html(rendering);
+    }
+    function renderApplicationsNorecordReceived(context) {
+        var markup = jQuery('#application-norecord-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        //jQuery("#form-application-filter").hide();
+        jQuery('#application-list').html(rendering);
+    }
+    function renderSearchPagination(context) {
+        var markup = jQuery('#application-pagination-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.pagination-list').html(rendering);
+    }
+    AddForgeryToken = function (data, formid) {
+        data.__RequestVerificationToken = $('#' + formid + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+</script>

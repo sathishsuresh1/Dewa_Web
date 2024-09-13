@@ -1,0 +1,44 @@
+﻿@model DEWAXP.Feature.SupplyManagement.Models.Track.TrackRequestAnonymous
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers;
+
+@{
+
+    string msg = @Translate.Text("TRA_NoRecord_Found");
+var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+@if (Model.TrackStatusList != null && Model.TrackStatusList.Count > 0)
+{
+    bool CurrentState = true;
+    <ul class="j120-smart-response--track_list" data-msg="@(msg)">
+        @foreach (var item in Model.TrackStatusList)
+        {
+            string extClass = string.Format("j120-smart-response--track_item--current {0}j120-smart-response--track_item--done", (item.notificationstatus == "S002" ? "j120-smart-response--track_item--location " : ""));
+            <li data-nid="@(item.notificationnumber)" class="j120-smart-response--track_item @(CurrentState?extClass:"")">
+                <div class="j120-smart-response--track_item-content">
+                    <span class="j120-smart-response--track_item-status-title">@_commonHelper.GetSMTranslation(item.notificationtextstatus, lang) </span>
+                    @if (item.notificationdate != "0000-00-00")
+                    {
+                        string mnth = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "MMM"), lang);
+                        string dd = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "dd"), lang);
+                        string yyyy = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "yyyy"), lang);
+                        string fromattedDate = string.Format("{0} {1} {2}", dd, mnth, yyyy);
+                        <span class="date-time">@string.Format("{0} {1}", fromattedDate, item.notificationtime) </span>
+                    }
+                </div>
+            </li>
+            if (item.currentstatus == "X" && CurrentState)
+            {
+                CurrentState = false;
+            }
+        }
+
+    </ul>
+
+}
+else
+{
+    <p style="padding-right:40px;padding-left:40px;padding-top:10px;">@(msg)</p>
+}

@@ -1,0 +1,1129 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.ePass.PermanentPass
+
+@{
+    /**/
+
+    var Nationalities = DEWAXP.Foundation.Helpers.Extensions.FormExtensions.GetSAPCountryList(Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en", HttpContext.Current.Request.Headers["User-Agent"]);
+    var GccCountries = EpassHelper.GetGccCountries().ToArray();
+    var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(1);
+    var FromToTime = EpassHelper.GetFromToTime();
+    DateTime nowoneyear;
+    var _visaExpiry = "";
+
+    if (!string.IsNullOrWhiteSpace(Model.VisaExpiry))
+    {
+        //_visaExpiry = Model.VisaExpiry.Replace("January", "يناير").Replace("February", "فبراير").Replace("March", "مارس").Replace("April", "أبريل").Replace("May", "مايو").Replace("June", "يونيو").Replace("July", "يوليو").Replace("August", "أغسطس").Replace("September", "سبتمبر").Replace("October", "أكتوبر").Replace("November", "نوفمبر").Replace("December", "ديسمبر");
+        _visaExpiry = Model.VisaExpiry.Replace("يناير", "January").Replace("فبراير", "February").Replace("مارس", "March").Replace("أبريل", "April").Replace("مايو", "May").Replace("يونيو", "June").Replace("يوليو", "July").Replace("أغسطس", "August").Replace("سبتمبر", "September").Replace("أكتوبر", "October").Replace("نوفمبر", "November").Replace("ديسمبر", "December");
+    }
+    if (!string.IsNullOrWhiteSpace(_visaExpiry) && Convert.ToDateTime(_visaExpiry).Ticks < DateHelper.DubaiNow().AddDays(30).Ticks)
+    {
+        nowoneyear = Convert.ToDateTime(_visaExpiry).AddMonths(-1);
+    }
+    else
+    {
+        nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddDays(30);
+    }
+}
+<input type="hidden" name="eFolderId" id="eFolderId" value="@Model.eFolderId" />
+<input type="hidden" name="passNumber" id="passNumber" value="@Model.PassNumber" />
+
+<div class="form hidden single mt24">
+
+    <div class="j113-epass--permPass__form-page">
+        @if (Model.SubContractList != null)
+        {
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-subcontractor" class="form-field__label">
+                    @Translate.Text("Epass.Subcontractor")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select j113-epass--select_wrapper">
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.SubContractorID, new SelectList(Model.SubContractList, "Name", "Name"), Translate.Text("None"), new
+                   {
+                       @class = "form-field__input form-field__input--select form-field__input--select-full",
+                       @aria_describedby = "description-for-SubContractorID",
+                       @data_parsley_id = "18",
+                       @id = "form-field-SubContractorID"
+                   })
+                    </span>
+                </span>
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SUBCONTRACTOR)"
+                   class="j113-epass--add_item"><span>+</span>@Translate.Text("Epass.Add")</a>
+                <div id="description-for-SubContractorID" class="form-field__messages">
+                </div>
+            </div>
+        }
+
+        <div class="form-field form-field--text  ">
+            <label for="form-field-EmiratesID" class="form-field__label">
+                @Translate.Text("Epass.EIdnumber")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input value="@Model.EmiratesID"
+                       class="form-field__input form-field__input--text form-field__binding"
+                       id="form-field-EmiratesID"
+                       name="EmiratesID"
+                       type="number"
+                       required=""
+                       data-parsley-required-message="@Translate.Text("Epass.EnterEIdnumber")"
+                       placeholder="@Translate.Text("Epass.EnterEIdnumber")"
+                       aria-describedby="description-for-EmiratesID"
+                       data-parsley-errors-container="#description-for-EmiratesID"
+                       data-parsley-emiratesid=""
+                       data-parsley-emiratesid-message="@Translate.Text("Epass.OnlyEIdnumber")">
+            </span>
+            <div id="description-for-EmiratesID" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.EmiratesID, "", new { @class = "parsley-errors-list" })
+            </div>
+        </div>
+        <div id="datepicker-container-EmiratesIDExpiry" class="form-field form-field--text  ">
+            <label for="form-field-EmiratesIDExpiry" class="form-field__label">
+                @Translate.Text("Epass.EIDexpiry")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                <input value="@Model.EmiratesIDExpiry"
+                       class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                       id="form-field-EmiratesIDExpiry"
+                       name="EmiratesIDExpiry"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.EIDexpiry")"
+                       aria-describedby="description-for-EmiratesIDExpiry"
+                       data-parsley-errors-container="#description-for-EmiratesIDExpiry"
+                       data-parsley-error-message="@Translate.Text("Epass.Entercorrectdate")"
+                       data-el="datepicker-future"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="38"
+                       readonly=""
+                       required=""
+                       data-parsley-required-message="@Translate.Text("Epass.Requiredfield")"
+                       aria-haspopup="true"
+                       aria-expanded="false"
+                       aria-readonly="false"
+                       data-bindingID="emiratesidbinding"
+                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)]}'>
+            </span>
+            <div id="description-for-EmiratesIDExpiry" class="form-field__messages">
+            </div>
+        </div>
+
+        <div class="form-field form-field--text  ">
+            <label for="form-field-fullname" class="form-field__label">
+                @Translate.Text("Epass.FullnameasEID")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input maxlength="80"
+                       data-parsley-maxlength="80"
+                       value="@Model.FullName"
+                       data-parsley-pattern="/^[a-zA-Z -]*$/"
+                       class="form-field__input form-field__input--text"
+                       id="form-field-fullname"
+                       name="FullName"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Fullname")"
+                       aria-describedby="description-for-fullname"
+                       data-parsley-errors-container="#description-for-fullname"
+                       required=""
+                       data-parsley-error-message="@Translate.Text("Epass.Fullname")"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="30">
+            </span>
+            <div id="description-for-fullname" class="form-field__messages">
+            </div>
+        </div>
+        <div class="form-field form-field--select form-field--select-single">
+            <label for="form-field-nationality" class="form-field__label">
+                @Translate.Text("Epass.Nationality")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                <select class="form-field__input form-field__input--select2 form-field__input--select form-field__input--select-full"
+                        id="form-field-nationality"
+                        name="Nationality"
+                        aria-describedby="description-for-nationality"
+                        data-parsley-errors-container="#description-for-nationality"
+                        required=""
+                        data-parsley-required-message="@Translate.Text("Epass.Selectnationality")"
+                        data-parsley-trigger="change"
+                        data-parsley-id="32">
+                    <option value="" selected="">@Translate.Text("Epass.Selectnationality")</option>
+
+                    @{
+                        foreach (var item in Nationalities)
+                        {
+
+                            if (!string.IsNullOrWhiteSpace(Model.Nationality) && item.Value == Model.Nationality)
+                            {
+                                <option value="@item.Value" selected>@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    }
+                </select>
+            </span>
+            <div id="description-for-nationality" class="form-field__messages">
+            </div>
+        </div>
+        <div class="form-field form-field--text hidden">
+            <label for="form-field-nationalityh" class="form-field__label">
+                @Translate.Text("Epass.Nationality")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input maxlength="50"
+                       data-parsley-maxlength="50"
+                       class="form-field__input form-field__input--text disabled"
+                       id="form-field-nationalityh"
+                       name="nationality_hidden"
+                       type="text"
+                       readonly=""
+                       placeholder=""
+                       aria-describedby="description-for-nationalityh"
+                       data-parsley-errors-container="#description-for-nationalityh"
+                       data-parsley-required-message=""
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="34">
+            </span>
+            <div id="description-for-nationalityh" class="form-field__messages">
+            </div>
+        </div>
+        <div class="form-field form-field--text  ">
+            <label for="form-field-profession" class="form-field__label">
+                @Translate.Text("Epass.Professionvisa")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input maxlength="100"
+                       data-parsley-maxlength="100"
+                       value="@Model.ProfessionLevel"
+                       class="form-field__input form-field__input--text"
+                       id="form-field-profession"
+                       name="ProfessionLevel"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Professionvisa")"
+                       aria-describedby="description-for-profession"
+                       data-parsley-errors-container="#description-for-profession"
+                       required=""
+                       data-parsley-required-message="@Translate.Text("Epass.Professionvisavalid")"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="34">
+            </span>
+            <div id="description-for-profession" class="form-field__messages">
+            </div>
+        </div>
+        <div class="form-field form-field--text ">
+            <label for="form-field-MobilePhone" class="form-field__label">@Translate.Text("movein.mobilenumber") <span class="form-field__label-required">(@Translate.Text("Epass.Optional"))</span></label>
+
+            <label class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                @Html.TextBoxFor(x => x.Mobilenumber,
+                new
+                {
+                @type = "tel",
+                @class = "form-field__input form-field__input--text form-field__input--prefixed",
+                @name = "MobilePhone",
+                @id = "form-field-MobilePhone",
+                @placeholder = Translate.Text("Enter UAE mobile number"),
+                @data_parsley_error_message = Translate.Text("Please enter a valid UAE mobile number"),
+                @data_parsley_errors_container = "#description-for-MobilePhone",
+                @aria_describedby = "description-for-MobilePhone",
+                @data_parsley_id = "14",
+                @data_parsley_type = "digits",
+                @data_parsley_mobilenumber = "",
+                @step = "any"
+                })
+
+            </label>
+            <div id="description-for-MobilePhone" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.Mobilenumber, "", new { @class = "parsley-errors-list" })
+            </div>
+        </div>
+        <div class="form-field form-field--text ">
+            <label for="form-field-EmailAddress" class="form-field__label">@Translate.Text("Epass.Emailaddress") <span class="form-field__label-required">(@Translate.Text("Epass.Optional"))</span></label>
+            <label class="form-field__input-wrapper">
+                @Html.TextBoxFor(x => x.Emailaddress,
+                new
+                {
+                @class = "form-field-EmailAddress form-field__input form-field__input--text",
+                @id = "form-field-EmailAddress",
+                @placeholder = Translate.Text("Epass.Enteremailid"),
+                @data_parsley_error_message = Translate.Text("Epass.Entervalidemail"),
+                @data_parsley_errors_container = "#description-for-EmailAddress",
+                @aria_describedby = "description-for-EmailAddress",
+                @data_parsley_id = "14",
+                @step = "any",
+                @type = "email",
+                @maxlength = "50",
+                @data_parsley_trigger = "focusout",
+                @data_parsley_maxlength = "50"
+                })
+
+            </label>
+            <div id="description-for-EmailAddress" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.Emailaddress, "", new { @class = "parsley-errors-list" })
+            </div>
+        </div>
+
+        <div class="form-field form-field--text  ">
+            <label for="form-field-visa" class="form-field__label">
+                @Translate.Text("Epass.Visanumber")
+                <span class="form-field__label-required" id="spnVisanumber">(@Translate.Text("Epass.Optional"))</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input maxlength="15" data-parsley-maxlength="15" value="@Model.VisaNumber"
+                       class="form-field__input form-field__input--text form-field__binding"
+                       id="form-field-visa" name="VisaNumber"
+                       type="number"
+                       placeholder=" @Translate.Text("Epass.EnterVisanumber")"
+                       aria-describedby="description-for-visa"
+                       data-parsley-errors-container="#description-for-visa"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="40"
+                       data-parsley-required-message="@Translate.Text("Epass.EnterVisanumber")"
+                       data-bindingID="visabinding"
+                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+            </span>
+            <div id="description-for-visa" class="form-field__messages">
+                <p class="form-field__description">@Translate.Text("Epass.Slash")</p>
+            </div>
+        </div>
+        <div id="datepicker-container-visaexpiry" class="form-field form-field--text  ">
+            <label for="form-field-visaexpiry" class="form-field__label">
+                @Translate.Text("Epass.Visaexpirydate")
+                <span class="form-field__label-required" id="spnVisaexpirydate">(@Translate.Text("Epass.Optional"))</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                <input value="@Model.VisaExpiry"
+                       class="form-field__input form-field__input--text  form-field__input--datepicker picker__input form-field__binding"
+                       id="form-field-visaexpiry"
+                       name="VisaExpiry"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Visaexpirydate")"
+                       aria-describedby="description-for-visaexpiry"
+                       data-parsley-errors-container="#description-for-visaexpiry"
+                       data-el="datepicker-future"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="42"
+                       readonly=""
+                       data-parsley-required-message="@Translate.Text("Epass.Selectvisaexpirydate")"
+                       aria-haspopup="true"
+                       aria-expanded="false"
+                       aria-readonly="false"
+                       data-bindingID="visabinding"
+                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)]}'>
+            </span>
+            <div id="description-for-visaexpiry" class="form-field__messages">
+            </div>
+        </div>
+        <div class="form-field form-field--text  ">
+            <label for="form-field-Passportnumber" class="form-field__label">
+                @Translate.Text("Epass.Passportnumber")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input maxlength="15"
+                       data-parsley-maxlength="15"
+                       value="@Model.PassportNumber"
+                       class="form-field__input form-field__input--text form-field__binding"
+                       id="form-field-Passportnumber"
+                       name="PassportNumber"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.EnterPassportnumber")"
+                       aria-describedby="description-for-Passportnumber"
+                       data-parsley-errors-container="#description-for-Passportnumber"
+                       required=""
+                       data-bindingID="passportbinding"
+                       data-parsley-required-message="@Translate.Text("Epass.EnterPassportnumber")"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="44">
+            </span>
+            <div id="description-for-Passportnumber" class="form-field__messages">
+            </div>
+        </div>
+        <div id="datepicker-container-Passportexpiry" class="form-field form-field--text  ">
+            <label for="form-field-Passportexpiry" class="form-field__label">
+                @Translate.Text("Epass.Passportexpirydate")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                <input value="@Model.PassportExpiry"
+                       class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                       id="form-field-Passportexpiry"
+                       name="PassportExpiry"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Passportexpirydate")"
+                       aria-describedby="description-for-Passportexpiry"
+                       data-parsley-errors-container="#description-for-Passportexpiry"
+                       required=""
+                       data-parsley-required-message="@Translate.Text("Epass.SelectPassportexpirydate")"
+                       data-el="datepicker-future"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="46"
+                       readonly=""
+                       data-bindingID="passportbinding"
+                       aria-haspopup="true"
+                       aria-expanded="false"
+                       aria-readonly="false"
+                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)]}'>
+            </span>
+            <div id="description-for-Passportexpiry" class="form-field__messages">
+            </div>
+        </div>
+
+        <div id="datepicker-container-PassIssueDate" class="form-field form-field--text  ">
+            <label for="form-field-PassIssueDate" class="form-field__label">
+                @Translate.Text("Epass.Passissuedate")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                <input value="@Model.PassIssue"
+                       class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                       id="form-field-PassIssueDate"
+                       name="PassIssue"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Passissuedate")"
+                       aria-describedby="description-for-PassIssueDate"
+                       data-parsley-errors-container="#description-for-PassIssueDate"
+                       required=""
+                       data-parsley-required-message="@Translate.Text("Epass.SelectPassissuedate")"
+                       data-el="datepicker-future"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="46"
+                       readonly=""
+                       data-bindingID="passbinding"
+                       aria-haspopup="true"
+                       aria-expanded="false"
+                       aria-readonly="false"
+                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day] }' />
+            </span>
+            <div id="description-for-PassIssueDate" class="form-field__messages">
+            </div>
+        </div>
+
+        <div id="datepicker-container-PassExpiryDate" class="form-field form-field--text  ">
+            <label for="form-field-PassExpiryDate" class="form-field__label">
+                @Translate.Text("Epass.Passexpirydate")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                <input value="@Model.PassExpiry"
+                       class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                       id="form-field-PassExpiryDate"
+                       name="PassExpiry"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Passexpirydate")"
+                       aria-describedby="description-for-PassExpiryDate"
+                       data-parsley-errors-container="#description-for-PassExpiryDate"
+                       required=""
+                       data-parsley-required-message="@Translate.Text("Epass.SelectPassexpirydate")"
+                       data-el="datepicker-future"
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="46"
+                       readonly=""
+                       data-bindingID="passbinding"
+                       aria-haspopup="true"
+                       aria-expanded="false"
+                       aria-readonly="false"
+                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)],&quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day] }' />
+            </span>
+            <div id="description-for-PassExpiryDate" class="form-field__messages">
+            </div>
+        </div>
+        <div class="form-field form-field--select form-field--select-single">
+            <label for="form-field-FromTime" class="form-field__label">
+                @Translate.Text("Epass.Fromtime")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-FromTime" name="FromTime" aria-describedby="description-for-FromTime" data-parsley-errors-container="#description-for-FromTime" required data-parsley-required-message="@Translate.Text("Epass.Chooseanoption")">
+                    <option value="" selected>@Translate.Text("Epass.Chooseanoption")</option>
+
+                    @{
+                        foreach (var item in FromToTime)
+                        {
+                            <option value="@item.Value">
+                                @item.Text
+                            </option>
+                        }
+
+                        if (Model.FromTime != null)
+                        {
+                            <option value="@Model.FromTime" selected>@Model.FromTime</option>
+                        }
+                    }
+
+                </select>
+            </span>
+        </div>
+        <div class="form-field form-field--select form-field--select-single">
+            <label for="form-field-ToTime" class="form-field__label">
+                @Translate.Text("Epass.Totime")
+                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-ToTime" name="ToTime" aria-describedby="description-for-ToTime" data-parsley-errors-container="#description-for-ToTime" required data-parsley-required-message="@Translate.Text("Epass.Chooseanoption")">
+                    <option value="" selected>@Translate.Text("Epass.Chooseanoption")</option>
+                    @{
+                        foreach (var item in FromToTime)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+
+                        if (Model.ToTime != null)
+                        {
+                            <option value="@Model.ToTime" selected>@Model.ToTime</option>
+                        }
+                    }
+                </select>
+            </span>
+        </div>
+        @if (Model.Location != null)
+        {
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-ma7826si2" class="form-field__label">
+                    @Translate.Text("Epass.Location")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2" id="form-field-locations" name="SelectedLocation" multiple="multiple" aria-describedby="description-for-ma7826si2" data-parsley-errors-container="#description-for-ma7826si2" data-placeholder="@Translate.Text("Epass.SelectLocation")" required data-parsley-required-message="@Translate.Text("Epass.SelectLocation")">
+                        @{
+                            foreach (var item in Model.Location)
+                            {
+                                <option value="@item.Value" @(Model.SelectedLocation != null && Model.SelectedLocation.Contains(item.Value) ? "selected" : string.Empty)>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-ma7826si2" class="form-field__messages">
+                </div>
+            </div>
+        }
+        <div class="form-field__button">
+            <div class="button button--primary  j113-epass--permPass__form-page--next">
+                @Translate.Text("Epass.Continue")
+            </div>
+        </div>
+    </div>
+    <div class="j113-epass--permPass__form-page hidden">
+        <div class="form-field form-field--toggles mb24">
+            <fieldset class="fieldset">
+                <legend class="legend-color">.</legend>
+                <div class="form-field__checkbox   first">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox"
+                               id="form-field-checkbox_iswithcar"
+                               aria-label="form-field-checkbox_iswithcar"
+                               name="withcar"
+                               type="checkbox"
+                               value="False"
+                               aria-describedby="description-for-issanadsmartcard"
+                               data-parsley-errors-container="#description-for-issanadsmartcard">
+
+                        <span class="form-field__fakecheckbox focus-enabled">
+                            @Translate.Text("wp.do you want to accompany with Car")
+                        </span>
+                    </label>
+                </div>
+                <div id="description-for-withcar" class="form-field__messages">
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="form-field form-field--select form-field--select-single withcar hidden mt12">
+            <label for="form-field-emirates" class="form-field__label">
+                <span id="spEmirate"> @Translate.Text("EV Choose Emirate")</span>
+                <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                @Html.DropDownListFor(model => model.EmirateOrCountry, Model.Emirates, Translate.Text("EV Select Emirate"), new
+           {
+               @class = "form-field__input form-field__input--select form-field__input--select-full",
+               @id = "form-field-emirates",
+               @required = "required",
+               @data_parsley_required_message = Translate.Text("EV Select Emirate"),
+               @data_parsley_errors_container = "#description-for-w1mfbetd3",
+               @aria_describedby = "description-for-w1mfbetd3",
+               @data_postedvalue = Model.EmirateOrCountry
+           })
+
+            </span>
+            <div id="description-for-w1mfbetd3" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.EmirateOrCountry, "", new { @class = "parsley-errors-list" })
+            </div>
+        </div>
+        <div class="form-field form-field--select form-field--select-single  withcar hidden mt12 onlydxb">
+            <label for="form-field-categorycode" class="form-field__label">
+                <span>  @Translate.Text("EV.Category Code")</span>
+                <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                @Html.DropDownListFor(model => model.SelectedPlateCategory, Model.PlateCategory, Translate.Text("EV Select categorycode"), new
+           {
+               @class = "form-field__input form-field__input--select form-field__input--select-full",
+               @id = "form-field-categorycode",
+               @required = "required",
+               @data_parsley_required_message = @Translate.Text("EVcategorycodeErrorMessage"),
+               @data_parsley_errors_container = "#description-for-categorycode",
+               @aria_describedby = "description-for-categorycode",
+               @data_postedvalue = Model.SelectedPlateCategory
+           })
+
+            </span>
+            <div id="description-for-categorycode" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.SelectedPlateCategory, "", new { @class = "parsley-errors-list" })
+            </div>
+        </div>
+        <div class="form-field form-field--text  withcar hidden mt12">
+            <label for="form-field-PlateCode" class="form-field__label">
+                @Translate.Text("Epass.Car Plate Code")
+                <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input class="form-field__input form-field__input--text"
+                       id="form-field-PlateCode"
+                       name="PlateCode"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.Car Plate Code Placeholder")"
+                       aria-describedby="description-for-PlateCode"
+                       maxlength="3"
+                       data-parsley-maxlength="3"
+                       value="@Model.PlateCode"
+                       data-postedvalue="@Model.PlateCode"
+                       data-parsley-error-message="@Translate.Text("Epass.Car Plate Code Error Message")"
+                       data-parsley-errors-container="#description-for-PlateCode"
+                       onkeyup="this.value=removeSpaces(this.value);" />
+            </span>
+            <div id="description-for-PlateCode" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.PlateCode)
+            </div>
+        </div>
+        <div class="form-field form-field--text  withcar hidden mt12" id="divPlateNumber">
+            <label for="form-field-PlateNumber" class="form-field__label">
+                @Translate.Text("EV.Car Plate Number")
+                <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--plate-number">
+                <input class="form-field__input form-field__input--text ct_platenumber"
+                       id="form-field-PlateNumber"
+                       name="PlateNumber"
+                       type="text"
+                       data-parsley-type="number"
+                       placeholder="@Translate.Text("EV.Car Plate Number")"
+                       aria-describedby="description-for-PlateNumber"
+                       required=""
+                       value="@Model.PlateNumber"
+                       maxlength="20"
+                       data-parsley-maxlength="20"
+                       data-postedvalue="@Model.PlateNumber"
+                       data-parsley-error-message="@Translate.Text("EV.errorMessage_PlateNumber")"
+                       data-parsley-errors-container="#description-for-PlateNumber"
+                       onkeyup="this.value=removeSpaces(this.value);" />
+            </span>
+            <div id="description-for-PlateNumber" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.PlateNumber)
+            </div>
+        </div>
+
+
+        <div id="datepicker-container-vehregis" class="form-field form-field--text   withcar hidden mt12">
+            <label for="form-field-vehregis" class="form-field__label">
+                @Translate.Text("Epass.VehicleRegistrationDate")
+                <span class="form-field__label-required hidden" id="spnvehregisdate">(@Translate.Text("Epass.Optional"))</span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                <input value="@Model.VehicleRegistrationDate"
+                       class="form-field__input form-field__input--text  form-field__input--datepicker picker__input form-field__binding"
+                       id="form-field-vehregis"
+                       name="VehicleRegistrationDate"
+                       type="text"
+                       placeholder="@Translate.Text("Epass.VehicleRegistrationDate")"
+                       aria-describedby="description-for-vehregis"
+                       data-parsley-errors-container="#description-for-vehregis"
+                       data-el="datepicker"
+                       required=""
+                       data-parsley-trigger="focusout"
+                       data-parsley-id="43"
+                       aria-haspopup="true"
+                       aria-expanded="false"
+                       aria-readonly="false"
+                       data-bindingID="vehiclebinding"
+                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 2 , &quot;format&quot;: &quot;yyyy/mm/dd&quot;, &quot;min&quot;: [@DateTime.Now.AddYears(-2).Year.ToString(),@((DateTime.Now.AddYears(-2).Month-1).ToString()),@DateTime.Now.AddYears(-2).Day.ToString()], &quot;max&quot;: [@DateTime.Now.Year.ToString(),@((DateTime.Now.Month-1).ToString()),@DateTime.Now.Day.ToString()]}'>
+            </span>
+            <div id="description-for-vehregis" class="form-field__messages">
+            </div>
+        </div>
+
+        <div class="form-field form-field--upload hidden withcar" id="drivinglicensedocumentdiv">
+            <div class="form-field__input-wrapper">
+                <div class="form-field__preview-wrapper">
+                    <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="drivinglicense">
+                </div>
+                <div class="form-field__uploader-details">
+                    <label for="form-field-drivinglicense" class="form-field__label">
+                        @Translate.Text("wp.driving license")
+                        <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                    </label>
+                    <div>
+                        <label>
+                            <input class="form-field__input form-field__input--upload"
+                                   id="form-field-drivinglicense"
+                                   name="SinglePass_DrivingLicense"
+                                   type="file"
+                                   aria-describedby="description-for-drivinglicense"
+                                   data-parsley-errors-container="#description-for-drivinglicense"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("Epass.Uploaddrivinglicense")"
+                                   data-uploader-field="drivinglicense"
+                                   accept="image/*"
+                                   data-accepts='"jpg", ".bmp","png","jpeg"'
+                                   data-size="2048000"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="48">
+                            <span class="button button--primary button--small focus-enabled"
+                                  data-uploader-button="upload-choose">@Translate.Text("Epass.Choose")</span>
+
+                            </label>
+                        </div>
+                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Epass.Uploadformat")</p>
+                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Epass.Uploadfilesize")</p>
+                        <p class="form-field__input--upload-filename" data-uploader-filename="drivinglicense"></p>
+
+                        <p>
+                            <button class="button button--text button--remove hidden" data-uploader-remove="drivinglicense">@Translate.Text("Epass.Remove")</button>
+                        </p>
+                    </div>
+                </div>
+                <div id="description-for-drivinglicense" class="form-field__messages">
+                    <p class="form-field__description">@Translate.Text("Epass.Indoc")</p>
+                    <p class="form-field__error red">
+                        @Html.ValidationMessageFor(x => x.SinglePass_Photo)
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-field form-field--upload hidden withcar" id="vehicleregistrationdocumentdiv">
+                <div class="form-field__input-wrapper">
+                    <div class="form-field__preview-wrapper">
+                        <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="vehicleno">
+                    </div>
+                    <div class="form-field__uploader-details">
+                        <label for="form-field-vehicleno" class="form-field__label">
+                            @Translate.Text("Epass.VehicleRegistration")
+                            <span class="form-field__label-required hidden">(@Translate.Text("Epass.Optional"))</span>
+                        </label>
+                        <div>
+                            <label>
+                                <input class="form-field__input form-field__input--upload"
+                                       id="form-field-vehicleno"
+                                       name="SinglePass_VehicleRegistration"
+                                       type="file"
+                                       required=""
+                                       aria-describedby="description-for-vehicleno"
+                                       data-parsley-errors-container="#description-for-vehicleno"
+                                       data-parsley-required-message="@Translate.Text("Epass.UploadVehicleRegistration")"
+                                       data-uploader-field="vehicleno"
+                                       accept="image/*"
+                                       data-accepts='"jpg", ".bmp","png","jpeg"'
+                                       data-size="2048000"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="48">
+                                <span class="button button--primary  button--small focus-enabled"
+                                      data-uploader-button="upload-choose">@Translate.Text("Epass.Choose")</span>
+
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Epass.Uploadformat")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Epass.Uploadfilesize")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="vehicleno"></p>
+
+                            <p>
+                                <button class="button button--text button--remove hidden" data-uploader-remove="vehicleno">@Translate.Text("Epass.Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div id="description-for-vehicleno" class="form-field__messages">
+                        <p class="form-field__description">@Translate.Text("Epass.Indoc")</p>
+                        <p class="form-field__error red">
+                            @Html.ValidationMessageFor(x => x.SinglePass_VehicleRegistration)
+                        </p>
+                    </div>
+                </div>
+                <div class="form-field form-field--upload">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="applicantphoto">
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label for="form-field-applicantphoto" class="form-field__label">
+                                @Translate.Text("Epass.EIDpassport")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <div>
+                                <label>
+                                    <input class="form-field__input form-field__input--upload"
+                                           id="form-field-applicantphoto"
+                                           name="SinglePass_Photo"
+                                           type="file"
+                                           aria-describedby="description-for-applicantphoto"
+                                           data-parsley-errors-container="#description-for-applicantphoto"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("Epass.UploadApplicantPhoto")"
+                                           data-uploader-field="applicantphoto"
+                                           accept="image/*"
+                                           data-accepts='"jpg", ".bmp","png","jpeg"'
+                                           data-size="2048000"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="48">
+                                    <span class="button button--primary  button--small focus-enabled"
+                                          data-uploader-button="upload-choose">@Translate.Text("Epass.Choose")</span>
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Epass.Uploadformat")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Epass.Uploadfilesize")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="applicantphoto"></p>
+
+                                <p>
+                                    <button class="button button--text button--remove hidden" data-uploader-remove="applicantphoto">@Translate.Text("Epass.Remove")</button>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="description-for-applicantphoto" class="form-field__messages">
+                            <p class="form-field__description">@Translate.Text("Epass.Indoc")</p>
+                            <p class="form-field__error red">
+                                @Html.ValidationMessageFor(x => x.SinglePass_Photo)
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-field form-field--upload" id="eiddocumentdiv">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+                                <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="emiratesIdfile">
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label for="form-field-emiratesIdfile" class="form-field__label">
+                                    @Translate.Text("Epass.EIDboth")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               id="form-field-emiratesIdfile"
+                                               name="SinglePass_EmiratesID"
+                                               type="file"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("Epass.UploadEIDBoth")"
+                                               aria-describedby="description-for-emiratesIdfile"
+                                               data-parsley-errors-container="#description-for-emiratesIdfile"
+                                               data-uploader-field="emiratesIdfile"
+                                               accept="image/*"
+                                               data-accepts='"jpg", ".bmp","png","jpeg"'
+                                               data-size="2048000"
+                                               data-parsley-trigger="focusout"
+                                               data-parsley-id="50">
+                                        <span class="button button--primary  button--small focus-enabled"
+                                              data-uploader-button="upload-choose">@Translate.Text("Epass.Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Epass.Uploadformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Epass.Uploadfilesize")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="emiratesIdfile"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="emiratesIdfile">@Translate.Text("Epass.Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-emiratesIdfile" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("Epass.Indoc")</p>
+                                <p class="form-field__error red">
+                                    @Html.ValidationMessageFor(x => x.SinglePass_EmiratesID)
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-field form-field--upload" id="visadocumentdiv">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="Visafile">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Visafile" class="form-field__label">
+                                        @Translate.Text("Epass.Visapage")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-Visafile"
+                                                   name="SinglePass_Visa"
+                                                   type="file"
+                                                   data-parsley-required-message="@Translate.Text("Epass.UploadVisapage")"
+                                                   aria-describedby="description-for-Visafile"
+                                                   data-parsley-errors-container="#description-for-Visafile"
+                                                   data-uploader-field="Visafile"
+                                                   accept="image/*"
+                                                   data-accepts='"jpg", ".bmp","png","jpeg"'
+                                                   data-size="2048000"
+                                                   data-parsley-trigger="focusout"
+                                                   data-parsley-id="52">
+                                            <span class="button button--primary  button--small focus-enabled"
+                                                  data-uploader-button="upload-choose">@Translate.Text("Epass.Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Epass.Uploadformat")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Epass.Uploadfilesize")</p>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="Visafile"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="Visafile">@Translate.Text("Epass.Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-Visafile" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("Epass.Indoc")</p>
+                                    <p class="form-field__error red">
+                                        @Html.ValidationMessageFor(x => x.SinglePass_Visa)
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="form-field form-field--upload" id="passportdocumentdiv">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="passportfile">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-passportfile" class="form-field__label">
+                                            @Translate.Text("Epass.Passfirstlast")
+                                            <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-passportfile"
+                                                       name="SinglePass_Passport"
+                                                       type="file"
+                                                       aria-describedby="description-for-passportfile"
+                                                       data-parsley-errors-container="#description-for-passportfile"
+                                                       required=""
+                                                       data-parsley-required-message="@Translate.Text("Epass.UploadPassport")"
+                                                       data-uploader-field="passportfile"
+                                                       accept="image/*"
+                                                       data-accepts='"jpg", ".bmp","png","jpeg"'
+                                                       data-size="2048000"
+                                                       data-parsley-trigger="focusout"
+                                                       data-parsley-id="54">
+                                                <span class="button button--primary  button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Epass.Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Epass.Uploadformat")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Epass.Uploadfilesize")</p>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="passportfile"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="passportfile">@Translate.Text("Epass.Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-passportfile" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("Epass.Indoc")</p>
+                                    <p class="form-field__error red">
+                                        @Html.ValidationMessageFor(x => x.SinglePass_Passport)
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="form-field__button">
+                                <div class="button button--tertiary button--back j113-epass--permPass__form-page--back">
+                                    @Translate.Text("Epass.Back")
+                                </div>
+                                <button class="button button--primary" data-submission-text="@Translate.Text("Submitting")..." type="submit">@Translate.Text("Epass.Continue")</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+
+    docReady(function(){
+        //$(".j113-epass--loader").hide();
+        //$('body').removeClass('unscrollable');
+        require(['pickerdate'], function () {
+            $('.ePassForm').find('.form-field:not(.form-field--upload)').find('input').each(function () {
+                if ($(this).hasClass('form-field__input--datepicker') && ($(this).val().length > 0)) {
+                    jQuery(this).pickadate('picker').set('select', new Date($(this).val()));
+                }
+            })
+        });
+        var iswithcar = jQuery("#form-field-checkbox_iswithcar");
+        var withcar = jQuery(".withcar");
+        iswithcar.on('change', function () {
+            withcar.hide();
+            if ($(this).is(':checked')) {
+                withcar.show();
+                iswithcar.attr('value', 'True');
+
+            } else { iswithcar.attr('value', 'False'); }
+        });
+        jQuery('#form-field-nationality').on('change', function () {
+            //alert(this.value);
+            var isRequired = true;
+            var CountryArray = @Html.Raw(Json.Encode(@GccCountries.ToArray()));
+            for (i = 0; i < CountryArray.length; i++) {
+                if ($(this).find("option:selected").val() == CountryArray[i].Value) {
+                    isRequired = false;
+                    break;
+                }
+            }
+            if (isRequired) {
+                $("#spnVisanumber").html("");
+                $("#spnVisaexpirydate").html("");
+                $("#form-field-visa, #form-field-visaexpiry").prop('required', true);
+                $("#form-field-Visafile").prop('required', true);
+            }
+            else {
+                $("#spnVisanumber").html("(@Translate.Text("Epass.Optional"))");
+                $("#spnVisaexpirydate").html("(@Translate.Text("Epass.Optional"))");
+                $("#form-field-visa, #form-field-visaexpiry").removeAttr('required');
+                $("#form-field-Visafile").removeAttr('required');
+            }
+        });
+
+        Date.prototype.addDays = function (days) {
+            var date = new Date(this.valueOf());
+
+            date.setDate(date.getDate() + days);
+
+            return date;
+        };
+
+        require(['picker'], function () {
+            var today = new Date()
+
+            var from_$input = jQuery('#form-field-PassIssueDate').pickadate(),
+                from_picker = from_$input.pickadate('picker')
+
+            var to_$input = jQuery('#form-field-PassExpiryDate').pickadate(),
+                to_picker = to_$input.pickadate('picker')
+
+
+            // Check if there’s a “from” or “to” date to start with.
+            if (typeof from_picker !== "undefined" && from_picker.get('value')) {
+                to_picker.set('min', from_picker.get('select').obj.addDays(1))
+            }
+
+            // When something is selected, update the “from” and “to” limits.
+            if (typeof from_picker !== "undefined") {
+                from_picker.on('set', function (event) {
+                    if (event.select) {
+                        if (typeof to_picker !== "undefined" && to_picker.get('select') !== null) {
+                            if (from_picker.get('select').obj > to_picker.get('select').obj.addDays(-1)) {
+                                to_picker.clear();
+                            };
+                        }
+                        to_picker.set('min', from_picker.get('select').obj.addDays(1));
+                        to_picker.set('max', from_picker.get('select').obj.addDays(30));
+                    } else if ('clear' in event) {
+                        to_picker.set('min', today.addDays(1))
+                        to_picker.set('max', today.addDays(30))
+                    }
+                });
+            };
+            if (typeof to_picker !== "undefined") {
+                to_picker.on('set', function (event) {
+                    if (event.select) {
+                        //from_picker.set('max', to_picker.get('select').obj.addDays(15))
+                        if (typeof from_picker !== "undefined" && from_picker.get('select') !== null) {
+                            if (to_picker.get('select').obj < from_picker.get('select').obj.addDays(1)) {
+                                from_picker.clear();
+                            };
+                        }
+                    } else if ('clear' in event) {
+                        //from_picker.set('max', false)
+                    }
+                });
+            }
+        });
+    })
+
+    jQuery('.j113-epass--permPass__form-page--next').on('click', function () {
+        var $page = jQuery(this).closest('.j113-epass--permPass__form-page'),
+            good = 0;
+
+        jQuery('.ePassForm').parsley().validate();
+
+        $page.find('.form-field__input').each(function () {
+            if (jQuery(this).parsley().validate() == true) {
+
+            } else {
+                good++;
+            }
+        });
+
+        if (good == 0) {
+            $page.next().show();
+            $page.hide();
+            jQuery('.j113-epass--main_controls').hide();
+            steptrackerwithinpage(2, 2, "","false");
+            jQuery('.j113-epass--permPass__mode').hide();
+            jQuery('.m13-footer-back-to-top__link').trigger('click');
+        }
+    });
+
+
+    jQuery('.j113-epass--permPass__form-page--back').on('click', function () {
+        var $page = jQuery(this).closest('.j113-epass--permPass__form-page'),
+            good = 0;
+
+        $page.find('.form-field--upload').each(function () {
+            jQuery(this).find('.parsley-errors-list').html('');
+        });
+
+        if (good == 0) {
+            $page.prev().show();
+            $page.hide();
+            jQuery('.j113-epass--main_controls').show();
+            steptrackerwithinpage(2, 1, "","false");
+            jQuery('.j113-epass--permPass__mode').show();
+            jQuery('.m13-footer-back-to-top__link').trigger('click');
+        }
+    });
+
+
+    $(document).on('keypress', '#form-field-fullname', function (event) {
+        //var regex = new RegExp("^[a-zA-Z \\&'/:.,\\-()\"]+$");
+        var regex = new RegExp("^[a-zA-Z \&'/:.,\\-()\]+$");
+        var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        if (!regex.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+
+
+    //const urlParams = new URLSearchParams(window.location.search);
+    const myParam = @Model.PageNo;//urlParams.get('page');
+
+    var x = myParam;
+
+    setTimeout(function () {
+        if (x == "2") {
+            $('form.single').find('.j113-epass--permPass__form-page').hide();
+            $('form.single').find('.j113-epass--permPass__form-page:last-child').show();// need to check ":last-child" if deprecated or not
+        }
+    },250)
+
+    //jQuery('.button[data-accountupdate=true]').on('click',function() {
+    //    setTimeout(function() {
+    //        jQuery('#PONumber').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_number]').html())
+    //    },250);
+    //});
+
+
+                    </script>

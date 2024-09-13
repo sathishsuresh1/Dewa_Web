@@ -1,0 +1,185 @@
+﻿@using Sitecore.Globalization
+@model DEWAXP.Feature.USC.Models.SmartCommunications.VideoCallTokenRequest
+
+<div class="m2-card-form-card m2-card-form-countdown level-2" id="VideoCallToken-palceholder">
+    <div class="m2-card-form-card-body">
+        <div class="m2-card-form-card-header">
+            <div class="m2-card-form--trigger m2-card-form-card-back icon-new-arrow-right"></div>
+            <div class="m2-card-form-card-title green">
+                @Translate.Text("scomVTHeading")
+            </div>
+            <div class="m2-card-form-card-close icon-cancel" data-closeCard="true"></div>
+        </div>
+
+        <div class="m2-card-form-card-content">
+            @*<div class="m2-card-form-card-heading">
+            @Translate.Text("scomVTHeader")
+        </div>*@
+
+            <div class="m2-card-form-card-token">
+                @*<div class="m2-card-form-card-token_intro">
+                @Translate.Text("scomVTIntro")
+            </div>*@
+                <div class="m2-card-form-card-token_inner">
+                    <div class="m2-card-form-card-token_title">
+                        @Translate.Text("scomVTTokenLbl")
+                    </div>
+                    <div class="m2-card-form-card-token_num nexttoken">
+                        @Model.NextToken
+                    </div>
+                    <div class="m2-card-form-card-token_stat waitingtokentext">
+                        @*@Translate.Text("scomVTCurrentTokenLbl") <span class="currenttoken"> @Model.CurrentToken</span>*@
+                        @Model.WaitingTokenTxt
+                    </div>
+                </div>
+            </div>
+
+            <div class="m2-card-form-card-heading">
+                @*@Translate.Text("scomVTHeader")*@
+                @Translate.Text("scomVTHeader1")
+            </div>
+            @*<div class="m2-card-form-card-token_intro">
+                @Translate.Text("scomVTIntro")
+            </div>*@
+            <form id="tokenForm" action="#" class="form" data-form="true" method="POST">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.WaitingToken)
+                <input type="text" style="display:none" id="NextToken" value="@Model.NextToken" name="NextToken" />
+                <div class="form-field form-field--text">
+                    <label for="form-field-mobilenumber1" class="form-field__label">
+                        @Translate.Text("scomVTIntro")
+                        @*@Translate.Text("scomVTMobileLbl")*@
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                        <input class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-mobilenumber1" name="CustomerMobileNo" type="tel" placeholder="@Translate.Text("scomVTMobilePlaceholder")" aria-describedby="description-for-mobilenumber1" data-parsley-errors-container="#description-for-mobilenumber1" required="" data-parsley-required-message="@Translate.Text("scomVTMobileRequiredMsg")" data-parsley-mobile_number="" data-parsley-mobile_number-message="@Translate.Text("scomVTMobileRequiredMsg")" data-parsley-trigger="focusout" data-parsley-id="14">
+                    </span>
+                    <div id="description-for-mobilenumber1" class="form-field__messages">
+                    </div>
+                </div>
+
+                <div class="form-field__button">
+
+                    <button type="button" id="tokenSubmitBtn" class="button button--primary button--fullwidth">@Translate.Text("scomVTSend")</button>
+                    <div id="tokenSuccessBtn" class="button button--primary m2-card-form--trigger-form m2-card-form--trigger button--fullwidth hidden" data-cardTarget="#tokenSuccess">Submit</div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @*<div class="m2-card-form-card-footer">
+        <div class="m2-card-form-card-footertext">
+            @Translate.Text("scomVTInfoMsg") <span class="m2-card-form-card-cd" data-timer="30"></span>s
+        </div>
+    </div>*@
+</div>
+<div class="m2-card-form-card m2-card-form-countdown level-2" id="tokenSuccess">
+    <div class="m2-card-form-card-body">
+        <div class="m2-card-form-card-header">
+            <div class="m2-card-form-card-close icon-cancel" data-closeCard="true"></div>
+        </div>
+
+        <div class="m2-card-form-card-content">
+            <div class="m2-card-form-card-successIcon icon-new-success-message">
+            </div>
+            <div class="m2-card-form-card-successHeading">
+               @Translate.Text("scomVTSuccesHeader")
+            </div>
+            <div class="m2-card-form-card-successSubHeading">
+                @Translate.Text("scomVTSubHeader")
+            </div>
+            <div class="button button--fullwidth button--primary tokenBckBtn" data-closeCard="true">
+                @Translate.Text("scomVTBackbtn")
+            </div>
+        </div>
+    </div>
+    @*<div class="m2-card-form-card-footer">
+        <div class="m2-card-form-card-footertext">
+           @Translate.Text("scomVTFooterInfomsg") <span class="m2-card-form-card-cd" data-timer="10"></span>s
+        </div>
+    </div>*@
+</div>
+
+
+<script type="text/javascript">
+    var _tokenFormId = "#tokenForm";
+   
+    jQuery(document).ready(function () {
+        require(['parsley'], function () {
+            $("#tokenSubmitBtn").on("click", function () {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery(_tokenFormId).parsley().validate();
+                if (jQuery(_tokenFormId).parsley().isValid()) {
+                    jQuery(this).prop('disabled', true);
+                    var _submitData = {
+                        NextToken: $("#NextToken").val(),
+                        CustomerMobileNo: $("#form-field-mobilenumber1").val(),
+                        WaitingToken: $("#WaitingToken").val()
+                    }
+                    submitToken('@Url.Action("VideoCallTokenSubmit")', _tokenFormId, _submitData)
+                }
+            });
+            jQuery(".m2-card-form-mask,.m2-card-form-card-close,.tokenBckBtn").on("click", function () {
+                var _ctoken = jQuery("#NextToken").val();
+                var _serviceCode = jQuery('#Link_VideoCallToken-palceholder').attr("data-servicecode");
+                jQuery.ajax({
+                    url: '@Url.Action("VideoCallToken")?v=111&s=' + _serviceCode + '',
+                    type: 'GET',
+                    datatype: 'application/json',
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    success: function (response) {
+                        //alert(jQuery('[data-cardtarget="#VideoCallToken-palceholder"]').attr("data-servicecode"));
+                        setTimeout(function () {
+                            jQuery(".nexttoken").html(response.NextToken);
+                            jQuery("#NextToken").val(response.NextToken);
+                            jQuery("#WaitingToken").val(response.WaitingToken);
+                            jQuery(".waitingtokentext").html(response.WaitingTokenTxt);
+                        }, 100)
+                    }
+                });
+            });
+
+        });
+
+        
+        function submitToken(url, form, data) {
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'application/json',
+                data: AddForgeryTokenByElement(data, form),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                    jQuery("#tokenSuccessBtn").click();
+                    jQuery("#tokenSubmitBtn").prop('disabled', false);
+                },
+                success: function (response) {
+                    console.log(response)
+                    if (response != null && response.Success) {
+                       // jQuery("#tokenSuccessBtn").click();
+                    } else {
+                        console.log(response)
+                    }
+                }
+            });
+        }
+
+
+        
+    });
+
+    
+</script>

@@ -1,0 +1,381 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.DashboardPageModel
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j153-villa-exemption" data-journey="j153-villa-exemption">
+    <div class="grid">
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m26-page-title title_message">
+                    <!--  <div class="m26-page-title__links">
+                          <p class="m26-page-title__backlink">
+                              <a href="#" class="button button--text button--back">Back</a>
+                          </p>
+                      </div>-->
+                    <h1 class="text__page-title">@Translate.Text("VE_DB_heading")</h1>
+                    @*<p class="text-page__intro">@Translate.Text("VE_DB_subheading")</p>*@
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "hhvilladashboard", @class = "form form--single_line", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-mqbiiwfwi" class="form-field__label hidden">
+                            Select
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @*<select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-mqbiiwfwi" name="select" aria-describedby="description-for-mqbiiwfwi" data-parsley-errors-container="#description-for-mqbiiwfwi">
+                                    <option value="0" selected>@Translate.Text("VE_Search_by_AN")</option>
+                                    <option value="1">@Translate.Text("VE_Search_by_RN")</option>
+                                    <option value="2">@Translate.Text("VE_Search_by_OwnerType")</option>
+                                    <option value="3">@Translate.Text("VE_Search_by_Status")</option>
+                                </select>*@
+                            @Html.DropDownList("selectedSearchType", (IEnumerable<SelectListItem>
+                                )Model.SearchOptions,
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                    @id = "form-field-searchType",
+                                    @name = "selectedSearchType",
+                                    @aria_describedby = "description-for-searchType",
+                                    @data_parsley_id = "20"
+                                })
+                        </span>
+                        <div id="description-for-searchType" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field" id="appnumber">
+                        <div class="form-field form-field--text">
+                            <label for="form-field-search" class="form-field__label hidden">
+                                Text Field
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text" id="form-field-search" name="SearchText" value="@Model.SearchText" type="text" maxlength="30" aria-describedby="description-for-search" data-parsley-errors-container="#description-for-search" />
+                            </span>
+                            <div id="description-for-search" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field__button">
+                            <button class="button button--primary button--fullwidth-mobile" id="btnSearch" type="submit">@Translate.Text("VE_Search_Btn")</button>
+                            <button class="button button--quaternary button--fullwidth-mobile" id="btnClear" type="button">@Translate.Text("VE_Clear_Btn_Text")</button>
+                        </div>
+                    </div>
+
+                    <div class="floatRight">
+                        <a href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_NEWAPPLICATION)" class="button button--primary" target="_self">@Translate.Text("VE_New_Application")</a>
+                    </div>
+                }
+                <label id="lblSearchError" class="form-field__error hidden">
+                    @Translate.Text("VE_PleaseEnterMinThreeChars")
+                </label>
+                <div class="m23-table m23-table--green mt12" data-component="m23-table">
+                    <h3 class="m23-table__title "></h3>
+                    <table class="m23-table__content-table">
+                        <thead class="m23-table__content-table-header">
+                            <tr class="m23-table__content-table-row">
+                                <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Ref_Number")</th>
+                                <th class="m23-table__content-table-cell--header">@Translate.Text("VE_App_Number")</th>
+                                <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Owner_Type")</th>
+                                <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Status")</th>
+                                <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Actions")</th>
+                            </tr>
+                        </thead>
+                        <tbody class="m23-table__content-table-body">
+                            @if (Model != null && Model.CustomerDetails != null && Model.CustomerDetails.Count() > 0)
+                            {
+                                foreach (var r in Model.CustomerDetails)
+                                {
+                                    <tr class="m23-table__content-table-row">
+                                        <td data-label="Reference Number" class="m23-table__content-table-cell"><strong>@r.Reference</strong></td>
+                                        <td data-label="Application Number" class="m23-table__content-table-cell"><strong>@r.Number</strong></td>
+                                        <td data-label="Property Owner Type" class="m23-table__content-table-cell"><strong>@r.OwnerTypeDescription</strong></td>
+                                        <td data-label="Status" class="m23-table__content-table-cell"><strong>@r.StatusDesc</strong></td>
+                                        <td data-label="" class="m23-table__content-table-cell request_links">
+                                            @{
+                                                if (r.Status != null)
+                                                {
+                                                    switch (r.Status.Trim())
+                                                    {
+                                                        case "01":
+                                                            <button class="button button--greenoutline button--very_small" data-action="edit" data-val="@r.Reference">@Translate.Text("VE_Edit_Application")</button>
+                                                            <button class="button button--greenoutline button--very_small" data-action="submit" data-val="@r.Reference">@Translate.Text("VE_Submit_Application")</button>
+                                                            <button class="button button--greenoutline button--very_small" data-tab="status" data-history='@Html.Raw(r.History)' data-val="@r.Reference" data-currentstatus="@(r.Status)" data-action="history"><span class="status_modal">@Translate.Text("VE_ViewStatus")</span></button>
+                                                            <button class="button button--greenoutline button--very_small" data-tab="comment" data-history='@Html.Raw(r.History)' data-val="@r.Reference" data-currentstatus="@(r.Status)" data-action="comment"><span class="status_modal">@Translate.Text("VE_ViewComment")</span></button>
+                                                            <button class="button button--greenoutline button--very_small" data-action="view" data-val="@r.Reference">@Translate.Text("VE_View_Application")</button>
+                                                            break;
+                                                        case "02":
+                                                        case "03":
+                                                        case "04":
+                                                        case "05":
+                                                            <button class="button button--greenoutline button--very_small" data-tab="status" data-history='@Html.Raw(r.History)' data-val="@r.Reference" data-currentstatus="@(r.Status)" data-action="history"><span class="status_modal">@Translate.Text("VE_ViewStatus")</span></button>
+                                                            <button class="button button--greenoutline button--very_small" data-tab="comment" data-history='@Html.Raw(r.History)' data-val="@r.Reference" data-currentstatus="@(r.Status)" data-action="comment"><span class="status_modal">@Translate.Text("VE_ViewComment")</span></button>
+                                                            <button class="button button--greenoutline button--very_small" data-action="view" data-val="@r.Reference">@Translate.Text("VE_View_Application")</button>
+                                                            break;
+
+                                                        <!--<button class="button button--primary button--very_small" data-tab="status" data-action="history"><span class="status_modal">View Application</span></button>
+                                                        <button class="button button--primary button--very_small" id="status_modal" data-tab="status">Status History</button>
+                                                        <button class="button button--primary button--very_small" id="status_modal" data-tab="comment">View Comments</button>-->
+                                                        default:
+                                                            <button class="button button--greenoutline button--very_small" data-action="view" data-val="@r.Reference">@Translate.Text("VE_View_Application")</button>
+                                                            break;
+                                                    }
+                                                }
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr class="m23-table__content-table-row">
+                                    <td class="m23-table__content-table-cell centered mt24" colspan="5">@Translate.Text("VE_NoRecordFound")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="m39-modal m39-modal--new j153-villa-exemption-tab-modal" data-component="m39-modal" id="modal_true">
+    <button data-trigger="true" class="m39-modal__trigger hidden status_modal__trigger" id="_86qad514u_trigger" type="button" aria-controls="_86qad514u_content">MODAL TRIGGER FOR VIEW</button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_86qad514u_content" aria-labelledby="_86qad514u_trigger">
+        <div class="m39-modal__dialog">
+            <div class="m39-modal__header">
+                <div class="m39-modal__title">@Translate.Text("VE_Application_Details")</div>
+                <a data-close="true" class="m39-modal__button--close" id="_86qad514u_close" aria-controls="_86qad514u_content">@Translate.Text("VE_Close")</a>
+                <div class="m39-modal__subtitle">@Translate.Text("VE_App_Number"): <span id="transactionid"></span></div>
+            </div>
+            <div class="m39-modal__content" id="viewstatus" style="top: 123.797px;">
+                <div class="m39-modal__tabs">
+                    <ul>
+                        <li class="tab-status hidden" data-tab="status">@Translate.Text("VE_Status")</li>
+                        <li class="tab-comment status-text padding p-t-10 active" data-tab="comment">@Translate.Text("VE_DewaComments")</li>
+                    </ul>
+                </div>
+                <div id="viewcomment_content">
+                    <div class="m39-modal__tabs-content">
+                        <div class="m39-modal__tabs-content-section tabs-content-status tab-status hidden">
+                            <ul class="tabs-content-status-list">
+                                @*<li class="list-item-success tabs-content-status-list-item tabs-content-status-list-item-tick">
+                                        <span class="icon-tick"></span>
+                                        <span class="status-title">Commented</span>
+                                        <span class="status-text padding p-t-10">
+                                            You have submitted the application on
+                                        </span>
+                                        <span class="status-text status-date padding p-t-10">
+                                            Jan 12, 2019.
+                                        </span>
+                                    </li>
+                                    <li class="list-item-grey tabs-content-status-list-item tabs-content-status-list-item-tick">
+                                        <span class="status-title">Application Submitted</span>
+                                        <span class="status-text status-text padding p-t-10">
+                                            Application moved to the next stage
+                                            on Jan 13, 2019.
+                                        </span>
+                                    </li>*@
+                            </ul>
+                        </div>
+                        <div class="m39-modal__tabs-content-section tabs-content-comments tab-comment active">
+                            <div class="readonly-text">
+                                <ul>
+                                    @Translate.Text("VE_No_Comments")
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m39-modal__footer">
+                <a href="" class="button button--primary hidden" id="btn_status_editApp" data-accountupdate="true" data-modal-confirm="true">@Translate.Text("VE_Edit_Application")</a>
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal__overlay" style="display: none;"> </div>
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    var el_li = '<li class="list-item-green tabs-content-status-list-item tabs-content-status-list-item-tick"><span class="icon-tick"></span><span class="status-title">{0}</span><span class="status-text padding p-t-5">{1}</span><span class="status-text status-date padding p-t-10">{2}</span></li>';
+    var el_cmt = '<li class="padding p-t-10">{0}</li><li class="padding p-t-5">{1}</li>';
+    var el_cmt_empty = '<li class="padding p-t-10">{0}</li>';
+    jQuery(document).ready(function ($) {
+        // Get the input field
+        function validateNumber() {
+            if ((event.keyCode < 48 || event.keyCode > 57)) {
+                event.returnValue = false;
+            }
+        }
+        function alphaOnly() {
+            if ((event.charCode >= 97 && event.charCode <= 122) || event.charCode == 8 || (event.charCode >= 65 && event.charCode <= 90)) {
+                event.returnValue = true;
+            }
+            else {
+                event.returnValue = false;
+            }
+        }
+        function avoidSplChars(e) {
+            e = e || window.event;
+            var bad = /[^\sa-z\d]/i,
+                key = String.fromCharCode(e.keyCode || e.which);
+            if (e.which !== 0 && e.charCode !== 0 && bad.test(key)) {
+                var key = e.keyCode;
+                if (key == 45) {
+                    // Allow only 1 minus sign ('-')...
+                    if ((e.value) && (e.value.indexOf('-') >= 0))
+                        return false;
+                    else
+                        return true;
+                }
+                e.returnValue = false;
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+            }
+        }
+        jQuery('#btnSearch').on('click', function () {
+            if (jQuery("#form-field-search").val().length >= 3) {
+                jQuery("#lblSearchError").hide();
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            }
+            else {
+                jQuery("#lblSearchError").show();
+                return false;
+            }
+        });
+        if (jQuery("#form-field-searchType").val() == "1") {
+            document.getElementById("form-field-search").addEventListener('keypress', avoidSplChars);
+        }
+        else {
+            document.getElementById("form-field-search").removeEventListener('keypress', avoidSplChars);
+        }
+        jQuery('#form-field-searchType').on("change", function (e) {
+            jQuery("#form-field-search").val('');
+            jQuery("#lblSearchError").hide();
+            document.getElementById("form-field-search").removeEventListener('keypress', validateNumber);
+            document.getElementById("form-field-search").removeEventListener('keypress', alphaOnly);
+            document.getElementById("form-field-search").removeEventListener('keypress', avoidSplChars);
+            if (jQuery("#form-field-searchType").val() == "3") {
+                document.getElementById("form-field-search").addEventListener('keypress', validateNumber);
+            }
+            else {
+                document.getElementById("form-field-search").removeEventListener('keypress', validateNumber);
+            }
+            if (jQuery("#form-field-searchType").val() == "2" || jQuery("#form-field-searchType").val() == "4") {
+                document.getElementById("form-field-search").addEventListener('keypress', alphaOnly);
+            }
+            else {
+                document.getElementById("form-field-search").removeEventListener('keypress', alphaOnly);
+            }
+            if (jQuery("#form-field-searchType").val() == "1") {
+                document.getElementById("form-field-search").addEventListener('keypress', avoidSplChars);
+            }
+            else {
+                document.getElementById("form-field-search").removeEventListener('keypress', avoidSplChars);
+            }
+        });
+
+
+        jQuery('#btnClear').on('click', function () {
+            jQuery("#form-field-searchType option").removeAttr('selected').eq(0).attr('selected', 'selected');
+            jQuery("#form-field-search").val('');
+            jQuery('.j105-drrg--loader').show();
+            jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+            $('body').removeClass('unscrollable').addClass('unscrollable');
+            jQuery('#hhvilladashboard').submit();
+        });
+        $(".button--very_small").on("click", function (e) {
+            try {
+                //console.log($(this).data("history"));
+                //debugger;
+                switch ($(this).data("action")) {
+                    case "history":
+                    case "comment":
+                        var json = JSON.parse($(this).attr("data-history").replaceAll('\n', '<br> '));//JSON.parse($(this).data("history").replaceAll('\n', '\\n'));
+                        $("#transactionid").text(json.appno);
+                        $el = $("#viewcomment_content").find("ul.tabs-content-status-list");
+                        $elcmt = $("#viewcomment_content").find(".tabs-content-comments").find(".readonly-text > ul");
+                        $el.empty();
+                        $elcmt.empty();
+                        var cnt = 0;
+                        $.each(json.data, function (i, v) {
+                            console.log(v);
+                            $el.append(el_li.replace("{0}", v.statusdesc).replace("{1}", v.remarks).replace("{2}", v.date));
+                            if (v.remarks != "") {
+                                $elcmt.append(el_cmt.replace("{0}", v.remarks).replace("{1}", v.date));
+                                cnt++;
+                            }
+
+                        });
+                        if (cnt == 0) {
+                            $elcmt.empty();
+                            $elcmt.append(el_cmt_empty.replace("{0}", '@Translate.Text("VE_No_Comments")'));
+                        }
+                        if (jQuery(this).attr("data-currentstatus") == "01") {
+                            $("#btn_status_editApp").show();
+                            var no = $(this).data("val");
+                            var url = '@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_EDITAPPLICATION_STEP1)' + '?n=' + no;
+                            $("#btn_status_editApp").attr("href", url);
+                        }
+                        else {
+                            $("#btn_status_editApp").hide();
+                            $("#btn_status_editApp").attr("href", "#");
+                        }
+                        $(".status_modal__trigger").click();
+                        break;
+                    case "edit":
+                        var no = $(this).data("val");
+                        if (no) {
+                            var url = '@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_EDITAPPLICATION_STEP1)' + '?n=' + no;
+                            window.location.href = url;
+                        }
+                        break;
+                    case "view":
+                        var no = $(this).data("val");
+                        if (no) {
+                            var url = '@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_VIEWAPPLICATION)' + '?n=' + no;
+                            window.location.href = url;
+                        }
+                        break;
+                    case "submit":
+                        var no = $(this).data("val");
+                        if (no) {
+                            var url = '@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_EDITAPPLICATION_STEP3)' + '?n=' + no;
+                            window.location.href = url;
+                        }
+                        break;
+                    default:
+                        console.log($(this).data("action"));
+                        break;
+                }
+            } catch (e) { console.log(e); }
+        });
+
+    });
+</script>

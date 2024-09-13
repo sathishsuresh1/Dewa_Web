@@ -1,0 +1,92 @@
+﻿@using System.Linq
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+    string allowedtypes = !string.IsNullOrWhiteSpace(Model.Allowedfiletypes) ? String.Join(", ", Model.Allowedfiletypes.Split(',').Select(x => "\"" + x + "\"")) : AttachmentValidation.acceptedFileTypesClientSide;
+    string fileszie = !string.IsNullOrWhiteSpace(Model.Allowedfilesize) ? Model.Allowedfilesize.ToString() : AttachmentValidation.maximumFileSize.ToString();
+    string accepttype = AttachmentHelper.GetListMimeType(allowedtypes);
+    var srcSignature = Model.Surveyfeedback != null ? "data:image;base64," + Model.Surveyfeedback : "/images/preview@2x.png";
+    if (Model.Surveyfeedback == null || string.IsNullOrWhiteSpace(status))
+    {
+        srcSignature = "/images/preview@2x.png";
+    }
+}
+<fieldset class="fieldset">
+    @if (!string.IsNullOrWhiteSpace(Model.Asheading) && Model.Asheading.Equals("X")) { }
+    else
+    {
+        <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label @(displayonly?" form-field__label--readonly":string.Empty)">
+            @Model.Question
+            <span class="form-field__label-required aria-only">(@(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : "optional"))</span>
+        </label>
+    }
+    <div class="form-field form-field--upload">
+        <div class="form-field__input-wrapper">
+            <div class="form-field__preview-wrapper">
+                <img src="@srcSignature"
+                     data-src="/images/preview@2x.png"
+                     data-success="/images/preview@2x.png"
+                     class="form-field__preview"
+                     aria-hidden="true"
+                     role="presentation"
+                     alt=""
+                     data-uploader-image="form-field-group@(groupnumber)_question@(Model.Questionnumber)">
+            </div>
+            <div class="form-field__uploader-details">
+                @if (Model.Surveyfeedback == null || string.IsNullOrWhiteSpace(status))
+                {
+                    <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label">
+                        <strong class="form-field__label-description"></strong>
+                    </label>
+                    <div>
+                        <label>
+                            <input class="form-field__input form-field__input--upload"
+                                   id="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                                   name="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                                   type="file"
+                                   aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                                   data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                                   data-parsley-error-message="@Model.Questionplaceholder"
+                                   data-parsley-required-message="@Model.Questionplaceholder "
+                                   data-uploader-field="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                                   required=""
+                                   accept="@accepttype"
+                                   data-accepts='@allowedtypes' data-size="@(fileszie)">
+
+                            <span class="button button--primary button--small focus-enabled" data-uploader-button="upload-choose">@Sitecore.Globalization.Translate.Text("Choose")</span>
+                        </label>
+                    </div>
+                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Sitecore.Globalization.Translate.Text("invalid file type validation message")</p>
+                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Sitecore.Globalization.Translate.Text("file too large validation message")</p>
+
+                    <p class="form-field__input--upload-filename" data-uploader-filename="form-field-group@(groupnumber)_question@(Model.Questionnumber)"></p>
+                    <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="form-field-group@(groupnumber)_question@(Model.Questionnumber)">@Sitecore.Globalization.Translate.Text("Remove")</button></p>
+                }
+                else
+                {
+                    <a data-fileid="@(Model.Questiontype)" href="#" target="_blank" rel="" class="button button--primary filelink tooltipstered">
+                        View
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div id="description-for-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+            <p class="form-field__description">@Model.Questionnote</p>
+        </div>
+    </div>
+</fieldset>
+<script type="text/javascript">
+    docReady(function () {
+        $(".filelink").click(function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var fileid = $(this).data('fileid');
+            window.open("/api/sitecore/Internship/DownloadFile?id=" + fileid, '_blank');
+        });
+    });
+</script>

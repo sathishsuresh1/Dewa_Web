@@ -1,0 +1,486 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr"; }
+<link rel="stylesheet" type="text/css" href="~/styles/External/jquery.modal.min.css">
+<script src="~/scripts/External/jquery.modal.min.js"></script>
+<!-- .dashboard header -->
+<div class="grid">
+    <div class="dashboard__header">
+
+        @Html.Action("UserWidget", "Dashboard")
+
+        <form id="form-account-selector" method="POST" form-skipvalidation="true">
+            @* data-form="true" *@
+            <div class="dashboard__account-selector">
+                @Html.Sitecore().Placeholder("j69/account-selector")
+            </div>
+        </form>
+        <input type="hidden" name="bes-accountid" class="bes-accountid">
+    </div>
+</div>
+<!-- ./dashboard header -->
+<div style="display:none" id="divlivingstandard" class="grid">
+    @Html.Sitecore().Placeholder("j69/besheader")
+</div>
+<!-- .graphs -->
+<div id="graph-container" class="box box--5" data-journey="j69-dashboard">
+    <div class="grid j69-dashboard__charts">
+        <div class="grid__row">
+            <div class="grid__column grid__column--4">
+                <div class="m17-sectiontitle" data-component="m17-sectiontitle" id="outstandingHeaderDiv" style="display:none;">
+                    <h3 class="m17-sectiontitle__title text__section-title">
+                        @Translate.Text("My Green Bill")
+                    </h3>
+                </div>
+                <div id="bill-placeholder" class="ajax-placeholder bill-placeholder"></div>
+            </div>
+            <div class="grid__column grid__column--4" id="graph_electricityBES">
+                <div id="electricity-consumption-graph-placeholder" data-utility="Electricity" class="ajax-placeholder electricity-consumption-graph-placeholder"></div>
+                @Html.Sitecore().Placeholder("j69/besnc")
+            </div>
+            <div id="water-consumption-graph-placeholder" data-utility="Water" class="grid__column grid__column--4 ajax-placeholder water-consumption-graph-placeholder"></div>
+        </div>
+    </div>
+</div>
+<!-- ./graphs -->
+<div class="grid" id="BEScontainer">
+    <div class="grid__row">
+        <!-- .Bes -->
+        @Html.Sitecore().Placeholder("j69/bes")
+        <!-- ./Bes -->
+    </div>
+</div>
+<!-- .complaints & services (with notifications) -->
+<div id="grid-services--with-notifications" class="grid hidden">
+    <div class="grid__row">
+        <div class="grid__column grid__column--6">
+            <div id="request-tracker" class="dashboard__request-tracker">
+                <div class="request-tracker toggle-menu--active" data-helper="toggle-menu" data-toggle-breakpoint="l" data-toggle-auto-open="true">
+                    <h3 class="request-tracker__title">@Translate.Text("Track Requests and Complaints")</h3>
+                    <div id="enquiry-list-placeholder" class="request-tracker__items ajax-container"></div>
+                </div>
+
+                <p class="request-tracker__link">
+                    <a id="hpltrackills" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J22_TRACK_COMPLAINTS)" class="button button--text button--next">@Translate.Text("See all")</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="grid__column grid__column--6">
+            <div class="grid">
+                @Html.Sitecore().Placeholder("j69/services")
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./complaints & services (with notificatons) -->
+<!-- .complaints & services (without notifications) -->
+<div id="grid-services--without-notifications" class="grid hidden">
+    @Html.Sitecore().Placeholder("j69/services-inline")
+</div>
+<!-- ./complaints & services (without notifications) -->
+<!-- .green pledge -->
+<div class="grid">
+    @Html.Sitecore().Placeholder("j69/pledge")
+</div>
+<!-- ./green pledge -->
+<!-- .templates -->
+<script id="bill-component-template" type="text/x-handlebars-template">
+
+    <div class="m28-dashboard-component" data-component="m28-dashboard-component" data-chart-data="">
+
+        <h3 class="m28-dashboard-component__title">@Translate.Text("Upcoming bill")</h3>
+        <div class="m28-dashboard-component__summary">
+            <p>
+                <span class="m28-dashboard-component__amount">{{total}}</span>
+                <span class="m28-dashboard-component__unit">@Translate.Text("AED")</span>
+            </p>
+        </div>
+
+        <p class="m28-dashboard-component__button">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J14_PAY_BILLS)" class="button button--secondary button--next">@Translate.Text("Pay bill")</a>
+        </p>
+
+        <ul class="m28-dashboard-component__links">
+            <li>
+                <form action="@Url.Content("~/api/sitecore/bill/BillDownloads")" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="{{account}}" />
+                    <input type="hidden" name="type" value="ContractAccountNumber" />
+                    <button class="button button--text button--next" type="submit">@Translate.Text("View bill PDF")</button>
+                </form>
+
+            </li>
+            <li><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J15_PAYFRIENDBILL_START)" class="button button--text button--next">@Translate.Text("Pay a Friends Bill")</a></li>
+            <li><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_PAST_BILLS)?a={{account}}" class="button button--text button--next">@Translate.Text("Bill and Payments History")</a></li>
+        </ul>
+    </div>
+</script>
+
+<script id="graph-component-template" type="text/x-handlebars-template">
+    <div class="m28-dashboard-component" data-component="m28-dashboard-component" data-chart-data="{{dataPoints}}" dir="{{dir}}">
+        <h3 class="m28-dashboard-component__title">{{utilityheader}} </h3>
+
+        <div class="m28-dashboard-component__summary">
+            <p>
+                <span class="m28-dashboard-component__amount">{{consumption}}</span>
+                <span class="m28-dashboard-component__unit">{{unit}}</span>
+            </p>
+
+            <p class="m28-dashboard-component__month">{{periodEnd}}</p>
+        </div>
+
+        <div class="m28-dashboard-component__chart" data-chart-container="true" data-highcharts-chart="{{index}}"></div>
+
+        <ul class="m28-dashboard-component__links">
+            <li><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J31_CONSUMPTION_HISTORY)?a={{account}}#{{utility}}" class="button button--text button--next">@Translate.Text("View Trend")</a></li>
+        </ul>
+    </div>
+</script>
+
+<script id="empty-graph-component-template" type="text/x-handlebars-template">
+    <div class="m28-dashboard-component" data-component="m28-dashboard-component" data-chart-data="" dir="{{dir}}">
+        <h3 class="m28-dashboard-component__title">{{utilityheader}} </h3>
+        <p>@Translate.Text("no usage statistics notification")</p>
+    </div>
+</script>
+
+<script id="complaint-item-template" type="text/x-handlebars-template">
+    {{#enquiries}}
+    <div class="toggle-menu__item request-tracker__item">
+        <button class="toggle-menu__trigger request-tracker__trigger" data-toggle-trigger="{{shouldExpand}}">
+            <p class="request-tracker__type">{{type}}</p>
+            <p>
+
+                <span class="request-tracker__date">
+                    @Translate.Text("Requested") {{date}}
+                </span>
+            </p>
+        </button>
+        {{#if shouldExpand}}
+        <div class="toggle-menu__content request-tracker__content" data-toggle-content="true" style="display: block;">
+            <div class="request-tracker__summary">
+                {{summary}}
+            </div>
+        </div>
+        {{/if}}
+    </div>
+    {{/enquiries}}
+</script>
+<!-- ./templates -->
+
+<script type="text/javascript">
+
+
+    docReady(function () {
+        jQuery("#form-account-selector").submit(handleAccountSelection);
+        jQuery("#form-account-selector").submit();
+    });
+
+    function handleAccountSelection(e) {
+        jQuery('.ajax-placeholder').empty();
+        var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+        var bpNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+
+        var cat = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-acc-cat");
+        var flag = cat.substr(0, 1);
+
+        var isvisited = "@Session["Isvisitedconsumption"]";
+
+
+        if (e.type == "submit" || isvisited == "") {
+            if (flag == 'Y') {
+
+                @{Session["X"] = "Y";};
+
+                window.location.href = "./consumption/my-consumption?isBI=Y";
+
+            }
+            else {
+                @{Session["X"] = "";};
+            }
+        }
+
+
+        if (accountNumber) {
+
+            var data = { service: 'info', account_id: "00"+accountNumber };
+            jQuery.ajax("/api/bes/proxy", {
+                dataType: 'json',
+                data: data,
+                method: 'POST',
+                success:function(response) {
+                    var result = response;
+                    if (result != null && result.account != null) {
+
+                        if (result.account.show_bes != null && result.account.show_bes == "true") {
+                            $("#graph-container .grid").first().css("position", "initial");
+                            $(".j69-dashboard__charts--carousel").css("display", "none");
+                            $("#graph_electricityBES").removeClass("grid__column--4").addClass("grid__column--8");
+                            $("#divlivingstandard").show();
+                            $(".bes-accountid").val(accountNumber);
+                            $(".bes-accountid").trigger('change');
+                            $(".electricity-consumption-graph-placeholder").hide();
+                            $(".water-consumption-graph-placeholder").hide();
+                            $("#BEScontainer").show();
+                            $(".bes-container").show();
+                            $("#outstandingHeaderDiv").show();
+                            $("#outstandingHeaderDiv").addClass("m17-sectiontitle");
+                        }
+                        else {
+
+                            renderWaterElectricity(accountNumber);
+                        }
+                    }
+                },error:function (response) {
+                    renderWaterElectricity(accountNumber);
+                }
+            });
+
+
+            //console.log('acc');
+            jQuery.ajax("/api/bills/" + accountNumber, {
+                beforeSend: function () {
+                    window.attachSpinner('.bill-placeholder', { bgColor: '#fff', opacity: 0.6 });
+                },
+                complete: function () {
+                    window.detachSpinner('.bill-placeholder');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success: function (response) {
+                    renderBill(response);
+                }
+            });
+            jQuery.ajax("/api/enquiries?id=" + accountNumber + "&bpNumber=" + bpNumber, {
+                beforeSend: function () {
+                    window.attachSpinner('#enquiry-list-placeholder', { bgColor: '#fff', opacity: 0.6 });
+                },
+                complete: function () {
+                    window.detachSpinner('#enquiry-list-placeholder');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success:function(response) {
+                    renderEnquiries(response);
+                    jQuery("#hpltrackills")[0].search = "";
+                    var src = jQuery("#hpltrackills").attr('href').replace("?", "");
+                    jQuery("#hpltrackills").attr('href', src + "?a=" + accountNumber);
+                }
+            });
+
+        }
+        return false;
+    }
+
+    function renderWaterElectricity(accountNumber) {
+        $(".j69-dashboard__charts--carousel").css("display", "block");
+        $("#graph_electricityBES").removeClass("grid__column--8").addClass("grid__column--4");
+        $("#graph-container .grid").first().css("position", "");
+        $("#outstandingHeaderDiv").hide();
+        $("#outstandingHeaderDiv").removeClass("m17-sectiontitle");
+        $("#divlivingstandard").hide();
+        $("#BEScontainer").hide();
+        $(".bes-container").hide();
+        $(".electricity-consumption-graph-placeholder").show();
+        $(".water-consumption-graph-placeholder").show();
+        jQuery.ajax("/api/consumptionstatistics/" + accountNumber, {
+            beforeSend: function () {
+                window.attachSpinner('.electricity-consumption-graph-placeholder', { bgColor: '#fff', opacity: 0.6 });
+                window.attachSpinner('.water-consumption-graph-placeholder', { bgColor: '#fff', opacity: 0.6 });
+            },
+            complete: function () {
+                window.detachSpinner('.electricity-consumption-graph-placeholder');
+                window.detachSpinner('.water-consumption-graph-placeholder');
+            },
+            dataType: 'json',
+            method: 'GET',
+            success:function(response) {
+                renderGraphs(accountNumber, response.series);
+            }
+        });
+    }
+
+    function renderBill(bill) {
+        var markup = jQuery('#bill-component-template').html();
+        var template = Handlebars.compile(markup);
+
+        var context = {
+            account: bill.AccountNumber,
+            total: numeral(bill.Balance).format('0,0.00')
+        };
+
+        var rendering = template(context);
+        jQuery('.bill-placeholder').empty().html(rendering);
+    }
+
+    function renderEnquiries(enquiries) {
+        if (enquiries && enquiries.length > 0) {
+            var markup = jQuery('#complaint-item-template').html();
+            var template = Handlebars.compile(markup);
+
+            var context = {
+                enquiries: _.map(enquiries, function (e) {
+                    return {
+                        summary: e.Status,
+                        date: e.RequestDate,
+                        type: e.RequestType,
+                        status: function () {
+                            if (e.Completed) return '@Translate.Text("Closed")';
+                            return '@Translate.Text("In progress")';
+                        },
+                        statusClass: function () {
+                            if (e.Completed) return 'request-tracker__state--closed';
+                            return 'request-tracker__state--inprogress';
+                        },
+                        shouldExpand: function () {
+                            return e.Status !== undefined && e.Status !== '';
+                        }
+                    }
+                }).splice(0, 4)
+            };
+
+            jQuery('#grid-services--with-notifications').removeClass('hidden');
+            jQuery('#grid-services--without-notifications').addClass('hidden');
+
+            jQuery('#enquiry-list-placeholder').empty().html(template(context));
+            window.initComponents('request-tracker');
+        } else {
+            jQuery('#grid-services--with-notifications').addClass('hidden');
+            jQuery('#grid-services--without-notifications').removeClass('hidden');
+        }
+    }
+
+    function renderGraphs(accountNumber, series) {
+        var markup = jQuery('#graph-component-template').html();
+        var template = Handlebars.compile(markup);
+
+        var placeholders = [
+            '.electricity-consumption-graph-placeholder',
+            '.water-consumption-graph-placeholder'
+        ];
+
+        var groupedSeries = _.chain(series)
+            .groupBy('Utility')
+            .map(function (group, key) {
+                return {
+                    Account: accountNumber,
+                    Utility: parseInt(key),
+                    Series: _.chain(group).pluck('DataPoints').flatten().value()
+                };
+            })
+            .value();
+
+        for (var i = 0; i < groupedSeries.length; i++) {
+            if (!groupedSeries[i].Series || groupedSeries[i].Series.length === 0) continue;
+
+            var placeholder = placeholders[groupedSeries[i].Utility];
+            var context = createGraphContext(groupedSeries[i]);
+            var rendering = template(context);
+
+            jQuery(placeholder).empty().html(rendering);
+
+            window.initComponents(placeholders[groupedSeries[i].Utility].substr(1));
+        }
+
+        jQuery('[id$="-graph-placeholder"]:not(:has(".m28-dashboard-component__chart"))')
+            .empty()
+            .each(function () {
+                var empty = jQuery('#empty-graph-component-template').html();
+                var emptyTemplate = Handlebars.compile(empty);
+
+                var util = jQuery(this).data('utility') === 'Electricity' ? '@Translate.Text("Electricity")' : '@Translate.Text("Water")';
+                var utilCons = jQuery(this).data('utility') === 'Electricity' ? '@Translate.Text(DictionaryKeys.Dashboard.ElectricityConsumption)' : '@Translate.Text(DictionaryKeys.Dashboard.WaterConsumption)';
+                var rendered = emptyTemplate({
+                    utility: util,
+                    utilityheader: utilCons
+                });
+                jQuery(this).html(rendered);
+            });
+    }
+
+    function createGraphContext(trend) {
+        var dataPoints;
+
+        if (trend.Series.length <= 6) {
+            dataPoints = _.map(trend.Series, function (dp) {
+                return {
+                    value: dp.Value,
+                    year: dp.Year,
+                    month: dp.Month
+                };
+            });
+        } else {
+            dataPoints = _.map(trend.Series, function (dp) {
+                return {
+                    value: dp.Value,
+                    year: dp.Year,
+                    month: dp.Month
+                };
+            }).slice(-6);
+        }
+
+        return {
+            account: trend.Account,
+            dataPoints: function () {
+                return _.pluck(dataPoints, 'value').join(", ");
+            },
+            utility: function () {
+                return trend.Utility === 0 ? '@Translate.Text("Electricity")' : '@Translate.Text("Water")';
+            },
+            utilityheader: function () {
+                return trend.Utility === 0 ? '@Translate.Text(DictionaryKeys.Dashboard.ElectricityConsumption)' : '@Translate.Text(DictionaryKeys.Dashboard.WaterConsumption)';
+            },
+            index: function () {
+                return trend.Utility + 1;
+            },
+            unit: function () {
+                return trend.Utility === 0 ? '@Translate.Text("Kilowatt Hour unit")' : '@Translate.Text("Imperial Gallon unit")';
+            },
+            periodEnd: function () {
+                var last = _.last(dataPoints);
+
+                return moment(last.month, 'M').format('MMMM');
+            },
+            consumption: function () {
+                var last = _.last(dataPoints);
+
+                return numeral(last.value).format('0,0');
+            },
+            dir: '@direction'
+        };
+    }
+
+    function loadwidget(component, elementid, endpoint, returnURL) {
+        var accountnumber = "00"+$(".bes-accountid").val();
+        var s;
+        var lang;
+        if ($('html').attr('lang') != "en") {
+            lang = "ar";
+        } else {
+            lang = "en";
+        }
+        //console.log(accountnumber + "-" + component + "-" + elementid + "-" + endpoint + "-" + lang);
+        s = document.createElement('script');
+        s.id = 'adv_main';
+        //s.src = '/Scripts/nml/main.min.js';
+        s.src = '/api/bes/proxy?page=mainjs&account_id=' + accountnumber;
+        s.async = true;
+        s.onload = function () {
+            var comp = new advComp();
+            comp.create({
+                "account_id": accountnumber, // currently selected account ID
+                "component": component, // e.g. "component": "survey", "nc", "hist"
+                "element_id": elementid, // id of element where to display the widget
+                "api": endpoint, // in this case //staging.dewa.gove.ae/api/acp/proxy
+                "lg": lang,
+                "return_url": ""
+            });
+        };
+        document.body.appendChild(s);
+    }
+</script>

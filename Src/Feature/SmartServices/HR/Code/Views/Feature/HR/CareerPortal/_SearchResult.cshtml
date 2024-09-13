@@ -1,0 +1,209 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Glass.Mapper.Sc.Fields
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using DEWAXP.Feature.HR.Models.CareerPortal
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@model DEWAXP.Feature.HR.Models.CareerPortal.SearchJobModel
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.HR.Helpers.CareerPortal
+@{
+
+    var redirectURL = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_APPLICATION_WIZARD) + "?q=";
+    var redirectTellFriendURL = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_TELL_FRIEND) + "?q=";
+    var loginUrl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_LOGIN);
+    string redirectLoginUrl = string.Format(loginUrl + "?returnUrl={0}", HttpUtility.UrlEncode(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_TELL_FRIEND) + "?q="));
+}
+<style>
+    .button--back:before {
+        content: "\e606" !important;
+        transform: none !important;
+        color: #BCBEC0;
+        font-size: 32px;
+        top: -3px !important;
+        left: -6px !important;
+    }
+
+    .m34-pagination__page-list-item--active .button {
+        font-weight: bold;
+        cursor: default;
+    }
+
+        .m34-pagination__page-list-item--active .button:hover {
+            color: #3f3f3f;
+        }
+
+    .m34-pagination__button--prev.second {
+        margin: 0 6px;
+    }
+
+    .m34-pagination {
+        margin: 0px auto 30px;
+    }
+</style>
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid j126-career-portal" id="searchDiv" data-journey="j126-career-portal">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                </div>
+                <h2 class="text__page-title">@Translate.Text("job search title")</h2>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <p class="text__content-copy form-field__label">@Translate.Text("job search intro title")</p>
+            <p class="text__content-copy">@Translate.Text("job search introduction")</p>
+            <br />
+            <p class="text__content-copy form-field__label">
+                @Translate.Text("search criteria text")
+            </p>
+
+            <p class="text__content-copy">@Translate.Text("search restrict text")</p>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m23-table-start -->
+
+            <div class="grid__row m15-filter--select_wrapper" data-title="Page size">
+                <div class="grid__column grid__column--6">
+                    <h3 class="m23-table__title">
+                        @Translate.Text("search result text"): @Model.totalRecords @Translate.Text("hits text")
+                    </h3>
+                </div>
+                <div class="grid__column grid__column--6">
+                    <div class="float_right">
+                        @Translate.Text("pagesize")
+                        @Html.DropDownList("pagesizefilter", CareerPortalHelper.GetPageSize(),
+                            new
+                            {
+                                @class = "m15-filter--select",
+                                @id = "pagesizefilter",
+                                @name = "pagesizefilter",
+                                @aria_describedby = "description-for-pagesizefilter",
+                                @data_parsley_id = "20"
+                            })
+                    </div>
+                </div>
+
+            </div>
+            <div class="m23-table m23-table--asymetric-40" data-component="m23-table" id="jobList">
+                @{ Html.RenderPartial("~/Views/Feature/HR/CareerPortal/_JobsList.cshtml", Model); }
+            </div>
+            <!-- m23-table-end -->
+            <p><label class="parsley-errors-list hidden" id="lblerrorjob">@Translate.Text("please select job")</label></p>
+            <div class="form-field__button">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_JOBSEARCH)" class="button button--primary">@Translate.Text("return to the search page")</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script language="javascript" type="text/javascript">
+    docReady(function () {
+        //jQuery('select[name="pagesizefilter"]').change(PagerClick(1));
+        $("#pagesizefilter").change(function () {
+            PagerClick(1);
+        });
+    });
+    function applyJob() {
+        if (jQuery(".m23-table__content-table-body tr.selected td").length == 0) {
+            $("#lblerrorjob").show();
+            return false;
+        }
+        jQuery(".m23-table__content-table-body tr.selected td").each(function (i) {
+            if (jQuery(this).attr("data-label") == "@Translate.Text("job posting title")") {
+                var jobPostingId = jQuery(".m23-table__content-table-cell.icon-tick").attr("data-guid");
+                jQuery('.j105-drrg--loader').show();
+                if (@ViewBag.IsLoggedIn== true) {
+                    jQuery('.j105-drrg--loader').show();
+                    window.location.href = '@(redirectTellFriendURL)' + jobPostingId;
+                }
+                else {
+                     jQuery('.j105-drrg--loader').show();
+                    window.location.href = '@(redirectLoginUrl)' + jobPostingId;
+                }
+
+            }
+        });
+    }
+    function selectJob() {
+        if (jQuery(".m23-table__content-table-body tr.selected td").length == 0) {
+            $("#lblerrorjob").show();
+            return false;
+        }
+        jQuery(".m23-table__content-table-body tr.selected td").each(function (i) {
+            if (jQuery(this).attr("data-label") == "@Translate.Text("job posting title")") {
+                var jobDesc = jQuery(this).text().trim();
+                var jobId = jQuery(".m23-table__content-table-cell.icon-tick").attr("data-id");
+                if (@ViewBag.IsLoggedIn== true) {
+                    jQuery('.j105-drrg--loader').show();
+                    window.location.href = '@(redirectURL)' + jobId;
+                }
+                else {
+
+                    var url = "/api/sitecore/CareerPortal/ApplyJob";
+                    jQuery.ajax({
+                        url: url,
+                        type: 'POST',
+                        datatype: 'application/json',
+                        data: { jobDesc: jobDesc, jobId: jobId },
+                        beforeSend: function () {
+                            jQuery('.j105-drrg--loader').show();
+                            jQuery('.j105-drrg--loader').css('top', jQuery(window).scrollTop());
+                            jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                        },
+                        complete: function () {
+                            jQuery('.j105-drrg--loader').hide();
+                            jQuery('body').removeClass('unscrollable');
+                        },
+                    }).success(function (response) {
+                        jQuery('#searchDiv').html('');
+                        jQuery('#searchDiv').html(response);
+                    });
+                }
+                return false;
+            }
+        });
+
+    }
+    function PagerClick(index) {
+        var pageSize = $('#pagesizefilter').val();
+        var url = "/api/sitecore/CareerPortal/AjaxSearchJob";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: { currentPage: parseInt(index), pageSize: parseInt(pageSize) },
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+        }).success(function (response) {
+            jQuery('#jobList').html('');
+            jQuery('#jobList').html(response);
+            window.initComponents('rs_area');
+        });
+    }
+</script>

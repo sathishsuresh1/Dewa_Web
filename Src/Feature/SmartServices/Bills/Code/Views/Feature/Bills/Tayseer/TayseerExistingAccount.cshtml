@@ -1,0 +1,149 @@
+﻿@using System.Activities.Statements
+@using DEWAXP.Foundation.Integration.Extensions
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model List<DEWAXP.Feature.Bills.Models.Tayseer.TayseerFileUploadModel>
+
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="box box--1">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("j87/m26-page-title")
+            @*<div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                        <p class="intro-text">This feature enables you to make a payment for multiple accounts through a single Reference Number</p>
+                    </div>
+                </div>*@
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnreviewUrl" value="@ViewBag.ReviewURL" />
+
+@Html.Sitecore().Placeholder("j87/m41-tab-box")
+<div class="grid">
+    <div class="grid__row" style="display:none" id="divTableMessageEA">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text" id="divErrortextmsgEA"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j102-tayseer-service mt56" data-journey="j102-tayseer-service" id="divExistingAccount" style="margin-top:-20px">
+    <div class="grid">
+        <div class="grid__row">
+            @if (ViewBag.ReferenceNo != null)
+            {
+            <div style="margin-bottom:12px; text-align:center" class="grid__column--form">
+                <label for="form-field-10rt0ju5e" class="form-field__label" style="display:inline">
+                    @Translate.Text("Reference No"):
+                </label>
+                <label for="form-field-10rt0ju5e" class="form-field__label" style="display:inline">
+                    <strong>@ViewBag.ReferenceNo</strong>
+                </label>
+            </div>
+            }
+            <form id="TayseerExistingaddaccount" data-form="true" action="#" method="POST" form-skipvalidation="true">
+                @Html.AntiForgeryToken()
+                <div id="divExistingAddAccount">
+                    @Html.Partial("~/Views/Feature/Bills/Tayseer/TayseerExistingAddAccount.cshtml")
+                </div>
+                <div class="m39-modal confirm-delete" data-component="m39-modal" id="modal_true">
+                    <a role="button" data-trigger="true" class="button hidden lnkHiddenDelete" data-contractaccount="" id="_lcwyzq4m6_trigger" aria-controls="_lcwyzq4m6_content"></a>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_lcwyzq4m6_content" aria-labelledby="_lcwyzq4m6_trigger">
+                        <div class="m39-modal__dialog">
+                            <div class="m39-modal__header">
+                                <div class="m39-modal__title">@Translate.Text("Tayseer")</div>
+                                <button data-close="true" class="m39-modal__button--close"></button>
+                            </div>
+                            <div class="m39-modal__content">
+                                <div class="grid__row">
+                                    @Translate.Text("Remove Confirmation")
+                                </div>
+                                <div class="grid__row">
+                                    <div class="button m39-m12-no confirm-delete-false" data-contractaccount=""> @Translate.Text("No") </div>
+                                    <a class="button button--primary confirm-delete-true lnkDeleteFU" data-contractaccount=""> @Translate.Text("Yes") </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                <input type="button" class="button button--primary lnkPaymentReviewEA" value="@Translate.Text("Review Payment")" />
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+
+    $(function () {
+        if (getParameterByName('refno') != '' && getParameterByName('refno') != null) {
+
+            var _lang = '@lang';
+
+            if (_lang == 'ar')
+                $('.button--back').attr('href', '/ar-AE/consumer/billing/tayseer/tayseer-reference-number-history');
+            else
+                $('.button--back').attr('href', '/en/consumer/billing/tayseer/tayseer-reference-number-history');
+        }
+        $(".lnkPaymentReviewEA").attr("disabled", false);
+        // Payment Review Button Click
+        $(document).on('click', '.lnkPaymentReviewEA', function (e) {
+
+            try {
+                e.preventDefault();
+                var _selectTab = "existingAccountsTab",
+                   data = { selectedTab: _selectTab }
+                $(".lnkPaymentReviewEA").attr("disabled", true);
+                $(".lnkPaymentReviewEA").attr("disabled", true).val("@Translate.Text("Submitting")...");
+                $.ajax({
+                    type: "POST",
+                    url: "/api/sitecore/Tayseer/TayseerReviewPaymentClick",
+                    data: AddForgeryToken(data, "TayseerExistingaddaccount"),
+                    cache: false,
+                    success: function (response) {
+                        try {
+                            var _url = $("#hdnreviewUrl").val();
+                            if (response.status == true) {
+                                location.href = _url;
+                                //location.href = "/en/customer/services/payment-services/tayseer-review-payment?tab=" + _selectTab;
+                            }
+                            else {
+                                $("#divTableMessageEA").show();
+                                $("#divErrortextmsgEA").html(response.Message);
+                                $(window).scrollTop($('#divTableMessageEA').offset().top - 200);
+                                $(".lnkPaymentReviewEA").attr("disabled", false);
+                                $(".lnkPaymentReviewEA").val("@Translate.Text("Review Payment")");
+                            }
+                        } catch (e) {
+                            $(".lnkPaymentReviewEA").attr("disabled", false);
+                            $(".lnkPaymentReviewEA").val("@Translate.Text("Review Payment")");
+                        }
+                    },
+                    error: function (error) {
+                        //console.log("Error:" + error);
+                    }
+                });
+            } catch (e) {
+            }
+        });
+    });
+</script>

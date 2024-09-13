@@ -1,0 +1,104 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@{
+    var _progress = Model.SurveyResponses.Select(x => x.Progress).FirstOrDefault().ToString();
+    var _isFirstAttempted = Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted;
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+            <div class="m17-sectiontitle__colors">
+                <span class="title-colors-green"></span>
+                <span class="title-colors-red"></span>
+                <span class="title-colors-blue"></span>
+                <span class="title-colors-purple"></span>
+                <span class="title-colors-brown"></span>
+            </div>
+            <h3 class="m17-sectiontitle__title  text__section-title">
+                @Translate.Text("IDH_Step1") @Translate.Text("IDH_Step1Title")
+                @if (_isFirstAttempted)
+                {<span class="icon-new-success-message"></span>}
+            </h3>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    @if (_isFirstAttempted)
+    {
+        <div class="grid__column grid__column--12 grid__column-toggle">
+            <div class="grid__column-toggle-button">
+                <span class="show">
+                    @Translate.Text("IDH_Step3ShowResult")
+                </span>
+                <span class="hide">
+                    @Translate.Text("IDH_Step3HideResult")
+                </span>
+            </div>
+            <div class="grid__column-toggle-content j143-ideal-home__assesment j143-ideal-home-box">
+                <div class="m14-richtext">
+                    <h4>
+                        @Translate.Text("IDH_Step1TitleSurvey")
+                    </h4>
+                    <p>@Translate.Text("IDH_Step1Initial")</p>
+                </div>
+                <div class="j143-ideal-home__assesment-progress-chart">
+                    <div class="m94-progress-chart" data-component="m94-progress-chart" data-progress-text="@Translate.Text("IDH_Completed")" data-completed="@_progress" data-completed-color="#007560">
+                    </div>
+                </div>
+                <div class="m14-richtext">
+                    <br />
+                    <p class="richtext-list">
+                        @Translate.Text("IDH_Step3YourResult")
+                    </p>
+                    <span class="status-green richtext-list">@Model.SurveyResponses.Select(x => x.Correct).FirstOrDefault().ToString() @Translate.Text("J106.CorrectLabel")</span><br />
+                    <span class="status-red richtext-list">@Model.SurveyResponses.Select(x => x.Wrong).FirstOrDefault().ToString() @Translate.Text("J106.WrongLabel")</span>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="grid__column grid__column--12 grid__column-toggle grid__column-active">
+            <div class="grid__column-toggle-content j143-ideal-home__assesment j143-ideal-home-box">
+                <div class="m14-richtext">
+                    <h4>
+                        @Translate.Text("IDH_Step1TitleSurvey")
+                    </h4>
+                    <p>@Translate.Text("IDH_Step3Initial")</p>
+                </div>
+                <div class="j143-ideal-home__assesment-progress-chart">
+                    <div class="m94-progress-chart" data-component="m94-progress-chart" data-progress-text="@Translate.Text("IDH_Completed")" data-completed="@_progress" data-completed-color="#007560">
+                    </div>
+                </div>
+                <div class="j143-ideal-home__assesment-button">
+                    <p><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_SURVEY)" class="button button--primary button--next" onclick="triggerDownload()">@Translate.Text("IDH_Step3StartAssessment")</a></p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    function triggerDownload() {
+        jQuery('.j105-drrg--loader').show();
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+        setTimeout(function () {
+            jQuery('.j105-drrg--loader').hide();
+            jQuery('body').removeClass('unscrollable');
+        }, 500);
+    }
+</script>

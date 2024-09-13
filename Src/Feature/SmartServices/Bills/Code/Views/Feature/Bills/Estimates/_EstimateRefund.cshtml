@@ -1,0 +1,629 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Content
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@model DEWAXP.Feature.Bills.Models.Estimates.EsitimateRefundViewModel
+@{
+    bool Ibanok = Model.OkIBAN == "Y";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="box box--1">
+
+    @Html.Sitecore().Placeholder("j82/m26-page-title")
+</div>
+@Html.Sitecore().Placeholder("j82/m41-tab-box")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "VAT_REFUND_FORM", @class = "form", @data_form = "true", encType = "multipart/form-data", @data_parsley_focus = "none", @data_submit_validate = "enabled", @novalidate = "true" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            if (Model.ConnectionDetails != null)
+            {
+                <div class="form-screen">
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field_ApplicationNumber" class="form-field__label">
+                            @Translate.Text("ER_ApplicationNumberLabel")
+                            <span class="form-field__label-required aria-only">(required)</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="form-field__input form-field__input--select form-field__input--select2 form-field__input--select-full "
+                                    id="form-field_ApplicationNumber"
+                                    name="ApplicationNumber"
+                                    aria-describedby="description-for-ApplicationNumber"
+                                    data-parsley-errors-container="#description-for-ApplicationNumber"
+                                    required
+                                    data-parsley-required-message="@Translate.Text("ER_ApplicationNumberRequiredMsg")">
+                                <option value=" " selected data-itemval="">@Translate.Text("defaultSelect")</option>
+                                @if (Model.ConnectionDetails != null)
+                                {
+                                    foreach (DEWAXP.Foundation.Integration.APIHandler.Models.Response.Estimate.NewConnectionRefundConnectiondetail item in Model.ConnectionDetails)
+                                    {
+                                        <option value="@item.applicationno" data-estno="@item.posid" @Html.Raw(@item.applicationno == Model.ApplicationNumber ? "selected" : "") data-pod>@item.applicationno / @item.posid </option>
+                                    }
+                                }
+                            </select>
+                        </span>
+                        <div id="description-for-ApplicationNumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.ApplicationNumber)
+                        </div>
+                    </div>
+                    @Html.HiddenFor(m => m.EstimateNo, new { @class = "EstimateNoText" })
+                    <div class="otherdetail mt24@(Model.IsServiceFailure?" hidden":"")">
+                        <div class="form-field form-field--text">
+                            <label for="CustomerName" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("ER_CustomerNameLabel")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <span class="CustomerNameInputLabel">@Model.CustomerName</span>
+                                @Html.HiddenFor(m => m.CustomerName, new
+                           {
+                               @placeholder = @Translate.Text("ER_CustomerNamePlaceholder"),
+                               @aria_describedby = "description-for-CustomerName",
+                               @data_parsley_errors_container = "#description-for-CustomerName",
+                               @required = "",
+                               @data_parsley_required_message = Translate.Text("ER_CustomerNameRequired"),
+                               @class = "form-field__input form-field__input--readonly CustomerNameInput",
+                           })
+                            </span>
+                            <div id="description-for-CustomerName" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text">
+                            <label for="RegisteredMobileNumber" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("ER_RegisteredMobileNumberLabel")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <span class="RegisteredMobileNumberInput">@Model.RegisteredMobileNumber</span>
+                                @Html.HiddenFor(m => m.RegisteredMobileNumber)
+                            </span>
+                            <div id="description-for-RegisteredMobileNumber" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text">
+                            <label for="RegisteredEmail" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("ER_RegisteredEmailLabel")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <span class="RegisteredEmailInputLabel">@Model.RegisteredEmail</span>
+                                @Html.HiddenFor(m => m.RegisteredEmail, new
+                           {
+                               @placeholder = Translate.Text("ER_RegisteredEmailPlaceholder"),
+                               @aria_describedby = "description-for-RegisteredEmail",
+                               @data_parsley_errors_container = "#description-for-RegisteredEmail",
+                               @required = "",
+                               @data_parsley_required_message = Translate.Text("ER_RegisteredEmailRequired"),
+                               @class = "form-field__input form-field__input--text RegisteredEmailInput",
+                           })
+                            </span>
+                            <div id="description-for-RegisteredEmail" class="form-field__messages">
+                            </div>
+                        </div>
+
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field_ReasonCode" class="form-field__label">
+                                @Translate.Text("ER_ReasonForRefundLabel")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                        id="form-field_ReasonForRefund"
+                                        name="ReasonForRefund"
+                                        aria-describedby="description-for-ReasonForRefund"
+                                        data-parsley-errors-container="#description-for-ReasonForRefund"
+                                        required
+                                        data-parsley-required-message="@Translate.Text("ER_ReasonForRefundRequiredMsg")">
+                                    <option value="" selected data-itemval="">@Translate.Text("defaultSelect")</option>
+                                    @if (Model.ReasonCodeList != null)
+                                    {
+                                        foreach (SelectListItem item in Model.ReasonCodeList)
+                                        {
+                                            <option value="@item.Value" @Html.Raw(@item.Value == Model.ReasonForRefund ? "selected" : "") data-pod>@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-ReasonForRefund" class="form-field__messages">
+
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field_RefundMode" class="form-field__label">
+                                @Translate.Text("ER_RefundModeLabel")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                        id="form-field_RefundMode"
+                                        name="RefundMode"
+                                        aria-describedby="description-for-RefundMode"
+                                        data-parsley-errors-container="#description-for-RefundMode"
+                                        required
+                                        data-parsley-required-message="@Translate.Text("ER_RefundModeRequiredMsg")">
+                                    <option value="" selected data-itemval="">@Translate.Text("defaultSelect")</option>
+                                    @if (Model.RefundModeList != null)
+                                    {
+                                        foreach (SelectListItem item in Model.RefundModeList)
+                                        {
+                                            string _class = "";
+                                            if (item.Value == "I")
+                                            {
+                                                _class = "ibanctrl";
+                                                if (!Convert.ToBoolean(Model.OkIBAN == "X" || Model.OkIBAN == "Y"))
+                                                {
+                                                    _class += " hidden";
+                                                }
+                                            }
+
+                                            if (item.Value == "C")
+                                            {
+                                                _class = "chqctrl";
+                                                if (!Convert.ToBoolean(Model.OkCheque == "X" || Model.OkCheque == "Y"))
+                                                {
+                                                    _class += " hidden";
+                                                }
+                                            }
+                                            <option value="@item.Value"
+                                                    @Html.Raw(string.Format("class='{0}'", _class))
+                                                    data-pod>
+                                                @item.Text
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-RefundMode" class="form-field__messages">
+
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single RefundToWapper hidden">
+                            <label for="form-field_IBANNo" class="form-field__label">
+                                @Translate.Text("ER_RefundToLabel")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+
+                            @{
+                                bool _ibanList = Model.IbanDetails != null && Model.IbanDetails.Any();
+                            }
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select ibanselectwapper hidden">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field_IBANNoSelect"
+                                        name="IBANNoSelect"
+                                        aria-describedby="description-for-IBANNoSelect"
+                                        data-parsley-errors-container="#description-for-IBANNoSelect"
+                                        data-parsley-required-message="@Translate.Text("ER_IBANNoRequiredMsg")">
+                                    @if (_ibanList)
+                                    {
+                                        <option value="" selected data-itemval="">@Translate.Text("defaultSelect")</option>
+                                        foreach (DEWAXP.Foundation.Integration.APIHandler.Models.Response.Estimate.NewConnectionRefundIbandetail item in Model.IbanDetails)
+                                        {
+                                            <option value="@item.iban" @Html.Raw(@item.iban == Model.IBANNo ? "selected" : "") data-pod>@item.maskiban</option>
+                                        }
+                                        <option value="o" data-itemval="">@Translate.Text("ER_other")</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-IBANNoSelect" class="form-field__messages">
+                            </div>
+
+                        </div>
+                        <div class="form-field form-field--text ibanvaluewapper hidden " id="valueibannumber">
+                            <label for="form-field-IBANNumber" class="form-field__label">
+                                @Translate.Text("IBAN Label")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                <input class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-IBANNumber" name="IBANNo" type="number"
+                                       placeholder="@Translate.Text("IBAN Placeholder")" aria-describedby="description-for-IBANNumber" data-parsley-errors-container="#description-for-IBANNumber" required="" data-parsley-required-message="@Translate.Text("IBAN Required Text")" data-parsley-iban="" data-parsley-iban-message="@Translate.Text("IBAN Invalid Error Message")" data-iban_confirm="" data-parsley-trigger="focusout" data-parsley-id="19">
+                            </span>
+                            <div id="description-for-IBANNumber" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text ibanconfirmwapper hidden " id="confirmibannumber">
+                            <label for="form-field-IBANConfirmNumber" class="form-field__label">
+                                @Translate.Text("Confirm IBAN Label")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                <input class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-IBANConfirmNumber" name="ConfirmIBANno" type="number"
+                                       placeholder="@Translate.Text("IBAN Placeholder")" aria-describedby="description-for-IBANConfirmNumber" data-parsley-errors-container="#description-for-IBANConfirmNumber" required="" data-parsley-required-message="@Translate.Text("IBAN Confirm Required Text")" data-parsley-iban="" data-parsley-iban-message="@Translate.Text("IBAN Invalid Error Message")" data-parsley-equalto="#form-field-IBANNumber" data-parsley-equalto-message="@Translate.Text("IBAN Mismatch Error Message")" data-iban_confirm="" data-parsley-trigger="focusout" data-parsley-id="19">
+                            </span>
+                            <div id="description-for-IBANConfirmNumber" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field button-item fileuploaderwapper@(!string.IsNullOrEmpty(Model.AttachFlag)?"":" hidden")">
+                            <h2 class="teaser__title">@Translate.Text("ER_FTAFileLabel")</h2>
+                            <h5>@Translate.Text("ER_FTAFileInfoText")</h5>
+                            @Html.Sitecore().Placeholder("estimate_file_placeholder")
+                        </div>
+                        <div class="form-field form-field--upload form-field--upload_new fileuploaderwapper@(!string.IsNullOrEmpty(Model.AttachFlag)?"":" hidden")">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-FTADeclarationFormFile" class="form-field__label">
+                                        <span class="aria-only">@Translate.Text("ER_FTAFileUploadText")</span>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload" id="form-field-FTADeclarationFormFile" name="FTADeclarationFormFile" type="file" aria-describedby="description-for-FTADeclarationFormFile" data-parsley-errors-container="#description-for-FTADeclarationFormFile" required data-parsley-required-message="@Translate.Text("ER_FTAFileUploadError")" data-uploader-field="FTADeclarationFormFile" accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip" data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"' data-size="2048000">
+                                            <span class="button button--upload focus-enabled" data-uploader-button="upload-choose">@Translate.Text("ER_FTAFileUploadText")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("ER_FTAFileUploadFormatError")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("ER_FTAFileUploadSizeError")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="FTADeclarationFormFile"></p>
+                                    <p class="relative">
+                                        <button class="button--upload_remove hidden" data-uploader-remove="FTADeclarationFormFile"><span class="aria-only">@Translate.Text("Remove")</span></button>
+                                    </p>
+                                    <div class="form-field__input--upload-filesize hidden" data-uploader-filesize="FTADeclarationFormFile">
+                                        <span data-currentsize="FTADeclarationFormFile">2.3</span>kB of <span data-totalsize="FTADeclarationFormFile"></span>kB
+                                        <div class="form-field__input--upload-filesize_bar">
+                                            <div class="form-field__input--upload-filesize_green">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="description-for-FTADeclarationFormFile" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("ER_FTAFileUploadHelpText")</p>
+
+                            </div>
+                        </div>
+
+
+                        <div class="form-field form-field--toggles inline-terms" id="IBANModal">
+                            <div class="form-field__checkbox  last">
+                                <label for="form-field-checkbox_1_1">
+                                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment1" type="checkbox" value="true" aria-describedby="description-for-accept-terms1" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms1" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                    <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                                </label>
+                            </div>
+                            <fieldset class="fieldset m39-modal__tnc">
+                                <legend class="legend-color">.</legend>
+                                <span class="text">@Translate.Text("ER_Iagree")</span>
+                                @Html.Sitecore().Placeholder("estimate_termcondition_placeholder")
+                            </fieldset>
+                            <div id="description-for-accept-terms1" class="form-field__messages"></div>
+                            <input type="hidden" name="AgreedToPayment1" value="false" />
+                        </div>
+
+                        <div id="description-for-error" class="form-field__messages">
+                            <p class="form-field__description genericerror red"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-screen border-1 radius-3 p20 hidden">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12 grid__column--form">
+                            <h2 class="text__section-title success-subtitle__h2">@Translate.Text("ER_SuccessHeading")</h2>
+                            <div class="m42-keyvalue success-page">
+                                <dl>
+                                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_CustomerNameLabel")</dt>
+                                    <dd class="m42-keyvalue__value--stacked tran-details CustomerNameInputLabel">@Model.CustomerName </dd>
+
+                                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_ApplicationNumberLabel")</dt>
+                                    <dd class="m42-keyvalue__value--stacked tran-details ApplicationNumberInputLabel"> </dd>
+
+                                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_ReasonForRefundLabel")</dt>
+                                    <dd class="m42-keyvalue__value--stacked tran-details ReasonForRefundInputLabel"> </dd>
+
+                                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_RefundThroughLabel")</dt>
+                                    <dd class="m42-keyvalue__value--stacked tran-details RefundThroughInputLabel"> </dd>
+                                    @Html.HiddenFor(m => m.IBANNoMasked, new { @class = "IBANNoMaskedLabel" })
+                                </dl>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-field__button otherdetail@(Model.IsServiceFailure?" hidden":"")">
+                    <a role="button" data-m51-next="" aria-label="@Translate.Text("Next")" class="button button--primary button--next btnnext">@Translate.Text("Next")</a>
+                    @*<a role="button" data-m51-next="" aria-label="@Translate.Text("Back")" class="button button--primary button--back hidden btnback">@Translate.Text("Back")</a>*@
+                    <button type="submit" class="button button--primary button--submit hidden btnsubmit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                </div>
+            }
+
+        }
+    </div>
+</div>
+
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+
+    docReady(function () {
+
+        var _dataexist = false;
+        var _getConnectionDetailUrl = '@Url.Action("GetSmartCommunicationData")';
+        /**inital events**/
+        RenderRefundModeSection(jQuery("#form-field_RefundMode").val());
+
+
+        jQuery("#form-field_ApplicationNumber").on("change", function () {
+            jQuery("#description-for-ApplicationNumber").html('');
+
+            var estno = jQuery("option:selected", $("#form-field_ApplicationNumber")).data("estno")
+
+            jQuery(".EstimateNoText").val(estno);
+
+            var requestData = {
+                AppID: jQuery(this).val(),
+                EstNo:estno,
+            }
+            jQuery.ajax({
+                url: _getConnectionDetailUrl,
+                type: 'GET',
+                traditional: true,
+                data: requestData,
+                beforeSend: function () {
+                    jQuery(".error-html").remove();
+                    //$(".m66-preloader-fullpage").show();
+                    jQuery(".CustomerName").val('');
+                    jQuery(".CustomerNameInputLabel").html('');
+                    jQuery(".RegisteredMobileNumber").val('');
+                    jQuery(".RegisteredMobileNumberInput").html('');
+                    jQuery(".RegisteredEmail").val('');
+                    jQuery(".RegisteredEmailInputLabel").html('');
+                    jQuery("#form-field_ReasonForRefund").val('');
+                    jQuery("#form-field_RefundMode").val('');
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+
+                    jQuery(".checkwapper").hide();
+                    jQuery(".ibanwapper").hide();
+
+                    jQuery(".ibanctrl").hide();
+                    jQuery(".chqctrl").hide();
+                    jQuery(".otherdetail").hide();
+                    jQuery(".fileuploaderwapper").hide();
+                    RenderRefundModeSection("");
+                    jQuery("#form-field-FTADeclarationFormFile").removeAttr("required", "");
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    //$(".m66-preloader-fullpage").hide();
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                console.log(response);
+                _dataexist = response.success && response.data.IsServiceFailure == false;
+                if (_dataexist) {
+                    jQuery(".otherdetail").show();
+                    $("#CustomerName").val(response.data.fullname);
+                    $(".CustomerNameInputLabel").html(response.data.fullname);
+                    $("#RegisteredMobileNumber").val(response.data.mobile);
+                    $(".RegisteredMobileNumberInput").html(response.data.mobile);
+                    $("#RegisteredEmail").val(response.data.emailaddress);
+                    $(".RegisteredEmailInputLabel").html(response.data.emailaddress);
+
+                    if (response.data.okiban == "X" || response.data.okiban == "Y") {
+                        if (response.data.ibandetails != null && response.data.ibandetails.length > 0) {
+                            $("#form-field_IBANNoSelect").html("");
+                            $("#form-field_IBANNoSelect").append("<option value='' selected  data-itemval=''>@Translate.Text("defaultSelect")</option>")
+                            $.each(response.data.ibandetails, function (index, item) {
+                                console.log(index);
+                                console.log(item);
+                                $("#form-field_IBANNoSelect").append("<option value='" + item.iban + "' " + (index == 0 ? "selected" : "") + " data-itemval=''>" + item.maskiban + "</option>");
+                            });
+                            $("#form-field_IBANNoSelect").append("<option value='o'  data-itemval=''>@Translate.Text("ER_other")</option>");
+                        }
+                        //jQuery("#form-field_RefundMode").val("Z");
+                        //RenderRefundModeSection("Z");
+                        jQuery(".ibanctrl").show();
+                    }
+
+                    if (response.data.okcheque == "X" || response.data.okcheque == "Y") {
+                        //jQuery("#form-field_RefundMode").val("C");
+                        //RenderRefundModeSection("C");
+                        jQuery(".chqctrl").show();
+                    }
+
+                    if (response.data.attachflag != "" && response.data.attachflag != null) {
+                        jQuery(".fileuploaderwapper").show();
+                        jQuery("#form-field-FTADeclarationFormFile").attr("required", "");
+                    }
+
+
+                }
+                else {
+                    jQuery("#description-for-ApplicationNumber").html('<ul class="parsley-errors-list filled" id="parsley-id-8"><li class="parsley-required">' + response.data.description+'</li></ul>')
+                    //window.location.reload();
+                }
+            });
+        });
+
+        jQuery("#form-field_RefundMode").on("change", function () {
+            RenderRefundModeSection(jQuery(this).val());
+        });
+
+        jQuery(".btnnext").on("click", function (event) {
+            require(['parsley'], function () {
+                event.preventDefault();
+                $(".genericerror").html('');
+                if (jQuery('#VAT_REFUND_FORM').parsley().validate()) {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                    ValidateVatRequest(function (responseData) {
+                        if (responseData.success && !responseData.data.IsServiceFailure) {
+                            setTimeout(function () {
+                                RenderPreviewScreen();
+                                jQuery('.j105-drrg--loader').hide();
+                                jQuery('body').removeClass('unscrollable');
+
+                                jQuery('html, body').animate({
+                                    scrollTop: $(".m41-tabs-box--variant").offset().top
+                                }, 2000);
+                            }, 100);
+                        } else {
+                            $(".genericerror").html(responseData.data.description);
+                            jQuery('.j105-drrg--loader').hide();
+                            jQuery('body').removeClass('unscrollable');
+                        }
+                    })
+                }
+            })
+        });
+
+        jQuery(".m26-page-title__backlink .button--back").on("click", function (e) {
+
+            if (jQuery(this).hasClass("btnback")) {
+                e.preventDefault();
+                //jQuery(".btnback").hide();
+                jQuery(this).removeClass("btnback");
+                jQuery(".m41-tabs-box--variantcentered").show();
+                jQuery(".btnnext").show();
+                jQuery(".btnsubmit").hide();
+                jQuery(".preview-screen").hide();
+                jQuery(".form-screen").show();
+                jQuery('html, body').animate({
+                    scrollTop: $(".m41-tabs-box--variant").offset().top
+                }, 2000);
+                return false;
+            }
+        })
+
+        function RenderRefundModeSection(mode) {
+            jQuery(".RefundToWapper").hide();
+            jQuery(".checkwapper").hide();
+            jQuery(".ibanselectwapper").hide();
+            jQuery(".ibanconfirmwapper").hide();
+            jQuery(".ibanvaluewapper").hide();
+
+            jQuery("#form-field_IBANNoSelect").removeAttr("required");
+            jQuery("#form-field-IBANNumber").removeAttr("required");
+            jQuery("#form-field-IBANConfirmNumber").removeAttr("required");
+            //jQuery("#ChequeNO").removeAttr("required");
+
+
+            //if (mode == "C") {
+            //    jQuery("#ChequeNO").attr("required","");
+            //    jQuery(".checkwapper").show();
+            //}
+            if (mode == "I") {
+
+                RenderIBANLogic();
+                //jQuery(".RefundToWapper").show();
+            }
+        }
+
+        function RenderPreviewScreen() {
+            jQuery(".btnnext").hide();
+            $(".ApplicationNumberInputLabel").html(jQuery("#form-field_ApplicationNumber option:selected").text());
+            $(".ReasonForRefundInputLabel").html(jQuery("#form-field_ReasonForRefund option:selected").text());
+            var RefundMode = jQuery("#form-field_RefundMode").val();
+
+            var RefundModeText = jQuery("#form-field_RefundMode option:selected").text()
+            var _refundThrough = "";
+
+            if (RefundMode == "I") {
+                _refundThrough = jQuery("#form-field-IBANNumber").text();
+
+                if (_refundThrough == '') {
+                    _refundThrough = 'AE' +jQuery("#form-field-IBANConfirmNumber").val();
+                }
+
+                jQuery(".IBANNoMaskedLabel").val(_refundThrough);
+            }
+            $(".RefundThroughInputLabel").html(RefundModeText+" "+_refundThrough);
+            //jQuery(".btnback").show();
+            jQuery(".m26-page-title__backlink .button--back").addClass("btnback");
+            jQuery(".m41-tabs-box--variantcentered").hide();
+            jQuery(".btnsubmit").show();
+            jQuery(".preview-screen").show();
+            jQuery(".form-screen").hide();
+        }
+
+
+        function RenderIBANLogic() {
+            //default empty
+            jQuery("#form-field_IBANNoSelect").val('');
+            jQuery("#form-field-IBANNumber").val('');
+            jQuery("#form-field-IBANConfirmNumber").val('');
+
+            //default show
+            jQuery(".ibanconfirmwapper").show();
+            jQuery("#form-field-IBANConfirmNumber").attr("required", "");
+
+            //render on  base of iban exist
+            var IbanlistExist = jQuery("#form-field_IBANNoSelect").find("option").length > 0;
+            if (IbanlistExist) {
+                jQuery(".ibanselectwapper").css("display","block");
+                jQuery(".RefundToWapper").show();
+                jQuery("#form-field_IBANNoSelect").attr("required", "");
+                jQuery("#form-field_IBANNoSelect").trigger("change");
+            } else {
+                jQuery(".ibanvaluewapper").show();
+                jQuery("#form-field-IBANNumber").attr("required", "");
+            }
+      }
+
+        jQuery("#form-field_IBANNoSelect").on("change", function () {
+            var _IBANNo = $(this).val();
+            jQuery(".ibanvaluewapper").hide();
+            jQuery(".ibanconfirmwapper").hide();
+            jQuery("#form-field-IBANNumber").val('');
+            jQuery("#form-field-IBANConfirmNumber").val('');
+
+            if (_IBANNo != "") {
+                jQuery("#form-field-IBANNumber").val($(this).val());
+                 if (_IBANNo == "o") {
+                     jQuery("#form-field-IBANNumber").val("");
+                     jQuery(".ibanvaluewapper").show();
+                 }
+                jQuery(".ibanconfirmwapper").show();
+            }
+        });
+        jQuery("#form-field_ReasonForRefund").on("change", function () {
+            $("#form-field_RefundMode").val("");
+            RenderRefundModeSection("");
+        });
+
+        function ValidateVatRequest(OnValidation) {
+            var requestData = {
+                AppID: jQuery("#form-field_ApplicationNumber").val(),
+                EstNo: jQuery(".EstimateNoText").val(),
+                reason: jQuery("#form-field_ReasonForRefund").val(),
+                refundmode: jQuery("#form-field_RefundMode").val(),
+            }
+            jQuery.ajax({
+                url: _getConnectionDetailUrl,
+                type: 'GET',
+                traditional: true,
+                data: requestData,
+                beforeSend: function () {
+                },
+                error: function (e) {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                    return OnValidation(null);
+                }, success: function (response) {
+                    return OnValidation(response);
+                }
+            })
+        }
+
+    });
+
+</script>

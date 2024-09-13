@@ -1,0 +1,59 @@
+﻿@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M6TeaserSet
+@using Sitecore.Globalization
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers;
+
+@if (Model != null)
+{
+    if (!string.IsNullOrWhiteSpace(Model.Header))
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Generic/M17 Section Title.cshtml", Model)
+    }
+
+    if (Model.Children != null && Model.Children.Any())
+    {
+        var count = 0;
+        var totalCount = 0;
+
+        foreach (var teaser in Model.Children)
+        {
+            count++;
+            totalCount++;
+            if (count == 1)
+            {
+                @:<div class="grid__row">
+                }
+
+                @RenderM6Teaser(teaser)
+
+                if (count == 4 || totalCount == Model.Children.Count())
+                {
+                    count = 0;
+                @:</div>
+            }
+
+        }
+
+
+
+
+        if (!string.IsNullOrWhiteSpace(@Model.ButtonText) && Model.ButtonLink != null)
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--centered">
+                    <p>
+                        <a href="@LinkManager.GetItemUrl(Model.ButtonLink)" class="button button--primary button--next">@Translate.Text("View all DEWA Services")</a>
+                    </p>
+                </div>
+            </div>
+        }
+    }
+
+    @helper RenderM6Teaser(Teaser teaser)
+    {
+        <div class="grid__column grid__column--3">
+            @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Teasers/M6 Teaser.cshtml", teaser)
+        </div>
+    }
+}

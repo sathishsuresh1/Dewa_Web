@@ -1,0 +1,2311 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using System.Linq
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Foundation.Content.Models.AccountModel.UpdateCustomerInfoModel
+@{
+    /**/
+
+    var commEmailActiveClass = Model.GeneralCommEmail == "Y" ? "form-field--fakecbox2_input--active" : string.Empty;
+    var commSMSActiveClass = Model.GeneralCommSMS == "Y" ? "form-field--fakecbox2_input--active" : string.Empty;
+
+    var shamsEmailActiveClass = Model.ShamsDubaiEmail == "Y" ? "form-field--fakecbox2_input--active" : string.Empty;
+    var shamsSMSActiveClass = Model.ShamsDubaiSMS == "Y" ? "form-field--fakecbox2_input--active" : string.Empty;
+
+    var otherMeida = (Model.SelectedPreferredMedia != null && Model.SelectedPreferredMedia.Contains("14")) ? string.Empty : "hidden";
+
+    var now = DateHelper.DubaiNow().AddMonths(-1);
+    var yearmin = DateHelper.DubaiNow().AddYears(-121);
+    var yearmax = DateHelper.DubaiNow().AddYears(-5);
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__column grid__column--12 grid__column--form">
+    @if (ViewBag.UCI == null)
+    {
+
+        <div class="m17-sectiontitle mb12" data-component="m17-sectiontitle">
+            <h3 class="m17-sectiontitle__title m17-sectiontitle__title--green text__section-title">
+                @Translate.Text("cust.profile.title")
+            </h3>
+            <p class="m17-sectiontitle__text">
+                @Translate.Text("cust.profile.subtitle")
+            </p>
+        </div>
+        if (Model.TradelicenseExpired == "X")
+        {
+            <script>
+            jQuery("#rs_area").append("<div data-target='notification' data-timeout='10' data-show-permanent='true' data-time-repeat='1' data-component='m20-notification' class='new-notification warning-dark notification-newstyle fixed'>" +
+                "<div class='grid'>" +
+                "<div class='grid__row'>" +
+                "<div class='m20-notification-2'>" +
+                "<p class='teaser__copy'>" +
+                "<span class='notification_title uppercase iconfont_item_icon icon - new- announcement' style='text-transform:none'>@Translate.Text("cust.profile.tradelicense.notification")</span>" +
+                "<a class='m20-newstyle-close button button--very_small button--fullwidth-mobile' style='text-transform:none'>@Translate.Text("cust.profile.close")</a>" +
+                "</p>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>");
+            </script>
+        }
+        if (Model.PassportExpired == "X")
+        {
+            <script>
+                jQuery("#rs_area").append("<div data-target='notification' data-timeout='10' data-show-permanent='true' data-time-repeat='1' data-component='m20-notification' class='new-notification warning-dark notification-newstyle fixed'>" +
+                "<div class='grid'>" +
+                "<div class='grid__row'>" +
+                "<div class='m20-notification-2'>" +
+                "<p class='teaser__copy'>" +
+                "<span class='notification_title uppercase iconfont_item_icon icon - new- announcement' style='text-transform:none'>@Translate.Text("cust.profile.passport.notification")</span>" +
+                "<a class='m20-newstyle-close button button--very_small button--fullwidth-mobile' style='text-transform:none'>@Translate.Text("cust.profile.close")</a>" +
+                "</p>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>");
+            </script>
+        }
+        if (Model.EmirateIdExpired == "X")
+        {
+            <script>
+                jQuery("#rs_area").append("<div data-target='notification' data-timeout='1000' data-show-permanent='true' data-time-repeat='1' data-component='m20-notification' class='new-notification warning-dark notification-newstyle fixed'>" +
+                "<div class='grid'>" +
+                "<div class='grid__row'>" +
+                "<div class='m20-notification-2'>" +
+                "<p class='teaser__copy'>" +
+                "<span class='notification_title uppercase iconfont_item_icon icon - new- announcement' style='text-transform:none'>@Translate.Text("cust.profile.emirateid.notification")</span>" +
+                "<a class='m20-newstyle-close button button--very_small button--fullwidth-mobile' style='text-transform:none'>@Translate.Text("cust.profile.close")</a>" +
+                "</p>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>");
+            </script>
+        }
+        if (Model.mailVerifyPending == "X")
+        {
+            <script>
+                jQuery("#rs_area").append("<div data-target='notification' data-timeout='10' data-show-permanent='true' data-time-repeat='1' data-component='m20-notification' class='new-notification warning-dark notification-newstyle fixed'>" +
+                "<div class='grid'>" +
+                "<div class='grid__row'>" +
+                "<div class='m20-notification-2'>" +
+                "<p class='teaser__copy'>" +
+                "<span class='notification_title uppercase iconfont_item_icon icon - new- announcement' style='text-transform:none'>@Translate.Text("cust.profile.email.notification")</span>" +
+                "<a class='m20-newstyle-close button button--very_small button--fullwidth-mobile' style='text-transform:none'>@Translate.Text("cust.profile.close")</a>" +
+                "</p>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>");
+            </script>
+        }
+
+        if (ViewBag.ProfileAvatar != null)
+        {
+            <script>
+            jQuery("#rs_area").append("<div data-target='notification' data-timeout='10' data-show-permanent='false' data-time-repeat='1' data-component='m20-notification' class='new-notification warning-dark notification-newstyle fixed'>" +
+                "<div class='grid'>" +
+                "<div class='grid__row'>" +
+                "<div class='m20-notification-2'>" +
+                "<p class='teaser__copy'>" +
+                "<span class='notification_title uppercase iconfont_item_icon icon - new- announcement' style='text-transform:none'>@Translate.Text("cust.profile.pic.success")</span>" +
+                "<a class='m20-newstyle-close button button--very_small button--fullwidth-mobile' style='text-transform:none'>@Translate.Text("cust.profile.close")</a>" +
+                "</p>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</div>");
+            </script>
+        }
+
+        using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "manageprofileform", @class = "form", data_journey = "j69-dashboard", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            @Html.HiddenFor(m => m.BusinessPartnerType)
+            @Html.HiddenFor(m => m.BusinessPartnerNumber)
+            @Html.HiddenFor(m => m.AccountNumberSelected)
+            @Html.HiddenFor(m => m.HiddenEmailAddress)
+            @Html.HiddenFor(m => m.HiddenMobileNumber)
+            @Html.HiddenFor(m => m.IsMyselfPOD)
+            @Html.HiddenFor(m => m.EmirateIdExpired)
+            @Html.HiddenFor(m => m.PassportExpired)
+            @Html.HiddenFor(m => m.TradelicenseExpired)
+            @Html.HiddenFor(m => m.SelectedNationality)
+            @Html.HiddenFor(m => m.OtpRequestId)
+            @Html.HiddenFor(m => m.RequestType)
+            <div class="hidden j69-dashboard--customer_labels1" data-labels1='{"famemname":"@Translate.Text("cust.family.member.name")", "famemres":"@Translate.Text("cust.selectAccount")", "reside_label":"@Translate.Text("cust.selectAccount")", "mem_namelabel":"@Translate.Text("cust.family.member.name")","mem_namepholder":"@Translate.Text("cust.enter.familyName")", "req_label":"@Translate.Text("cust.required.field.message")", "rela_label":"@Translate.Text("cust.select.relationship")", "cat_label":"@Translate.Text("cust.category.fallin")", "hasPOD_label":"@Translate.Text("cust.from.pod")", "hasPMI_label":"Has Permanent Medical Issue", "dis_typelabel":"Disability type(s)", "sensdis_label":"Sensory Disability", "mentaldis_label":"Mental Disability", "physdis_label":"Physical Disability", "others_label": "@Translate.Text("cust.other")", "medsit_label":"Medical Situation Type(s)", "heart_label":"Heart Disease", "resp_label":"Respiratory Disease", "digest_label":"Digestive Disease", "medeq_label": "Is there any special medical equipment such as oxygen concentrator, pulse oximeter, ventilator, etc?", "yes":"Yes", "no":"No", "podcard_label":"@Translate.Text("cust.pod.from.ministry")", "srcard_label":"@Translate.Text("cust.prof.thukurcard")", "podcard_pholder":"@Translate.Text("cust.enter.pod.number")", "preview_path":"/images/preview_pdf@2x.png", "eidfile_label":"@Translate.Text("cust.emirateid.account.holder")", "choose_label":"@Translate.Text("cust.choose.text")", "uploadformat_msg":"@Translate.Text("cust.file.format.validation")", "uploadfile_msg":"@Translate.Text("cust.filesize.validation")", "remove_label":"@Translate.Text("cust.remove.text")", "upload_note":"@Translate.Text("cust.fileupload.note")"}'>
+            </div>
+            <div class="hidden j69-dashboard--customer_labels" data-labels='{"famemname":"@Translate.Text("cust.family.member.name")", "famemres":"@Translate.Text("cust.selectAccount")", "reside_label":"@Translate.Text("cust.selectAccount")", "mem_namelabel":"@Translate.Text("cust.family.member.name")","mem_namepholder":"@Translate.Text("cust.enter.familyName")", "req_label":"@Translate.Text("cust.required.field.message")", "rela_label":"@Translate.Text("cust.select.relationship")", "cat_label":"@Translate.Text("cust.category.fallin")", "hasPOD_label":"@Translate.Text("cust.from.pod")", "hasPMI_label":"Has Permanent Medical Issue",  "medeq_label": "Is there any special medical equipment such as oxygen concentrator, pulse oximeter, ventilator, etc hans?", "yes":"Yes", "no":"No", "podcard_label":"@Translate.Text("cust.pod.from.ministry")","mdcard_label":"@Translate.Text("cust.pod.from.medicalreport")", "podcard_pholder":"@Translate.Text("cust.enter.pod.number")", "srcard_label":"@Translate.Text("cust.prof.seniorcitizen.thukurcard")", "preview_path":"/images/preview_pdf@2x.png", "eidfile_label":"@Translate.Text("cust.emirateid.account.holder")", "choose_label":"@Translate.Text("cust.choose.text")", "uploadformat_msg":"@Translate.Text("cust.file.format.validation")", "uploadfile_msg":"@Translate.Text("cust.filesize.validation")", "remove_label":"@Translate.Text("cust.remove.text")", "upload_note":"@Translate.Text("cust.fileupload.note")","podeidcard_label":"@Translate.Text("cust.emirateid.family")","mdeidcard_label":"@Translate.Text("cust.emirateid.family.medicalcondition")","sreidcard_label":"@Translate.Text("cust.emirateid.seniorcitizen.residepremise")"}'>
+            </div>
+
+            <div class="hidden j69-customer--reside_option">
+                <option value="" selected="">@Translate.Text("cust.select.account")</option>
+                @{
+                    if (Model.CustomerAccountList != null)
+                    {
+
+                        foreach (var item in Model.CustomerAccountList)
+                        {
+                            @*if (!string.IsNullOrWhiteSpace(Model.SelectedAccountNumber) && item.Value == Model.SelectedAccountNumber)
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+
+                                }*@
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                }
+            </div>
+
+            <div class="hidden j69-customer--rela_option">
+                <option value="" selected="">@Translate.Text("cust.select.relation")</option>
+                @if (Model.RelationList != null)
+                {
+                    foreach (var itemRelation in Model.RelationList)
+                    {
+                        <option value="@itemRelation.Value">@itemRelation.Text</option>
+                    }
+                }
+            </div>
+
+            <div class="hidden j69-customer--medpod_issues">
+                <div class="form-field form-field--text hidden relationship-others">
+                    <label for="form-field-3t2ktdhs5_12123" class="form-field__label">
+                        @Translate.Text("cust.relation.others")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text OtherRelationship"
+                               id="form-field-3t2ktdhs5_12123"
+                               name="inst_name"
+                               type="text"
+                               placeholder="@Translate.Text("cust.placeholder.others")"
+                               aria-describedby="description-for-3t2ktdhs5_12123"
+                               data-parsley-errors-container="#description-for-3t2ktdhs5_12123"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-3t2ktdhs5_12123" class="form-field__messages">
+                    </div>
+                </div>
+
+                <fieldset class="fieldset form-field form-field__radio--toggle">
+                    <legend class="form-field__label">
+                        @Translate.Text("cust.category.fallin")
+                    </legend>
+
+                    @if (Model.PODCategoryList != null)
+                    {
+                        var i = 1;
+                        foreach (var catItem in Model.PODCategoryList)
+                        {
+                            var target = ".target0" + i;
+
+                            <p class="form-field__radio">
+                                <label for="form-field-radio_22_@catItem.Value">
+                                    <input class="form-field__input form-field__input--radio pod_cat"
+                                           id="form-field-radio_22_@catItem.Value"
+                                           name="radios_groupv"
+                                           type="radio"
+                                           value="@catItem.Value"
+                                           data-index="@i"
+                                           is-clear="true" @((i == 1) ? "checked=checked" : "")
+                                           aria-describedby="description-for-podcat"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-errors-container="#description-for-podcat"
+                                           data-parsley-multiple="radios_groupv"
+                                           toggle-target="@target"
+                                           data-parsley-id="35">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @catItem.Text
+                                    </span>
+                                </label>
+                            </p>
+                            i++;
+                        }
+                        <div id="description-for-podcat" class="form-field__messages">
+                        </div>
+                    }
+                </fieldset>
+            </div>
+
+            <div class="hidden j69-customer--med_equipment">
+                <fieldset class="fieldset form-field">
+                    <legend class="form-field__label">
+                        @Translate.Text("cust.special.medical.equipment.note")
+                    </legend>
+                    @if (Model.EquiExistList != null)
+                    {
+                        var eq = 1;
+                        foreach (var EquiExistItem in Model.EquiExistList)
+                        {
+                            <p class="form-field__radio ">
+                                <label for="form-field-radio_w1_@EquiExistItem.Value">
+                                    <input class="form-field__input form-field__input--radio medicalEquipment_type"
+                                           id="form-field-radio_w1_@EquiExistItem.Value"
+                                           name="radios_group_equiexist"
+                                           type="radio"
+                                           value="@EquiExistItem.Value"
+                                           aria-describedby="description-for-equiexist" @((eq == 1) ? "checked=checked" : "")
+                                           data-parsley-errors-container="#description-for-equiexist"
+                                           data-parsley-multiple="radios_group_equiexist"
+                                           data-parsley-id="35">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @EquiExistItem.Text
+                                    </span>
+                                </label>
+                            </p>
+                            eq++;
+                        }
+                        <div id="description-for-equiexist" class="form-field__messages">
+                        </div>
+                    }
+                </fieldset>
+            </div>
+
+            <div class="hidden j69-customer--med_issues">
+                <fieldset class="fieldset">
+                    <legend class="form-field__label">
+                        @Translate.Text("cust.medical.situation.types")
+                    </legend>
+                    @if (Model.MedicalSituationTypeList != null)
+                    {
+                        foreach (var medicalSituationItem in Model.MedicalSituationTypeList)
+                        {
+                            var toggleClass = medicalSituationItem.Value == "OD" ? "form-field__input--checkbox--toggle" : "";
+                            var targetToggle = ((medicalSituationItem.Value != null && medicalSituationItem.Value == "OD") ? "toggle-target=.target9" : "");
+                            var isClear = ((medicalSituationItem.Value != null && medicalSituationItem.Value == "OD") ? "is-clear=true" : "");
+                            <div class="form-field__checkbox first">
+                                <label for="form-field-checkbox_q1_@medicalSituationItem.Value">
+                                    <input class="form-field__input form-field__input--checkbox medicalSituation_type @toggleClass"
+                                           id="form-field-checkbox_q1_@medicalSituationItem.Value"
+                                           name="radios_groupvmedicalSituation"
+                                           type="checkbox"
+                                           value="@medicalSituationItem.Value"
+                                           @targetToggle
+                                           @isClear
+                                           required=""
+                                           aria-describedby="description-for-medical-situ"
+                                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-errors-container="#description-for-medical-situ"
+                                           data-parsley-multiple="radios_groupvmedicalSituation"
+                                           data-parsley-id="45">
+
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        @medicalSituationItem.Text
+                                    </span>
+                                </label>
+                            </div>
+                        }
+
+                    }
+                    <div id="description-for-medical-situ" class="form-field__messages">
+                    </div>
+
+                </fieldset>
+                <div class="form-field form-field--text mt24 target9">
+                    <label for="form-field-3t2ktdhs599" class="form-field__label">
+                        @Translate.Text("cust.other")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text othermedicalsituation" id="form-field-3t2ktdhs599" name="inst_name" type="text" placeholder="@Translate.Text("cust.other")" aria-describedby="description-for-3t2ktdhs599" data-parsley-errors-container="#description-for-3t2ktdhs5" required="" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-3t2ktdhs599" class="form-field__messages">
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden j69-customer--pod_issues">
+                <fieldset class="fieldset">
+                    <legend class="form-field__label">
+                        @Translate.Text("cust.disability.types")
+                    </legend>
+                    @if (Model.DisabilityTypeList != null)
+                    {
+                        foreach (var disabilityItem in Model.DisabilityTypeList)
+                        {
+                            var toggleClass = disabilityItem.Value == "11" ? "form-field__input--checkbox--toggle" : "";
+                            var targetToggle = ((disabilityItem.Value != null && disabilityItem.Value == "11") ? "toggle-target=.target8" : "");
+                            var isClear = ((disabilityItem.Value != null && disabilityItem.Value == "11") ? "is-clear=true" : "");
+                            <div class="form-field__checkbox first">
+                                <label for="form-field-checkbox_b1_@disabilityItem.Value">
+                                    <input class="form-field__input form-field__input--checkbox disability_type @toggleClass"
+                                           id="form-field-checkbox_b1_@disabilityItem.Value"
+                                           name="radios_disabilitygroupv"
+                                           type="checkbox"
+                                           value="@disabilityItem.Value"
+                                           @targetToggle
+                                           @isClear
+                                           required=""
+                                           aria-describedby="description-for-chk-disability"
+                                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-errors-container="#description-for-chk-disability"
+                                           data-parsley-multiple="radios_disabilitygroupv"
+                                           data-parsley-id="45">
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        @disabilityItem.Text
+                                    </span>
+                                </label>
+                            </div>
+                        }
+                        <div id="description-for-chk-disability" class="form-field__messages">
+                        </div>
+                    }
+
+                </fieldset>
+                <div class="form-field form-field--text mt24 target8">
+                    <label for="form-field-3t2ktdhs588" class="form-field__label">
+                        @Translate.Text("cust.other")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text otherdisability" id="form-field-3t2ktdhs588" name="inst_name" type="text" placeholder="@Translate.Text("cust.other")" aria-describedby="description-for-3t2ktdhs588" data-parsley-errors-container="#description-for-3t2ktdhs588" required="" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-3t2ktdhs588" class="form-field__messages">
+                    </div>
+                </div>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-businesspartnerlist" class="form-field__label">
+                    @Translate.Text("cust.profile.businesspartners")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select  form-field__input-wrapper--select2">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2"
+                            id="form-field-businesspartnerlist"
+                            name="SelectedBusinessPartner"
+                            aria-describedby="description-for-businesspartnerlist"
+                            data-parsley-errors-container="#description-for-businesspartnerlist"
+                            data-parsley-trigger="change"
+                            data-parsley-id="28"
+                            data-parsley-required-message="@Translate.Text("cust.required.field")"
+                            required="">
+                        @{
+                            if (Model.BusinessPartnerList != null)
+                            {
+                                foreach (var item in Model.BusinessPartnerList)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(Model.SelectedBusinessPartner) && item.Value == Model.SelectedBusinessPartner)
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-businesspartnerlist" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field--text">
+                <label for="form-field-customername" class="form-field__label">
+                    @Translate.Text("cust.profile.name")
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text"
+                           id="form-field-customername"
+                           name="CustomerName"
+                           value="@Model.CustomerName"
+                           type="text"
+                           placeholder="@Translate.Text("cust.name.placeholder.msg")"
+                           aria-describedby="description-for-customername"
+                           data-parsley-errors-container="#description-for-customername"
+                           required=""
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-customername" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.CustomerName, string.Empty, new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--text">
+                <label for="form-field-emailaddress" class="form-field__label">
+                    @Translate.Text("cust.profile.email") @*@if (Model.mailVerifyPending == "X")
+                        {<span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("cust.profile.emailverification.message")">@Translate.Text("cust.profile.pendingemailverification")</span>}*@
+                    <span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("cust.profile.emailaddress.note")"></span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text"
+                           id="form-field-emailaddress"
+                           name="EmailAddress"
+                           type="email"
+                           value="@Model.EmailAddress"
+                           placeholder="@Translate.Text("cust.email.placeholder.msg")"
+                           aria-describedby="description-for-emailaddress"
+                           data-parsley-errors-container="#description-for-emailaddress"
+                           data-parsley-error-message="@Translate.Text("Please enter a valid email address")"
+                           required=""
+                           readonly
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-emailaddress" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.EmailAddress, string.Empty, new { @class = "parsley-errors-list" })
+                    <p class="form-field__description">
+                        @Translate.Text("cust.not.my.emailaddress")
+                        <span id="lnkUpdateEmail" style="cursor: pointer;" class="link">@Translate.Text("cust.profile.Update.Email.Address")</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-field form-field--text">
+                <label for="form-field-mobilenumber" class="form-field__label">
+                    @Translate.Text("cust.profile.mobileno")<span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("cust.profile.mobile.note")"></span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                    <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                           id="form-field-mobilenumber"
+                           name="MobileNumber"
+                           type="tel"
+                           value="@Model.MobileNumber.RemoveMobileNumberZeroPrefix()"
+                           placeholder="@Translate.Text("cust.mobile.placeholder.msg")"
+                           aria-describedby="description-for-mobilenumber"
+                           data-parsley-errors-container="#description-for-mobilenumber"
+                           required=""
+                           readonly
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                           data-parsley-mobile_number=""
+                           data-parsley-mobile_number-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-mobilenumber" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.MobileNumber, string.Empty, new { @class = "parsley-errors-list" })
+                    <p class="form-field__description">
+                        @Translate.Text("cust.not.my.mobilenumber")
+                        <span id="lnkUpdateMobile" style="cursor: pointer;" class="link">@Translate.Text("cust.profile.Update.Mobile")</span>
+                    </p>
+                </div>
+            </div>
+            <div class="form-field form-field--text">
+                <label for="form-field-telephone" class="form-field__label">
+                    @Translate.Text("cust.profile.telephone")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                    <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                           id="form-field-telephone"
+                           name="TelephoneNumber"
+                           type="tel"
+                           value="@Model.TelephoneNumber.RemoveMobileNumberZeroPrefix()"
+                           placeholder="@Translate.Text("cust.telephone.placeholder.msg")"
+                           aria-describedby="description-for-telephone"
+                           data-parsley-errors-container="#description-for-telephone"
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-telephone_number=""
+                           data-parsley-telephone_number-message="@Translate.Text("FG_LandLineInvalid")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-telephone" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.TelephoneNumber, string.Empty, new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--text form-field--6">
+                <label for="form-field-pobox" class="form-field__label">
+                    @Translate.Text("cust.profile.PO.box")
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text"
+                           id="form-field-pobox"
+                           name="POBox"
+                           type="number"
+                           value="@Model.POBox"
+                           placeholder="@Translate.Text("cust.pobox.placeholder.msg")"
+                           aria-describedby="description-for-pobox"
+                           data-parsley-errors-container="#description-for-pobox"
+                           required=""
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-pobox" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.POBox, string.Empty, new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--select form-field--select-single form-field--6">
+                <label for="form-field-emirate" class="form-field__label">
+                    @Translate.Text("cust.emirate")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    @Html.DropDownListFor(x => x.SelectedEmirateKey, new SelectList(ViewBag.Emirates, "Key", "Value", Translate.Text("Select Emirate")), new
+                    {
+                        @class = "form-field__input form-field__input--select form-field__input--select-full",
+                        @aria_describedby = "description-for-emirate",
+                        @data_parsley_id = "18",
+                        @id = "form-field-emirate"
+                    })
+                </span>
+                <div id="description-for-emirate" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.SelectedEmirateKey, string.Empty, new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+            <!-- Display Emirates ID and Passport with Attachment option only if BP Type is 01 -->
+            if (Model.BusinessPartnerType == "1")
+            {
+                <div class="form-field form-field--text clear_both">
+                    <label for="form-field-emirateid" class="form-field__label">
+                        @Translate.Text("cust.profile.EmiratesID.No")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-emirateid"
+                               name="EmirateId"
+                               type="number"
+                               value="@Model.EmirateId"
+                               placeholder="@Translate.Text("cust.emirateid.placeholder.msg")"
+                               aria-describedby="description-for-emirateid"
+                               data-parsley-errors-container="#description-for-emirateid"
+                               maxlength="15"
+                               data-parsley-emiratesid=""
+                               data-parsley-emiratesid-message="@Translate.Text("cust.valid.emirateid.msg")"
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-emirateid" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.EmirateId, string.Empty, new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div id="datepicker-container-emirateexpdate" class="form-field form-field--text">
+                    <label for="form-field-emirateexpdate" class="form-field__label">
+                        @Translate.Text("cust.profile.EmiratesID.ExpiryDate") @if (Model.EmirateIdExpired == "X")
+                        {<span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("cust.profile.emiratesidexipry.message")">@Translate.Text("cust.profile.exrired")</span>}
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                               id="form-field-emirateexpdate"
+                               name="EmirateExpDate"
+                               type="text"
+                               value="@Model.EmirateExpDate"
+                               placeholder="@Translate.Text("cust.selectdate.placeholder")"
+                               aria-describedby="description-for-emirateexpdate"
+                               data-parsley-errors-container="#description-for-emirateexpdate"
+                               data-el="datepicker-future"
+                               data-picker-options="{&quot;selectYears&quot;: 50 , &quot;selectMonths&quot;: true }"
+                               readonly=""
+                               aria-haspopup="true"
+                               aria-expanded="false"
+                               aria-readonly="false"
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                        <span data-clicker="#datepicker-container-emirateexpdate" class="form-field__datepicker-icon-clicker"></span>
+                        <input type="hidden" name="text-date_submit">
+                        <span data-clicker="#datepicker-container-emirateexpdate" class="form-field__datepicker-icon-clicker"></span>
+                        <input type="hidden" name="text-date_submit">
+                    </span>
+                    <div id="description-for-emirateexpdate" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.EmirateExpDate, string.Empty, new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <!--j21/emirate-Id-uploader-->
+                @Html.Sitecore().Placeholder("j21/emirate-Id-uploader")
+
+                <div id="datepicker-container-dob" class="form-field form-field--text">
+                    <label for="form-field-dob" class="form-field__label">
+                        @Translate.Text("cust.DOB")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        @Html.TextBoxFor(x => x.DateOfBirth, new
+                       {
+
+                           data_parsley_id = "6",
+                           @class = "form-field__input form-field__input--text  form-field__input--datepicker  picker__input",
+                           id = "form-field-dob",
+                           placeholder = Translate.Text("cust.placeholder.DOB"),
+                           data_parsley_required_message = Translate.Text("cust.errorMsg.DOB"),
+                           @data_parsley_error_message = Translate.Text("cust.errorMsg.DOB"),
+                           data_el = "datepicker",
+                           data_parsley_errors_container = "#description-for-dob",
+                           data_picker_options = "{\"selectMonths\": true ,\"selectYears\": 120 ,\"max\": [" + yearmax.Year + "," + (yearmax.Month) + "," + yearmax.Day + "],\"min\": [" + yearmin.Year + "," + (yearmin.Month) + "," + yearmin.Day + "] }",
+                           type = "text",
+                           @data_initial_date = string.Empty
+                       })
+                    </span>
+                    <div id="description-for-dob" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.DateOfBirth, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--text">
+                    <label for="form-field-passportno" class="form-field__label">
+                        @Translate.Text("cust.profile.PassportNo")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-passportno"
+                               name="PassportNo"
+                               type="text"
+                               value="@Model.PassportNo"
+                               placeholder="@Translate.Text("cust.passport.placeholder.msg")"
+                               aria-describedby="description-for-passportno"
+                               data-parsley-errors-container="#description-for-passportno"
+                               maxlength="15"
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-passportno" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.PassportNo, string.Empty, new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div id="datepicker-container-passportexpdate" class="form-field form-field--text">
+                    <label for="form-field-passportexpdate" class="form-field__label">
+                        @Translate.Text("cust.profile.Passport.ExpiryDate") @if (Model.PassportExpired == "X")
+                        {<span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("cust.profile.passportexipry.message")">@Translate.Text("cust.profile.exrired")</span>}
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                               id="form-field-passportexpdate"
+                               name="PassportExpDate"
+                               type="text"
+                               value="@Model.PassportExpDate"
+                               placeholder="@Translate.Text("cust.selectdate.placeholder")"
+                               aria-describedby="description-for-passportexpdate"
+                               data-parsley-errors-container="#description-for-passportexpdate"
+                               data-el="datepicker-future"
+                               data-picker-options="{&quot;selectYears&quot;: 50 , &quot;selectMonths&quot;: true }"
+                               readonly=""
+                               aria-haspopup="true"
+                               aria-expanded="false"
+                               aria-readonly="false"
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                        <span data-clicker="#datepicker-container-passportexpdate" class="form-field__datepicker-icon-clicker">
+                        </span>
+                        <input type="hidden" name="text-date_submit">
+                        <span data-clicker="#datepicker-container-passportexpdate" class="form-field__datepicker-icon-clicker">
+                        </span>
+                        <input type="hidden" name="text-date_submit">
+                    </span>
+                    <div id="description-for-passportexpdate" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.PassportExpDate, string.Empty, new { @class = "parsley-errors-list" })
+                    </div>
+
+                </div>
+
+                <!--j21/passport-uploader-->
+                @Html.Sitecore().Placeholder("j21/passport-uploader")
+
+                <!--j21/passport-uploader-->
+
+
+                if (!string.IsNullOrWhiteSpace(Model.SelectedNationality))
+                {
+                    var selected = Model.NationalityList.Where(x => x.Value == Model.SelectedNationality).First();
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-nationality" class="form-field__label">
+                            @Translate.Text("cust.profile.nationality")
+                        </label>
+                        <div class="form-field__description">
+                            @selected.Text
+                        </div>
+                    </div>
+                }
+
+
+            }
+
+            <!-- Display Trade License  with Attachment option only if BP Type is 02 -->
+            if (Model.BusinessPartnerType == "2")
+            {
+                <div class="form-field form-field--text">
+                    <label for="form-field-trandeLicenseNo" class="form-field__label">
+                        @Translate.Text("cust.profile.trade.licenseNo")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-trandeLicenseNo"
+                               name="TrandeLicenseNo"
+                               type="text"
+                               value="@Model.TrandeLicenseNo"
+                               placeholder="@Translate.Text("cust.trade.license.placeholder")"
+                               aria-describedby="description-for-trandeLicenseNo"
+                               data-parsley-errors-container="#description-for-trandeLicenseNo"
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-trandeLicenseNo" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.TrandeLicenseNo, string.Empty, new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div id="datepicker-container-trandeLicenseExpDate" class="form-field form-field--text">
+                    <label for="form-field-trandeLicenseExpDate" class="form-field__label">
+                        @Translate.Text("cust.profile.trade.licenseExpiryDate") @if (Model.TradelicenseExpired == "X")
+                        {<span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("cust.profile.tradelicenseexipry.message")">@Translate.Text("cust.profile.exrired")</span>}
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                               id="form-field-trandeLicenseExpDate"
+                               name="TrandeLicenseExpDate"
+                               type="text"
+                               placeholder="@Translate.Text("cust.selectdate.placeholder")"
+                               value="@Model.TrandeLicenseExpDate"
+                               aria-describedby="description-for-trandeLicenseExpDate"
+                               data-parsley-errors-container="#description-for-trandeLicenseExpDate"
+                               data-el="datepicker-future"
+                               data-picker-options="{&quot;selectYears&quot;: 50 , &quot;selectMonths&quot;: true }"
+                               readonly=""
+                               aria-haspopup="true"
+                               aria-expanded="false"
+                               aria-readonly="false"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout">
+                        <span data-clicker="#datepicker-container-trandeLicenseExpDate" class="form-field__datepicker-icon-clicker">
+                        </span>
+                        <input type="hidden" name="text-date_submit">
+                        <span data-clicker="#datepicker-container-trandeLicenseExpDate" class="form-field__datepicker-icon-clicker"></span>
+                        <input type="hidden" name="text-date_submit">
+                    </span>
+                    <div id="description-for-trandeLicenseExpDate" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.TrandeLicenseExpDate, string.Empty, new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <!--j21/trade-license-uploader-->
+                @Html.Sitecore().Placeholder("j21/trade-license-uploader")
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-issuingauthority" class="form-field__label">
+                        @Translate.Text("cust.profile.trade.license.issuingAuthority")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                id="form-field-issuingauthority"
+                                name="SelectedIssuingAuthority"
+                                aria-describedby="description-for-issuingauthority"
+                                data-parsley-errors-container="#description-for-issuingauthority"
+                                data-parsley-trigger="change"
+                                data-parsley-id="28"
+                                data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                required="">
+                            <option value="0" selected="">@Translate.Text("cust.select.issuingauthority")</option>
+                            @{
+                                if (Model.IssuingAuthorityList != null)
+                                {
+                                    foreach (var item in Model.IssuingAuthorityList)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(Model.SelectedIssuingAuthority) && item.Value == Model.SelectedIssuingAuthority)
+                                        {
+                                            <option value="@item.Value" selected>@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    }
+                                }
+                            }
+
+                        </select>
+                    </span>
+                    <div id="description-for-issuingauthority" class="form-field__messages">
+                    </div>
+                </div>
+            }
+
+
+
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-prefferedlanguage" class="form-field__label">
+                    @Translate.Text("cust.profile.preferred.communication.language")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full"
+                            id="form-field-prefferedlanguage"
+                            name="SelectedPrefferedLanguage"
+                            aria-describedby="description-for-prefferedlanguage"
+                            data-parsley-errors-container="#description-for-prefferedlanguage"
+                            data-parsley-trigger="change"
+                            data-parsley-id="28"
+                            data-parsley-required-message="@Translate.Text("cust.required.field")"
+                            required="">
+                        <option value="0" selected="">@Translate.Text("cust.select.preferredlanguage")</option>
+                        @{
+                            if (Model.PrefferedLanguageList != null)
+                            {
+                                foreach (var item in Model.PrefferedLanguageList)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(Model.SelectedPrefferedLanguage) && item.Value == Model.SelectedPrefferedLanguage)
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-prefferedlanguage" class="form-field__messages">
+                </div>
+            </div>
+
+            <fieldset class="fieldset mt56">
+                <legend class="legend">@Translate.Text("cust.profile.manage.communication")</legend>
+                @{
+                    var counter = 0;
+                }
+                @if (Model.BPCommunications != null)
+                {
+                    foreach (var communication in Model.BPCommunications)
+                    {
+                        if (communication != null)
+                        {
+                            <div class="form-field form-field--fakecbox2">
+                                <div class="form-field__label">
+                                    @(!string.IsNullOrWhiteSpace(communication.CommunicationType) ?
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            (communication.CommunicationType.Equals("01") ? Translate.Text("cust.profile.general.communication") :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            (communication.CommunicationType.Equals("02") ? Translate.Text("cust.profile.shamsdubai.subscribe") : string.Empty))
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            : string.Empty )
+                                </div>
+                                <div class="form-field--fakecbox2_wrap">
+                                    <span class="form-field--fakecbox2_desc">@Translate.Text("cust.profile.subscribe.through")</span>
+                                    @Html.Hidden("BPCommunications[" + counter + "].CommunicationType", communication.CommunicationType)
+                                    <div class="form-field--fakecbox2_input @(communication.SubscribeEmail ? "form-field--fakecbox2_input--active" : "")">
+                                        @Translate.Text("cust.profile.emailsubscribe")
+                                        <input class="hidden"
+                                               name="BPCommunications[@(counter)].SubscribeEmail"
+                                               type="checkbox"
+                                               value="true" @(communication.SubscribeEmail ? "checked=\"checked\"" : "")
+                                               data-parsley-multiple="gen_com_@(counter)">
+                                    </div>
+                                    <div class="form-field--fakecbox2_input @(communication.SubscribeSMS ? "form-field--fakecbox2_input--active" : "")">
+                                        @Translate.Text("cust.profile.SMSsubscribe")
+                                        <input class="hidden"
+                                               name="BPCommunications[@(counter)].SubscribeSMS"
+                                               type="checkbox"
+                                               value="true" @(communication.SubscribeSMS ? "checked=\"checked\"" : "")
+                                               data-parsley-multiple="gen_com_@(counter)">
+                                    </div>
+                                </div>
+                            </div>
+                            { counter++; }
+                        }
+
+                    }
+                }
+
+
+                @*<div class="form-field form-field--fakecbox2">
+                        <div class="form-field__label">
+                            @Translate.Text("cust.profile.general.communication")
+                        </div>
+                        <div class="form-field--fakecbox2_wrap">
+                            <span class="form-field--fakecbox2_desc">
+                                @Translate.Text("cust.profile.subscribe.through")
+                            </span>
+                            <div class="form-field--fakecbox2_input @commEmailActiveClass">
+                                @Translate.Text("cust.profile.emailsubscribe")
+                                <input class="hidden" type="checkbox" id="gen_com_email" name="SelectedGeneralComms" value="@Model.GeneralCommEmail" data-parsley-multiple="gen_com">
+                            </div>
+                            <div class="form-field--fakecbox2_input @commSMSActiveClass">
+                                @Translate.Text("cust.profile.SMSsubscribe")
+                                <input class="hidden" type="checkbox" id="gen_com_sms" name="SelectedGeneralComms" value="@Model.GeneralCommSMS" data-parsley-multiple="gen_com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--fakecbox2">
+                        <div class="form-field__label">
+                            @Translate.Text("cust.profile.shamsdubai.subscribe")
+                        </div>
+                        <div class="form-field--fakecbox2_wrap">
+                            <span class="form-field--fakecbox2_desc">
+                                @Translate.Text("cust.profile.subscribe.through")
+                            </span>
+                            <div class="form-field--fakecbox2_input @shamsEmailActiveClass">
+                                @Translate.Text("cust.profile.emailsubscribe")
+                                <input class="hidden" type="checkbox" id="shams_com_email" name="SelectedShamsComms" value="@Model.ShamsDubaiEmail" data-parsley-multiple="shams">
+                            </div>
+                            <div class="form-field--fakecbox2_input @shamsSMSActiveClass">
+                                @Translate.Text("cust.profile.SMSsubscribe")
+                                <input class="hidden" type="checkbox" id="shams_com_sms" name="SelectedShamsComms" value="@Model.ShamsDubaiSMS" data-parsley-multiple="shams">
+                            </div>
+                        </div>
+                    </div>*@
+            </fieldset>
+
+            <fieldset class="fieldset mt56 fieldset--collapsable" style="height: 516px;">
+                <legend class="legend">@Translate.Text("cust.profile.additional.personal.details")</legend>
+
+                <!-- Marital Status and Monthly Income should come only if BP Type is 01 -->
+                @if (Model.BusinessPartnerType == "1")
+                {
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-maritalstatus" class="form-field__label">
+                            @Translate.Text("cust.profile.marital.status")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                    id="form-field-maritalstatus"
+                                    name="SelectedMaritalStatus"
+                                    aria-describedby="description-for-maritalstatus"
+                                    data-parsley-errors-container="#description-for-maritalstatus"
+                                    data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                    data-parsley-trigger="change"
+                                    data-parsley-id="28"
+                                    required="">
+                                <option value="" selected="">@Translate.Text("cust.profile.select.maritalstatus")</option>
+                                @{
+                                    if (Model.MaritalStatusList != null)
+                                    {
+                                        foreach (var item in Model.MaritalStatusList)
+                                        {
+                                            if (!string.IsNullOrWhiteSpace(Model.SelectedMaritalStatus) && item.Value == Model.SelectedMaritalStatus)
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                }
+                            </select>
+                        </span>
+                        <div id="description-for-maritalstatus" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-monthlyincome" class="form-field__label">
+                            @Translate.Text("cust.profile.monthlyincome")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                    id="form-field-monthlyincome"
+                                    name="SelectedMonthlyIncome"
+                                    aria-describedby="description-for-monthlyincome"
+                                    data-parsley-errors-container="#description-for-monthlyincome"
+                                    data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                    data-parsley-trigger="change"
+                                    data-parsley-id="28"
+                                    required="">
+                                <option value="" selected="">@Translate.Text("cust.profile.select.monthlyincome")</option>
+                                @{
+                                    if (Model.MonthlyIncomeList != null)
+                                    {
+                                        foreach (var item in Model.MonthlyIncomeList)
+                                        {
+                                            if (!string.IsNullOrWhiteSpace(Model.SelectedMonthlyIncome) && item.Value == Model.SelectedMonthlyIncome)
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                }
+                            </select>
+                        </span>
+                        <div id="description-for-monthlyincome" class="form-field__messages">
+                        </div>
+                    </div>
+                }
+                <fieldset class="fieldset form-field">
+                    <legend class="form-field__label">
+                        @Translate.Text("cust.profile.technology.usage.title")
+                    </legend>
+                    @if (Model.TechnologyUsage != null)
+                    {
+                        foreach (var techItem in Model.TechnologyUsage)
+                        {
+                            <p class="form-field__radio">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio"
+                                           id="form-field-radio_1_@techItem.Value"
+                                           name="SelectedTechnologyRating"
+                                           type="radio"
+                                           value="@techItem.Value"
+                                           aria-describedby="description-for-technologyusage"
+                                           data-parsley-errors-container="#description-for-technologyusage"
+                                           data-parsley-multiple="radios_grouptechnologyrating"
+                                           data-parsley-id="35">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @techItem.Text
+                                    </span>
+                                </label>
+                            </p>
+                        }
+                    }
+                    <div id="description-for-technologyusage" class="form-field__messages">
+                    </div>
+                </fieldset>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-media" class="form-field__label">
+                        @Translate.Text("cust.profile.preferred.media.channels")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select  form-field__input-wrapper--select2">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2"
+                                id="form-field-media"
+                                name="MultiplePreferredMedia"
+                                aria-describedby="description-for-selectedMediaChannel"
+                                data-parsley-errors-container="#description-for-selectedMediaChannel"
+                                data-placeholder="@Translate.Text("cust.select.more.channel.message")"
+                                required=""
+                                multiple="multiple"
+                                data-parsley-required-message="@Translate.Text("cust.select.more.channel.message")"
+                                tabindex="-1"
+                                aria-hidden="true"
+                                data-parsley-trigger="change">
+                            <option value="">@Translate.Text("cust.select.mediachannel")</option>
+
+                            @{
+                                if (Model.PreferredMediaList != null)
+                                {
+                                    foreach (var item in Model.PreferredMediaList)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(Model.SelectedPreferredMedia) && Model.SelectedPreferredMedia.Contains(item.Value))
+                                        {
+                                            <option value="@item.Value" selected>@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    }
+                                }
+                            }
+                        </select>
+                    </span>
+                    <div id="description-for-selectedMediaChannel" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field form-field--text mt24 othermediachannel @otherMeida">
+                    <label for="form-field-othermediachannel" class="form-field__label">
+                        @Translate.Text("cust.OtherMediaChannel")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text" value="@Model.OtherMediaChannel" id="form-field-othermediachannel" name="OtherMediaChannel" type="text" placeholder="@Translate.Text("cust.OtherMediaChannel")" aria-describedby="description-for-othermediachannel" data-parsley-errors-container="#description-for-othermediachannel" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-othermediachannel" class="form-field__messages">
+                    </div>
+                </div>
+            </fieldset>
+            if (Model.BusinessPartnerType == "1")
+            {
+                <fieldset class="fieldset mt56 fieldset--collapsable" style="height: 258px;">
+                    <legend class="legend">@Translate.Text("cust.pod.title")</legend>
+                    <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="form-field__label">
+                                @Translate.Text("cust.pod.subtitle")
+                            </legend>
+                            @if (Model.PODTypesList != null)
+                            {
+                                foreach (var podItem in Model.PODTypesList)
+                                {
+                                    <div class="form-field__checkbox">
+                                        <label for="form-field-checkbox_1_@podItem.Value">
+                                            <input class="form-field__input form-field__input--checkbox form-field__input--checkbox--toggle"
+                                                   id="form-field-checkbox_1_@podItem.Value"
+                                                   name="SelectedPODType"
+                                                   type="checkbox"
+                                                   value="@podItem.Value"
+                                                   aria-describedby="description-for-podtype"
+                                                   toggle-target=".@podItem.Value"
+                                                   data-parsley-errors-container="#description-for-podtype"
+                                                   data-parsley-multiple="checkbox_1_@podItem.Value"
+                                                   data-parsley-id="48">
+                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                @podItem.Text
+                                            </span>
+                                        </label>
+                                    </div>
+                                }
+                                <div id="description-for-podtype" class="form-field__messages">
+                                </div>
+                            }
+                        </fieldset>
+                    </div>
+
+                    <fieldset class="M j69-customer--details_field form-field" style="display: none;">
+                        <div class="j69-customer--details_title">
+                            <div class="j69-customer--details_name">@Translate.Text("you label")</div>
+                            <div class="j69-customer--details_account" id="you_details_account">
+                                @Translate.Text("cust.profile.select.accountnumbers")
+                                @if (Model.CustomerAccountList != null)
+                                {
+                                    foreach (var item in Model.CustomerAccountList)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(Model.SelectedAccountNumber) && item.Value == Model.SelectedAccountNumber)
+                                        {
+                                            @item.Text.ToString()
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <div class="j69-customer--details_forms">
+                            <div class="form-field form-field--select form-field--select-single">
+                                <label for="form-field-accountnumber" class="form-field__label">
+                                    @Translate.Text("cust.selectAccount")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--text-binded"
+                                            id="form-field-accountnumber"
+                                            name="SelectedAccountNumber"
+                                            aria-describedby="description-for-accountnumber"
+                                            data-parsley-errors-container="#description-for-accountnumber"
+                                            data-parsley-trigger="change"
+                                            data-parsley-id="28"
+                                            binding-target="#you_details_account"
+                                            data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                            required="">
+                                        <option value="" selected="">@Translate.Text("cust.profile.select.accountnumbers")</option>
+                                        @{
+                                            if (Model.CustomerAccountList != null)
+                                            {
+                                                foreach (var item in Model.CustomerAccountList)
+                                                {
+                                                    if (!string.IsNullOrWhiteSpace(Model.SelectedAccountNumber) && item.Value == Model.SelectedAccountNumber.TrimStart(new char[] { '0' }))
+                                                    {
+                                                        <option value="@item.Value" selected>@item.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.Value">@item.Text</option>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    </select>
+
+                                </span>
+                                <div id="description-for-accountnumber" class="form-field__messages">
+                                </div>
+                            </div>
+                            <fieldset class="fieldset form-field form-field__radio--toggle">
+                                <legend class="form-field__label">
+                                    @Translate.Text("cust.category.fallin")
+                                </legend>
+                                @if (Model.PODCategoryList != null)
+                                {
+                                    foreach (var catItem in Model.PODCategoryList)
+                                    {
+                                        <p class="form-field__radio">
+                                            <label for="form-field-radio_2_@catItem.Value">
+                                                <input class="form-field__input form-field__input--radio myselfpodcategory"
+                                                       id="form-field-radio_2_@catItem.Value"
+                                                       name="SelectedPODCategory"
+                                                       type="radio"
+                                                       value="@catItem.Value"
+                                                       is-clear="true"
+                                                       aria-describedby="description-for-podcat"
+                                                       data-parsley-errors-container="#description-for-podcat"
+                                                       data-parsley-multiple="radios_groupv"
+                                                       toggle-target=".cat-@catItem.Value"
+                                                       data-parsley-id="35">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    @catItem.Text
+                                                </span>
+                                            </label>
+                                        </p>
+
+                                    }
+                                    <div id="description-for-podcat" class="form-field__messages">
+                                    </div>
+                                }
+                            </fieldset>
+                            <div class="form-field form-field--toggles cat-01">
+                                <fieldset class="fieldset">
+                                    <legend class="form-field__label">
+                                        @Translate.Text("cust.disability.types")
+                                    </legend>
+                                    @if (Model.DisabilityTypeList != null)
+                                    {
+                                        foreach (var disabilityItem in Model.DisabilityTypeList)
+                                        {
+                                            var toggleClass = disabilityItem.Value == "11" ? "form-field__input--checkbox--toggle" : "";
+                                            var targetToggle = ((disabilityItem.Value != null && disabilityItem.Value == "11") ? "toggle-target=.target10" : "");
+                                            var isClear = ((disabilityItem.Value != null && disabilityItem.Value == "11") ? "is-clear=true" : "");
+                                            <div class="form-field__checkbox first">
+                                                <label for="form-field-checkbox_b_@disabilityItem.Value">
+                                                    <input class="form-field__input form-field__input--checkbox @toggleClass"
+                                                           id="form-field-checkbox_b_@disabilityItem.Value"
+                                                           name="MultipleDisableTypes"
+                                                           data-parsley-multiple="radios_disabilitygroup"
+                                                           type="checkbox"
+                                                           value="@disabilityItem.Value" @((Model.MultipleDisableTypes != null && Model.MultipleDisableTypes.Contains(disabilityItem.Value)) ? "checked=\"checked\"" : "")
+                                                           @targetToggle
+                                                           @isClear
+                                                           required=""
+                                                           aria-describedby="description-for-chk-disability"
+                                                           data-parsley-errors-container="#description-for-chk-disability"
+                                                           data-parsley-id="45">
+                                                    <span class="form-field__fakecheckbox focus-enabled">
+                                                        @disabilityItem.Text
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                        }
+                                        <div id="description-for-chk-disability" class="form-field__messages">
+                                        </div>
+                                    }
+                                </fieldset>
+                                <div class="form-field form-field--text mt24 target10">
+                                    <label for="form-field-otherdisability" class="form-field__label">
+                                        @Translate.Text("cust.other")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="form-field-otherdisability" value="@Model.OtherDisabilityType" name="OtherDisabilityType" type="text" placeholder="@Translate.Text("cust.other")" aria-describedby="description-for-otherdisability" data-parsley-errors-container="#description-for-otherdisability" required="" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                                    </span>
+                                    <div id="description-for-otherdisability" class="form-field__messages">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cat-02 form-field" style="display: none;">
+                                <div class="form-field form-field--toggles">
+                                    <fieldset class="fieldset">
+                                        <legend class="form-field__label">
+                                            @Translate.Text("cust.medical.situation.types")
+                                        </legend>
+                                        @if (Model.MedicalSituationTypeList != null)
+                                        {
+                                            foreach (var medicalSituationItem in Model.MedicalSituationTypeList)
+                                            {
+                                                var toggleClass = medicalSituationItem.Value == "OD" ? "form-field__input--checkbox--toggle" : "";
+                                                var targetToggle = ((medicalSituationItem.Value != null && medicalSituationItem.Value == "OD") ? "toggle-target=.target11" : "");
+                                                var isClear = ((medicalSituationItem.Value != null && medicalSituationItem.Value == "OD") ? "is-clear=true" : "");
+                                                <div class="form-field__checkbox first">
+                                                    <label for="form-field-checkbox_q_@medicalSituationItem.Value">
+                                                        <input class="form-field__input form-field__input--checkbox @toggleClass"
+                                                               id="form-field-checkbox_q_@medicalSituationItem.Value"
+                                                               name="MultipleMedicalSituationTypes"
+                                                               data-parsley-multiple="radios_medicalgroup"
+                                                               type="checkbox"
+                                                               value="@medicalSituationItem.Value" @((Model.MultipleMedicalSituationTypes != null && Model.MultipleMedicalSituationTypes.Contains(medicalSituationItem.Value)) ? "checked=\"checked\"" : "")
+                                                               @targetToggle
+                                                               @isClear
+                                                               required=""
+                                                               aria-describedby="description-for-medical-situ"
+                                                               data-parsley-errors-container="#description-for-medical-situ"
+                                                               data-parsley-id="45">
+                                                        <span class="form-field__fakecheckbox focus-enabled">
+                                                            @medicalSituationItem.Text
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            }
+
+                                        }
+                                        <div id="description-for-medical-situ" class="form-field__messages">
+                                        </div>
+                                    </fieldset>
+                                    <div class="form-field form-field--text mt24 target11">
+                                        <label for="form-field-othermedicalsituation" class="form-field__label">
+                                            @Translate.Text("cust.other")
+                                        </label>
+                                        <span class="form-field__input-wrapper">
+                                            <input class="form-field__input form-field__input--text" id="form-field-othermedicalsituation" value="@Model.OtherMedicalSituationType" name="OtherMedicalSituationType" type="text" placeholder="@Translate.Text("cust.other")" aria-describedby="description-for-othermedicalsituation" data-parsley-errors-container="#description-for-othermedicalsituation" required="" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                                        </span>
+                                        <div id="description-for-othermedicalsituation" class="form-field__messages">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <fieldset class="fieldset form-field">
+                                    <legend class="form-field__label">
+                                        @Translate.Text("cust.special.medical.equipment.note")
+                                    </legend>
+                                    @if (Model.EquiExistList != null)
+                                    {
+                                        foreach (var equipItem in Model.EquiExistList)
+                                        {
+                                            <p class="form-field__radio ">
+                                                <label for="form-field-radio_k_ @equipItem.Value">
+                                                    <input class="form-field__input form-field__input--radio"
+                                                           id="form-field-radio_k_ @equipItem.Value"
+                                                           name="SelectedEquipment"
+                                                           data-parsley-multiple="radios_equipgroup"
+                                                           type="radio"
+                                                           value=" @equipItem.Value.ToLower()"
+                                                           aria-describedby="description-for-equip"
+                                                           data-parsley-errors-container="#description-for-equip"
+                                                           data-parsley-id="35">
+                                                    <span class="form-field__fakeradio focus-enabled">
+                                                        @equipItem.Text
+                                                    </span>
+                                                </label>
+                                            </p>
+                                        }
+                                    }
+
+                                    <div id="description-for-equip" class="form-field__messages">
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-podnumber" class="form-field__label">
+                                    @Translate.Text("cust.pod.number")
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           id="form-field-podnumber"
+                                           name="DeterminationID"
+                                           type="number"
+                                           maxlength="15"
+                                           data-parsley-maxnumber="15"
+                                           value="@Model.DeterminationID"
+                                           placeholder="@Translate.Text("cust.pod.number")"
+                                           aria-describedby="description-for-podnumber"
+                                           data-parsley-errors-container="#description-for-podnumber"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout">
+                                </span>
+                                <div id="description-for-podnumber" class="form-field__messages">
+                                </div>
+                            </div>
+                            <!-- Emirates ID for DEWA Account Holders file uploader -->
+                            @Html.Sitecore().Placeholder("j21/account-emirateId-uploader")
+
+
+                            <!-- POD OD card from Ministry of Community Development -->
+                            @Html.Sitecore().Placeholder("j21/pod-uploader")
+
+                        </div>
+                    </fieldset>
+
+                    <div class="F form-field add-family" style="display: none;">
+
+                        @{ if (Model.FamilyMembers != null) { Html.RenderPartial("~/Views/Feature/Account/Account/_PODInfo.cshtml", Model); } }
+                        <div class="link align_right mt24"><span class="j69-customer--add_fam">@Translate.Text("cust.add.familymember.link")</span></div>
+                    </div>
+
+                </fieldset>
+            }
+            <div class="form-field__button">
+                @Html.HiddenFor(x => x.postedPOD, new { id = "postedPOD", @value = "" })
+                <button type="submit" class="button button--primary button--next button--centered" id="manageprofilebuttonsubmit" data-submission-text="@Translate.Text("Updating")...">@Translate.Text("cust.update.information.button")</button>
+            </div>
+
+        }
+        <div class="m39-modal m39-modal--profile m39-modal--nofocus" data-component="m39-modal" id="modal_true">
+            <button data-trigger="true" class="m39-modal__trigger optpopuptrigger hidden">OTP Trigger</button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                <div class="m39-modal__dialog otp">
+                    <div class="m39-modal__header">
+                        <button data-close="true" class="m39-modal__button--close">
+                            <span class="aria-only">@Translate.Text("Close")</span>
+                        </button>
+                    </div>
+                    <div class="m39-modal__content flex-center">
+                        <div class="otp--modalcontent">
+                            <div class="otp_inputdisplay_screen hidden">
+                                <img src="/images/customer_care.png">
+                                <div class="otp--modalcontent-title">
+                                    <span class="otp-title"></span>
+                                </div>
+                                <div class="otp--modalcontent-details">
+                                    <span class="otp_inputdisplay_screen_error red">
+
+                                    </span>
+                                    <span class="otp_inputdisplay_screen_success">
+
+                                    </span>
+                                </div>
+                                <div class="otp--modalcontent-text hidden">
+                                    @Html.Raw(Translate.Text("cust.care.info.note"))
+                                </div>
+                            </div>
+                            <div class="otp_input_screen hidden">
+                                <img class="otp_chatcheck hidden" src="/images/chatcheck.png">
+                                <img class="otp_mailcheck hidden" src="/images/mailcheck.png">
+                                <div class="otp--modalcontent-title">
+                                    <span class="otp-title"></span>
+                                </div>
+                                <div class="otp--modalcontent-details">
+                                    <span dir="rtl" class="otp-message"></span>
+                                </div>
+                                <form id="otpform" class="form1 mt24 input-otp-textbox" method="post" data-form>
+                                    @Html.AntiForgeryToken()
+                                    <div class="form-field form-field--otp centered">
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp"
+                                                   id="form-field-otpnumber" name="text" type="number"
+                                                   aria-describedby="description-for-otpnumber"
+                                                   data-parsley-maxnumber="1"
+                                                   data-parsley-errors-container="#description-for-mobiotpnumber"
+                                                   required="" autofocus=""
+                                                   data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="6"
+                                                   aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp"
+                                                   id="form-field-otpnumber" name="text" type="number"
+                                                   aria-describedby="description-for-otpnumber"
+                                                   data-parsley-maxnumber="1"
+                                                   data-parsley-errors-container="#description-for-otpnumber"
+                                                   required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="8"
+                                                   aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp"
+                                                   id="form-field-otpnumber" name="text" type="number"
+                                                   aria-describedby="description-for-otpnumber"
+                                                   data-parsley-maxnumber="1"
+                                                   data-parsley-errors-container="#description-for-otpnumber"
+                                                   required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="10"
+                                                   aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp"
+                                                   id="form-field-otpnumber" name="text" type="number"
+                                                   aria-describedby="description-for-otpnumber"
+                                                   data-parsley-maxnumber="1"
+                                                   data-parsley-errors-container="#description-for-otpnumber"
+                                                   required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="12"
+                                                   aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp"
+                                                   id="form-field-otpnumber" name="text" type="number"
+                                                   aria-describedby="description-for-otpnumber"
+                                                   data-parsley-maxnumber="1"
+                                                   data-parsley-errors-container="#description-for-otpnumber"
+                                                   required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="14"
+                                                   aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp"
+                                                   id="form-field-otpnumber" name="text" type="number"
+                                                   aria-describedby="description-for-otpnumber"
+                                                   data-parsley-maxnumber="1"
+                                                   data-parsley-errors-container="#description-for-otpnumber"
+                                                   required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="16"
+                                                   aria-invalid="false">
+                                        </span>
+                                        <input class="form-field__input form-field__input--otp_main"
+                                               id="form-field-otpnumbermain" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="6"
+                                               data-parsley-errors-container="#description-for-otpnumber"
+                                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="33">
+                                        <div id="description-for-otpnumber" class="form-field__messages"></div>
+                                    </div>
+                                    <div class="form-field mt0 otp_inputdisplay_screen_error red hidden">
+                                    </div>
+                                    <div class="form-field">
+                                        <div class="button button--timer timer-button--outline"
+                                             data-component="m78-timer" id="timerbutton"
+                                             timer-labels="{&quot;before&quot;:&quot;@Translate.Text("cust.resend.button.text")&quot;, &quot;after&quot;:&quot;@Translate.Text("cust.resend.button.text") (&quot;}"
+                                             timer-time="{&quot;seconds&quot;:300}">
+                                            <span class="m78-timer--button_text">@Translate.Text("cust.send.button.text")</span>
+                                            <span class="m78-timer--button_time"></span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m39-modal__overlay"> </div>
+        </div>
+        <script type="text/javascript">
+        docReady(function () {
+            //form-field-emirateid
+            var errIdNumber = jQuery('#description-for-emirateid');
+            var errCustomername = jQuery('#description-for-customername');
+            var errPassport = jQuery('#description-for-passportno');
+            var errtrandeLicenseNo = jQuery('#description-for-trandeLicenseNo');
+            var $idnumberfield = jQuery('#form-field-emirateid');
+            var $name = jQuery("#form-field-customername");
+            var $passport = jQuery("#form-field-passportno");
+            var $nationality = '@Model.SelectedNationality';
+            var $tradelicense = jQuery("#form-field-trandeLicenseNo");
+            var $institute = jQuery("#form-field-issuingauthority");
+            var $dob = jQuery("#form-field-dob");
+            var $submitBtn = jQuery("#manageprofilebuttonsubmit");
+            jQuery(".m21-avatar").addClass("mb12");
+            jQuery(".form-field__label-optional").hide();
+            var bpNumber = '@Translate.Text("Business Partner Avatar") @Model.SelectedBusinessPartner';
+            var bpName = '@Model.CustomerName';
+            jQuery(".m21-avatar__bp").html(bpNumber);
+            jQuery(".m21-avatar__name").html(bpName);
+            SelectRadioButton('SelectedPODCategory', '@Model.SelectedPODCategory');
+
+            SelectRadioButton('SelectedEquipment', '@Model.SelectedEquipment');
+            SelectRadioButton('SelectedTechnologyRating', '@Model.SelectedTechnologyRating');
+            var IsMyselfPOD = '@Model.IsMyselfPOD';
+
+            if (IsMyselfPOD == "True") {
+                jQuery("#form-field-AccountHolderEmirateID").removeAttr("required");
+                jQuery("#form-field-DeterminationIDCopy").removeAttr("required");
+            }
+
+            var tags = @Html.Raw(Json.Encode(Model.PODTypesList));
+            selectCheckBox('SelectedPODType', tags);
+
+            function SelectRadioButton(name, value) {
+
+                $("input[name='" + name + "'][value='" + value + "']").prop('checked', true);
+                return false; // Returning false would not submit the form
+            }
+            function selectCheckBox(name, arrayValue) {
+                if (arrayValue != null) {
+                    for (var i = 0; i < arrayValue.length; i++) {
+                        if (arrayValue[i].Selected)
+                            $("input[name='" + name + "'][value='" + arrayValue[i].Value + "']").prop('checked', true);
+                    }
+                }
+            }
+
+            jQuery("#form-field-businesspartnerlist").on("change", function () {
+                var selectedId = $(this).val();
+                window.location.href = '@LinkHelper.GetItemUrl(ScPageItemId.CustomerProfilePage)' + '?id=' + selectedId;
+            });
+            jQuery("#form-field-media").on("change", function () {
+                var selectedId = $(this).val();
+                var isOther = false;
+                if (selectedId != null && selectedId != undefined) {
+                    for (i = 0; i < selectedId.length; i++) {
+                        if (selectedId[i] == "14") {
+                            isOther = true;
+                            break;
+                        }
+                        //othermediachannel
+                    }
+                }
+                if (isOther) {
+                    jQuery(".othermediachannel").show();
+                    jQuery("#form-field-othermediachannel").attr("required", true);
+                }
+                else {
+                    jQuery(".othermediachannel").hide();
+                    jQuery("#form-field-othermediachannel").removeAttr("required");
+                    jQuery("#form-field-othermediachannel").val('');
+                }
+            });
+            jQuery(".myselfpodcategory").on("change", function () {
+                var selectedCat = $(this).val();
+                if (selectedCat == "03") {
+                    var txt = '@Translate.Text("cust.prof.thukurcard")';
+                    jQuery("[for='form-field-DeterminationIDCopy']").find("strong").html(txt);
+                }
+                else if (selectedCat == "01") {
+                    var txt = '@Translate.Text("cust.pod.from.ministry")';
+                    jQuery("[for='form-field-DeterminationIDCopy']").find("strong").html(txt);
+                }
+                else {
+                    var txt = '@Translate.Text("cust.pod.from.medicalreport")';
+                    jQuery("[for='form-field-DeterminationIDCopy']").find("strong").html(txt);
+                }
+            });
+            $dob.on("change", function () {
+                checkProfileValidation("P");
+            });
+            $institute.on("change", function () {
+                checkProfileValidation("T");
+            });
+            $name.on('focusout', function () {
+                checkProfileValidation("N");
+            });
+            $idnumberfield.on('focusout', function () {
+                checkProfileValidation("E");
+            });
+            $tradelicense.on('focusout', function () {
+                checkProfileValidation("T");
+            });
+            $passport.on('focusout', function () {
+                checkProfileValidation("P");
+            });
+
+            function checkProfileValidation(iv_type) {
+                var form = jQuery("#manageprofileform");
+                var token = $('input[name="__RequestVerificationToken"]', form).val();
+                var url = "/api/sitecore/Account/CheckProfileValidation";
+
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    data: {
+                        __RequestVerificationToken: token,
+                        businesspartner: '@Model.SelectedBusinessPartner',
+                        ivtype: iv_type,
+                        idnumber: $idnumberfield.val(),
+                        name: $name.val(),
+                        tradelicense: $tradelicense.val(),
+                        passport: $passport.val(),
+                        dob: $dob.val(),
+                        nationality: $nationality,
+                        institute: $institute.val()
+                    },
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                        $submitBtn.attr('disabled', true);
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                    success: function (response) {
+                        if (response != null) {
+                            if (response.errorCode != "000") {
+                                valid = false;
+                                switch (iv_type) {
+                                    case "N":
+                                        errCustomername.html('');
+                                        errCustomername.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                                        jQuery("#form-field-customername").removeClass("parsley-success");
+                                        jQuery("#form-field-customername").addClass("form-field__input--error parsley-error");
+                                        jQuery("#form-field-customername").parent('span').removeClass("form-field__input-wrapper--validated");
+                                        jQuery("#form-field-customername").parent('span').addClass("form-field__input-wrapper--error");
+                                        break;
+                                    case "E":
+                                        errIdNumber.html('');
+                                        errIdNumber.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                                        jQuery("#form-field-emirateid").removeClass("parsley-success");
+                                        jQuery("#form-field-emirateid").addClass("form-field__input--error parsley-error");
+                                        jQuery("#form-field-emirateid").parent('span').removeClass("form-field__input-wrapper--validated");
+                                        jQuery("#form-field-emirateid").parent('span').addClass("form-field__input-wrapper--error");
+                                        break;
+                                    case "P":
+                                        errPassport.html('');
+                                        errPassport.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                                        jQuery("#form-field-passportno").removeClass("parsley-success");
+                                        jQuery("#form-field-passportno").addClass("form-field__input--error parsley-error");
+                                        jQuery("#form-field-passportno").parent('span').removeClass("form-field__input-wrapper--validated");
+                                        jQuery("#form-field-passportno").parent('span').addClass("form-field__input-wrapper--error");
+                                        break;
+                                    case "T":
+                                        errtrandeLicenseNo.html('');
+                                        errtrandeLicenseNo.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                                        jQuery("#form-field-trandeLicenseNo").removeClass("parsley-success");
+                                        jQuery("#form-field-trandeLicenseNo").addClass("form-field__input--error parsley-error");
+                                        jQuery("#form-field-trandeLicenseNo").parent('span').removeClass("form-field__input-wrapper--validated");
+                                        jQuery("#form-field-trandeLicenseNo").parent('span').addClass("form-field__input-wrapper--error");
+                                        break;
+                                    default:
+                                    // code block
+                                }
+
+                            }
+                            else {
+                                switch (iv_type) {
+                                    case "N":
+                                        errCustomername.html('');
+                                        break;
+                                    case "E":
+                                        errIdNumber.html('');
+                                        break;
+                                    case "P":
+                                        errPassport.html('');
+                                        break;
+                                    case "T":
+                                        errtrandeLicenseNo.html('');
+                                        break;
+                                    default:
+                                    // code block
+                                }
+                                valid = true;
+                                $submitBtn.attr('disabled', false);
+                            }
+                        }
+                    }
+                });
+            }
+            var postedPODlist = jQuery('#postedPOD');
+            var podlist = [];
+            function handleProfilePODDeletion(e) {
+                var obj = {};
+                obj.recorddeletionindicator = "X";
+                if (jQuery(e).find(".reside_dp") != null && jQuery(e).find(".reside_dp") != undefined)
+                    obj.contractaccountnumber = jQuery(e).find(".reside_dp").val(); // Account Number
+
+                if (jQuery(e).find(".fam_name") != null && jQuery(e).find(".fam_name") != undefined)
+                    obj.nameoffamilymember = jQuery(e).find(".fam_name").val();// Family member name
+
+                if (jQuery(e).find(".relationship") != null && jQuery(e).find(".relationship") != undefined)
+                    obj.relationship = jQuery(e).find(".relationship").val(); // Relationship
+
+                if (jQuery(this).find(".OtherRelationship") != null && jQuery(this).find(".OtherRelationship") != undefined) {
+                    obj.otherrelationship = jQuery(this).find(".OtherRelationship").val(); // Other Relationship
+                }
+
+                if (jQuery(e).find(".pod_cat") != null && jQuery(e).find(".pod_cat") != undefined) {
+                    obj.podcategory = jQuery(e).find(".pod_cat:checked").val(); // POD category
+                }
+
+                if (jQuery(e).find(".disability_type") != null && jQuery(e).find(".disability_type") != undefined) {
+                    obj.disabilitytype = jQuery(e).find(".disability_type:checked").val(); // Disability Type
+                }
+                if (jQuery(this).find(".otherdisability") != null && jQuery(this).find(".otherdisability") != undefined) {
+                    obj.otherdisease = jQuery(this).find(".otherdisability").val(); // other disability type
+                }
+                if (jQuery(this).find(".othermedicalsituation") != null && jQuery(this).find(".othermedicalsituation") != undefined) {
+                    obj.othermedicaltype = jQuery(this).find(".othermedicalsituation").val(); // other medical types
+                }
+                if (jQuery(e).find(".medicalSituation_type") != null && jQuery(e).find(".medicalSituation_type") != undefined) {
+                    obj.medicalSituationexist = jQuery(e).find(".medicalSituation_type:checked").val(); // MedicalSituation Type
+                }
+
+                if (jQuery(e).find(".medicalEquipment_type") != null && jQuery(e).find(".medicalEquipment_type") != undefined) {
+                    obj.medicalequipmenttype = jQuery(e).find(".medicalEquipment_type:checked").val(); // MedicalEquipment Type
+                }
+
+                if (jQuery(e).find(".pod_num") != null && jQuery(e).find(".pod_num") != undefined)
+                    obj.podidcardnumber = jQuery(e).find(".pod_num").val(); // POD number
+
+                obj.type = "F";
+                podlist.push(obj);
+
+            }
+            function handleProfilePODSelection() {
+                jQuery(".F .j69-customer--details_field").each(function () {
+                    //debugger;
+                    var obj = {};
+
+                    if (jQuery(this).find(".reside_dp") != null && jQuery(this).find(".reside_dp") != undefined)
+                        obj.contractaccountnumber = jQuery(this).find(".reside_dp").val(); // Account Number
+
+                    if (jQuery(this).find(".fam_name") != null && jQuery(this).find(".fam_name") != undefined)
+                        obj.nameoffamilymember = jQuery(this).find(".fam_name").val();// Family member name
+
+                    if (jQuery(this).find(".relationship") != null && jQuery(this).find(".relationship") != undefined)
+                        obj.relationship = jQuery(this).find(".relationship").val(); // Relationship
+
+                    if (jQuery(this).find(".OtherRelationship") != null && jQuery(this).find(".OtherRelationship") != undefined) {
+                        obj.otherrelationship = jQuery(this).find(".OtherRelationship").val(); // Other Relationship
+                    }
+
+                    if (jQuery(this).find(".pod_cat") != null && jQuery(this).find(".pod_cat") != undefined) {
+                        obj.podcategory = jQuery(this).find(".pod_cat:checked").val(); // POD category
+                    }
+
+                    //if (jQuery(this).find(".disability_type") != null && jQuery(this).find(".disability_type") != undefined) {
+                    //    obj.disabilitytype = jQuery(this).find(".disability_type:checked").val(); // Disability Type
+                    //}
+                    if (jQuery(this).find(".disability_type") != null && jQuery(this).find(".disability_type") != undefined) {
+                        $.each(jQuery(this).find(".disability_type:checked"), function () {
+                            if (obj.disabilitytype != undefined)
+                                obj.disabilitytype += ";" + $(this).val();
+                            else
+                                obj.disabilitytype = $(this).val();
+                        });
+                    }
+
+                    if (jQuery(this).find(".otherdisability") != null && jQuery(this).find(".otherdisability") != undefined) {
+                        obj.otherdisease = jQuery(this).find(".otherdisability").val(); // other disability type
+                    }
+
+                    //if (jQuery(this).find(".medicalSituation_type") != null && jQuery(this).find(".medicalSituation_type") != undefined) {
+                    //    obj.medicalSituationexist = jQuery(this).find(".medicalSituation_type:checked").val(); // MedicalSituation Type
+                    //}
+                    if (jQuery(this).find(".medicalSituation_type") != null && jQuery(this).find(".medicalSituation_type") != undefined) {
+                        $.each(jQuery(this).find(".medicalSituation_type:checked"), function () {
+                            if (obj.medicalSituationexist != undefined)
+                                obj.medicalSituationexist += ";" + $(this).val();
+                            else
+                                obj.medicalSituationexist = $(this).val();
+                        });
+                    }
+
+                    if (jQuery(this).find(".othermedicalsituation") != null && jQuery(this).find(".othermedicalsituation") != undefined) {
+                        obj.othermedicaltype = jQuery(this).find(".othermedicalsituation").val(); // other medical type
+                    }
+
+                    if (jQuery(this).find(".medicalEquipment_type") != null && jQuery(this).find(".medicalEquipment_type") != undefined) {
+                        obj.medicalequipmenttype = jQuery(this).find(".medicalEquipment_type:checked").val(); // MedicalEquipment Type
+                    }
+
+                    if (jQuery(this).find(".pod_num") != null && jQuery(this).find(".pod_num") != undefined)
+                        obj.podidcardnumber = jQuery(this).find(".pod_num").val(); // POD number
+
+                    if (jQuery(this).find(".eid_file") != null && jQuery(this).find(".eid_file") != undefined && jQuery(this).find(".eid_file").length > 0) {
+                        // Emirate ID file
+                        //var file = jQuery(this).find(".eid_file").prop('files')[0];
+                        obj.filename1 = jQuery(this).find(".eid_file").attr("name");
+                    }
+
+                    if (jQuery(this).find(".pod_file") != null && jQuery(this).find(".pod_file") != undefined && jQuery(this).find(".pod_file").length > 0) {
+                        //var file = jQuery(this).find(".pod_file").prop('files')[0]; // Determination ID card file
+                        obj.filename2 = jQuery(this).find(".pod_file").attr("name");
+                    }
+
+                    if (jQuery(this).find(".senior_file") != null && jQuery(this).find(".senior_file") != undefined && jQuery(this).find(".senior_file").length > 0) {
+                        //var file = jQuery(this).find(".senior_file").prop('files')[0]; // Determination ID card file
+                        obj.filename3 = jQuery(this).find(".senior_file").attr("name");
+                    }
+
+                    if (jQuery(this).find(".podaction") != null && jQuery(this).find(".podaction") != undefined) {
+                        obj.recorddeletionindicator = jQuery(this).find(".podaction").val();
+                    }
+
+                    //senior_file
+                    obj.type = "F";
+                    podlist.push(obj);
+                });
+                postedPODlist[0].value = JSON.stringify(podlist);
+
+            }
+            jQuery('.m44-bill-selector__deselect').off('click.select').on('click.select', function () {
+                var $this = jQuery(this),
+                    $checkbox = $this.closest('.m39-modal__content').find('.form-field__input--checkbox');
+
+                if (!$this.hasClass('selected')) {
+                    $checkbox.each(function () {
+                        //debugger;
+                        jQuery(this).prop('checked', true);
+                        // console.log(jQuery(this).val());
+                    });
+                    $this.html('@Translate.Text("cust.deselectall")');
+                    $this.addClass('selected');
+                } else {
+                    $checkbox.each(function () {
+                        jQuery(this).prop('checked', false);
+                    });
+                    $this.html('@Translate.Text("cust.selectall")');
+                    $this.removeClass('selected');
+                }
+            });
+            jQuery('#manageprofilebuttonsubmit').on('click', (handlemanageaccountselection));
+            function handlemanageaccountselection(e) {
+                //debugger;
+
+                requirejs(['parsley'], function () {
+                    if (jQuery("#modal_manageprofile") != undefined) {
+                        var errors = 0;
+                        var accArray = [];
+                        e.preventDefault();
+                        e.stopPropagation();
+                        jQuery('#manageprofileform').parsley().validate();
+                        //jQuery('#manageprofileform').find('.form-field__input').each(function () {
+                        if (!jQuery('#manageprofileform').parsley().isValid()) {
+                            errors = + 1;
+                        }
+
+                        try {
+                            jQuery('.j69-customer--details_field').each(function () {
+                                if (jQuery(this).closest('.form-field').css('display') != 'none') {
+                                    var fielderror = 0;
+
+                                    jQuery(this).find('.form-field__input').not('.form-field__input--radio').not('.form-field__input--checkbox').each(function () {
+                                        if (jQuery(this).closest('.form-field').css('display') != 'none') {
+                                            jQuery(this).parsley().validate()
+                                            if (!jQuery(this).parsley().isValid()) {
+                                                errors = + 1;
+                                                fielderror = + 1;
+                                            }
+                                        }
+                                    })
+
+                                    if (fielderror != 0) {
+                                        if (jQuery(this).find('.j69-customer--details_title').hasClass('collapsed')) {
+                                            jQuery(this).find('.j69-customer--details_title').click();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        catch (err) {
+                            jQuery('.j69-customer--details_field').each(function () {
+                                if (jQuery(this).closest('.form-field').css('display') != 'none') {
+                                    var fielderror = 0;
+
+                                    jQuery(this).find('.form-field__input').not('.form-field__input--radio').not('.form-field__input--checkbox').each(function () {
+                                        if (jQuery(this).closest('.form-field').css('display') != 'none') {
+                                            jQuery(this).parsley().validate()
+                                            if (!jQuery(this).parsley().isValid()) {
+                                                errors = + 1;
+                                                fielderror = + 1;
+                                            }
+                                        }
+                                    })
+
+                                    if (fielderror != 0) {
+                                        if (jQuery(this).find('.j69-customer--details_title').hasClass('collapsed')) {
+                                            jQuery(this).find('.j69-customer--details_title').click();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        //});
+
+                        if (errors == 0) {
+                            //form-field-mobilenumber form-field-emailaddress
+                            if ((jQuery("#HiddenMobileNumber").val() != jQuery("#form-field-mobilenumber").val()) || (jQuery("#HiddenEmailAddress").val() != jQuery("#form-field-emailaddress").val())) {
+                                jQuery('#modal_manageprofile').find('.m39-modal__trigger').trigger('click');
+                                jQuery('#skipthisstep').off('click.step').on('click.step', function () {
+                                    //console.log('submit');
+                                    //console.log(accArray);
+                                    handleProfilePODSelection();
+                                    if (accArray.length > 0)
+                                        jQuery('#AccountNumberSelected').val(accArray.join(", "));
+                                    jQuery('#manageprofileform').submit();
+                                    jQuery('#modal_manageprofile').find('.m39-modal__button--close').trigger('click');
+                                });
+                                jQuery('#updateSelectedAccountbutton').off('click.step').on('click.step', function () {
+                                    var checkbxs = jQuery('.m44-bill-selector-list-placeholder').find('.form-field__input'),
+                                        checked = 0;
+
+                                    accArray = [];
+                                    checkbxs.each(function () {
+                                        if (jQuery(this).prop('checked')) {
+                                            checked = + 1;
+                                            accArray.push(jQuery(this).val())
+                                        }
+                                        jQuery(this).on('click', function () {
+                                            if (jQuery(this).prop('checked')) {
+                                                jQuery('#accselectonemsg').hide();
+                                            }
+                                        });
+                                    });
+
+                                    if (checked > 0) {
+                                        jQuery('#skipthisstep').trigger('click')
+                                    } else {
+                                        jQuery('#accselectonemsg').show();
+                                    }
+                                });
+                            } else {
+                                handleProfilePODSelection();
+                                if (accArray.length > 0)
+                                    jQuery('#AccountNumberSelected').val(accArray.join(", "));
+                                jQuery('#manageprofileform').submit();
+                                return true;
+                            }
+
+
+                        }
+
+                    }
+                    else {
+                        jQuery('#manageprofileform').submit();
+                        return true;
+                    }
+
+                });
+                return false;
+            }
+
+            jQuery('.j69-customer--details_field').each(function () {
+                var tthis = this,
+                    $remove = jQuery(this).prev('.j69-customer--details_field--remove');
+
+                $remove.off('click').on('click', function () {
+                    handleProfilePODDeletion(tthis);
+                    jQuery(tthis).remove();//.addClass("hidden");//remove();
+                    jQuery(this).remove();//remove();
+                    jQuery(window).trigger('j69-customer_reinit');
+                });
+                jQuery(window).trigger('j69-customer_reinit');
+            });
+            jQuery('.j69-customer--add_fam').off('click.delete').on('click.delete', function () {
+                setTimeout(function () {
+                    jQuery('.j69-customer--details_field').each(function () {
+                        var tthis = this,
+                            $remove = jQuery(this).prev('.j69-customer--details_field--remove');
+
+                        $remove.off('click').on('click', function () {
+                            handleProfilePODDeletion(tthis);
+                            jQuery(tthis).remove(); //.addClass("hidden");//remove();
+                            jQuery(this).remove(); //remove();
+                            jQuery(window).trigger('j69-customer_reinit');
+                        });
+                        jQuery(window).trigger('j69-customer_reinit');
+                    });
+
+
+                    if (jQuery('#form-field-radio_2_3').length == 0) {
+                        jQuery('.form-field__label.target03').hide();
+                        jQuery('.form-field__label.target03').closest('.form-field__uploader-details').find('.form-field__label:first-child').show();
+                    }
+                }, 250)
+            });
+
+            // Update email address
+            var selected = null;
+            jQuery("#lnkUpdateEmail").on("click", function () {
+                selected = "email";
+                CrudOtp(GetReadRequestData(selected), function (rdata) {
+                    var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                    var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                    $(".m66-preloader-fullpage").fadeOut();
+                    $(".otp_inputdisplay_screen").hide();
+                    $(".otp--modalcontent-text").hide();
+                    $(".otp-title").html(title);
+
+                    if (rdata.status) {
+                        $(".otp_chatcheck").show();
+                        $(".otp_mailcheck").hide();
+                        $(".otp-message").html(msg.replace("{0}", '@Model.MobileNumber.AddMobileNumberZeroPrefix()'));
+                        $("#OtpRequestId").val(rdata.data.otprequestid);
+                        $(".otp_input_screen").show();
+                        $(".otp_inputdisplay_screen_error").hide();
+                        $(".otp_inputdisplay_screen_success").show();
+                        
+                        resetTimer();
+                        $(".optpopuptrigger").trigger('click');
+                    }
+                    else {
+                        $(".otp-title").html('@Translate.Text("Update Email ID")');
+                        $(".optpopuptrigger").trigger('click');
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        $(".otp_inputdisplay_screen_success").hide();
+                        $(".otp--modalcontent-text").show();
+                        if (jQuery("#form-field-mobilenumber").val() != "")
+                            $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                    }
+                });
+            });
+            // Update Mobile Number
+            jQuery("#lnkUpdateMobile").on("click", function () {
+                selected = "mobile";
+                CrudOtp(GetReadRequestData(selected), function (rdata) {
+                    var title = '@Html.Raw(Translate.Text("cust.email.otp.screen.title"))';
+                    var msg = '@Html.Raw(Translate.Text("cust.email.otp.screen.msg"))';
+                    $(".m66-preloader-fullpage").fadeOut();
+                    $(".otp_inputdisplay_screen").hide();
+                    $(".otp--modalcontent-text").hide();
+                    $(".otp-title").html(title);
+
+                    if (rdata.status) {
+                        $(".otp_mailcheck").show();
+                        $(".otp_chatcheck").hide();
+                        $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-emailaddress").val()));
+                        $("#OtpRequestId").val(rdata.data.otprequestid);
+                        $(".otp_input_screen").show();
+                        $(".otp_inputdisplay_screen_error").hide();
+                        $(".otp_inputdisplay_screen_success").show();
+                        
+                        resetTimer();
+                        $(".optpopuptrigger").trigger('click');
+                    }
+                    else {
+                        $(".otp-title").html('@Translate.Text("Update Mobile Number")');
+                        $(".optpopuptrigger").trigger('click');
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        $(".otp_inputdisplay_screen_success").hide();
+                        $(".otp--modalcontent-text").show();
+                        if (jQuery("#form-field-emailaddress").val() != "")
+                            $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                    }
+                });
+            });
+            setTimeout(function () {
+                $(".form-field__input--otp").on('keyup blur', function () {
+                    var otp = jQuery(".form-field__input--otp_main").val();
+                    if (otp.length >= 6) {
+                        $(".form-field__input--otp").val('');
+                        CrudOtp(fnVerifyOtpData(selected, otp), function (rdata) {
+                            $(".m66-preloader-fullpage").fadeOut();
+                            if (rdata.status) {
+                                $(".otp-message").removeClass("red");
+                                $(".otp_input_screen").hide();
+                                $(".m39-modal__button--close").trigger('click');
+                                jQuery("#RequestType").val(selected);
+                                if (selected == "mobile") {
+                                    $("#form-field-mobilenumber").attr("readonly", false);
+                                    $("#form-field-mobilenumber").focus().select();
+                                }
+                                else {
+                                    $("#form-field-emailaddress").attr("readonly", false);
+                                    $("#form-field-emailaddress").focus().select();
+                                    jQuery("#lnkUpdateMobile").hide();
+                                }
+                                jQuery("#lnkUpdateEmail").hide();
+                                jQuery("#lnkUpdateMobile").hide();
+                            }
+                            else {
+                                $(".optpopuptrigger").trigger('click');
+                                $(".otp_input_screen").show();
+                                $(".otp_inputdisplay_screen_error").show();
+                                $(".otp_inputdisplay_screen_success").hide();
+                                $(".otp_inputdisplay_screen_error").html(rdata.desc);
+
+                                if (selected == "mobile")
+                                    $("#form-field-emailaddress").attr("readonly", true);
+                                else
+                                    $("#form-field-mobilenumber").attr("readonly", true);
+                            }
+                        });
+                    }
+                });
+            }, 500);
+           
+            function fnVerifyOtpData(selected, otp) {
+                var requestData = GetReadRequestData();
+                requestData.type = selected;
+                requestData.Otp = otp;
+                requestData.bpno = jQuery("#form-field-businesspartnerlist").val();
+                requestData.mode = "V";
+                requestData.reqId = jQuery("#OtpRequestId").val()
+                return requestData;
+            }
+            function fnSendOtpRequestData(selected) {
+                var requestData = GetReadRequestData();
+                requestData.type = selected;
+                requestData.bpno = jQuery("#form-field-businesspartnerlist").val();
+                requestData.mode = "S";
+                return requestData;
+            }
+            function GetReadRequestData(type) {
+                var mobile = null;
+                var email = null;
+                var bpno = jQuery("#form-field-businesspartnerlist").val();
+                var type = type;
+                var otp = null;
+                var prtype = "CUPD";
+                var requestData = {
+                    mobile: mobile,
+                    email: email,
+                    bpno: bpno,
+                    type: type,
+                    Otp: otp,
+                    prtype: prtype
+                }
+                requestData.mode = "S";
+                return requestData;
+            }
+            AddCustomForgeryToken = function (data, elementId) {
+                data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                return data;
+            };
+            function CrudOtp(requestData, onSuccess) {
+                var _postUrl = '@Url.Content("~/api/sitecore/Account/CrudOtp")';
+                requestData = AddCustomForgeryToken(requestData, "#otpform");
+                $.ajax({
+                    url: _postUrl,
+                    type: 'POST',
+                    data: requestData,
+                    beforeSend: function () {
+                        $(".m39-modal__button--close").trigger('click');
+                        $(".m66-preloader-fullpage").show();
+                        $(".otp_inputdisplay_screen").hide();
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen_error").hide();
+                        $(".otp_inputdisplay_screen_success").hide();
+
+                    },
+                    success: onSuccess,
+                    error: function (er) {
+                        console.log(er)
+                    },
+                    complete: function (x) {
+                        $(".m66-preloader-fullpage").fadeOut()
+                        console.log(x)
+                    }
+                })
+            }
+            jQuery("#timerbutton").on("click", function () {
+                if (!jQuery("#timerbutton").hasClass("timer-button--outline")) {
+                    CrudOtp(fnSendOtpRequestData(selected), function (rdata) {
+                        $(".m66-preloader-fullpage").fadeOut();
+                        $(".otp_inputdisplay_screen").hide();
+                        if (selected == 'mobile') {
+                            var title = '@Html.Raw(Translate.Text("cust.email.otp.screen.title"))';
+                            var msg = '@Html.Raw(Translate.Text("cust.email.otp.screen.msg"))';
+                            $(".otp_mailcheck").show();
+                            $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-emailaddress").val()));
+                            $(".otp-title").html(title);
+                        }
+                        else {
+                            var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                            var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                            $(".otp-message").html(msg.replace("{0}", '@Model.MobileNumber.AddMobileNumberZeroPrefix()'));
+                            $(".otp-title").html(title);
+                        }
+                        if (rdata.status) {
+                            $("#OtpRequestId").val(rdata.data.otprequestid);
+                            $(".otp-message").removeClass("red");
+                            $(".input-otp-textbox").show();
+                            
+                            resetTimer();
+
+                        } else {
+                            $(".otp-message").addClass("red");
+                            $(".input-otp-textbox").hide();
+                            $(".otp-message").html(rdata.desc);
+                        }
+
+                        $(".otp_input_screen").show();
+                        $(".optpopuptrigger").trigger('click');
+                    });
+                }
+            });
+            //$('#timerbutton').on('DOMNodeInserted', function () {
+            //    if ($(this).hasClass('button--primary')) {
+            //        $(this).closest('form').find('.form-field__input--otp').attr('disabled', true);
+            //        $(this).closest('form').find('.form-field--otp').addClass('form-field-disabled');
+            //    }
+            //});
+            //jQuery(".m39-modal__button--close").on("click", function () {
+            //    jQuery('#timerbutton').addClass('stopped');
+            //});
+            function resetTimer() {
+                $("#otpform").find('.form-field__input--otp').attr('disabled', false);
+                $("#otpform").find('.form-field--otp').removeClass('form-field-disabled');
+                
+                setTimeout(function () {
+                    jQuery('.form-field--otp').find('.form-field__input--otp')[0].focus()
+                }, 500);
+                setTimeout(function () {
+                    jQuery('.button--timer').trigger('start.timer');
+                }, 500);
+                
+            }
+        });
+        </script>
+    }
+    else if (ViewBag.UCI == "success" && Model.UpdateCustomerInfoSuccessModel != null)
+    {
+        var _data = Model.UpdateCustomerInfoSuccessModel;
+        @Html.Partial("~/Views/Feature/Account/Account/_UpdateCustomerInfoSuccess.cshtml", _data)
+    }
+    @if (Model.Accounts != null && Model.Accounts.Length > 0)
+    {
+        @Html.Partial("~/Views/Feature/Account/Account/v1/_ModalAccounts.cshtml", new DEWAXP.Foundation.Content.Models.AccountModel.ModalaccountList { Accounts = Model.Accounts, BusinessPartnerNumber = Model.BusinessPartnerNumber })
+
+    }
+
+    <script src="~/scripts/External/nml/form-submit-validate.js"></script>
+</div>

@@ -1,0 +1,85 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content 
+@model DEWAXP.Foundation.Content.Models.Payment.PaymentCompletionModel
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+<!--_ClearanceCertificateConfirmation.cshtml-->
+<div class="grid">
+
+    @Html.Sitecore().Placeholder("j26/page-title")
+
+    @if (Model.Succeeded)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                    <div class="m40-status-message__title icon--success">@Translate.Text("Payment completed")</div>
+                    <div class="m40-status-message__referance">@Translate.Text("Reference Number"): <strong>@Model.DewaTransactionId.ToString() </strong></div>
+                    <div class="m40-status-message__text">@Translate.Text("CC.Success.Message.DEWA.Customer")</div>
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+
+                <div class="m42-keyvalue success-page">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("payment date and time label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+
+                        @*<dt class="m42-keyvalue__key--stacked">@Translate.Text("receipt id label")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.ReceiptIdentifiers</dd>*@
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("deg transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.BusinessPartners))
+                        {
+                            <dt class="m42-keyvalue__key--stacked">@Translate.Text("business partner label")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.BusinessPartners</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.ContractAccountNumber))
+                        {
+                            <dt class="m42-keyvalue__key--stacked">@Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.ContractAccountNumber</dd>
+                        }
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Model.Total+ Model.SuqiaAmount)</dd>
+                    </dl>
+                </div>
+
+            </div>
+        </div>
+    }
+
+    else
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    }
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+    </div>
+    <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+        @Html.Sitecore().Placeholder("content-transreciept-placeholder")
+        <div class="button-container--single">
+            <a href="/" class="button button--primary button--next" role="button">@Translate.Text(DictionaryKeys.Global.Home)</a>
+        </div>
+    </div>
+</div>
+</div>
+<!--_ClearanceCertificateConfirmation.cshtml-->

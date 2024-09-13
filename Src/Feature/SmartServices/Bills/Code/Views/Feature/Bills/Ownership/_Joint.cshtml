@@ -1,0 +1,1276 @@
+﻿@using Sitecore.Globalization
+@model DEWAXP.Feature.Bills.Models.Premise.JointOwnerModel
+@*<style>
+        .m31-search {
+            display: none;
+        }
+    </style>*@
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="m26-page-title title_message">
+                <h1 class="text__page-title">
+                    @Translate.Text("JO.Request")
+                </h1>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="j170-joint-owner-request" data-journey="j170-joint-owner-request">
+                <div class="j169-cs--container">
+                    <div class="j169-cs--section">
+                        <div class="grid__column--form">
+
+                            @if (Model.IsLoginUser)
+                            {
+                                <div class="form-field" style="margin-bottom:15px;">
+                                    @Html.Sitecore().Placeholder("j169-customer-support-account")
+                                </div>
+                            }
+
+                            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "form-joint-owner", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+                            {
+                                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                                @Html.Sitecore().FormHandler()
+                                @Html.AntiForgeryToken()
+                                <div class="form-field form-field-multiform" data-list="@(!ViewData.ModelState.IsValid && !string.IsNullOrEmpty(Model.AccountList) ? Json.Encode(Model.AccountList.Split(',').ToList<string>()) : "")">
+                                    <fieldset class="fieldset">
+                                        <legend class="form-field__label">
+                                            @Translate.Text("JO.PremiseNumberQuestion")
+                                        </legend>
+                                        <p class="form-field__radio ">
+                                            <label>
+                                                <input class="form-field__input form-field__input--radio fieldset_morethan_select"
+                                                       id="form-field-radio_1_1" name="premise_option" type="radio"
+                                                       value="1" aria-describedby="description-for-iq6uebejk"
+                                                       data-parsley-errors-container="#description-for-iq6uebejk"
+                                                       checked="" data-parsley-multiple="radios_group1" data-parsley-id="35">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    @Translate.Text("JO.Yes")
+                                                </span>
+                                            </label>
+                                        </p>
+
+                                        <p class="form-field__radio ">
+                                            <label>
+                                                <input class="form-field__input form-field__input--radio fieldset_lessthan_select"
+                                                       id="form-field-radio_1_2" name="premise_option" type="radio"
+                                                       value="2" aria-describedby="description-for-iq6uebejk"
+                                                       data-parsley-errors-container="#description-for-iq6uebejk"
+                                                       data-parsley-multiple="radios_group1">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    @Translate.Text("JO.No")
+                                                </span>
+                                            </label>
+                                        </p>
+                                        <div id="description-for-iq6uebejk" class="form-field__messages"></div>
+                                        <input type="hidden" value="" id="hd_AccSelectection" name="TypeOfAccount" />
+                                        <input type="hidden" value="" id="hd_AccountList" name="AccountList" />
+                                    </fieldset>
+
+                                    <fieldset class="fieldset  fieldset_lessthan" style="display:none ;">
+                                        <label for="form-field-7n19v5gdv22" class="form-field__label">
+                                            @Translate.Text("JO.PremiseNumber")
+                                        </label>
+                                        <div class="form-field__input-wrapper-add">
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text"
+                                                       id="form-field-premiseNumber" name="text" type="number"
+                                                       placeholder="@Translate.Text("JO.PremiseNumber")"
+                                                       required
+                                                       data-parsley-premise_number=""
+                                                       data-parsley-error-message="@Translate.Text("JO.PremiseNumberValidate")"
+                                                       aria-describedby="description-for-premiseNumber"
+                                                       data-parsley-errors-container="#description-for-premiseNumber"
+                                                       data-parsley-required-message="@Translate.Text("JO.PremiseNumberRequired")" />
+                                            </span>
+                                            <div data-max="10" data-max-message="@Translate.Text("JO.MaximumNumberReached")" class="wrapper-add_link icon-wrapper-add_link"></div>
+                                        </div>
+                                        <div id="description-for-premiseNumber" class="form-field__messages"></div>
+                                        <ul id="premiseAccountList" class="premiseList" data-remove-label="@Translate.Text("JO.Remove")">
+                                        </ul>
+                                    </fieldset>
+                                    <fieldset class="fieldset  fieldset_morethan">
+                                        <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                            <div class="form-field__input-wrapper">
+                                                <div class="form-field__uploader-details">
+                                                    <div>
+                                                        <label>
+                                                            <input class="form-field__input form-field__input--upload form-field__input--upload-owner-list"
+                                                                   id="ContractAccountfile" name="ContractAccountfile" type="file"
+                                                                   aria-describedby="description-for-ContractAccountfile"
+                                                                   data-parsley-errors-container="#description-for-ContractAccountfile"
+                                                                   data-uploader-field="ContractAccountfile"
+                                                                   accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                                                   data-accepts='"xlsx","XLSX"' data-size="2048000">
+                                                            <span class="button button--upload--variant focus-enabled"
+                                                                  data-uploader-button="upload-choose"> @Translate.Text("JO.Attachment")</span>
+                                                            </label>
+                                                        </div>
+                                                        <p class="form-field__input--upload-format-error-message"
+                                                           data-uploader-format-error="error-message">
+                                                            @Translate.Text("JO.UploadFormat")
+                                                        </p>
+                                                        <p class="form-field__input--upload-size-error-message"
+                                                           data-uploader-size-error="error-message">
+                                                            @Translate.Text("JO.UploadSize")
+                                                        </p>
+                                                        <div class="form-field--upload_new-details">
+                                                            <div class="form-field__input--upload-filetype"
+                                                                 data-uploader-filetype="ContractAccountfile">
+
+                                                            </div>
+                                                            <div>
+                                                                <p class="form-field__input--upload-filename"
+                                                                   data-uploader-filename="ContractAccountfile"></p>
+                                                                <div class="form-field__input--upload-filesize hidden"
+                                                                     data-uploader-filesize="ContractAccountfile">
+                                                                    <span data-totalsize="ContractAccountfile"></span>@Translate.Text("JO.kB")
+                                                                </div>
+                                                            </div>
+                                                            <button class="button--upload_remove hidden"
+                                                                    data-uploader-remove="ContractAccountfile">
+                                                                <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="description-for-ContractAccountfile" class="form-field__messages">
+                                                    <p class="form-field__description">
+                                                        @Translate.Text("JO.SupportedFileExcel")
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <input type="hidden" name="Contractaccount" id="Contractaccount" value="@Model.Contractaccount" />
+                                    </div>
+
+                                    <div class="form-field form-field--text">
+                                        <label for="form-field-Mobilenumber" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("JO.MobileNumber")
+                                        </label>
+                                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                                   id="form-field-Mobilenumber" name="Mobilenumber" type="tel"
+                                                   value="@Model.Mobilenumber"
+                                                   readonly
+                                                   placeholder="Mobile number" aria-describedby="description-for-Mobilenumber"
+                                                   data-parsley-errors-container="#description-for-Mobilenumber"
+                                                   data-parsley-mobile_number=""
+                                                   data-parsley-mobile_number-message="@Translate.Text("JO.ValidUAENumber")"
+                                                   data-parsley-trigger="focusout" data-parsley-id="8">
+                                        </span>
+                                        <div id="description-for-Mobilenumber" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--text">
+                                        <label for="form-field-Email" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("JO.EmailAddress")
+                                        </label>
+                                        <span class="form-field__input-wrapper">
+                                            <input class="form-field__input form-field__input--text"
+                                                   id="form-field-Email" name="Email" type="email"
+                                                   value="@Model.Email"
+                                                   readonly
+                                                   placeholder="Email Address" aria-describedby="description-for-Email"
+                                                   data-parsley-errors-container="#description-for-Email"
+                                                   data-parsley-trigger="focusout" data-parsley-id="6">
+                                        </span>
+                                        <div id="description-for-Email" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--select form-field--6">
+                                        <label for="form-field-Region" class="form-field__label">
+                                            @Translate.Text("JO.Region")
+                                        </label>
+                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                            @Html.DropDownListFor(x => x.Region, (IEnumerable<SelectListItem>)ViewBag.Regions,
+                                                                    Sitecore.Globalization.Translate.Text("JO.Region"),
+                                                                    new
+                                                                    {
+                                                                        @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                                        @id = "Region",
+                                                                        @name = "Region",
+                                                                        @aria_describedby = "description-for-Region",
+                                                                        @required = "",
+                                                                        @data_parsley_error_message = @Translate.Text("JO.RegionRequired"),
+                                                                        @data_parsley_errors_container = "#description-for-Region"
+                                                                    })
+                                        </span>
+                                        <div id="description-for-Region" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--6">
+                                        <label for="form-field-Pobox" class="form-field__label">
+                                            @Translate.Text("JO.POBOX")
+                                        </label>
+                                        <span class="form-field__input-wrapper">
+                                            <input class="form-field__input form-field__input--text"
+                                                   id="form-field-Pobox" name="Pobox" type="number" placeholder="@Translate.Text("JO.POBOX")"
+                                                   aria-describedby="description-for-Pobox"
+                                                   value="@Model.Pobox"
+                                                   data-parsley-errors-container="#description-for-Pobox" required
+                                                   data-parsley-required-message="@Translate.Text("JO.POBOXRequired")" />
+                                        </span>
+                                        <div id="description-for-Pobox" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--select">
+                                        <label for="form-field-PropertyType" class="form-field__label">
+                                            @Translate.Text("JO.PropertyType")
+                                        </label>
+                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                                    id="form-field-PropertyType" name="PropertyType" value="@Model.PropertyType"
+                                                    aria-describedby="description-for-PropertyType"
+                                                    required
+                                                    data-parsley-required-message="@Translate.Text("JO.PropertyTypeRequired")"
+                                                    data-parsley-errors-container="#description-for-PropertyType">
+                                                <option value="" disabled="" selected="">@Translate.Text("JO.SelectPropertyType")</option>
+                                                <option value="1">@Translate.Text("JO.PurchaseAgreement")</option>
+                                                <option value="2">@Translate.Text("JO.TitleAgreement")</option>
+                                            </select>
+                                        </span>
+                                        <div id="description-for-PropertyType" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__uploader-details">
+                                                <div>
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--upload"
+                                                               id="form-field-z07ba9pxj2" name="PurchaseAgreementFile" type="file"
+                                                               aria-describedby="description-for-z07ba9pxj2"
+                                                               data-parsley-errors-container="#description-for-z07ba9pxj2"
+                                                               required data-parsley-required-message="@Translate.Text("JO.UploadPurchaseRequired")"
+                                                               data-uploader-field="z07ba9pxj2"
+                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                               data-size="2048000">
+                                                        <span class="button button--upload--variant focus-enabled"
+                                                              data-uploader-button="upload-choose">
+                                                            @Translate.Text("JO.UploadPurchase")
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message"
+                                                   data-uploader-format-error="error-message">
+                                                    @Translate.Text("JO.UploadFormat")
+                                                </p>
+                                                <p class="form-field__input--upload-size-error-message"
+                                                   data-uploader-size-error="error-message">
+                                                    @Translate.Text("JO.UploadSize")
+                                                </p>
+                                                <div class="form-field--upload_new-details">
+                                                    <div class="form-field__input--upload-filetype"
+                                                         data-uploader-filetype="z07ba9pxj2">
+
+                                                    </div>
+                                                    <div>
+                                                        <p class="form-field__input--upload-filename"
+                                                           data-uploader-filename="z07ba9pxj2"></p>
+                                                        <div class="form-field__input--upload-filesize hidden"
+                                                             data-uploader-filesize="z07ba9pxj2">
+                                                            <span data-totalsize="z07ba9pxj2"></span>@Translate.Text("JO.kB")
+                                                        </div>
+                                                    </div>
+                                                    <button class="button--upload_remove hidden"
+                                                            data-uploader-remove="z07ba9pxj2">
+                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="description-for-z07ba9pxj2" class="form-field__messages">
+                                            <p class="form-field__description">
+                                                @Translate.Text("JO.SupportedFile")
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="owner-fieldset" data-owner='@(!ViewData.ModelState.IsValid ? (Json.Encode(Model.Ownerlist)) : "")'>
+                                        <div class="owner-fieldset_title">@Translate.Text("JO.OwnerDetails")</div>
+                                        <div class="owner-fieldset_content" data-max="10">
+                                            <div class="owner-content_section">
+                                                <div class="owner-content_section-title">
+                                                    @Translate.Text("JO.Owner")<span class="numOwner">1</span>
+                                                </div>
+                                                <div class="form-field form-field--select">
+                                                    <label for="form-field-xkaujaalv" class="form-field__label">
+                                                        @Translate.Text("JO.IdentificationDoc")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        <select class="form-field__input form-field__input--select form-field__input--select-full identificationselection"
+                                                                id="form-field-xkaujaalv" name="Ownerlist[0].Type"
+                                                                aria-describedby="description-for-xkaujaalv"
+                                                                data-parsley-errors-container="#description-for-xkaujaalv">
+                                                            <option value="0" selected data-val="passportdetails">
+                                                                @Translate.Text("JO.Passport")
+                                                            </option>
+                                                            <option value="1" data-val="tlicensedetails">
+                                                                @Translate.Text("JO.TradeLicense")
+                                                            </option>
+                                                            <option value="2" data-val="emiratesid">
+                                                                @Translate.Text("JO.EmiratesId")
+                                                            </option>
+                                                        </select>
+                                                    </span>
+                                                    <div id="description-for-xkaujaalv" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection passportdetails">
+                                                    <div class="form-field">
+                                                        <label for="form-field-7n19v5gdv44" class="form-field__label">
+                                                            @Translate.Text("JO.PassportNumber")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-7n19v5gdv44" name="Ownerlist[0].PassportNumber" type="text"
+                                                                   placeholder=" @Translate.Text("JO.PassportNumber")"
+                                                                   aria-describedby="description-for-7n19v5gdv44"
+                                                                   data-parsley-errors-container="#description-for-7n19v5gdv44"
+                                                                   required
+                                                                   data-parsley-required-message="@Translate.Text("JO.PassPortNumberRequired")" />
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv44" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj3" name="Ownerlist[0].PassportFiledata"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj3"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj3"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.PassportRequired")"
+                                                                               data-uploader-field="z07ba9pxj3"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.PassportCopy")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj3">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj3"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj3">
+                                                                            <span data-totalsize="z07ba9pxj3"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj3">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj3" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--select">
+                                                        <label for="form-field-xkaujaalv" class="form-field__label">
+                                                            @Translate.Text("JO.Nationality")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                                                    id="form-field-xkaujaalv" name="Ownerlist[0].Nationality"
+                                                                    aria-describedby="description-for-xkaujaalv"
+                                                                    data-parsley-errors-container="#description-for-xkaujaalv">
+                                                                <option value="0" selected>@Translate.Text("JO.SelectNationality")</option>
+                                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Nationalities)
+                                                                {
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            </select>
+                                                        </span>
+                                                        <div id="description-for-xkaujaalv" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection tlicensedetails" style="display:none;">
+                                                    <div class="form-field">
+                                                        <label for="form-field-7n19v5gdv55" class="form-field__label">
+                                                            @Translate.Text("JO.TradeLicense")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-7n19v5gdv55" name="Ownerlist[0].TradeLicense" type="text"
+                                                                   placeholder="@Translate.Text("JO.TradeLicense")"
+                                                                   aria-describedby="description-for-7n19v5gdv55"
+                                                                   data-parsley-errors-container="#description-for-7n19v5gdv55"
+                                                                   required
+                                                                   data-parsley-required-message="@Translate.Text("JO.TradeLicenseRequired")" />
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv55" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--select">
+                                                        <label for="form-field-7n19v5gdv66" class="form-field__label">
+                                                            @Translate.Text("JO.IssuingAuthority")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                                                    id="form-field-7n19v5gdv66" name="Ownerlist[0].Issuingauthority"
+                                                                    aria-describedby="description-for-7n19v5gdv66"
+                                                                    required
+                                                                    data-parsley-errors-container="#description-for-7n19v5gdv66"
+                                                                    data-parsley-required-message="@Translate.Text("JO.AuthorityRequired")">
+                                                                <option value="0" selected>@Translate.Text("JO.SelectIssuingAuthority")</option>
+                                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.IssuingAuthority)
+                                                                {
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            </select>
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv66" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj4" name="Ownerlist[0].TradeFiledata"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj4"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj4"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.UploadTradeLicenseRequired")"
+                                                                               data-uploader-field="z07ba9pxj4"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.UploadTradeLicense")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj4">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj4"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj4">
+                                                                            <span data-totalsize="z07ba9pxj4"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj4">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj4" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection emiratesid" style="display:none;">
+                                                    <div class="form-field form-field--text">
+                                                        <label for="form-field-EmiratesID" class="form-field__label">
+                                                            @Translate.Text("JO.EmiratesId")
+                                                            <span class="form-field__label-required aria-only">@Translate.Text("JO.EmiratesIdRequired")</span>
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input value=""
+                                                                   class="form-field__input form-field__input--text form-field__binding"
+                                                                   id="form-field-EmiratesID"
+                                                                   name="Ownerlist[0].EmiratesIdNumber"
+                                                                   type="text"
+                                                                   required=""
+                                                                   data-parsley-required-message="@Translate.Text("JO.EmiratesIdRequireMessage")"
+                                                                   placeholder="@Translate.Text("JO.EmiratesId")"
+                                                                   aria-describedby="description-for-EmiratesID"
+                                                                   data-parsley-errors-container="#description-for-EmiratesID"
+                                                                   maxlength="15" data-parsley-maxlength="15">
+                                                        </span>
+                                                        <div id="description-for-EmiratesID" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj3" name="Ownerlist[0].EmiratesIdDataFile"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj3"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj3"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.EmiratesIdDataFileRequired")"
+                                                                               data-uploader-field="z07ba9pxj3"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.EmiratesCopy")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj3">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj3"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj3">
+                                                                            <span data-totalsize="z07ba9pxj3"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj3">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj3" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                            <div class="owner-content_section">
+                                                <div class="owner-content_section-title">
+                                                    @Translate.Text("JO.Owner") <span class="numOwner">2</span>
+                                                </div>
+                                                <div class="form-field form-field--select">
+                                                    <label for="form-field-xkaujaalv" class="form-field__label">
+                                                        @Translate.Text("JO.IdentificationDoc")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        <select class="form-field__input form-field__input--select form-field__input--select-full identificationselection"
+                                                                id="form-field-xkaujaalv" name="Ownerlist[1].Type"
+                                                                aria-describedby="description-for-xkaujaalv"
+                                                                data-parsley-errors-container="#description-for-xkaujaalv">
+                                                            <option value="0" selected data-val="passportdetails">
+                                                                @Translate.Text("JO.Passport")
+                                                            </option>
+                                                            <option value="1" data-val="tlicensedetails">
+                                                                @Translate.Text("JO.TradeLicense")
+                                                            </option>
+                                                            <option value="2" data-val="emiratesid">
+                                                                @Translate.Text("JO.EmiratesId")
+                                                            </option>
+                                                        </select>
+                                                    </span>
+                                                    <div id="description-for-xkaujaalv" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection passportdetails">
+                                                    <div class="form-field">
+                                                        <label for="form-field-7n19v5gdv77" class="form-field__label">
+                                                            @Translate.Text("JO.PassportNumber")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-7n19v5gdv77" name="Ownerlist[1].PassportNumber" type="text"
+                                                                   placeholder="@Translate.Text("JO.PassportNumber")"
+                                                                   aria-describedby="description-for-7n19v5gdv77"
+                                                                   data-parsley-errors-container="#description-for-7n19v5gdv77"
+                                                                   required
+                                                                   data-parsley-required-message="@Translate.Text("JO.PassPortNumberRequired")" />
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv77" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj5" name="Ownerlist[1].PassportFiledata"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj5"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj5"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.PassportRequired")"
+                                                                               data-uploader-field="z07ba9pxj5"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.PassportCopy")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj5">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj5"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj5">
+                                                                            <span data-totalsize="z07ba9pxj5"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj5">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj5" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--select">
+                                                        <label for="form-field-xkaujaalv" class="form-field__label">
+                                                            @Translate.Text("JO.Nationality")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                                                    id="form-field-xkaujaalv" name="Ownerlist[1].Nationality"
+                                                                    aria-describedby="description-for-xkaujaalv"
+                                                                    data-parsley-errors-container="#description-for-xkaujaalv">
+                                                                <option value="0" selected>@Translate.Text("JO.SelectNationality")</option>
+                                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Nationalities)
+                                                                {
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            </select>
+                                                        </span>
+                                                        <div id="description-for-xkaujaalv" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection tlicensedetails" style="display:none;">
+                                                    <div class="form-field">
+                                                        <label for="form-field-7n19v5gdv88" class="form-field__label">
+                                                            @Translate.Text("JO.TradeLicense")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-7n19v5gdv88" name="Ownerlist[1].TradeLicense" type="text"
+                                                                   placeholder=" @Translate.Text("JO.TradeLicense")"
+                                                                   aria-describedby="description-for-7n19v5gdv88"
+                                                                   data-parsley-errors-container="#description-for-7n19v5gdv88"
+                                                                   required
+                                                                   data-parsley-required-message="@Translate.Text("JO.TradeLicenseRequired")" />
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv88" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--select">
+                                                        <label for="form-field-7n19v5gdv99" class="form-field__label">
+                                                            @Translate.Text("JO.IssuingAuthority")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                                                    id="form-field-7n19v5gdv99" name="Ownerlist[1].Issuingauthority"
+                                                                    aria-describedby="description-for-7n19v5gdv99"
+                                                                    required
+                                                                    data-parsley-errors-container="#description-for-7n19v5gdv99"
+                                                                    data-parsley-required-message="@Translate.Text("JO.AuthorityRequired")">
+                                                                <option value="0" selected>@Translate.Text("JO.SelectIssuingAuthority")</option>
+                                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.IssuingAuthority)
+                                                                {
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            </select>
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv99" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj6" name="Ownerlist[1].TradeFiledata"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj6"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj6"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.UploadTradeLicenseRequired")"
+                                                                               data-uploader-field="z07ba9pxj6"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.UploadTradeLicense")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj6">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj6"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj6">
+                                                                            <span data-totalsize="z07ba9pxj6"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj6">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj6" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection emiratesid" style="display:none;">
+                                                    <div class="form-field form-field--text">
+                                                        <label for="form-field-EmiratesID" class="form-field__label">
+                                                            @Translate.Text("JO.EmiratesId")
+                                                            <span class="form-field__label-required aria-only">@Translate.Text("JO.EmiratesIdRequired")</span>
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input value=""
+                                                                   class="form-field__input form-field__input--text form-field__binding"
+                                                                   id="form-field-EmiratesID"
+                                                                   name="Ownerlist[1].EmiratesIdNumber"
+                                                                   type="text"
+                                                                   required=""
+                                                                   data-parsley-required-message="@Translate.Text("JO.EmiratesIdRequireMessage")"
+                                                                   placeholder="@Translate.Text("JO.EmiratesId")"
+                                                                   aria-describedby="description-for-EmiratesID"
+                                                                   data-parsley-errors-container="#description-for-EmiratesID"
+                                                                   maxlength="15" data-parsley-maxlength="15">
+                                                        </span>
+                                                        <div id="description-for-EmiratesID" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj3" name="Ownerlist[1].EmiratesIdDataFile"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj3"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj3"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.EmiratesIdDataFileRequired")"
+                                                                               data-uploader-field="z07ba9pxj3"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.EmiratesCopy")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj3">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj3"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj3">
+                                                                            <span data-totalsize="z07ba9pxj3"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj3">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj3" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="owner-content_section owner-content_section-template"
+                                                 style="display:none;">
+                                                <div class="owner-content_section-title">
+                                                    @Translate.Text("JO.Owner") <span class="numOwner">0</span> <span class="icon-item-remove remove-section">@Translate.Text("JO.Remove")</span>
+                                                </div>
+                                                <div class="form-field form-field--select">
+                                                    <label for="form-field-xkaujaalv" class="form-field__label">
+                                                        @Translate.Text("JO.IdentificationDoc")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        <select class="form-field__input form-field__input--select form-field__input--select-full identificationselection"
+                                                                id="form-field-xkaujaalv" name="Ownerlist[#].Type"
+                                                                aria-describedby="description-for-xkaujaalv"
+                                                                data-parsley-errors-container="#description-for-xkaujaalv">
+                                                            <option value="0" selected data-val="passportdetails">
+                                                                @Translate.Text("JO.Passport")
+                                                            </option>
+                                                            <option value="1" data-val="tlicensedetails">
+                                                                @Translate.Text("JO.TradeLicense")
+                                                            </option>
+                                                            <option value="2" data-val="emiratesid">
+                                                                @Translate.Text("JO.EmiratesId")
+                                                            </option>
+                                                        </select>
+                                                    </span>
+                                                    <div id="description-for-xkaujaalv" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection passportdetails">
+                                                    <div class="form-field">
+                                                        <label for="form-field-7n19v5gdv01" class="form-field__label">
+                                                            @Translate.Text("JO.PassportNumber")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-7n19v5gdv01" name="Ownerlist[#].PassportNumber" type="text"
+                                                                   placeholder="@Translate.Text("JO.PassportNumber")"
+                                                                   aria-describedby="description-for-7n19v5gdv01"
+                                                                   data-parsley-errors-container="#description-for-7n19v5gdv01"
+                                                                   required
+                                                                   data-parsley-required-message="@Translate.Text("JO.PassPortNumberRequired")" />
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv01" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj7" name="Ownerlist[#].PassportFiledata"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj7"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj7"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.PassportRequired")"
+                                                                               data-uploader-field="z07ba9pxj7"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.PassportCopy")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj7">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj7"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj7">
+                                                                            <span data-totalsize="z07ba9pxj7"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj7">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj7" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--select">
+                                                        <label for="form-field-xkaujaalv" class="form-field__label">
+                                                            @Translate.Text("JO.Nationality")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                                                    id="form-field-xkaujaalv" name="Ownerlist[#].Nationality"
+                                                                    aria-describedby="description-for-xkaujaalv"
+                                                                    data-parsley-errors-container="#description-for-xkaujaalv">
+                                                                <option value="0" selected>@Translate.Text("JO.SelectNationality")</option>
+                                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Nationalities)
+                                                                {
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            </select>
+                                                        </span>
+                                                        <div id="description-for-xkaujaalv" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection tlicensedetails" style="display:none;">
+                                                    <div class="form-field">
+                                                        <label for="form-field-7n19v5gdv02" class="form-field__label">
+                                                            @Translate.Text("JO.TradeLicense")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-7n19v5gdv02" name="Ownerlist[#].TradeLicense" type="text"
+                                                                   placeholder="@Translate.Text("JO.TradeLicense")"
+                                                                   aria-describedby="description-for-7n19v5gdv02"
+                                                                   data-parsley-errors-container="#description-for-7n19v5gdv02"
+                                                                   required
+                                                                   data-parsley-required-message="@Translate.Text("JO.TradeLicenseRequired")" />
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv02" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--select">
+                                                        <label for="form-field-7n19v5gdv03" class="form-field__label">
+                                                            @Translate.Text("JO.IssuingAuthority")
+                                                        </label>
+                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                                                    id="form-field-7n19v5gdv03" name="Ownerlist[#].Issuingauthority"
+                                                                    aria-describedby="description-for-7n19v5gdv03"
+                                                                    required
+                                                                    data-parsley-errors-container="#description-for-7n19v5gdv03"
+                                                                    data-parsley-required-message="@Translate.Text("JO.AuthorityRequired")">
+                                                                <option value="0" selected>@Translate.Text("JO.SelectIssuingAuthority")</option>
+                                                                @foreach (var item in (IEnumerable<SelectListItem>)ViewBag.IssuingAuthority)
+                                                                {
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            </select>
+                                                        </span>
+                                                        <div id="description-for-7n19v5gdv03" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj8" name="Ownerlist[#].TradeFiledata"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj8"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj8"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.UploadTradeLicenseRequired")"
+                                                                               data-uploader-field="z07ba9pxj8"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.UploadTradeLicense")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj8">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj8"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj8">
+                                                                            <span data-totalsize="z07ba9pxj8"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj8">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj8" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="detailsection emiratesid" style="display:none;">
+                                                    <div class="form-field form-field--text">
+                                                        <label for="form-field-EmiratesID" class="form-field__label">
+                                                            @Translate.Text("JO.EmiratesId")
+                                                            <span class="form-field__label-required aria-only">@Translate.Text("JO.EmiratesIdRequired")</span>
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input value=""
+                                                                   class="form-field__input form-field__input--text form-field__binding"
+                                                                   id="form-field-EmiratesID"
+                                                                   name="Ownerlist[#].EmiratesIdNumber"
+                                                                   type="text"
+                                                                   required=""
+                                                                   data-parsley-required-message="@Translate.Text("JO.EmiratesIdRequireMessage")"
+                                                                   placeholder="@Translate.Text("JO.EmiratesId")"
+                                                                   aria-describedby="description-for-EmiratesID"
+                                                                   data-parsley-errors-container="#description-for-EmiratesID"
+                                                                   maxlength="15" data-parsley-maxlength="15">
+                                                        </span>
+                                                        <div id="description-for-EmiratesID" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant">
+                                                        <div class="form-field__input-wrapper">
+                                                            <div class="form-field__uploader-details">
+                                                                <div>
+                                                                    <label>
+                                                                        <input class="form-field__input form-field__input--upload"
+                                                                               id="form-field-z07ba9pxj3" name="Ownerlist[#].EmiratesIdDataFile"
+                                                                               type="file"
+                                                                               aria-describedby="description-for-z07ba9pxj3"
+                                                                               data-parsley-errors-container="#description-for-z07ba9pxj3"
+                                                                               required
+                                                                               data-parsley-required-message="@Translate.Text("JO.EmiratesIdDataFileRequired")"
+                                                                               data-uploader-field="z07ba9pxj3"
+                                                                               accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                               data-accepts='"jpg", "bmp","gif","png","jpeg","pdf","doc","docx","xls","csv", "xlsx"'
+                                                                               data-size="2048000">
+                                                                        <span class="button button--upload--variant focus-enabled"
+                                                                              data-uploader-button="upload-choose">
+                                                                            @Translate.Text("JO.EmiratesCopy")
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                                <p class="form-field__input--upload-format-error-message"
+                                                                   data-uploader-format-error="error-message">
+                                                                    @Translate.Text("JO.UploadFormat")
+                                                                </p>
+                                                                <p class="form-field__input--upload-size-error-message"
+                                                                   data-uploader-size-error="error-message">
+                                                                    @Translate.Text("JO.UploadSize")
+                                                                </p>
+                                                                <div class="form-field--upload_new-details">
+                                                                    <div class="form-field__input--upload-filetype"
+                                                                         data-uploader-filetype="z07ba9pxj3">
+
+                                                                    </div>
+                                                                    <div>
+                                                                        <p class="form-field__input--upload-filename"
+                                                                           data-uploader-filename="z07ba9pxj3"></p>
+                                                                        <div class="form-field__input--upload-filesize hidden"
+                                                                             data-uploader-filesize="z07ba9pxj3">
+                                                                            <span data-totalsize="z07ba9pxj3"></span>@Translate.Text("JO.kB")
+                                                                        </div>
+                                                                    </div>
+                                                                    <button class="button--upload_remove hidden"
+                                                                            data-uploader-remove="z07ba9pxj3">
+                                                                        <span class="aria-only">@Translate.Text("JO.Remove")</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="description-for-z07ba9pxj3" class="form-field__messages">
+                                                            <p class="form-field__description">
+                                                                @Translate.Text("JO.SupportedFile")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span class="addmorelink icon-text-link">@Translate.Text("JO.AddOwners")</span> @Translate.Text("JO.MoreOwners")
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-field__button">
+                                        <button class="button button--primary btn-submit" data-submission-text="@Translate.Text("Submitting")..." onclick="submitForm()">@Translate.Text("Submit")</button>
+                                    </div>
+                                }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#hd_AccSelectection").val("");
+        $(".m43-accountsel-hidden .m39-modal__footer .button--primary").on("click", onAccountSelection);
+        onAccountSelection();
+    });
+
+    function handleAccountNumber() {
+        if ($("#form-field-radio_1_1").prop("checked")) {
+            $("#hd_AccSelectection").val(1);
+            if ($('#ContractAccountfile').val() == '') {
+                alert("@Translate.Text("JO.AccountFileMissing")");
+                return false
+            }
+        }
+        else if ($("#form-field-radio_1_2").prop("checked")) {
+            $("#hd_AccSelectection").val(2);
+
+            var list = $("#premiseAccountList li").map(function () {
+                return this.textContent.trim();
+            }).get();
+
+            if (list.length <= 0 && ($("#form-field-premiseNumber").val() == "" || $("#form-field-premiseNumber").val() == null)) {
+                alert("@Translate.Text("JO.OneAccountNeeded")");
+                return false
+            }
+
+            var array = [];
+
+            if (list.length > 0) {
+                $.each(list, function (idx2, val2) {
+                    var str = val2.split(' ');
+                    array.push(str[0]);
+                });
+            }
+            else {
+                array.push($("#form-field-premiseNumber").val());
+            }
+
+            var acc = array + "";
+
+            $("#hd_AccountList").val(acc);
+
+            return true;
+        }
+    }
+
+    function submitForm() {
+        if (handleAccountNumber()) {
+            if ($('#form-joint-owner').parsley().validate()) {
+                $('#form-joint-owner').submit();
+            }
+        }
+    }
+
+    function onAccountSelection() {
+        var SelectedAccountElement = $("input[name='SelectedAccountNumber']:checked");
+        $("#Contractaccount").val($(SelectedAccountElement).val());
+        $(".m37-expander").hide();
+    }
+
+</script>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

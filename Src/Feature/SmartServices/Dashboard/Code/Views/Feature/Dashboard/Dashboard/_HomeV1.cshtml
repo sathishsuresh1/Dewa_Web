@@ -1,0 +1,623 @@
+﻿@using Newtonsoft.Json
+@using Newtonsoft.Json.Serialization;
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    //JavaScriptSerializer js = new JavaScriptSerializer();
+    string jsonMonthString = JsonConvert.SerializeObject(DEWAXP.Foundation.Content.Helpers.DateHelper.GetStaticMonthList().Select(x => x.Text).ToList());
+}
+<link rel="stylesheet" type="text/css" href="~/styles/External/jquery.modal.min.css">
+<script src="~/scripts/External/jquery.modal.min.js"></script>
+<!--_HomeV1.cshtml-->
+<div class="grid">
+
+    <!--AccountSelector-->
+    <div class="grid__row mb24">
+        <div class="grid__column grid__column--6">
+            <form id="form-account-selector" method="GET" form-skipvalidation="true">
+                @Html.Sitecore().Placeholder("j69/account-selector")
+            </form>
+            <input type="hidden" name="bes-accountid" class="bes-accountid">
+        </div>
+    </div>
+    <!--Account Seclector-->
+
+
+    <div class="grid__row mb32">
+        <div class="grid__column grid__column--6">
+            <div id="bill-placeholder" class="ajax-placeholder bill-placeholder"></div>
+        </div>
+        <div class="grid__column grid__column--6">
+            <div id="enquiry-list-placeholder" class="request-tracker__items ajax-container"></div>
+        </div>
+    </div>
+
+
+
+</div>
+
+<!--Dashboard Charts-->
+
+<div id="m28-dashboard-component-gauge-placeholder" class="m28-dashboard-component-gauge-placeholder">
+
+</div>
+<!--Dashboard Charts-->
+
+<div class="grid BES-grid" style="display:none">
+    <div class="grid__row mb24">
+        <div class="grid__column grid__column--12">
+            <div class="j69-dashboard--card">
+                <div class="j69-dashboard--card_title">
+
+                </div>
+                <div class="j69-dashboard--bes_6">
+                    <div class="m14-richtext" style="margin-bottom:0px">
+                        @Html.Sitecore().Placeholder("j69/bes-richtext")
+
+                    </div>
+                </div>
+                <div class="j69-dashboard--bes_6">
+
+                    @Html.Sitecore().Placeholder("j69/bes")
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row mb32">
+        <div class="grid__column grid__column--12">
+            <div class="j69-dashboard--card">
+                <div class="j69-dashboard--card_title">
+                </div>
+                @Html.Sitecore().Placeholder("j69/bes-saving")
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Handlerbar Section-->
+<script id="bill-component-template" type="text/x-handlebars-template">
+    <div class="j69-dashboard--card">
+        <div class="j69-dashboard--card_title">
+            @Translate.Text("Upcoming bill")
+        </div>
+
+        <div class="j69-dashboard--card-paynow">
+            <div class="j69-dashboard--card-paynow__amount">
+                {{total}} <span>@Translate.Text("AED")</span>
+            </div>
+            <a class="button button--next button--primary" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J14_PAY_BILLS)">@Translate.Text("Pay bill")</a>
+        </div>
+
+        <div class="j69-dashboard--card-quicklinks">
+            <form action="@Url.Content("~/api/sitecore/bill/BillDownloads")" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="{{account}}" />
+                <input type="hidden" name="type" value="ContractAccountNumber" />
+                <button class="button button--text button--next" type="submit">@Translate.Text("View bill PDF")</button>
+            </form>
+
+            @*<a class="button button--text button--next" href="">View Bill PDF</a>*@
+            <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_PAST_BILLS)?a={{account}}">@Translate.Text("Bill Payment History")</a>
+        </div>
+    </div>
+</script>
+
+<script id="complaint-item-template" type="text/x-handlebars-template">
+
+    <div class="j69-dashboard--card">
+        <div class="j69-dashboard--card_title">
+            @Translate.Text("Track Requests and Complaints")
+        </div>
+        <div class="request-tracker">
+            <div class="request-tracker__items">
+                {{#enquiries}}
+                <div class="toggle-menu__item request-tracker__item">
+                    <p>
+                        <span class="request-tracker__type">
+                            {{type}}
+                        </span>
+
+                        <span class="request-tracker__state {{statusClass}}">
+                            {{status}}
+                        </span>
+                    </p>
+                    <p>
+                        <span class="request-tracker__date">
+                            @Translate.Text("Requested") {{date}}
+                        </span>
+                        <span class="request-tracker__notifnum">
+                            {{refrence_no}}
+                        </span>
+                    </p>
+                </div>
+                {{/enquiries}}
+            </div>
+        </div>
+        <p class="request-tracker__link">
+            <a id="hpltrackills" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J22_TRACK_COMPLAINTS)" class="button button--text button--next">@Translate.Text("See all")</a>
+        </p>
+    </div>
+
+
+
+</script>
+
+<script id="dashboard-gaugegraph-item-template" type="text/x-handlebars-template">
+
+    <div class="m28-dashboard-component-gauge" data-component="m28-dashboard-component-gauge" data-chart-data='{{dataSeriesStringfy}}' data-electricity-max="8000" data-water-max="18000" data-carbonfootprint-max="2750" data-months='@Html.Raw(jsonMonthString)'>
+
+        <div class="grid">
+            <div class="grid__row mb32">
+                <div class="grid__column grid__column--12">
+                    <div class="j69-dashboard--card">
+                        <div class="j69-dashboard--card_title">
+                            @Translate.Text("Last Billing Cycle Usage")
+                        </div>
+                        <div class="m28-gauge--wrapper">
+                            <div class="m28-gauge--container m28-gauge--container--4 m28-gauge--container--electricity">
+                                <svg version="1.1" id="chart2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="300" height="300px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
+                                <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%" spreadMethod="pad">    
+                                <stop offset="0%" stop-color="#5b1ba1" stop-opacity="1"></stop>   
+                                <stop offset="100%" stop-color="#b478da" stop-opacity="1"></stop>
+                                    </linearGradient>
+                                </defs>
+
+                                <g class="m28-gauge--bar1">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar2">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar3">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar4">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+                            </svg>
+                            </div>
+                            <div class="m28-gauge--details">
+                                <div class="m28-gauge--details-value">420</div>
+                                <div class="m28-gauge--details-unit">@Translate.Text("Kilowatt Hour unit")</div>
+                                <div class="m28-gauge--details-type"> @Translate.Text("Electricity") | <span class="m28-gauge--details-month"></span> <span class="m28-gauge--details-year">2019</span></div>
+                            </div>
+                        </div>
+
+                        <div class="m28-gauge--wrapper">
+                            <div class="m28-gauge--container m28-gauge--container--3 m28-gauge--container--water">
+                                <svg version="1.1" id="chart2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="300" height="300px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
+                                <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%" spreadMethod="pad">    
+                                <stop offset="0%" stop-color="#5b1ba1" stop-opacity="1"></stop>   
+                                <stop offset="100%" stop-color="#b478da" stop-opacity="1"></stop>
+                                    </linearGradient>
+                                </defs>
+
+                                <g class="m28-gauge--bar1">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar2">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar3">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+                            </svg>
+                            </div>
+                            <div class="m28-gauge--details">
+                                <div class="m28-gauge--details-value">3000</div>
+                                <div class="m28-gauge--details-unit">@Translate.Text("Imperial Gallon unit")</div>
+                                <div class="m28-gauge--details-type">@Translate.Text("Water") | <span class="m28-gauge--details-month">Aug</span> <span class="m28-gauge--details-year">2019</span></div>
+                            </div>
+                        </div>
+
+                        <div class="m28-gauge--wrapper">
+                            <div class="m28-gauge--container m28-gauge--container--4 m28-gauge--container--carbonfootprint">
+                                <svg version="1.1" id="chart2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="300" height="300px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
+                                <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%" spreadMethod="pad">    
+                                <stop offset="0%" stop-color="#5b1ba1" stop-opacity="1"></stop>   
+                                <stop offset="100%" stop-color="#b478da" stop-opacity="1"></stop>
+                                    </linearGradient>
+                                </defs>
+
+                                <g class="m28-gauge--bar1">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar2">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar3">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+
+                                <g class="m28-gauge--bar4">   
+                                <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none" stroke="#eef0f0"></path>   
+
+                                <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="10px" fill="none">
+                                    </path>
+                                </g>
+                            </svg>
+                            </div>
+                            <div class="m28-gauge--details">
+                                <div class="m28-gauge--details-value">2400</div>
+                                <div class="m28-gauge--details-unit">@Translate.Text("Kg CO2e")</div>
+                                <div class="m28-gauge--details-type">@Translate.Text("Carbon Footprint") | <span class="m28-gauge--details-month">Aug</span> <span class="m28-gauge--details-year">2019</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--
+            <div class="grid__row mb32">
+                <div class="grid__column grid__column--6">
+                    <div class="j69-dashboard--card">
+                        <div class="j69-dashboard--card_title">
+                            @Translate.Text(DictionaryKeys.Dashboard.ElectricityConsumption)
+                        </div>
+                        <div class="m28-columncharts--wrapper m28-columncharts--electricity">
+                        </div>
+                        <div class="m28-columncharts--link">
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J31_CONSUMPTION_HISTORY)?a={{account}}#@Translate.Text(" Electricity")" class="button button--text button--next">@Translate.Text("View Trend")</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid__column grid__column--6">
+                    <div class="j69-dashboard--card">
+                        <div class="j69-dashboard--card_title">
+                            @Translate.Text(DictionaryKeys.Dashboard.WaterConsumption)
+                        </div>
+                        <div class="m28-columncharts--wrapper m28-columncharts--water">
+                        </div>
+                        <div class="m28-columncharts--link">
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J31_CONSUMPTION_HISTORY)?a={{account}}#@Translate.Text(" Water")" class="button button--text button--next">@Translate.Text("View Trend")</a>
+                        </div>
+                    </div>
+                </div>
+            </div>-->
+        </div>
+    </div>
+
+</script>
+<!--Handlebar Section-->
+<script type="text/javascript">
+
+    //variavles --- start
+    var xhrPool = []; // no need to use **var**
+    var gaguageLoadSettting =
+            [{ name: "_billDetailsAndEnquiryHandler", enabled: false, isComplete :null  },
+            { name: "_consumptionGraphHandler", enabled: false, isComplete :null },
+            //{ name: "_besHandler", enabled: false, isComplete: null },
+            //{ name: "ami-graph", enabled: false, isComplete: null }
+        ];
+
+    var _innnerHtml = '<div class="grid"> <div class="grid__row"><div class="grid__column grid__column--12"> ' +
+        '<div class="j69-dashboard--card" id="m28-dashboard-component-gauge-placeholder-loader" style="position:relative;"></div>' +
+        '</div></div></div>';
+
+    var accountNumber = '';
+    var bpNumber = '';
+    var cat = '';
+    var flag = '';
+    var isvisited = '';
+     //variavles --- end
+
+
+    docReady(function () {
+
+        jQuery("#form-account-selector").submit(handleAccountSelection);
+        jQuery("#form-account-selector").submit();
+    });
+
+    function AbortAllAjaxCall() {
+        $.each(xhrPool, function (idx, jqXHR) {
+            jqXHR.abort();
+        });
+    }
+
+    function handleAccountSelection(e) {
+        AbortAllAjaxCall();
+        jQuery('.ajax-placeholder').empty();
+        var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+        var bpNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+
+        var cat = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-acc-cat");
+        var flag = cat.substr(0, 1);
+
+        var isvisited = "@Session["Isvisitedconsumption"]";
+
+
+        if (e.type == "submit" || isvisited == "") {
+            if (flag == 'Y') {
+
+                @{Session["X"] = "Y";};
+
+                window.location.href = "./consumption/my-consumption?isBI=Y";
+
+            }
+            else {
+                @{Session["X"] = "";};
+            }
+        }
+        jQuery("#outstandingHeaderDiv").hide();
+
+        if (accountNumber) {
+            var data = { service: 'info', account_id: "00" + accountNumber };
+            jQuery.ajax("/api/bes/proxy", {
+            dataType: 'json',
+            data: data,
+            method: 'POST',
+            async: true,
+            beforeSend: function (jqXHR) {
+            xhrPool.push(jqXHR);
+                },
+                success:function(response) {
+                    var result = response;
+                    if (result != null && result.account != null) {
+                        if (result.account.show_bes != null && result.account.show_bes == "true") {
+                            //jQuery("#graph-container .grid").first().css("position", "initial");
+                            //jQuery(".j69-dashboard__charts--carousel").css("display", "none");
+                            //jQuery("#graph_electricityBES").removeClass("grid__column--4").addClass("grid__column--8");
+                            //jQuery("#divlivingstandard").show();
+                            jQuery(".bes-accountid").val(accountNumber);
+                            $(".bes-accountid").trigger('change');
+                            //jQuery(".electricity-consumption-graph-placeholder").hide();
+                            //jQuery(".water-consumption-graph-placeholder").hide();
+                            $("#BEScontainer").show();
+                            jQuery(".bes-container").show();
+                            jQuery("#outstandingHeaderDiv").show();
+                            jQuery("#outstandingHeaderDiv").addClass("m17-sectiontitle");
+                            setTimeout(function () {
+
+                                jQuery(".BES-grid").show();
+
+                            }, 1000)
+                        }
+                        else {
+                            jQuery(".BES-grid").hide();
+                        }
+
+                    }
+                },error:function (response) {
+                    //renderWaterElectricity(accountNumber);
+                }
+            });
+
+
+
+        //console.log('acc');
+        jQuery.ajax("/api/bills/" + accountNumber, {
+            beforeSend: function (jqXHR) {
+                xhrPool.push(jqXHR);
+                jQuery('.bill-placeholder').empty();
+                window.attachSpinner('.bill-placeholder', { bgColor: '#fff', opacity: 0.6, minHeight: 250 });
+            },
+            complete: function () {
+                window.detachSpinner('.bill-placeholder');
+            },
+            dataType: 'json',
+            method: 'GET',
+            async: true,
+            success: function (response) {
+                renderBill(response);
+            }
+        });
+
+
+        jQuery.ajax("/api/enquiries?id=" + accountNumber + "&bpNumber=" + bpNumber, {
+            beforeSend: function (jqXHR) {
+                xhrPool.push(jqXHR);
+                jQuery('#enquiry-list-placeholder').empty();
+                window.attachSpinner('#enquiry-list-placeholder', { bgColor: '#fff', opacity: 0.6, minHeight: 250 });
+            },
+            complete: function () {
+                window.detachSpinner('#enquiry-list-placeholder');
+            },
+            dataType: 'json',
+            method: 'GET',
+            async: true,
+            success: function (response) {
+                if (response != null && response.length > 0) {
+                    renderEnquiries(response);
+                    if (jQuery("#hpltrackills").length > 0) {
+                        jQuery("#hpltrackills")[0].search = "";
+                        var src = jQuery("#hpltrackills").attr('href').replace("?", "");
+                        jQuery("#hpltrackills").attr('href', src + "?a=" + accountNumber);
+                    }
+                }
+            }
+        });
+
+
+
+                var d = [];
+                d.account = accountNumber;
+                d.dataSeries = { "electricity": [{ "value": 0, "year": 0, "month": 1 }, { "value": 0, "year": 0, "month": 2 }, { "value": 0, "year": 0, "month": 3 }, { "value": 0, "year": 0, "month": 4 }, { "value": 0, "year": 0, "month": 5 }, { "value": 0, "year": 0, "month": 6 }], "water": [{ "value": 0, "year": 0, "month": 1 }, { "value": 0, "year": 0, "month": 2 }, { "value": 0, "year": 0, "month": 3 }, { "value": 0, "year": 0, "month": 4 }, { "value": 0, "year": 0, "month": 5 }, { "value": 0, "year": 0, "month": 6 }], "carbonFootprint": {"value":0,"year":0,"month":0} }
+                d.dataSeriesStringfy = JSON.stringify(d.dataSeries);
+
+            var _innnerHtml = '<div class="grid"> <div class="grid__row"><div class="grid__column grid__column--12"> ' +
+                '<div class="j69-dashboard--card" id="m28-dashboard-component-gauge-placeholder-loader" style="position:relative;"></div>' +
+                '</div></div></div>';
+            jQuery.ajax("/api/ConsumptionStatisticsV1/" + accountNumber, {
+                beforeSend: function (jqXHR) {
+                    xhrPool.push(jqXHR);
+                    jQuery('.m28-dashboard-component-gauge-placeholder').empty().html(_innnerHtml);
+                    window.attachSpinner('#m28-dashboard-component-gauge-placeholder-loader', { bgColor: '#fff', opacity: 0.6, minHeight: 250 });
+                },
+                dataType: 'json',
+                method: 'GET',
+                async: true,
+                success: function (response) {
+                    //zero initailization.
+                    renderDashboardGraph(d);
+                    setTimeout(function () {
+
+                        //reponse data mapping.
+                        d.dataSeries = response.formattedData.dataSeries;
+                        d.dataSeriesStringfy = JSON.stringify(d.dataSeries);
+                        renderDashboardGraph(d);
+                    }, 100)
+
+                }
+            });
+
+
+
+
+        }
+        return false;
+    }
+    //Modules Handler - end
+
+    //Renderer Handler - start
+    function renderBill(bill) {
+        var markup = jQuery('#bill-component-template').html();
+        var template = Handlebars.compile(markup);
+
+        var context = {
+            account: bill.AccountNumber,
+            total: numeral(bill.Balance).format('0,0.00')
+        };
+
+        var rendering = template(context);
+        jQuery('.bill-placeholder').empty().html(rendering);
+    }
+
+
+    ///
+    function renderEnquiries(enquiries) {
+        if (enquiries && enquiries.length > 0) {
+            var markup = jQuery('#complaint-item-template').html();
+            var template = Handlebars.compile(markup);
+            var context = {
+                enquiries: _.map(enquiries, function (e) {
+                    d =  {
+                        refrence_no: e.Reference,
+                        summary: e.Status,
+                        date: e.RequestDate,
+                        type: e.RequestType,
+                        status: function () {
+
+                            var _status = e.Status;
+                            if(e.Status){
+                            _status =  e.Status.replace(e.Reference,"").replace(" - ","")
+                            };
+                            return _status;
+                           // if (e.Completed) return '@Translate.Text("Closed")';
+                           // return '@Translate.Text("In progress")';
+                        },
+                        statusClass: function () {
+                            if (e.Completed) return 'request-tracker__state--closed';
+                            return 'request-tracker__state--inprogress';
+                        },
+                        shouldExpand: function () {
+                            return e.Status !== undefined && e.Status !== '';
+                        }
+                    }
+
+                return d;
+                }).splice(0, 2)
+            };
+
+            //jQuery('#grid-services--with-notifications').removeClass('hidden');
+            //jQuery('#grid-services--without-notifications').addClass('hidden');
+
+            jQuery('#enquiry-list-placeholder').empty().html(template(context));
+            window.initComponents('request-tracker');
+        } else {
+            //jQuery('#grid-services--with-notifications').addClass('hidden');
+            //jQuery('#grid-services--without-notifications').removeClass('hidden');
+        }
+    }
+    function renderDashboardGraph(_data)
+    {
+        var markup = jQuery('#dashboard-gaugegraph-item-template').html();
+        var template = Handlebars.compile(markup);
+
+        jQuery('.m28-dashboard-component-gauge-placeholder').empty().html(template(_data));
+        try {
+            window.initComponents("m28-dashboard-component-gauge-placeholder")
+            jQuery(window).trigger('reinit_m28');
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
+    function loadwidget(component, elementid, endpoint, returnURL) {
+        var accountnumber = "00" + jQuery(".bes-accountid").val();
+        var s;
+        var lang;
+        if (jQuery('html').attr('lang') != "en") {
+            lang = "ar";
+        } else {
+            lang = "en";
+        }
+        //console.log(accountnumber + "-" + component + "-" + elementid + "-" + endpoint + "-" + lang);
+        s = document.createElement('script');
+        s.id = 'adv_main';
+        //s.src = '/Scripts/nml/main.min.js';
+        s.src = '/api/bes/proxy?page=mainjs&account_id=' + accountnumber;
+        s.async = true;
+        s.onload = function () {
+            var comp = new advComp();
+            comp.create({
+                "account_id": accountnumber, // currently selected account ID
+                "component": component, // e.g. "component": "survey", "nc", "hist"
+                "element_id": elementid, // id of element where to display the widget
+                "api": endpoint, // in this case //staging.dewa.gove.ae/api/acp/proxy
+                "lg": lang,
+                "return_url": ""
+            });
+
+        };
+        document.body.appendChild(s);
+    }
+</script>
+
+
+<!--_HomeV1.cshtml-->

@@ -1,0 +1,326 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Content
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers.Extensions
+@model DEWAXP.Feature.Bills.Models.Estimates.MyEstimates
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+
+<div class="box box--1">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j82/m26-page-title")
+    </div>
+</div>
+
+@Html.Sitecore().Placeholder("j82/m41-tab-box")
+
+<div class="grid">
+
+    @{
+        string disablePayButton = "";
+    }
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Error/AlertError.cshtml")
+            @Html.Sitecore().Placeholder("j82/m14-journey-intro-rich-text")
+            @if (Model.Estimates != null && Model.Estimates.HasAny())
+            {
+                using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form form--inline", @id = "findEstimateForm", @data_form = "true" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    <div class="m45-estimate-selector" data-component="m45-estimate-selector" data-selectable="true" data-payment-max="@PaymentConstants.MaximumAllowedPaymentAmount">
+                        <p class="m45-estimate-selector-trigger__label" id="m45-bill_selector_label">@Sitecore.Globalization.Translate.Text("Estimate To Pay")</p>
+                        <button aria-labelledby="m45-bill_selector_label" data-accountselector="m45-bill_selector_trigger" class="m45-estimate-selector__trigger"></button>
+
+                        <div class="m39-modal" data-component="m39-modal" id="modal_m45-bill_selector_trigger">
+
+                            <div data-content="m45-bill_selector_trigger" class="m39-modal__container" role="dialog" aria-expanded="false">
+                                <div class="m39-modal__dialog m39-modal__dialog--account">
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title">@Sitecore.Globalization.Translate.Text("Select Estimate")</div>
+                                        <button data-close="m45-bill_selector_trigger" class="m39-modal__button--close">@Translate.Text("Close")</button>
+                                        <!-- m49-list-filter-start -->
+                                        <!-- ideally data-filter-list will match a container id for all list items to filter -->
+                                        <div class="m49-list-filter" data-component="m49-list-filter" data-filter-list=".estimatefilter">
+                                            <input class="m49-list-filter--input" id="m49-list-filter--input" name="m49-list-filter--input" placeholder="@Translate.Text(DictionaryKeys.AccountSelector.SearchByNumber)" type="search">
+                                            <button class="m49-list-filter--button" title="Filter results" type="button" role="search" aria-label="@Translate.Text(DictionaryKeys.AccountSelector.Filter)"><span class="aria-only">@Translate.Text(DictionaryKeys.AccountSelector.Filter)</span></button>
+                                        </div>
+                                        <!-- m49-list-filter-end -->
+                                    </div>
+                                    <div class="m39-modal__content estimatefilter">
+                                        <div class="m45-estimate-selector__menu" data-menu="true">
+                                            <div class="form-field">
+                                                <fieldset class="fieldset">
+                                                    <legend class="legend-color">.</legend>
+                                                    @foreach (var item in Model.Estimates)
+                                                    {
+                                                        <p class="form-field__radio form-field__radio--accselector">
+                                                            <label>
+                                                                <input class="form-field__input form-field__input--radio"
+                                                                       name="estimateNumber"
+                                                                       type="radio"
+                                                                       value="@item.estimateno"
+                                                                       data-id="@item.estimateno"
+                                                                       aria-describedby="description-for-estimate-selection"
+                                                                       data-parsley-errors-container="#description-for-estimate-selection"
+                                                                       onclick="Check('@item.sales_document_type')">
+
+                                                                <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                                                                    <span class="m45-estimate-selector__id">@Translate.Text("estimate label") @item.estimateno</span>
+                                                                    <span class="m45-estimate-selector__description">@Translate.Text("Application No"): @item.customer_po_number</span>
+                                                                    <span class="m45-estimate-selector__amount">
+                                                                        @Translate.Text("Total Estimate"):
+                                                                        <span data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@item.netvalue1</span>
+                                                                        (@Translate.Text("Valid up to") <span>@Convert.ToDateTime(item.estimatevalidtodate).ToString("dd MMM yyyy", Sitecore.Context.Culture)</span>)
+
+                                                                    </span>
+                                                                </span>
+                                                            </label>
+                                                        </p>
+                                                    }
+                                                    <div id="description-for-estimate-selection" class="form-field__messages"></div>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+
+                                        <div class="m49-no-matches">@Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)</div>
+                                    </div>
+
+                                    <div class="m39-modal__footer">
+                                        <button class="button button--primary" data-accountupdate="true" data-modal-confirm="true">@Translate.Text("Confirm")</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @foreach (var item in Model.Estimates)
+                        {
+
+                            <div class="m45-estimate-selector__estimate m45-estimate-selector__estimate--selectable" data-bill-details="true" data-bill-details-id="@item.estimateno" data-bill-amount="@item.netvalue3.ToString("0,0.00")">
+                                <div class="m45-estimate-selector__summary m45-estimate-selector__summary--selectable" data-bill-summary="true">
+                                    <p class="m45-estimate-selector__id">@Translate.Text("estimate label") @item.estimateno</p>
+                                    <p class="m45-estimate-selector__amount">
+                                        @Translate.Text("Total Estimate"):
+                                        <span data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@item.netvalue1</span>
+                                        (@Translate.Text("Valid up to") <span>@Convert.ToDateTime(item.estimatevalidtodate).ToString("dd MMM yyyy", Sitecore.Context.Culture)</span>)
+                                    </p>
+                                </div>
+
+                                <div class="m37-expander " data-component="m37-expander">
+                                    <button data-toggle="true" class="m37-expander__trigger">@Translate.Text("Estimate details")</button>
+
+                                    <div data-content="true" class="m37-expander__content" role="region" aria-expanded="false">
+                                        <dl class="m45-estimate-selector__keyvalues">
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Application No"):</dt>
+                                            <dd class="m45-estimate-selector__value">@item.customer_po_number</dd>
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Estimate Date"):</dt>
+                                            <dd class="m45-estimate-selector__value">@Convert.ToDateTime(item.estimatevalidfromdate).ToString("dd MMM yyyy", Sitecore.Context.Culture)</dd>
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Plot Number"):</dt>
+                                            <dd class="m45-estimate-selector__value">@item.plot</dd>
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Area Name"):</dt>
+                                            <dd class="m45-estimate-selector__value">@item.area</dd>
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Owner Name"):</dt>
+                                            <dd class="m45-estimate-selector__value">@item.ownername  </dd>
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Consultant Contractor Name"):</dt>
+                                            <dd class="m45-estimate-selector__value">@item.con_name</dd>
+                                            <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Outstanding Amount"):</dt>
+                                            <dd class="m45-estimate-selector__value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@item.netvalue3</dd>
+                                        </dl>
+
+                                        <p class="help-text">
+                                            <a href="javascript:void(0)" data-estno="@item.estimateno" data-apiurl="/api/sitecore/Estimate/DisplayPDF" class="link DisplayPDF">@Sitecore.Globalization.Translate.Text("View PDF version of Estimate")</a>
+                                            @*<a href="/api/sitecore/Estimate/DisplayPDF?estimateNumber=@item.EstimateNo" class="link link--pdf" target="_blank">@Sitecore.Globalization.Translate.Text("View PDF version of Estimate")</a>*@
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+
+                        <div class="m45-estimate-selector--amount-utils">
+                            <div class="button button--text">
+                                @Sitecore.Globalization.Translate.Text("Amount"):
+                                <span class="m45-estimate-selector--amount-selected">
+                                </span>
+                                @Translate.Text("AED")
+                            </div>
+                            <a role="button" class="button button--text m45-estimate-selector--edit-amount">@Sitecore.Globalization.Translate.Text("Edit amount")</a>
+                        </div>
+                        <div class="m45-estimate-selector--amount-pay-form">
+                            <fieldset class="fieldset">
+                                <legend class="legend-color">.</legend>
+                                <div class="m45-estimate-selector--amount-pay-form-input" amount=>
+
+                                    <div class="form-field form-field--text ">
+                                        <label for="form-field-mgu30b4sk estimatedamount" class="form-field__label">
+                                            @Sitecore.Globalization.Translate.Text("Set amount")
+                                            <span class="form-field__label-required aria-only">(required)</span>
+                                        </label>
+                                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--currency">
+                                            <input class="form-field__input form-field__input--text form-field__input--prefixed edtPayment"
+                                                   id="form-field-mgu30b4sk estimatedamount"
+                                                   name="number-currency"
+                                                   min="0"
+                                                   step="any"
+                                                   type="number"
+                                                   aria-describedby="description-for-mgu30b4sk"
+                                                   data-parsley-errors-container="#description-for-mgu30b4sk"
+                                                   required
+                                                   data-parsley-required-message="This field is required"
+                                                   data-parsley-currency
+                                                   data-parsley-currency-message="Please enter a valid monetary value" />
+                                        </span>
+                                        <div id="description-for-mgu30b4sk" class="form-field__messages">
+                                        </div>
+                                    </div>
+                                    <div class="form-field__button">
+                                    </div>
+
+                                </div>
+                                <div class="m45-estimate-selector--amount-pay-form-button--cancel">
+                                    <a class="button button--text button--cancel" role="button" aria-label="Cancel">@Sitecore.Globalization.Translate.Text("Cancel")</a>
+                                </div>
+                                <div class="m45-estimate-selector--amount-pay-form-button--set">
+                                    <a class="button button--text" role="button">@Sitecore.Globalization.Translate.Text("Set")</a>
+                                </div>
+                            </fieldset>
+                            <div class="m45-estimate-selector--error form-field__messages form-field__error">
+                                <p class="error-one" style="display:none">@Sitecore.Globalization.Translate.Text("estimatepayment.greateramount")</p>
+                                <p class="error-two" style="display:none">@Sitecore.Globalization.Translate.Text("estimatepayment.zero")</p>
+                                <p class="error-three" style="display:none">@Sitecore.Globalization.Translate.Text("estimatepayment.processpayment")</p>
+                            </div>
+                        </div>
+                        <div class="form-field__button">
+                            <a id="pay-button-popup" class="button button--primary button--next">
+                                @*<input name="estimatedamount" value="1000" />*@
+                                @Html.Hidden("estimatedamount")
+                                @Sitecore.Globalization.Translate.Text("Pay"):
+                                <span class="amount_label" data-payment-amount="true" amount=""></span> @Translate.Text("AED")
+                            </a>
+                            @*<label>
+                                    @Html.CheckBox("PayThroughNoqodi", Model.PayThroughNoqodi)
+                                    <span>@Translate.Text("PaybyNoqodi")</span>
+                                </label>*@
+                            @*<div class="form-field form-field--toggles">
+                                    <fieldset class="fieldset">
+                                        <div class="form-field__checkbox">
+                                            <label>
+                                                <input class="form-field__input form-field__input--checkbox"
+                                                       id="form-field-PaybyNoqodi"
+                                                       name="PayThroughNoqodi"
+                                                       type="checkbox"
+                                                       value="true"
+                                                       aria-describedby="description-for-PaybyNoqodi"
+                                                       data-parsley-errors-container="#description-for-PaybyNoqodi"
+                                                       data-parsley-multiple="checkbox_1_2"
+                                                       data-parsley-id="48">
+                                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("PaybyNoqodi")</span>
+                                            </label>
+                                        </div>
+                                        <div id="description-for-PaybyNoqodi" class="form-field__messages">
+                                        </div>
+                                    </fieldset>
+                                </div>*@
+                            <div class="journey-intro__text" id="estimate-message" style="display:none">
+                                @Html.Sitecore().Placeholder("j82/estimate-message")
+                            </div>
+                            <div class="m45-estimate-selector--error form-field__messages form-field__error">
+                                <p>@Translate.Text("Maximum aggregate payment amount", PaymentConstants.MaximumAllowedPaymentAmount.ToString("0,0.00"))</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Payment Type Popup module *@
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+
+                }
+                <form action="/api/sitecore/Estimate/DisplayPDF" method="post" id="DisplayPFDFrom">
+                    <input type="hidden" name="test" />
+                </form>
+            }
+            else
+            {
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <p class="text__noresults">
+
+                        </p>
+                    </div>
+                </div>
+            }
+            <script type="text/javascript">
+                docReady(function () {
+                    $(".DisplayPDF").on("click", function (e) {
+                        e.preventDefault();
+                        $('#DisplayPFDFrom').html("");
+                        $('#DisplayPFDFrom').append('<input type="hidden" name="estimateNumber" value="' + $(this).data("estno") + '"/>');
+                        $('#DisplayPFDFrom').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('#findEstimateForm input[name=__RequestVerificationToken]').val() + '">');
+                        $('#DisplayPFDFrom').submit();
+                        $('#DisplayPFDFrom').html('<input type="hidden" name="test" />');
+
+                        return false;
+                    })
+
+                    // Edit amount disabled enter key
+                    setTimeout(function () {
+                        jQuery('.edtPayment').each(function () {
+                            jQuery(this).off('keydown.submit').on('keydown.submit', function (event) {
+                                if (event.keyCode == 13 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                }
+                            })
+                        });
+                    }, 250)
+                });
+            </script>
+            @*@Html.Action("EstimatePaymentHistory", "Estimate", new { payForFriend = false })*@
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function Check(value) {
+
+
+        //if (value == "DBPI") {
+        //    $("#pay-button").hide();
+        //    $("#pay-button-popup").hide();
+        //    $("#estimate-message").show();
+        //}
+        //else {
+        //    $("#pay-button").show();
+        //    $("#pay-button-popup").show();
+        //    $("#estimate-message").hide();
+        //}
+        $("#pay-button").show();
+        $("#pay-button-popup").show();
+        $("#estimate-message").hide();
+    }
+    // Open Payment method popup.
+    jQuery('#pay-button-popup').on('click', function () {
+        var currency = '@Translate.Text("AED")';
+        var total = jQuery('#pay-button-popup .amount_label').text().replace(",","");
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (total != "" && numeral(total) > 0) {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        }
+    });
+
+    docReady(function () {
+        jQuery("input:radio[name='estimateNumber']:first").attr('checked', true);
+    });
+</script>

@@ -1,0 +1,104 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Feature.IdealHome.Models.IdealHome.Survey
+
+
+
+
+<div class="grid">
+
+
+    <div class="grid__row">
+
+
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_form = "true", @data_parsley_focus = "none", @class = "form", @data_submit_validate = "enabled", @novalidate = "false", encType = "multipart/form-data" }))
+            {
+
+            @Html.AntiForgeryToken()
+
+                // Main Survey Questionare
+
+            <div class="grid__row" style="text-align:center;">
+                <br />
+
+                <img src="@ViewBag.EntityLogo" alt="" height="220px" width="420px" />
+                <label class="form-field__label">
+                    @ViewBag.MainCriteria
+                </label>
+            </div>
+
+            <br /><br />
+
+                int count = 1;
+                foreach (var item in Model.Questions)
+                {
+                    item.QuestionNo = count;
+
+            <div class="form-field form-field--text">
+
+                <div class="form-field form-field--select form-field--select-single">
+
+                    <label for="form-field-kn3ivmwm9" class="form-field__label">
+                        @item.SubCriteria
+                        <span class="form-field__label-required aria-only">(required)</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                id="ddlQuestion_@item.QuestionNo"
+                                name="ddlQuestion_@item.QuestionNo"
+                                aria-describedby="description-for-id-@count"
+                                data-parsley-errors-container="#description-for-id-@count"
+                                data-parsley
+                                required
+                                data-parsley-required-message="@Translate.Text("Please Select")">
+                            <option value="" selected>@Translate.Text("Please Select")</option>
+
+                            @foreach (var options in item.OptionList)
+                                    {
+                                    <option value="@options.Value,@options.Selection_Code">@options.Text - (@options.Value)</option>
+                                    }
+
+                        </select>
+
+                    </span>
+                    <div id="description-for-id-@count" class="form-field__messages">
+                    </div>
+
+                </div>
+
+            </div>
+                                    count = count + 1;
+                }
+
+            <div class="form-field__button">
+                <button data-trigger="true" class="button button--primary button--next">أرسل </button>
+                
+                <a class="button button--primary button--next" href="@Sitecore.Links.LinkManager.GetItemUrl(Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.IDEAL_HOME_DISPLAY_CUSTOMER))">@Translate.Text("Cancel")</a>
+            </div>
+                
+
+
+            
+
+            }
+
+        </div>
+
+    </div>
+
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--success " data-component="m40-status-message">                
+                <div class="m40-status-message__text">@Translate.Text("Dialoge.Note")</div>
+            </div>
+        </div>
+    </div>
+</div>
+

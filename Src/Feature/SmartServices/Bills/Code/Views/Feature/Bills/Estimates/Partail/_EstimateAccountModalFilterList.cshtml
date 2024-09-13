@@ -1,0 +1,171 @@
+﻿@using DEWAXP.Feature.Bills.Models.Estimates;
+@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Content
+@model  DEWAXP.Feature.Bills.Models.Estimates.EstimateAccountSelectorModel
+
+@{
+    var isRtl = (bool)ViewBag.IsRTL;
+    var dir = isRtl ? "rtl" : "ltr";
+    var isempty = Model != null && Model.EstimateAccountSelectorList.Count > 0 ? false : true;
+}
+
+<div class="m39-modal__content " id="m43-account-list" style="top: 120px;">
+    <div class="m43-accountsel__group_wrap">
+        @{var groupData = Model.EstimateAccountSelectorList.GroupBy(x => x.BusinessPartnerNo).ToList();
+            foreach (var groupItem in groupData)
+            {
+                <div class="m43-accountsel__group">
+                    <p class="m43-accountsel__accounts-listheader">
+                        @Translate.Text("Business Partner"): @groupItem.FirstOrDefault().BusinessPartnerNo
+                        <span class="m43-accountsel__accounts-number">@string.Format("({0} {1})", groupItem.Count(), Translate.Text("Accounts").ToLowerInvariant())</span>
+                    </p>
+
+                    @foreach (EstimateAccountDetail itemDetail in groupItem)
+                    {
+                        int cnt = 1;
+                        bool IsSelected = itemDetail.ContractAccNo == Model.SelectedContractAccNo;
+
+                        <div class="m43-accountsel__accounts-list" data-accounts="true">
+                            <div class="form-field">
+                                <p class="form-field__radio form-field__radio--accselector">
+                                    <label>
+                                        <input aria-label="SelectedAccountNumber_@cnt" @(IsSelected ? "checked='checked' " : " ") class="form-field__input accnt-radiobtn form-field__input--radio _selected_@itemDetail.ContractAccNo" data-acc-cat="N-Commercial" data-account-category-type="1" data-input="radio" data-legacy-acc-number="E-100710" data-legacy-bp-number="@itemDetail.BusinessPartnerNo" data-bp-number="@itemDetail.BusinessPartnerNo" data-bp-name="@itemDetail.BusinessPartnerName" id="SelectedAccountNumber_@cnt" name="SelectedAccountNumber" type="radio" value="@itemDetail.ContractAccNo">
+                                        <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                                            <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                                                <span class="m43-accountsel__header">
+                                                    <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                                        <span class="inline-block" dir="@dir">@itemDetail.BusinessPartnerName</span>
+                                                        @*<span dir="@dir" class="m43-accountsel__status m43-accountsel__status--active">Active</span>
+                                                            <span class="hidden accountselector-ownertype" style="float:right;font-weight:normal;">Owner</span>*@
+                                                    </span>
+                                                    <span class="m43-accountsel__details">
+                                                        <abbr title="@Translate.Text("Account")">@Translate.Text("Acc")</abbr>: <span dir="@dir" data-acc-detail="acc_number">@itemDetail.ContractAccNo</span><span class="aria-only"> | </span>
+                                                    </span>
+                                                    @*<span class="m43-accountsel__details">
+                                                            Type: <span dir="@dir" data-acc-detail="acc_type">Non-residential</span><span class="aria-only"> | </span>
+                                                        </span>
+                                                        <span class="m43-accountsel__details">
+                                                            Premise Number: <span dir="@dir" data-acc-detail="acc_premise">E-100710</span><span class="aria-only"> | </span>
+                                                        </span>*@
+                                                    <span class="m43-accountsel__details">
+                                                        @Translate.Text("Business Partner"): <span dir="@dir" data-acc-detail="acc_businesspartner">@itemDetail.BusinessPartnerNo</span><span class="aria-only"> | </span>
+                                                    </span>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </label>
+                                    @*<input id="Accounts_0__AccountNumber" name="Accounts[0].AccountNumber" type="hidden" value="2001194013">
+                                        <input id="Accounts_0__Active" name="Accounts[0].Active" type="hidden" value="True">
+                                        <input id="Accounts_0__Balance" name="Accounts[0].Balance" type="hidden" value="0">
+                                        <input id="Accounts_0__BusinessPartnerNumber" name="Accounts[0].BusinessPartnerNumber" type="hidden" value="10007120">
+                                        <input id="Accounts_0__PremiseNumber" name="Accounts[0].PremiseNumber" type="hidden" value="60009026">
+                                        <input id="Accounts_0__CustomerPremiseNumber" name="Accounts[0].CustomerPremiseNumber" type="hidden" value="E-100710">*@
+                                </p>
+                                <div id="description-for-radios_group1" class="form-field__messages"></div>
+                            </div>
+                        </div>
+                        cnt++;
+                    }
+
+                </div>
+            }
+        }
+    </div>
+    <!-- output a paging control that lets the user navigation to the previous page, next page, etc -->
+
+    <div id="myPager" class="centerpage">
+
+    </div>
+
+    <div class="m49-no-matches">
+        @Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)
+    </div>
+
+    @*<script>
+            docReady(function () {
+
+                $('#m49-list-filter--input').off().on('keypress', function (e) {
+
+                    if (e.keyCode == 13) {
+                        search(true);
+                        return false;
+                    }
+
+                });
+                function search(force) {
+                    var existingString = $("#m49-list-filter--input").val();
+                    $.get('/api/sitecore/Renderings/AccountSelector?contextid=' + '{BF44CE13-AC92-4F57-A139-4D7D4DCCA919}' + '&q=' + existingString, function (data) {
+                        $('#m43-account-list').html(data);
+                        $('.pager_update').click();
+                    });
+                }
+
+                function clearFilter() {
+                    $.get('/api/sitecore/Renderings/AccountSelector?contextid=' + '{BF44CE13-AC92-4F57-A139-4D7D4DCCA919}' + '&q=' + "", function (data) {
+                        $('#m43-account-list').html(data);
+                        $('.pager_update').click();
+                    });
+                }
+
+                jQuery('#search').off().on('click', function (e) {
+                    e.preventDefault();
+                    search(true);
+                    return false;
+                });
+                jQuery('.m49-list-filter-reset-button').on('click', function () {
+                    $("#m49-list-filter--input").val('');
+                    clearFilter();
+                });
+                jQuery('#pager').on('click', 'a', function () {
+                    if (this.href != '' && this.href != null) {
+                        jQuery.ajax({
+                            url: this.href,
+                            type: 'GET',
+                            cache: false,
+                            success: function (result) {
+                                $('#m43-account-list').html(result);
+
+                                $('.pager_update').click();
+                                $('#m43-account-list').animate({
+                                    scrollTop: 0
+                                }, 600);
+                            }
+                        });
+                    }
+                    return false;
+                });
+
+                if ('False' == 'True') {
+                    jQuery('.m49-no-matches').show();
+                }
+            });
+
+        </script>*@
+
+
+    <script>
+
+        docReady(function () {
+
+
+            /**if list is empty**/
+            if ('@isempty' == 'True') {
+                jQuery('.m49-no-matches').show();
+            }
+        })
+    </script>
+
+</div>
+
+
+
+<input type="hidden" value="@Model.SearchText" class="hiddenSearchText" />
+
+
+<script>
+    docReady(function () {
+        jQuery(".accnt-radiobtn").click(function () {
+            jQuery(".m49-list-filter--input").val("");
+        });
+    })
+</script>

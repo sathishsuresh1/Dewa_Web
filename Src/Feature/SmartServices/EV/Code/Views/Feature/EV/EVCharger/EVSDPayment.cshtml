@@ -1,0 +1,200 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Feature.EV.Models.EVDashboard
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@model EVSDPaymentViewModel
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+@Html.Sitecore().Placeholder("j14/page-title")
+
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j14/step-tracker")
+        @Html.Sitecore().Placeholder("j14/intro-text")
+    </div>
+</div>
+@if (!(bool)ViewBag.status)
+{
+    <div style="margin-top:60px;">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12  grid__column--form">
+                <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                    <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                    <div class="m40-status-message__text" dir="@dir">@ViewBag.ErrorMessage</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m42-keyvalue">
+                <dl class="mb24">
+                    @if (!string.IsNullOrWhiteSpace(Model.Fullname))
+                    {
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("FullName")<span class="floatRight mobile-hide">:</span></dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.Fullname</dd>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Trafficfileno))
+                    {
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("EV TC Field Label")<span class="floatRight mobile-hide">:</span></dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.Trafficfileno</dd>
+                    }
+
+                </dl>
+            </div>
+        </div>
+    </div>
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+    <form id="form-bill-selector"
+          action="#" class="form"
+          method="POST" novalidate="novalidate"
+          billform="true" form-skipvalidation="true">
+        @Html.AntiForgeryToken()
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+
+                @if (Model != null && Model.Vehiclelists != null && Model.Vehiclelists.Count.Equals(1))
+                {
+                    <h3 class="text__section-subtitle">@Translate.Text("EVDeeplink.Vehicletopaysecuritydepositandactivatetheaccount")</h3>
+                    <div id="m44-account-list">
+                        @Html.HiddenFor(m => m.accounts)
+                        @{var vehicle = Model.Vehiclelists.FirstOrDefault();}
+                        <div class="m44-bill-selector__partner">
+                            <div class="m44-bill-selector__accounts-list">
+                                <div class="m44-bill-selector__checkbox-wrapper">
+                                    <div class="form-field form-field--toggles">
+                                        <div class="form-field__checkbox form-field__checkbox--billselector ">
+                                            <label>
+                                                <span class="m44-bill-selector__account m44-bill-selector__account--select" data-acc-detail="wrapper" data-bill-amount="@vehicle.Sdamount">
+                                                    <span class="m44-bill-selector__header">
+                                                        <span class="m44-bill-selector__name" data-acc-detail="acc_name">
+                                                            <span class="inline-block" dir="ltr">
+                                                                @if (!string.IsNullOrWhiteSpace(Model.Carregistrationregion) && Model.Carregistrationregion.Equals("DXB"))
+                                                                {
+                                                                    if (Sitecore.Context.Culture.TextInfo.IsRightToLeft)
+                                                                    {
+                                                                        @((vehicle.Platecode + " " + vehicle.Platenumber) + " " + Translate.Text("Vehicle Number"))
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @(Translate.Text("Vehicle Number") + " " + (vehicle.Platecode + " " + vehicle.Platenumber))
+                                                                    }
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (Sitecore.Context.Culture.TextInfo.IsRightToLeft)
+                                                                    {
+                                                                        @((vehicle.Platecode) + " " + Translate.Text("Vehicle Number"))
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @(Translate.Text("Vehicle Number") + " " + (vehicle.Platecode))
+                                                                    }
+
+                                                                }
+
+                                                            </span>
+                                                        </span>
+                                                    </span>
+                                                    <strong class="m44-bill-selector__details green" data-numeric-format="0,0.00">
+                                                        @vehicle.Totalamount @Translate.Text("AED")
+                                                    </strong>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div id="description-for-checkboxes_group1_multi" class="form-field__messages"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m44-bill-selector__total">
+                            <!-- m42-key-value--start -->
+                            <div class="m42-keyvalue">
+                                <dl>
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt m44-bill-selector--total-accounts-EN">
+                                        @Translate.Text("Total")
+                                    </dt>
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt m44-bill-selector--total-accounts-AR">
+                                        @Translate.Text("Total amount Due")
+                                    </dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail="">
+                                        <span class="m42-keyvalue__value--currency--amount" data-numeric-format="0,0.00">@vehicle.Totalamount</span>
+                                        <span class="m42-keyvalue__value--currency--suffix">@Translate.Text("AED")</span>
+                                    </dd>
+
+                                </dl>
+                            </div>
+                            <!-- m42-key-value--end -->
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        docReady(function () {
+                            var handleBillSelection = function (e) {
+                                jQuery('input[name="accounts"]').val('@vehicle.Platenumber');
+                                return true;
+                            };
+                            jQuery("#form-bill-selector").submit(handleBillSelection);
+                        });
+                    </script>
+                }
+                else
+                {
+                    <div class="m44-bill-selector m44-bill-selectorEV" data-component="m44-bill-selector" data-bill-total="" data-currency-suffix="@Translate.Text("AED")" data-payment-max="@PaymentConstants.MaximumAllowedPaymentAmount">
+                        <h3 class="text__section-subtitle">@Translate.Text("EVDeeplink.Select Cards to Activate")</h3>
+                        <a class="link m44-bill-selector__deselect" href="#" data-state="1" data-select="@Translate.Text("Select all")" data-deselect="@Translate.Text("Deselect all")">@Translate.Text("Deselect all")</a>
+
+                        <div id="m44-bill-selector-list" class="ajax-placeholder m44-bill-selector-list-placeholder">
+                            @Html.Partial("~/Views/Feature/EV/EVCharger/EVSDPayment_SubList.cshtml", Model)
+                        </div>
+                        <span class="pager_update" data-pager-update="true"></span>
+
+                    </div>
+                    <script type="text/javascript">
+                        docReady(function () {
+                            beforesendfnc();
+                            var handleBillSelection = function (e) {
+                                var selection = [];
+                                $(dewaGlobal.billAccountsListSelected).each(function (i, obj) {
+                                    selection.push(obj.Platenumber);
+                                });
+                                jQuery('input[name="accounts"]').val(selection);
+
+                                return true;
+                            };
+                            jQuery("#form-bill-selector").submit(handleBillSelection);
+                        });
+                    </script>
+                }
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                <button id="btnSubmit" type="submit" data-m44-next="" aria-label="Next" class="button button--primary button--next">@Translate.Text("Next")</button>
+            </div>
+        </div>
+    </form>
+}
+
+
+<script type="text/javascript">
+    docReady(function () {
+        jQuery('#noaccounts').hide();
+        if (!jQuery("input.form-field__input--checkbox:checkbox").length) {
+            jQuery('form[billform="true"]').hide();
+            jQuery('#altpayments').hide();
+            jQuery('#noaccounts').show();
+        }
+    });
+</script>

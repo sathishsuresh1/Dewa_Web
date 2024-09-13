@@ -1,0 +1,55 @@
+﻿@using System.Globalization
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.QuickImageLinksSection
+
+@if (Model != null)
+{
+    string ImageUrl = Model.BackgroundImage != null ? Model.BackgroundImage.Src : "../../images/quick_toolsBG.jpg";
+    <div class="m18-quick-tools flex-center" data-component="m18-quick-tools" style="background-image: url('@ImageUrl');">
+        <div class="m18-quick-tools--container">
+            <div class="m18-quick-tools--wrapper">
+                <div class="m18-quick-tools--panelouter">
+                    <div class="m18-quick-tools--panel m18-quick-tools--panel--2">
+                        <div class="m18-quick-tools--title">
+                            @Html.Glass().Editable(x => x.Header)
+                        </div>
+                        <div class="m18-quick-tools--subtitle">
+                            @Html.Raw(Html.Glass().Editable(x => x.SubHeader))
+                        </div>
+                        <div class="m18-quick-tools--content">
+                            @foreach (var quickImageItem in Model.QuickM7Teaser)
+                            {
+                                if (quickImageItem != null && quickImageItem.Link != null && quickImageItem.Image != null)
+                                {
+                                    using (Html.Glass().BeginRenderLink(quickImageItem, x => x.Link, new { @class = "m7-teaser m7-teaser--variant" }))
+                                    {
+                                        <div class="m7-teaser__image">
+                                            <div class="m7-teaser__image-item_wrapper">
+                                                @Html.Glass().RenderImage(quickImageItem, x => x.Image, new { @class= "m7-teaser__image-item", @alt = quickImageItem.Image.Alt, title = quickImageItem.Image.Title }, true, false)
+                                            </div>
+                                        </div>
+                                        <div class="m7-teaser__content">
+                                            <div>
+                                                @if (!string.IsNullOrWhiteSpace(quickImageItem.Header))
+                                                {
+                                                <h3 class="teaser__title">@Html.Glass().Editable(quickImageItem, x => x.Header)</h3 >
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(quickImageItem.Subheader))
+                                                {
+                                                <p class="m7-teaser__copy teaser__copy">@Html.Raw(Html.Glass().Editable(quickImageItem, x => x.Subheader))</p>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

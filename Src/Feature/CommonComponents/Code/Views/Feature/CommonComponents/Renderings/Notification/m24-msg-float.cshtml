@@ -1,0 +1,95 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc;
+@using DEWAXP.Feature.CommonComponents.Models.Header
+@using Sitecore.Data.Items
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    /**/
+
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    // Sitecore gives both value in minute
+    var notificationData = _contentRepository.GetItem<NotificationModel>(new GetItemByIdOptions(Guid.Parse(_scPageItemId.BottomNotificationConfigId)));
+    // Sitecore gives both value in minute
+    var TimePeriodinSecond = notificationData != null && !string.IsNullOrEmpty(notificationData.TimePeriod) ? (Convert.ToDouble(notificationData.TimePeriod) * 60).ToString() : "10";
+    var RecurringTimeInMinute = notificationData != null && !string.IsNullOrEmpty(notificationData.RecurringTime) ? notificationData.RecurringTime : "30";
+    var notificationLink = notificationData.NotificationLink != null ? notificationData.NotificationLink.Url : "#";
+    var notificationtype = notificationData.NotificationType != null ? notificationData.NotificationType : string.Empty;
+    var notificationtitle = notificationData.Title != null ? notificationData.Title : string.Empty;
+    var showClosebutton = notificationData.ShowCloseButton;
+    var showPermenant = notificationData.ShowPermenant;
+    var icon = notificationData.Icon.Value;
+
+    var currentitem = _contextRepository.GetCurrentItem<Item>();
+    var pageNotification = currentitem.Fields["Show Notification"];
+    bool notificationStatus = false;
+    var cookie = Request.Cookies["dewa_m24"];
+    if (notificationData != null && notificationData.Enabled)
+    {
+        notificationStatus = true;
+    }
+    else
+    {
+        if (pageNotification != null && pageNotification.Value == "1")
+        {
+            notificationStatus = true;
+        }
+    }
+    if (notificationStatus && notificationData != null && ((cookie != null && !cookie.Value.ToString().Equals("1")) || cookie == null))
+    {
+        if (showPermenant || (!showPermenant && notificationData.StartTime != null && notificationData.EndTime != null && DateTime.Now >= notificationData.StartTime && DateTime.Now <= notificationData.EndTime))
+        {
+
+            //data-timeout - We need to enter value in Second , data-time-repeat - We need to enter value in Minute
+            <!--Bottom Notification-->
+            <div class="m24-msg-float m24-msg-float--active noprint" data-component="m24-msg-float" data-redirect-url="@LinkHelper.GetItemUrl("{28247855-B85F-40E9-8D1F-A2CD19C72416}")">
+                <div class="m24-msg-float--wrapper_outer">
+                    <div class="m24-msg-float--wrapper">
+                        <div class="m24-msg-float--text">
+                            @Html.Raw(notificationData.Description)
+                        </div>
+                        <div class="m24-msg-float--buttons">
+                            @using (Html.Glass().BeginRenderLink(notificationData, x => x.NotificationLink, new { @class = "button button--outline button--small" }))
+                            {
+                                @Translate.Text("bottom_Notif_RedirectBtnText")
+                            }
+                            @if (showClosebutton)
+                            {
+                                <button class="button button--secondary button--small m24-msg-float--close">@Translate.Text("bottom_Notif_CloseBtnText")</button>
+
+                                @*<script type="text/javascript">
+                                                            docReady(function () {
+                                                                var _hbn = readCookie("hbn");
+                                                                HideNotification(_hbn);
+                                                            })
+
+                                                            function HideNotification(h) {
+
+                                        if (h != null && h != undefined && h == 1) {
+                                            createCookie("hbn", 1, 10000);
+                                            jQuery(".m24-msg-float--close").closest(".m24-msg-float").removeClass("m24-msg-float--active");
+                                        } else {
+                                            eraseCookie("hbn");
+                                            jQuery(".m24-msg-float--close").closest(".m24-msg-float").addClass("m24-msg-float--active");
+                                        }
+                                    }
+                                                            </script>*@
+                            }
+                        </div>
+
+                        <div class="m24-msg-float--closebtn icon-cancel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Bottom Notification-->
+
+        }
+    }
+}

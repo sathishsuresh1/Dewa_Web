@@ -1,0 +1,189 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Feature.GeneralServices.Models.Miscellaneous.TrackMiscellaneousModel
+@{
+    /**/
+
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("j7/m26-page-title")
+        </div>
+    </div>
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="j171-masar">
+                <div class="form-field form-field--text" id="byrequestnumber">
+                    <span class="form-field__input-wrapper j171-masar--search">
+                        <input class="form-field__input form-field__input--text" id="form-field-tdzemk8e2" required="" maxlength="12" name="text" type="tel" data-input-numbers value="@Model.ApplicationNO" aria-describedby="description-for-tdzemk8e2" data-parsley-errors-container="#description-for-tdzemk8e2" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+
+                        <a href="javascript:void(0)" class="button button--primary btSearchh" role="button">@Translate.Text("Search")</a>
+
+                    </span>
+                    <div id="description-for-tdzemk8e2" class="form-field__messages red">
+                    </div>
+                </div>
+                @if (Model.trackMiscellaneousDetails != null && Model.trackMiscellaneousDetails.Count > 0)
+                {
+                <div class="masar-sectiontitle">@Translate.Text("Masar.Requests")</div>
+                    var count = 0;
+
+                    foreach (var item in Model.trackMiscellaneousDetails)
+                    {
+                        if (!string.IsNullOrEmpty(item.CodeGroupCoding))
+                        {
+                <div class="m70-status-cs--sectiontrack mb24 @(count > 0 ? "closed" : "") progress">
+                    <div class="m70-status-cs--sectiontrack-heading">
+                        <div class="m70-status-cs--sectiontrack-icon icon-b-receipt">
+                        </div>
+                        <div class="m70-status-cs--sectiontrack-headingdetails">
+                            <div class="m70-status-cs--sectiontrack-headingtitle">
+                                @Translate.Text("SS_T_TestingRequest")
+                            </div>
+                            <div class="m70-status-cs--sectiontrack-headingsubtitle">
+                                @item.CodeText
+                            </div>
+                            <div class="m70-status-cs--sectiontrack-headingid">
+                                @item.NotificationNumber
+                            </div>
+                        </div>
+                        <div class="m70-status-cs--sectiontrack-headingstatus closed">
+                            @item.ShortText
+                        </div>
+                        <div class="m70-status-cs--sectiontrack-toggle">
+                            <span class="aria-only">Toggle Section</span>
+                        </div>
+                    </div>
+                    <div class="m70-status-tracker m70-status-tracker-verticalnew">
+                        <div class="m70-status-tracker--item">
+                            <div class="m70-status-tracker--item_inner">
+                                <div class="m70-status-tracker--item_title">
+                                    <div class="m70-status-tracker--item_icon icon-tick"></div>
+                                    @Translate.Text("SS_T_RequestSubmitted")
+                                </div>
+                                <div class="m70-status-tracker--item_desc" style="direction:ltr">
+                                    @{
+                                                    var createDate = !string.IsNullOrEmpty(item.CreateDate) ? DateTime.ParseExact(item.CreateDate + " " + item.NotificationTime, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMM yyyy hh:mm tt") : string.Empty;
+                                                    if (direction == "rtl")
+                                                    {
+                                                        //createDate = createDate.Replace("Jan", "يناير").Replace("Feb", "فبراير").Replace("Mar", "مارس").Replace("Apr", "أبريل").Replace("May", "مايو").Replace("Jun", "يونيو").Replace("Jul", "يوليو").Replace("Aug", "أغسطس").Replace("Sep", "سبتمبر").Replace("Oct", "أكتوبر").Replace("Nov", "نوفمبر").Replace("Dec", "ديسمبر").Replace("AM", "صباحا").Replace("PM", "مساء");
+                                                    }
+                                    }
+                                    @createDate
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m70-status-tracker--item">
+                            <div class="m70-status-tracker--item_inner">
+                                <div class="m70-status-tracker--item_title green">
+                                    <div class="m70-status-tracker--item_icon icon-tick"></div>
+                                    @item.ShortText
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <span style="display:none">@(count++)</span>
+
+                        }
+                    }
+
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).on('click', '.btSearchh', function (e) {
+        //BizName.replace(/[^a-zA-Z0-9]/g, '-');
+        var searchVal = $('#form-field-tdzemk8e2').val();
+
+        searchVal = searchVal.replace(/[^0-9]/g, '');
+
+        if (searchVal != '') {
+            $('#description-for-tdzemk8e2').html('');
+
+            var href = window.location.href;
+
+            var replaceStr = '';
+            if (href != '' && href.indexOf('&appno=') > -1) {
+
+                replaceStr = href.substring(href.indexOf('&appno='), href.length);
+
+            }
+
+            if (replaceStr != '') {
+
+                href = href.replace(replaceStr, '');
+
+            }
+            if (href.toLowerCase().indexOf('?apptype=') > - 1)
+                href += '&appno=' + searchVal;
+            else
+                href = '?appno=' + searchVal;
+
+            $(this).attr('href', href);
+            window.location.href = href;
+        }
+        else {
+
+            var href = window.location.href;
+
+            var replaceStr = '';
+            if (href != '' && href.indexOf('&appno=') > -1) {
+
+                replaceStr = href.substring(href.indexOf('&appno='), href.length);
+
+            }
+
+            if (href != '' && href.indexOf('?appno=') > -1) {
+
+                replaceStr = href.substring(href.indexOf('?appno='), href.length);
+
+            }
+
+            if (replaceStr != '') {
+
+                href = href.replace(replaceStr, '');
+
+            }
+
+            $(this).attr('href', href);
+            window.location.href = href;
+        }
+
+    });
+
+
+    $(document).ready(function () {
+
+        $('.m70-status-cs--sectiontrack-toggle').on('click', function () {
+            var clickedItem = $(this).closest('.m70-status-cs--sectiontrack');
+            $('.m70-status-cs--sectiontrack').not(clickedItem).addClass('closed');
+            clickedItem.toggleClass('closed');
+        });
+
+        $('#form-field-tdzemk8e2').keypress(function (e) {
+            if (e.which == 13) {
+                $('.btSearchh').click();
+            }
+        });
+
+
+
+    });
+
+
+
+
+
+</script>

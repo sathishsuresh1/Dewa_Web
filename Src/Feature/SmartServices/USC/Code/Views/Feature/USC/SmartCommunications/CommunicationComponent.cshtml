@@ -1,0 +1,350 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Feature.USC.Models.SmartCommunications
+@using DEWAXP.Foundation.Content
+@model SmartCommunicationFolder
+@{
+    /**/
+
+    List<string> placeholders = new List<string>();
+    var BillingUrl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J24_BILLING_COMPLAINT);
+    var errorMsg = Translate.Text("scomVTcustomerTimings");
+    var thxYou = Translate.Text("scomThankyou");
+}
+@if (Model != null)
+{
+    <div class="j105-drrg">
+        <div class="m66-preloader j105-drrg--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="maincontent">
+        <div class="grid relative">
+            <div class="m11-tools" data-component="m11-tools">
+                <div class="icon-pod m11-tools--accessibility">
+                </div>
+                @Html.Partial("~/Views/Feature/USC/SmartCommunications/Partial/Accessibility.cshtml")
+                @Html.Action("SmartCommunicationsLanguageSwitcher", "Renderings")
+            </div>
+        </div>
+
+        <div class="grid main">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+
+                    <div class="m1-pagetitle">
+                        <div class="m1-pagetitle--title">
+                            @Model.Title
+                        </div>
+                        <div class="m1-pagetitle--subtitle">
+                            @Model.SubTitle
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+
+                    <div class="m2-card-form" data-component="m2-card-form" data-realCD="600">
+                        @foreach (SmartCommunicationPersona persona in Model.Personas)
+                        {
+                            if (persona != null)
+                            {
+                                <div class="m2-card-form--primarywrapper">
+                                    <div class="m2-card-form--primary m2-card-form--trigger" data-inquiryType="@persona.InquiryType" data-cardTarget="#@(persona.CardTarget)">
+                                        <div class="m2-card-form--primaryinner">
+                                            <img alt="" src="@(persona.BackgroundImage != null&& !string.IsNullOrWhiteSpace(persona.BackgroundImage.Src) ?persona.BackgroundImage.Src : string.Empty)">
+                                            <div class="m2-card-form--primary_title">
+                                                @persona.PersonaName
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <div class="m2-card-form-cardStash">
+                            @foreach (SmartCommunicationPersona persona in Model.Personas)
+                            {
+                                if (persona != null)
+                                {
+                                    var count = 0; var personacount = !string.IsNullOrWhiteSpace(persona.TileCount) ? Convert.ToInt32(persona.TileCount) : 2;
+                                    <div class="m2-card-form-card@(personacount==3?" m2-card-form-card--3":"") level-1" id="@persona.CardTarget">
+                                        <div class="m2-card-form-card-body">
+                                            <div class="m2-card-form-card-header">
+                                                <div class="m2-card-form-card-title">
+                                                    @persona.Description
+                                                </div>
+                                                <div class="m2-card-form-card-close icon-cancel" data-closeCard="true"></div>
+                                            </div>
+
+                                            <div class="m2-card-form-card-content">
+                                                @foreach (SmartCommunicationServiceCategory category in persona.Categories)
+                                                {
+                                                    count++;
+                                                    if (count == 1)
+                                                    {
+                                                        @:<div class="m2-card-form-card-row">
+                                                        }
+                                                        <div class="m2-card-form-card-item">
+                                                            <div class="m2-card-form-card-item_inner">
+                                                                <div class="m2-card-form-card-itemTitle">
+                                                                    @category.Title
+                                                                </div>
+                                                                <div class="m2-card-form-card-itemContent">
+                                                                    @foreach (SmartCommunicationServices service in category.Categories)
+                                                                    {
+                                                                        if (service.RedirectLink)
+                                                                        {
+
+                                                                            if (service.URL.Type == Glass.Mapper.Sc.Fields.LinkType.Internal)
+                                                                            {
+                                                                                <div class="m2-card-form-card-itemLink m2-card-form--triggerModal" data-iframeContent="@(service.URL.Url+"?se=0x00x&mobid=cMDyFwiSeqD3h75tNCf87ENPvnrbv2S8ql3i0Bq0R9s=")">
+                                                                                    @Html.Glass().RenderImage(service, x => x.BackgroundImage, new { @alt = service.BackgroundImage.Alt, title = service.Title, @class = "" }, true, false)
+                                                                                    @Html.Raw(service.Title)
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @*using (Html.Glass().BeginRenderLink(service, x => x.URL, attributes: new { @class = "m2-card-form-card-itemLink" }))
+                                                                                    {
+                                                                                        @Html.Glass().RenderImage(service, x => x.BackgroundImage, new { @alt = service.BackgroundImage.Alt, title = service.Title, @class = "" }, true, false)
+                                                                                        @Html.Raw(service.Title)
+                                                                                    }*@
+                                                                                <div class="m2-card-form-card-itemLink m2-card-form--triggerModal" data-iframeContent="@(service.URL.Url)">
+                                                                                    @Html.Glass().RenderImage(service, x => x.BackgroundImage, new { @alt = service.BackgroundImage.Alt, title = service.Title, @class = "" }, true, false)
+                                                                                    @Html.Raw(service.Title)
+                                                                                </div>
+                                                                            }
+
+                                                                        }
+                                                                        if (service.IsCardType)
+                                                                        {
+                                                                            if (!placeholders.Contains(service.CardTarget) && !string.IsNullOrWhiteSpace(service.CardTarget))
+                                                                            {
+                                                                                placeholders.Add(service.CardTarget);
+                                                                            }
+                                                                            if (string.IsNullOrWhiteSpace(service.ServiceCode))
+                                                                            {
+                                                                                <div class="m2-card-form--trigger m2-card-form-card-itemLink" data-inquiryType="@(service.InquiryType)" data-cardTarget="#@(service.CardTarget)">
+                                                                                    <img alt="" src="@(service.BackgroundImage != null && !string.IsNullOrWhiteSpace(service.BackgroundImage.Src) ? service.BackgroundImage.Src : string.Empty)">
+                                                                                    @Html.Raw(service.Title)
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="m2-card-form-card-itemLink card issuTokenCard" data-servicecode="@(service.ServiceCode)" id="Link_@service.CardTarget" data-inquiryType="@(service.InquiryType)" data-cardTarget="#@(service.CardTarget)">
+                                                                                    <img src="@(service.BackgroundImage != null && !string.IsNullOrWhiteSpace(service.BackgroundImage.Src) ? service.BackgroundImage.Src : string.Empty)">
+                                                                                    @Html.Raw(service.Title)
+                                                                                </div>
+                                                                                <div class="m2-card-form--trigger issueTokenForm hidden" id="Form_@service.ServiceCode" data-cardtarget="#@(service.CardTarget)"></div>
+                                                                            }
+
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        if (count == personacount)
+                                                        {
+                                                            count = 0;
+                                                        @:</div>
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="m2-card-form-card-footer">
+                                            <div class="m2-card-form-card-footertext">
+                                                @Translate.Text("Tap outside to close")
+                                            </div>
+
+                                            <div class="m11-tools" data-component="m11-tools">
+                                                <div class="icon-pod m11-tools--accessibility">
+                                                </div>
+                                                @Html.Partial("~/Views/Feature/USC/SmartCommunications/Partial/Accessibility.cshtml")
+                                                @Html.Action("SmartCommunicationsLanguageSwitcher", "Renderings")
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                            @foreach (string placeholder in placeholders)
+                            {
+                                if (!string.IsNullOrWhiteSpace(placeholder))
+                                {
+                                    @Html.Sitecore().Placeholder(placeholder)
+
+                                }
+                            }
+
+                        </div>
+
+                        <div class="m39-modal m39-modal-full m2-card-form--modal" data-component="m39-modal">
+                            <button data-trigger="true" class="m39-modal__trigger"></button>
+                            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                                <div class="m39-modal__dialog">
+                                    <div class="m39-modal__header">
+                                        <button data-close="true" class="m39-modal__button--close" id="_r8ndg43x3_close" aria-controls="_r8ndg43x3_content">@Translate.Text("sc.Close")</button>
+                                    </div>
+                                    <div class="m39-modal__content">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay"> </div>
+                        </div>
+
+                        <div class="m2-card-form-mask" data-closeCard="true">
+                        </div>
+
+
+                        <div id="consumtionmodalpopup" class="m2-card-form-card-itemLink m2-card-form--triggerModal" data-iframecontent="@BillingUrl?se=0x00x&amp;mobid=cMDyFwiSeqD3h75tNCf87ENPvnrbv2S8ql3i0Bq0R9s=">
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+}
+
+    <script type="text/javascript">
+    var isFrame = getParameterByName('isFrame');
+    var branchcodeparam = getParameterByName('b');
+    if (document.cookie.match(/^(.*;)?\s*uscbranchcode\s*=\s*[^;]+(.*)?$/) != null && branchcodeparam==null) {
+        branchcodeparam = document.cookie.split('uscbranchcode=srv=').pop();
+        if (branchcodeparam.indexOf(";") > 0) {
+            branchcodeparam = branchcodeparam.substring(0, branchcodeparam.indexOf(";"));
+        }
+    }
+
+    if ((document.cookie.match(/^(.*;)?\s*uscbranchcode\s*=\s*[^;]+(.*)?$/) == ""
+        || document.cookie.match(/^(.*;)?\s*uscbranchcode\s*=\s*[^;]+(.*)?$/) == null)
+        && branchcodeparam != null)
+    {
+        var date = new Date(2147483647 * 1000).toUTCString();
+        var expiry = '; expires=' + date;
+        document.cookie = "uscbranchcode=srv=" + branchcodeparam + expiry + '; path=/';
+    }
+    if (isFrame != null && isFrame.toLocaleLowerCase() == "true") {
+        var uri = window.location.toString();
+        if (uri.indexOf("?") > 0) {
+            var clean_uri = uri.substring(0, uri.indexOf("?"));
+            clean_uri = clean_uri + "?b=" + branchcodeparam;
+            window.history.replaceState({}, document.title, clean_uri);
+        }
+        setTimeout(function () {
+            jQuery("#consumtionmodalpopup.m2-card-form--triggerModal").trigger("click");
+        }, 500);
+    }
+    else {
+        var uri = window.location.toString();
+        if (uri.indexOf("?") > 0) {
+            var clean_uri = uri.substring(0, uri.indexOf("?"));
+            clean_uri = clean_uri + "?b=" + branchcodeparam;
+            window.history.replaceState({}, document.title, clean_uri);
+        }
+    }
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\\/g, ' '));
+    }
+    AddForgeryTokenByElement = function (data, element) {
+        data.__RequestVerificationToken = jQuery(element + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+    $('.m2-card-form--modal').find('.m39-modal__button--close').off('click.m2').on('click.m2', function () {
+        //var crmSrc = $('.m2-card-form--modal').find('.m39-modal__content').find("iframe").attr('src');
+        if ($('.m2-card-form--modal').find('.m39-modal__content').find("iframe").attr('src').indexOf("crm") > -1) {
+            $('.m2-card-form--modal').find('.m39-modal__content').find("iframe").attr('src', 'https://crm.dewa.gov.ae/irj/portal/usclogoff');
+        }
+        jQuery.ajax({
+            url: "/api/sitecore/SmartCommunications/LogOut",
+            type: 'GET',
+            datatype: 'application/json',
+            success: function (response) {
+                if (response != null && response.Success) {
+                    console.log(response.redirectUrl);
+                    if (response.RedirectUrl != 'undefined' && response.RedirectUrl != "") {
+                        window.location.href = response.RedirectUrl + "?b=" + branchcodeparam;
+                    }
+                    else
+                        window.location.reload();
+                    //Console.log("success");
+                    //jQuery("#successdiv").click();
+                }
+            }
+        });
+    });
+
+    jQuery('.issuTokenCard').on("click", function () {
+        var _serviceCode = jQuery(this).attr("data-servicecode");
+        var _branchCode = getParameterByName('b');
+       
+        $nxtDiv = jQuery(this);
+        jQuery.ajax({
+            url: '@Url.Action("VideoCallToken")?v=111&b=' + _branchCode + '&s=' + _serviceCode + '',
+            type: 'GET',
+            datatype: 'application/json',
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                //alert(jQuery('[data-cardtarget="#VideoCallToken-palceholder"]').attr("data-servicecode"));
+                if (response != null && response.Status) {
+                    jQuery("#tokenForm").show();
+                    jQuery(".m2-card-form-card-token_title").show();
+                    setTimeout(function () {
+                        jQuery("#VideoCallToken-palceholder .m2-card-form-card-heading").show();
+                        jQuery(".nexttoken").html(response.NextToken);
+                        jQuery("#NextToken").val(response.NextToken);
+                        jQuery("#WaitingToken").val(response.WaitingToken);
+                        jQuery(".waitingtokentext").html(response.WaitingTokenTxt);
+                        $nxtDiv.next('.issueTokenForm').trigger("click");
+
+                    }, 100);
+                }
+                else {
+                    $nxtDiv.next('.issueTokenForm').trigger("click");
+                    if (response != null && response.ErrorCode == "30") {
+                          jQuery(".waitingtokentext").html('<div style="color:red !important">@thxYou </br> </br> @errorMsg</div>');
+                    }
+                    else {
+                        jQuery(".waitingtokentext").html('<div style="color:red !important">' + response.NextToken + '</div>');
+                    }
+                    jQuery("#tokenForm").hide();
+                    jQuery("#VideoCallToken-palceholder .m2-card-form-card-heading").hide();
+                    jQuery(".m2-card-form-card-token_title").hide();
+                }
+            }
+        });
+    });
+    </script>

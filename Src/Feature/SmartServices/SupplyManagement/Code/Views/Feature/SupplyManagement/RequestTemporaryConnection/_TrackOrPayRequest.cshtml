@@ -1,0 +1,162 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models.Payment
+@using DEWAXP.Foundation.Content.Models.RequestTempConnection
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Feature.SupplyManagement.Models.RequestTempConnection
+@model TrackTempConnectionRequestItem
+@{
+    var page = (RequestTempConnectionPage)ViewBag.Page;
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+
+<div class="box box--1">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                @Html.Sitecore().Placeholder("j75/m26-page-title")
+            </div>
+        </div>
+    </div>
+</div>
+<div class="m41-tabs-box" data-component="m41-tabs-box">
+    <div class="m41-tabs-box__tabs">
+        <ul class="m41-tabs-box__tab-items">
+            <li class="m41-tabs-box__tab-item">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J75_NEW_REQUEST)" class="m41-tabs-box__tab-link">@Translate.Text("j75.NewRequest")</a>
+            </li>
+            <li class="m41-tabs-box__tab-item">
+                <a href="#" class="m41-tabs-box__tab-link m41-tabs-box__tab-link--active">@Translate.Text("j75.TrackOrPayRequest")</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--6 grid__column--text">
+            <h2 class="text__section-subtitle">@Translate.Text("Please note")</h2>
+            <p class="text__content-copy">@Html.Glass().Editable(page, x => x.Content)</p>
+        </div>
+        <div class="grid__column grid__column--6">
+            <div class="request-tracker" data-helper="toggle-menu" data-toggle-breakpoint='l' data-toggle-auto-open="true">
+                <h3 class="request-tracker__title">@Sitecore.Globalization.Translate.Text("Application Details")</h3>
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="request-tracker__items">
+                    @if (Model != null)
+                    {
+                        <div class="toggle-menu__item request-tracker__item">
+                            <button class="toggle-menu__trigger  request-tracker__trigger" data-toggle-trigger="true">
+
+                                <p>
+                                    <span class="request-tracker__type">@Sitecore.Globalization.Translate.Text("Request") @Model.Reference</span>
+                                    <span class="request-tracker__state request-tracker__state--@Model.StatusClass">@Model.NotificationStatus</span>
+                                </p>
+                                <p>
+                                    <span class="request-tracker__date">@Sitecore.Globalization.Translate.Text("Requested") @Model.Date</span>
+                                </p>
+                            </button>
+                            <div class="toggle-menu__content request-tracker__content" data-toggle-content="true">
+                                <div class="m42-keyvalue success-page">
+                                    <dl>
+                                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Event type")</dt>
+                                        <dd class="m42-keyvalue__value--stacked">@Model.EventType</dd>
+                                        @if (!string.IsNullOrEmpty(Model.AccountNumber))
+                                        {
+                                            <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)</dt>
+                                            <dd class="m42-keyvalue__value--stacked">@Model.AccountNumber</dd>
+                                        }
+                                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.MobileNumber)</dt>
+                                        <dd class="m42-keyvalue__value--stacked">@Model.MobileNumber</dd>
+                                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Event Start Date")</dt>
+                                        <dd class="m42-keyvalue__value--stacked">@Model.EventStartDate</dd>
+                                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Event End Date")</dt>
+                                        <dd class="m42-keyvalue__value--stacked">@Model.EventEndDate</dd>
+                                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Location")</dt>
+                                        <dd class="m42-keyvalue__value--stacked">@Model.Location</dd>
+                                        @if (Model.NetAmount > 0)
+                                        {
+                                            <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Net Amount")</dt>
+                                            <dd class="m42-keyvalue__value--stacked" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.NetAmount</dd>
+                                        }
+                                        @if (Model.TaxAmount > 0)
+                                        {
+                                            <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("VAT Amount")</dt>
+                                            <dd class="m42-keyvalue__value--stacked" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.TaxAmount</dd>
+                                        }
+                                        @if (Model.Amount > 0)
+                                        {
+                                            <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Amount Total")</dt>
+                                            <dd class="m42-keyvalue__value--stacked" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Amount</dd>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.PaymentStatus))
+                                        {
+                                            <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Payment status")</dt>
+                                            <dd class="m42-keyvalue__value--stacked"><span class='request-tracker__state--inprogress'>@Model.PaymentStatus</span></dd>
+                                        }
+                                    </dl>
+                                </div>
+
+                                @if (Model.PayButton == "X")
+                                {
+                                    using (Html.BeginForm("RedirectForTemporaryConnection", "Payment", FormMethod.Post, new { @data_form = "true", @novalidate = "true", @data_parsley_focus = "true" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("Amount", Model.Amount)
+                                        @Html.Hidden("ContractAccount", Model.AccountNumber)
+                                        @Html.Hidden("NotificationReference", Model.Reference)
+                                        @Html.Hidden("MobileNumber", Model.MobileNumber)
+                                        @*@Html.Hidden("BusinessPartnerNumber", Model.BusinessPartnerNumber)
+                                            @Html.Hidden("EmailAddress", Model.EmailAddress)*@
+                                        <p class="form-field__button align_left">
+                                            <a class="button button--primary" id="continue-button-popup">
+                                                @Sitecore.Globalization.Translate.Text("Make payment")
+                                            </a>
+                                        </p>
+
+                                        @* Payment Type Popup module *@
+                                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>@Translate.Text("j75.notificationNotFound")</p>
+                    }
+                </div>
+            </div>
+            <div class="links-list">
+                <h3 class="links-list__title">@Translate.Text("More Options")</h3>
+                <ul>
+                    <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J75_SEARCH_REQUEST)" class="links-list__link">@Translate.Text("Search for another request")</a></li>
+                    @*<li class="links-list__item"><a href="#" class="links-list__link">@Translate.Text("Cant find your request")</a></li>*@
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery('#continue-button-popup').on('click', function () {
+        if (!jQuery('#continue-button-popup').parent().hasClass('disabled')) {
+            var currency = '@Translate.Text("AED")';
+            var total = '@(Model!=null ? Model.Amount : 0)';
+
+            jQuery('#divPaymentAmountVal').attr('data-value', total);
+            jQuery('#divPaymentAmountVal').data('value', total);
+
+            if (numeral(total) > 0)
+            {
+                //Set payment method based on paid amount
+                setPaymentMethod(total);
+
+                jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+                jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                jQuery('.btnmodaltrigger').trigger('click');
+            }
+        }
+    });
+</script>

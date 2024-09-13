@@ -1,0 +1,81 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@{
+    var btnDisabled = "disabled";
+    var btnText = Translate.Text("J106.ContinueLabel");
+    var showscore = false;
+
+    //if (Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted && Model.VideoResponses.FirstOrDefault().IsCompleted && !Model.SurveyResponses.LastOrDefault().IsSecondAttemptCompleted)
+    if (Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted && Model.VideoResponses.FirstOrDefault().IsCompleted && !Model.SurveyResponses.LastOrDefault().IsSecondAttemptCompleted)
+    {
+        btnDisabled = string.Empty;
+        showscore = false;
+        btnText = Translate.Text("J106.ContinueLabel");
+
+        if (Model.SurveyResponses.FirstOrDefault().Marks == 100)
+        {
+            btnDisabled = "disabled";
+            btnText = Translate.Text("J106.CompletedLabel");
+            showscore = true;
+        }
+        else
+        {
+            btnDisabled = string.Empty;
+            btnText = Translate.Text("J106.ContinueLabel");
+            showscore = false;
+        }
+
+    }
+    else if (Model.SurveyResponses.LastOrDefault().IsSecondAttemptCompleted)
+    {
+        btnText = Translate.Text("J106.CompletedLabel");
+        showscore = true;
+
+    }
+
+}
+
+
+
+
+<div class="grid__column grid__column--6">
+    <div class="j106-ideal-home__stat-card">
+        <div class="j106-ideal-home__stat-step">@Translate.Text("J106.Step3Label")</div>
+        <div class="j106-ideal-home__stat-title">@Translate.Text("J106.FinalAssessmentLabel")</div>
+        @if (Model.SurveyResponses.FirstOrDefault().Marks != 100)
+        {
+            <div class="j106-ideal-home__stat-progress">
+                <span class="j106-ideal-home__stat-progress--progress">@Translate.Text("J106.ProgressLabel") @Model.SurveyResponses.Select(x => x.Progress).LastOrDefault().ToString()%</span>
+                @if (showscore)
+                {
+                    <span class="j106-ideal-home__stat-progress--correct">@Model.SurveyResponses.Select(x => x.Correct).LastOrDefault().ToString() @Translate.Text("J106.CorrectLabel")</span>
+                    <span class="j106-ideal-home__stat-progress--wrong">@Model.SurveyResponses.Select(x => x.Wrong).LastOrDefault().ToString() @Translate.Text("J106.WrongLabel")</span>
+                }
+                <br /><br />
+                <span class="j106-ideal-home__stat-progress--progress">@Translate.Text("J106.ScoreLabel") @Model.SurveyResponses.Select(x => x.Marks).LastOrDefault().ToString()%</span>
+            </div>
+        }
+        else if (!Model.VideoResponses.FirstOrDefault().IsCompleted)
+        {
+            <div class="j106-ideal-home__stat-progress">
+                @Translate.Text("J106.PleaseCompleteStep3Label")
+            </div>
+        }
+        else
+        {
+            <div class="j106-ideal-home__stat-progress">
+                @Translate.Text("J106.Proccedtocertificate")
+            </div>
+        }
+        <div class="j106-ideal-home__buttons">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_SURVEY)" @btnDisabled class="@btnDisabled button button--primary button--small">
+                @btnText
+            </a>
+        </div>
+    </div>
+</div>

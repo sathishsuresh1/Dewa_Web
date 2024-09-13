@@ -1,0 +1,103 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@model DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey.Section
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+            <h3 class="m17-sectiontitle__title  text__section-title green">@Translate.Text("j154_SEA")</h3>
+        </div>
+    </div>
+</div>
+<div class="grid__row mb32 mobile-flex_direct">
+    <div class="grid__column grid__column--8 second">
+        <div class="j69-dashboard--card">
+            @*<div class="j69-dashboard--card_title">
+                @Translate.Text("j154_SEAF")
+            </div>*@
+
+            <div class="j154-sea-intro">
+                @Translate.Text("j154_Section_Header")
+            </div>
+            <div class="form-dynamic--inner">
+                @foreach (var q in Model.Questions)
+                {
+                    switch (q.Type)
+                    {
+                        case QuestionType.RadioButton:
+                            Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_SingleSelectButton.cshtml", q);
+                            break;
+                        case QuestionType.CheckBox:
+                        case QuestionType.SelectList:
+                            Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_MultipleSelectButton.cshtml", q);
+                            break;
+                        case QuestionType.TextBox:
+                            Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_TextBoxInput.cshtml", q);
+                            break;
+                        case QuestionType.Slider:
+                            Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_Slider.cshtml", q);
+                            break;
+                        case QuestionType.Rating:
+                            Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_Rating.cshtml", q);
+                            break;
+                    }
+
+                }
+                <div class="form-field__button">
+                    <button class="button goprevious" id="btPrevious" @Html.Raw((Model.GetSectionNumber()==1 ? "disabled=\"disabled\"" : "")) type="button">@Translate.Text("j154_PS")</button>
+                    @if (Model.GetSectionNumber() > 1)
+                    {
+
+                    }
+                    @if ((Model.GetSectionNumber() == 7 && Model.JourneyType == SectionType.Apartment) || (Model.GetSectionNumber() == 8))
+                    {
+                        <button class="button button--primary button--next" id="btSubmit" type="button">@Translate.Text("j154_Submit")</button>
+                    }
+                    else
+                    {
+                        <button class="button button--primary button--next" id="btSN" type="button">@Translate.Text("j154_SaveNext")</button>
+                    }
+                        <div>
+                            <button type="button" id="btSE" class="form-dynamic-footer">@Translate.Text("j154_SaveExit")</button>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid__column grid__column--4 first">
+        <div class="j154-sea--card" data-journey="j154-self-energy-assessment">
+            <div class="j154-sea--status">
+                <div>
+                    <div class="j154-sea--status_section">
+                        @(string.Format(Translate.Text("j154_Sec1Of8"), Model.GetSectionNumber(), Model.JourneyType == SectionType.Villa ? 8 : 7))
+                    </div>
+                    <div class="j154-sea--status_title">
+                        @Html.Raw(Model.Description)
+
+                    </div>
+
+                </div>
+
+                <div class="j154-sea-assessment_progress j154-sea-donut-progress" data-donut-rate="@Model.PercentageCompleted">
+                    <div class="j154-sea-donut-text">
+                        @Translate.Text("j154_Completed")
+                        <div class="j154-sea-donut-number">
+                            <span data-donut-number>@Html.Raw(Model.PercentageCompleted.ToString())</span>%
+                        </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 34 34">
+                        <circle cx="16" cy="16" r="16" class="progress-bar__background" stroke="#EAEAEA" stroke-width="3" />
+                        <circle cx="16" cy="16" r="16" class="progress-bar__progress js-progress-bar" stroke="#007560" stroke-width="3" stroke-dasharray="100 100" stroke-dashoffset="@Html.Raw(Model.PercentageCompleted.ToString())" style="stroke-dashoffset:@Html.Raw(Model.PercentageCompleted.ToString())px" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

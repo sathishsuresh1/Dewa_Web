@@ -1,0 +1,327 @@
+﻿@*@using System.Linq*@
+@using Sitecore.Globalization
+@using System.Web.Mvc.Html
+@using X.PagedList.Mvc
+@using X.PagedList
+@using X.PagedList.Mvc.Common
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+
+@model DEWAXP.Foundation.Content.Models.AccountSelector
+@{
+    var isRtl = (bool)ViewBag.IsRTL;
+    var dir = isRtl ? "rtl" : "ltr";
+    var isempty = Model.PagedAccounts.Count > 0 ? false : true;
+}
+<div class="m43-accountsel__group_wrap">
+    @foreach (var group in Model.PagedAccounts.GroupBy(acc => acc.BusinessPartnerNumber).OrderByDescending(group => group.Any(acc => acc.Primary)))
+    {
+        <div class="m43-accountsel__group">
+            <p class="m43-accountsel__accounts-listheader">
+                @Translate.Text("Business Partner"): @group.Key
+                <span class="m43-accountsel__accounts-number">@string.Format("({0} {1})", group.Count(), Translate.Text("Accounts").ToLowerInvariant())</span>
+            </p>
+
+            <div class="m43-accountsel__accounts-list" data-accounts="true">
+                <div class="form-field">
+                    @foreach (var account in group)
+                    {
+                        int i = Model.Accounts.IndexOf(account);
+
+                        var indicatorClass = Model.Accounts[i].Active ? "active" : "inactive";
+                        var indicatorText = Model.Accounts[i].Active ? "Active" : "Inactive";
+                        var displayName = !string.IsNullOrWhiteSpace(Model.Accounts[i].Name) ? Model.Accounts[i].Name : Model.Accounts[i].NickName;
+
+                        <p class="form-field__radio form-field__radio--accselector">
+                            <label>
+                                @Html.RadioButtonFor(m => m.SelectedAccountNumber, Model.Accounts[i].AccountNumber, new { @class = "form-field__input form-field__input--radio", @id = "SelectedAccountNumber" + i, data_input = "radio", data_acc_cat = Model.Accounts[i].Category, data_legacy_acc_number = Model.Accounts[i].CustomerPremiseNumber, data_legacy_bp_number = Model.Accounts[i].BusinessPartnerNumber, data_account_category_type = Model.Accounts[i].AccountCategory, data_evaccount = Model.Accounts[i].BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle) })
+                                <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                                    <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                                        @if (account.HasPhoto)
+                                        {
+                                            <img src="/images/ajax-loader_50x50.gif"
+                                                 data-src="/account_thumbs.ashx?id=@(Model.Accounts[i].AccountNumber)&aty=@((int)Model.Accounts[i].BillingClassification)"
+                                                 class="m43-accountsel__image withimage tooltipstered" alt="@displayName"
+                                                 role="presentation" data-acc-detail="acc_image">
+                                        }
+                                        else
+                                        {
+                                            <img src="@ImageHelper.GetAccountImage(Model.Accounts[i].BillingClassification)"
+                                                 data-src="@ImageHelper.GetAccountImage(Model.Accounts[i].BillingClassification)"
+                                                 class="m43-accountsel__image tooltipstered" alt="@displayName"
+                                                 role="presentation" data-acc-detail="acc_image">
+                                        }
+                                        <span class="m43-accountsel__header">
+                                            @if (!string.IsNullOrWhiteSpace(Model.Accounts[i].NickName))
+                                            {
+                                                <span class="m43-accountsel__secondarydetails m43-accountsel__nickname">
+                                                    <span class="inline-block" dir="@dir">
+                                                        <strong>@Model.Accounts[i].NickName</strong>
+                                                    </span>
+                                                </span>
+                                            }
+                                            <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                                <span class="inline-block" dir="@(dir)">@displayName</span>
+                                                @{
+                                                    if (account.AccountClass != DEWAXP.Foundation.Integration.Enums.AccountClassification.Unknown)
+                                                    {
+                                                        if (!Model.SecondaryDatasource)
+                                                        {
+                                                            if (!account.PartialPaymentPermitted)
+                                                            {<span dir="@dir" class="m44-bill-selector__review-details--final">(@Translate.Text("Final Bill"))</span>}
+                                                        if (account.AccountClass == DEWAXP.Foundation.Integration.Enums.AccountClassification.Active ||
+                                                                 account.AccountClass == DEWAXP.Foundation.Integration.Enums.AccountClassification.Inactive)
+                                                        {
+                                                            <span dir="@dir" class="m43-accountsel__status m43-accountsel__status--@indicatorClass" title="@Translate.Text(indicatorText)">@*@Translate.Text(indicatorText)*@</span>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span dir="@dir" class="m43-accountsel__status m43-accountsel__status--@indicatorClass" title="@Translate.Text(indicatorText)">@*@Translate.Text(indicatorText)*@</span>
+                                                    }
+                                                }
+
+
+                                                }
+                                                <span class="hidden accountselector-ownertype" dir="@dir" style="font-weight:normal;">@Model.Accounts[i].CustomerType</span>
+                                            </span>
+
+                                            <span class="m43-accountsel__details">
+                                                @if ((!string.IsNullOrWhiteSpace(Model.Accounts[i].BillingClass) && !Model.Accounts[i].BillingClass.Equals("-")))
+                                                {
+                                                    <span dir="@(dir)" data-acc-detail="type">@Model.Accounts[i].BillingClass</span> @("|")
+                                                }
+                                                else
+                                                {
+                                                    <span dir="@(dir)" data-acc-detail="type" style="display:none">@Model.Accounts[i].BillingClass</span>
+                                                }
+
+                                                @if ((!string.IsNullOrWhiteSpace(Model.Accounts[i].AccountNumber) && !Model.Accounts[i].AccountNumber.Equals("-")))
+                                                {
+                                                    <span title="Account">@Translate.Text("global.accountnumber")</span>
+                                                    <span dir="@(dir)" data-acc-detail="acc_number">(@Model.Accounts[i].AccountNumber)</span>
+                                                }
+
+
+                                            </span>
+
+                                            <span class="m43-accountsel__details hidden">
+                                                <span dir="@dir" data-acc-detail="acc_businesspartner">@Model.Accounts[i].BusinessPartnerNumber</span>
+                                            </span>
+                                            @if (!string.IsNullOrWhiteSpace(Model.Accounts[i].Street) && !string.IsNullOrWhiteSpace(Model.Accounts[i].Location))
+                                            {
+                                                <span class="m43-accountsel__details m43-accountsel__secondarydetails">
+                                                    <span dir="@dir" data-acc-detail="address">
+                                                        @Model.Accounts[i].Street, @Model.Accounts[i].Location
+                                                    </span>
+                                                </span>
+                                            }
+
+
+                                            @if (!String.IsNullOrEmpty(Model.Accounts[i].CustomerPremiseNumber))
+                                            {
+                                                if (Model.Accounts[i].BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle))
+                                                {
+                                                    <span class="m43-accountsel__details m43-accountsel__secondarydetails">
+
+                                                        <span dir="@dir" data-acc-detail="acc_premiseType">
+                                                        </span>
+                                                        <span dir="@dir" data-acc-detail="acc_premise">
+                                                            @(!string.IsNullOrWhiteSpace(Model.Accounts[i].CustomerPremiseNumber) ? string.Format(Translate.Text("cards"), Model.Accounts[i].CustomerPremiseNumber) : "-")
+                                                        </span>
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    if (!string.IsNullOrWhiteSpace(Model.Accounts[i].CustomerPremiseNumber))
+                                                    {
+
+                                                        <span class="m43-accountsel__details m43-accountsel__secondarydetails">
+                                                            <span dir="@dir" data-acc-detail="acc_premiseType">
+                                                                @Translate.Text("Premise")
+                                                            </span>
+                                                            @(" (")
+                                                            <span dir="@dir" data-acc-detail="acc_premise">
+                                                                @(Model.Accounts[i].CustomerPremiseNumber ?? "-")
+                                                            </span>
+                                                            @(")")
+                                                        </span>
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var pnumber = Model.Accounts[i].CustomerPremiseNumber ?? Model.Accounts[i].PremiseNumber;
+                                                if (!string.IsNullOrWhiteSpace(pnumber) && !pnumber.Equals("-"))
+                                                {
+                                                    <span class="m43-accountsel__details m43-accountsel__secondarydetails">
+                                                        @if (Model.Accounts[i].BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle))
+                                                        {
+                                                            <span dir="@dir" data-acc-detail="acc_premiseType">
+                                                            </span>
+                                                            <span dir="@dir" data-acc-detail="acc_premise">
+                                                                @(string.Format(Translate.Text("cards"), pnumber))
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span dir="@dir" data-acc-detail="acc_premiseType">
+                                                                @(Translate.Text("Premise"))
+                                                            </span>
+                                                            @(" (")
+                                                            <span dir="@dir" data-acc-detail="acc_premise">
+                                                                @(pnumber)
+                                                            </span>
+                                                            @(")")
+                                                        }
+                                                    </span>
+                                                }
+                                            }
+                                            @*@if (!string.IsNullOrWhiteSpace(Model.Accounts[i].NickName))
+                                                {
+                                                    <span class="m43-accountsel__secondarydetails">
+                                                        <span class="inline-block mt12" dir="@dir">
+                                                            <strong>@Model.Accounts[i].NickName</strong>
+                                                        </span>
+                                                    </span>
+                                                }*@
+                                        </span>
+                                        <span class="m43-accountsel__medpod">
+                                            @if (Model.Accounts[i].Medical)
+                                            {
+                                                <span class="green icon-medical" title="@Translate.Text("POD.Medical")"></span>
+                                            }
+                                            @if (Model.Accounts[i].POD)
+                                            {
+                                                <span class="green icon-pod" title="@Translate.Text("POD.pod")"></span>
+                                            }
+                                            @if (Model.Accounts[i].Senior)
+                                            {
+                                                <span class="green icon-senior" title="@Translate.Text("POD.senior")"></span>
+                                            }
+                                        </span>
+                                        @if (!string.IsNullOrWhiteSpace(Model.Accounts[i].NotificationNumber))
+                                        {
+                                            <span class="accountselector-moveoutreference">@Model.Accounts[i].NotificationNumber</span>
+                                        }
+                                    </span>
+                                </span>
+                            </label>
+                            @Html.HiddenFor(m => m.Accounts[i].AccountNumber, new { @class = "textAccountNumber" })
+                            @Html.HiddenFor(m => m.Accounts[i].Active, new { @class = "textActive" })
+                            @Html.HiddenFor(m => m.Accounts[i].Balance, new { @class = "textBalance" })
+                            @Html.HiddenFor(m => m.Accounts[i].BusinessPartnerNumber, new { @class = "textBusinessPartnerNumber" })
+                            @Html.HiddenFor(m => m.Accounts[i].PremiseNumber, new { @class = "textPremiseNumber" })
+                            @Html.HiddenFor(m => m.Accounts[i].CustomerPremiseNumber, new { @class = "textCustomerPremiseNumber" })
+                        </p>
+                    }
+                    <div id="description-for-radios_group1" class="form-field__messages"></div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<!-- output a paging control that lets the user navigation to the previous page, next page, etc -->
+
+<div id="myPager" class="centerpage">
+    @if (Model.PagedAccounts.PageCount > 1)
+    {
+        <div class="fix" id="pager">
+            @Html.PagedListPager(
+        Model.PagedAccounts,
+        page => Url.Action(
+            "AccountSelectorV1",
+            new
+            {
+                page = page,
+                currentFilter = ViewBag.CurrentFilter,
+                contextid = ViewBag.contextid,
+                selectedaccounts = ViewBag.requestedaccounts != null ? string.Join(",", (string[])ViewBag.requestedaccounts) : null
+            }
+        ),
+        new PagedListRenderOptions
+        {
+            LinkToFirstPageFormat = "|<",
+            LinkToPreviousPageFormat = "<",
+            LinkToNextPageFormat = ">",
+            LinkToLastPageFormat = ">|",
+            MaximumPageNumbersToDisplay = 3,
+            DisplayEllipsesWhenNotShowingAllPageNumbers = false
+        }
+    )
+        </div>
+    }
+
+</div>
+
+<div class="m49-no-matches">
+    @Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)
+</div>
+
+<script>
+    docReady(function () {
+        jQuery('.withimage').each(function (index,obj) {
+            var thiselement = jQuery(this);
+            var $url = jQuery(this).attr('data-src');
+            setTimeout(function () {
+                thiselement.attr("src", $url);
+            }, 300);
+        });
+
+        $('#m49-list-filter--input').off().on('keypress', function (e) {
+
+            if (e.keyCode == 13) {
+                search(true);
+                return false;
+            }
+
+        });
+        function search(force) {
+            var existingString = $("#m49-list-filter--input").val();
+            $.get('/api/sitecore/Account/AccountSelectorV1?contextid=' + '@ViewBag.contextid' + '&q=' + existingString + '&selectedaccounts='+'@(ViewBag.requestedaccounts != null ? string.Join(",", (string[])ViewBag.requestedaccounts) : null)', function (data) {
+                $('#m43-account-list').html(data);
+                $('.pager_update').click();
+            });
+        }
+
+        function clearFilter() {
+            $.get('/api/sitecore/Account/AccountSelectorV1?contextid=' + '@ViewBag.contextid' + '&q=' + '&selectedaccounts=' + '@(ViewBag.requestedaccounts != null ? string.Join(",", (string[])ViewBag.requestedaccounts) : null)', function (data) {
+                $('#m43-account-list').html(data);
+                $('.pager_update').click();
+            });
+        }
+
+        jQuery('#search').off().on('click', function (e) {
+            e.preventDefault();
+            search(true);
+            return false;
+        });
+        jQuery('.m49-list-filter-reset-button').on('click', function () {
+            $("#m49-list-filter--input").val('');
+            clearFilter();
+        });
+        jQuery('#pager').on('click', 'a', function () {
+            if (this.href != '' && this.href != null) {
+                jQuery.ajax({
+                    url: this.href,
+                    type: 'GET',
+                    cache: false,
+                    success: function (result) {
+                        $('#m43-account-list').html(result);
+
+                        $('.pager_update').click();
+                        $('#m43-account-list').animate({
+                            scrollTop: 0
+                        }, 600);
+                    }
+                });
+            }
+            return false;
+        });
+
+        if ('@isempty' == 'True') {
+            jQuery('.m49-no-matches').show();
+        }
+    });
+
+</script>

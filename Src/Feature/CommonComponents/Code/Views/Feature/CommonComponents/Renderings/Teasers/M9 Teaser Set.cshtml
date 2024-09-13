@@ -1,0 +1,81 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using System.Linq
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc.Web.Mvc;
+@using DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers;
+
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M9TeaserSet
+@{
+    var parameters = Html.Glass().GetRenderingParameters<DEWAXP.Feature.CommonComponents.Models.RenderingParameters.TeaserRenderingParameter>();
+    string cssClass = "";
+    string cssBoardClass = "";
+    if (parameters != null)
+    {
+        cssClass = parameters.EnableNewsTeaserStyle ? " m9-teaser--news" : "";
+        cssBoardClass = parameters.EnableBoardTeaserStyle ? " m9-teaser-image_bod" : "";
+    }
+}
+
+
+@if (!string.IsNullOrWhiteSpace(Model.Header))
+{
+    @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Generic/M17 Section Title.cshtml", Model)
+}
+
+@if (Model.RelatedArticles.HasAny())
+{
+    if (string.IsNullOrWhiteSpace(cssBoardClass))
+    {
+        foreach (var group in Model.RelatedArticles.Batch(4))
+        {
+            <div class="grid__row">
+                @foreach (var item in group)
+                {
+                    item.ContainerCssClass = cssClass;
+                    item.ContainerBoardCssClass = cssBoardClass;
+                    <div class="grid__column grid__column--4">
+                        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Teasers/M9 Teaser.cshtml", item)
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        var count = 0; var catCnt = 0; var catCn1 = 0; var personacount = 3;
+        foreach (M9Teaser group in Model.RelatedArticles)
+        {
+            catCnt++;
+        }
+        foreach (M9Teaser group in Model.RelatedArticles)
+        {
+            group.ContainerCssClass = cssClass;
+            group.ContainerBoardCssClass = cssBoardClass;
+            count++;
+            catCn1++;
+            if (count == 1)
+            {
+                @: <div class="grid__row">
+                }
+                <div class="grid__column grid__column--4">
+                    @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Teasers/M9 Teaser.cshtml", group)
+                </div>
+                if (count == personacount || catCn1 == catCnt)
+                {
+                    count = 0;
+                @:</div>
+            }
+        }
+    }
+}
+else
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Translate.Text("There are no related articles.")
+        </div>
+    </div>
+}
+

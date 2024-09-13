@@ -1,0 +1,74 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Resources.Media;
+@using Sitecore.Globalization;
+@using Sitecore.Links.UrlBuilders;
+@using Sitecore.Mvc.Analytics.Extensions;
+@using DEWAXP.Foundation.Helpers.Extensions;
+@using System.Web.Optimization
+@using DEWAXP.Foundation.Helpers.MetaTags
+@using DEWAXP.Foundation.Content
+@model RenderingModel
+@{
+    var currentItem = Html.Sitecore().CurrentItem;
+    var textDirection = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var lang = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    string version = Translate.Text("assest.version");
+}
+
+<!doctype html>
+<html lang="@Model.Item.Language.Name" dir="@textDirection">
+<head>
+    @*@Html.GetMetaTags()*@
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/MetaTags.cshtml", Sitecore.Context.Item)
+    @Html.GetSeoTagsForPage(Sitecore.Context.Item)
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/_FaviconRendering.cshtml")
+    @Styles.Render("~/Styles/CPPortal/" + lang)
+    @Scripts.Render("~/bundles/headjs")
+    <script src='https://www.google.com/recaptcha/api.js?hl=@(lang)'></script>
+    @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+    {
+        @Html.Sitecore().Rendering(SitecoreRenderingIds.GOOGLE_ANALYTICS_CONFIG_HEAD)
+    }
+    <!--Visitor-->
+    @Html.Sitecore().VisitorIdentification()
+    <!--Visitor-->
+
+    <link href="@Url.Content("~/styles/DEWA/custom.css?v="+version)" media="all" rel="stylesheet" type="text/css">
+    <!--[if IE]>
+        <link href="@Url.Content("~/styles/CPPortal/ie-custom.css?v=" + version)" media="all" rel="stylesheet" type="text/css">
+    <![endif]-->
+    <!--DEWA layout-->
+</head>
+<body id="page">
+    <!--[if lte IE 8]>
+        <div class="browserupgrade">
+            <div class="grid browserupgrade__grid-row">
+                <div class="grid__column grid__column--12">
+                    @if (lang.Equals("ar"))
+                    {
+
+                        <p dir="rtl" class="browserupgrade__message">المتصفح قديم. <a class="browserupgrade__link" href="/compatibility.html">الرجاء القيام بترقية المتصفح</a> للاستخدام الأمثل للموقع.</p>
+                    }
+                    else
+                    {
+                        <p class="browserupgrade__message">You are using an <strong>outdated</strong> browser. Please <a class="browserupgrade__link" href="/compatibility.html">upgrade your browser</a> to improve your experience.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    <![endif]-->
+    <h1 style="display: none;">@Html.Sitecore().Field("Browser Title", new { DisableWebEdit = true })</h1> <!--This H1 tag is a guideline for Bing Search Engine -->
+
+    @Html.Sitecore().Placeholder("main")
+
+    @Scripts.Render("~/bundles/CPPortal/js")
+    @Html.Partial("~/Views/Website/SubLayouts/ReadSpeaker/_ReadSpeaker.cshtml")
+
+    @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+    {
+        @Html.Sitecore().Rendering(SitecoreRenderingIds.GOOGLE_ANALYTICS)
+    }
+    <script src="https://mindrockets.app/web/client/MoroDewa/integrator.all.min.js"></script>
+</body>
+</html>

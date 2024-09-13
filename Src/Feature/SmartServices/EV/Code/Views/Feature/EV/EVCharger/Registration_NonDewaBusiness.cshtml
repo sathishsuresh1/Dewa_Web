@@ -1,0 +1,441 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Feature.EV.Models.EVCharger
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.EV.Models.EVCharger.EVAccountSetup
+
+@{
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ltr" : "rtl";
+    string url = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_Registration) + "?b=0";
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12" id="main-skip">
+        <div class="m26-page-title title_message">
+            <div class="m26-page-title__links">
+                <p class="m26-page-title__backlink">
+                    <a class="button button--text button--back" href="@ViewBag.backlink">@Translate.Text("Back")</a>
+                </p>
+            </div>
+            <h2 class="text__page-title">@Translate.Text("Create EV Account")</h2>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @*@Html.Sitecore().Placeholder("j100/m14-formatted-text")*@
+        <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="4" data-current-step="2">
+            <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="EV Login Card">
+            </div>
+        </div>
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form" id="evBPAccountSetup">
+
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "applyEVCardForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+        {
+            bool iseditable = ViewBag.datafrombackend == true ? true : false;
+            if (ViewBag.datafrombackend != null)
+            {
+                Model.IsIdReadonly = !string.IsNullOrWhiteSpace(Model.IdNumber) && iseditable;
+
+            }
+            bool companyreadonly = !string.IsNullOrWhiteSpace(Model.CompanyName) && iseditable;
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(x => x.IdType)
+            @Html.HiddenFor(x => x.CarPlateNumberList)
+            @Html.HiddenFor(x => x.CarRegisteredIn)
+            @Html.HiddenFor(x => x.EmirateOrCountry)
+            @Html.HiddenFor(x => x.TrafficCodeNumber)
+            @Html.HiddenFor(x => x.AccountType)
+            @*@Html.HiddenFor(x => x.mulkiyanum)*@
+
+            <input type="hidden" name="RegistrationStage" id="RegistrationStage" value="@Model.RegistrationStage" />
+            <input type="hidden" name="IsIdReadonly" id="IsIdReadonly" value="@(Model.IsIdReadonly?"true":"false")" />
+
+            <div class="form-field form-field--text" id="dvTradeLicenseNo">
+                <label for="form-field-sfeyvp6v88" class="form-field__label @(Model.IsIdReadonly?"form-field__label--readonly":"")">
+                    @Translate.Text("EV.TradeLicenceNumber")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper @(Model.IsIdReadonly?"form-field__input-wrapper--readonly":"")">
+
+                    <input class="form-field__input @(Model.IsIdReadonly?"form-field__input--readonly":"form-field__input--text")" id="form-field-sfeyvp6v88" name="IdNumber"
+                           type="text" aria-describedby="description-for-sfeyvp6v88"
+                           data-parsley-errors-container="#description-for-sfeyvp6v88"
+                           required="required" maxlength="20" data-parsley-maxlength="20"
+                           data-parsley-required-message="@Translate.Text("EV.TradeLicenceNumber error")"
+                           data-parsley-trigger="focusout" @*@(Model.GetCarRegisteredCountry() == "AE" ? "readonly=\"readonly\"" : "")*@
+                           data-parsley-id="20" value="@Model.IdNumber" @(Model.IsIdReadonly)
+                           placeholder="@Translate.Text("EV.TradeLicenceNumber")">
+
+                </span>
+                <div id="description-for-sfeyvp6v88" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.IdNumber, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--select form-field--select-single" id="divTitle">
+                <label for="form-field-IssuingAuthority" class="form-field__label">@Translate.Text("EV.IssuingAuthority") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    @Html.DropDownListFor(x => x.IssuingAuthority, Model.IssuingAuthorities,
+         Sitecore.Globalization.Translate.Text("EV.Select"),
+         new
+         {
+             @class = "form-field__input form-field__input--select form-field__input--select-full",
+             @id = "form-field-IssuingAuthority",
+             //@name = "select_EVTitle",
+             @aria_describedby = "description-for-IssuingAuthority",
+             @required = "",
+             @data_parsley_required_message = @Translate.Text("EV.IssuingAuthority error"),
+             @data_parsley_errors_container = "#description-for-IssuingAuthority",
+             @data_parsley_id = "15"
+         })
+                </span>
+                <div id="description-for-IssuingAuthority" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.IssuingAuthority, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+            <div class="form-field form-field--text" id="divOtherIssueAuthority">
+                <label for="form-field-otherissueauthority" id="lblotherissueauthority" class="form-field__label @(companyreadonly?"form-field__label--readonly":"")">
+                    @Translate.Text("EV_OtherIssueAuthority")
+                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                </label>
+                <span class="form-field__input-wrapper @(companyreadonly?"form-field__input-wrapper--readonly":"")">
+                    @Html.TextBoxFor(x => x.SubmittedTradeLicenceAuthorityName,
+                 new
+                 {
+                     @class = "form-field__input "/*+(companyreadonly ? "form-field__input--readonly" : "form-field__input--text")*/,
+                     @id = "form-field-otherissueauthority",
+                     @placeholder = Translate.Text("EV_OtherIssueAuthority"),
+                     @required = "",
+                     @data_parsley_error_message = Translate.Text("EV_errorMessage_otherissueauthority"),
+                     @data_parsley_errors_container = "#description-for-otherissueauthority",
+                     @aria_describedby = "description-for-otherissueauthority",
+                 })
+                </span>
+                <div id="description-for-otherissueauthority" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.SubmittedTradeLicenceAuthorityName, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+            <div class="form-field form-field--text" id="divCompanyName">
+                <label for="form-field-companyName" id="lblCompanyName" class="form-field__label @(companyreadonly?"form-field__label--readonly":"")">
+                    @Translate.Text("EV.CompanyName")
+                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                </label>
+                <span class="form-field__input-wrapper @(companyreadonly?"form-field__input-wrapper--readonly":"")">
+                    @Html.TextBoxFor(x => x.CompanyName,
+                 new
+                 {
+                     @class = "form-field__input " + (companyreadonly ? "form-field__input--readonly" : "form-field__input--text"),
+                     @name = "CompanyName",
+                     @id = "form-field-companyName",
+                     @placeholder = Translate.Text("EV.CompanyName"),
+                     @required = "",
+                     @data_parsley_error_message = Translate.Text("EV.errorMessage_companyName"),
+                     @data_parsley_errors_container = "#description-for-companyName",
+                     @aria_describedby = "description-for-companyName",
+                 }.AddHtmlAttrItem("readonly", "", companyreadonly))
+                </span>
+                <div id="description-for-companyName" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.CompanyName, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+            <div class="form-field form-field--text" id="divEmailAddress">
+                <label for="form-field-EmailAddress" id="lblEmailAddress" class="form-field__label">
+                    @Translate.Text("EV.Email Address")
+                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    @Html.TextBoxFor(x => x.EmailAddress,
+                 new
+                 {
+                     @class = "form-field__input form-field__input--text",
+                     @name = "EmailAddress",
+                     @type = "email",
+                     @id = "form-field-EmailAddress",
+                     @placeholder = Translate.Text("EV.Email Address"),
+                     @required = "",
+                     @data_parsley_error_message = Translate.Text("EV.errorMessage_EmailAddress"),
+                     @data_parsley_errors_container = "#description-for-EmailAddress",
+                     @aria_describedby = "description-for-EmailAddress",
+                 })
+                </span>
+                <div id="description-for-EmailAddress" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.EmailAddress, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--text" id="divMobileNumber">
+                <label for="form-field-MobileNumber" id="lblMobileNumber" class="form-field__label">
+                    @Translate.Text("EV.Mobile Number")
+                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+
+                    <input class="form-field__input form-field__input--text form-field__input--prefixed keep-ltr"
+                           id="form-field-MobileNumber"
+                           name="MobileNumber"
+                           type="tel"
+                           placeholder="@Translate.Text("EV.Mobile Number")"
+                           aria-describedby="description-for-MobileNumber"
+                           required=""
+                           value="@Model.MobileNumber"
+                           data-parsley-error-message="@Translate.Text("EV.errorMessage_MobileNumber")"
+                           data-parsley-errors-container="#description-for-MobileNumber"
+                           data-parsley-mobile_number=""
+                           data-parsley-type="digits" />
+                </span>
+
+                <div id="description-for-MobileNumber" class="form-field__messages">
+                    <p class="form-field__description form-field__description-icon-wrapper">
+                        <span class="form-field__description-icon icon-new-announcement rot180 line-h0"></span>@Translate.Text("EV Mobile Info")
+                    </p>
+                    @Html.ValidationMessageFor(x => x.MobileNumber, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+
+            <div class="form-field form-field--text" id="divPOBox">
+                <label for="form-field-POBox" id="lblPOBox" class="form-field__label">
+                    @Translate.Text("EV.POBox")
+                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    @Html.TextBoxFor(x => x.POBox,
+                 new
+                 {
+                     @class = "form-field__input form-field__input--text",
+                     @name = "POBox",
+                     @type = "number",
+                     @id = "form-field-POBox",
+                     @placeholder = Translate.Text("EV.POBox"),
+                     @required = "",
+                     @data_parsley_error_message = Translate.Text("EV.errorMessage_POBox"),
+                     @data_parsley_errors_container = "#description-for-POBox",
+                     @aria_describedby = "description-for-POBox",
+                     @lang = "en",
+                     @minlengh = 6,
+                     @maxlength = 6,
+                     @data_parsley_pobox = "",
+                     @step = "any"
+                 })
+                </span>
+                <div id="description-for-POBox" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.POBox, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--select form-field--select-single" id="divEmirate">
+                <label for="form-field-EVEmirate" class="form-field__label">
+                    @Translate.Text("EV PO Box Emirate") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                </label>
+                <label class="form-field__input-wrapper form-field__input-wrapper--select">
+                    @Html.DropDownListFor(x => x.Emirate, (IEnumerable<SelectListItem>)ViewBag.Emirates, Sitecore.Globalization.Translate.Text("EV.Select"),
+         new
+         {
+             @class = "form-field__input form-field__input--select form-field__input--select-full",
+             @id = "form-field-EVEmirate",
+             @name = "select_EVEmirate",
+             @aria_describedby = "description-for-EVEmirate",
+             @required = "",
+             @data_parsley_required_message = @Translate.Text("EV.Emirate error"),
+             @data_parsley_errors_container = "#description-for-EVEmirate",
+             @data_parsley_id = "15"
+         })
+                </label>
+                <div id="description-for-EVEmirate" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.Emirate, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+            @*<div class="form-field form-field--text ">
+                    <label for="form-field-setusername" class="form-field__label">
+                        @Translate.Text("username label")
+                        <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input type="text"
+                               name="Username"
+                               id="form-field-setusername"
+                               class="form-field__input form-field__input--text"
+                               aria-required="true"
+                               aria-describedby="description-for-setusername"
+                               required="required"
+                               autocomplete="off"
+                               placeholder="@Translate.Text("username label")"
+                               data-parsley-username=""
+                               value="@Model.Username"
+                               data-parsley-error-message="@Translate.Text("register username validation message")"
+                               data-parsley-errors-container="#description-for-setusername" />
+                    </span>
+                    <div id="description-for-setusername" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Username)
+                    </div>
+                </div>
+                <div class="form-field form-field--text ">
+                    <label for="form-field-password" class="form-field__label">
+                        @Translate.Text("password label")
+                        <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input type="password"
+                               name="Password"
+                               id="form-field-password"
+                               class="form-field__input form-field__input--text"
+                               aria-required="true"
+                               aria-describedby="description-for-set-password"
+                               autocomplete="off"
+                               required="required"
+                               placeholder="@Translate.Text("password label")"
+                               data-parsley-password=""
+                               data-parsley-error-message="@Translate.Text("login password validation message")"
+                               data-parsley-password-message="@Translate.Text("login password validation message")"
+                               data-parsley-errors-container="#description-for-set-password"
+                               data-parsley-trigger="focusout" />
+                    </span>
+                    <div id="description-for-set-password" class="form-field__messages">
+                        <p class="form-field__description">@Translate.Text("password description text")</p>
+                        @Html.ValidationMessageFor(x => x.Password)
+                    </div>
+                </div>*@
+            @*<div class="form-field form-field--text ">
+                    <label for="form-field-set-confirm-password" class="form-field__label">
+                        @Translate.Text("confirm password label")
+                        <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input type="password"
+                               name="ConfirmPassword"
+                               id="form-field-set-confirm-password"
+                               class="form-field__input form-field__input--text"
+                               aria-required="true"
+                               aria-describedby="description-for-set-confirm-password"
+                               autocomplete="off"
+                               placeholder="@Translate.Text("confirm password label")"
+                               data-parsley-equalto="#form-field-password"
+                               data-parsley-equalto-message="@Translate.Text("Password mismatch error")"
+                               data-parsley-errors-container="#description-for-set-confirm-password"
+                               data-parsley-trigger="focusout" />
+                    </span>
+                    <div id="description-for-set-confirm-password" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.ConfirmPassword)
+                    </div>
+                </div>*@
+
+
+
+            if (!Model.IsIdReadonly)
+            {
+                <fieldset class="fieldset" id="divIdDocument">
+                    <legend class="legend" id="legendDocument">@Translate.Text("EV.TradeLicenseAttachment")</legend>
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="AttachedDocument">
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label for="form-field-AttachedDocument" class="form-field__label">
+                                    <strong class="form-field__label-description" id="uploadfiletext">@Translate.Text("EV.TradeLicenseUploadFile")</strong>
+                                </label>
+                                <div>
+                                    <label>
+                                        @Html.TextBoxFor(m => m.AttachedDocument2,
+                                    new
+                                    {
+                                        type = "file",
+                                        @class = "form-field__input form-field__input--upload",
+                                        @id = "form-field-AttachedDocument",
+                                        @name = @Translate.Text("upload"),
+                                        @aria_describedby = "description-for-AttachedDocument",
+                                        @required = "",
+                                        @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                        @data_parsley_required_message = @Translate.Text("EV.AttachedDocumentrequiredmessage"),
+                                        @data_parsley_errors_container = "#errors-for-AttachedDocument",
+                                        @data_uploader_field = "AttachedDocument",
+                                        @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf",
+                                        @data_parsley_id = "16"
+                                    })
+
+                                        <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="AttachedDocument"></p>
+                                <p>
+                                    <button class="button button--text button--remove hidden" data-uploader-remove="AttachedDocument">@Translate.Text("Remove")</button>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="description-for-AttachedDocument" class="form-field__messages">
+                            <div id="errors-for-AttachedDocument">
+                                @Html.ValidationMessageFor(x => x.AttachedDocument2, "", new { @class = "parsley-errors-list" })
+                            </div>
+                            <p class="form-field__description">@Translate.Text(DictionaryKeys.EVCard.EVMaxFileSize)</p>
+                        </div>
+                    </div>
+                </fieldset>
+            }
+
+            @*<div class="form-field form-field--toggles mt24">
+                    <div class="form-field__checkbox  last">
+                        <label>
+                            <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                            <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("Terms Agreement")</span>
+                        </label>
+                    </div>
+                    <fieldset class="fieldset terms">
+                        <legend class="legend-color">.</legend>
+                        @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                    </fieldset>
+                    <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                    <input type="hidden" name="AgreedToPayment" value="false" />
+                </div>*@
+            <div class="form-field__button">
+                <button type="submit" id="evsubmitbutton" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Continue")</button>
+            </div>
+
+        }
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    docReady(function () {
+        if ($("#form-field-MobileNumber").val() != "" && $("#form-field-MobileNumber").val().indexOf('*') != -1) {
+            $("#form-field-MobileNumber").attr("type", "text");
+            $("#form-field-MobileNumber").removeAttr("data-parsley-type");
+            $("#form-field-MobileNumber").removeAttr('data-parsley-mobile_number');
+            $("#form-field-AttachedDocument").removeAttr("required");
+        }
+
+        $("#form-field-MobileNumber").on("keyup", function (e) {
+            if ((e.keyCode == 8 || e.keyCode == 46) && ($("#form-field-MobileNumber").val().length < 9) && !($("#form-field-MobileNumber").attr("type") == "tel")) {
+                $("#form-field-MobileNumber").attr("type", "tel");
+                $("#form-field-MobileNumber").attr("data-parsley-type", "digits");
+                $("#form-field-MobileNumber").attr('data-parsley-mobile_number', "");
+            }
+        });
+
+        $("#form-field-IssuingAuthority").on("change", function () {
+            OtherIssueAuthorityRender();
+        });
+
+        OtherIssueAuthorityRender();
+
+    });
+
+    function OtherIssueAuthorityRender() {
+        if ($("#form-field-IssuingAuthority").val() == "TL0999") {
+            $("#divOtherIssueAuthority").show();
+        } else {
+            $("#divOtherIssueAuthority").hide();
+        }
+    }
+
+    //$(".title_message").prepend("<div class='m26-page-title__links'><p class='m26-page-title__backlink'><a class='button button--text button--back' href='@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_Registration) + "?s=0")'>@Translate.Text("Back")</a></p></div>");
+
+</script>

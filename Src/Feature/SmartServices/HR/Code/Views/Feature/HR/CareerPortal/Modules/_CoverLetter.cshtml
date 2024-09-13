@@ -1,0 +1,126 @@
+﻿@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@using DEWAXP.Foundation.Integration.JobSeekerSvc
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.HR.Models.CareerPortal
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@{
+
+
+}
+
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { }, FormMethod.Post, new { @id = "candidateprofile" + Model.Section, @name = "j126-career-portal-profile", @data_parsley_focus = "true", @data_form = "true", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+{
+    //List<applicationSource> sourceList = Model.ApplicationSourceTypeList
+    //   .GroupBy(c => new { c.sourcetext, c.sourcecode })
+    //   .select(x => new applicationSource { x.sourcetext, x.sourcecode }).ToList();
+
+    @Html.Sitecore().FormHandler("CareerPortal", "CoverLetter")
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Section)
+    @Html.HiddenFor(x => x.JobId)
+    @Html.HiddenFor(x => x.ExperienceType)
+    <p><strong>@Translate.Text("cover letter text")</strong></p>
+    <div class="form-field form-field--select form-field--select-single form-field--12   ">
+        <label for="form-field-sourcetype" class="form-field__label">
+            @Translate.Text("application source type label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                    id="form-field-sourcetype"
+                    name="ApplicationSourceType"
+                    required="required"
+                    data-parsley-required-message="@Translate.Text("required field text")"
+                    aria-describedby="description-for-sourcetype"
+                    data-parsley-errors-container="#description-for-sourcetype">
+                <option value="" selected>@Translate.Text("select source type text")</option>
+                @foreach (var item in Model.ApplicationSourceTypeList)
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.ApplicationSourceType) && item.sourcetypecode == Model.ApplicationSourceType)
+                    {
+                        <option value="@item.sourcetypecode" data-option-value="@item.sourcetypecode" selected>@item.sourcetype</option>
+                    }
+                    else
+                    {
+                        <option value="@item.sourcetypecode" data-option-value="@item.sourcetypecode">@item.sourcetype</option>
+                    }
+                }
+            </select>
+        </span>
+        <div id="description-for-sourcetype" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--select form-field--select-single form-field--12 mb24">
+        <label for="form-field-source" class="form-field__label">
+            @Translate.Text("application source text")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                    id="form-field-source"
+                    name="ApplicationSource"
+                    required="required"
+                    aria-describedby="description-for-source"
+                    data-parsley-required-message="@Translate.Text("required field text")"
+                    data-parsley-errors-container="#description-for-source">
+                <option value="" class="defaultopt" selected>@Translate.Text("select source text")</option>
+                @foreach (var item in Model.ApplicationSourceList)
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.ApplicationSource) && item.sourcetypecode == Model.ApplicationSource)
+                    {
+                        <option class="@(item.sourcetypecode)-p" value="@item.sourcecode" data-option-value="@item.sourcecode" selected>@item.sourcetext</option>
+                    }
+                    else
+                    {
+                        <option class="@(item.sourcetypecode)-p" value="@item.sourcecode" data-option-value="@item.sourcecode">@item.sourcetext</option>
+                    }
+                }
+            </select>
+        </span>
+        <div id="description-for-source" class="form-field__messages">
+        </div>
+    </div>
+    @*<p><strong>@Translate.Text("cover letter text")</strong> <br /> @Translate.Text("cover letter intro")</p>
+        <div class="form-field form-field--text form-field--textarea">
+            <span class="form-field__input-wrapper">
+                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                          maxlength="500"
+                          data-textarea="coverletterdescription"
+                          id="form-field-coverletterdescription"
+                          name="CoverLetterDescription"
+                          type="textarea"
+                          aria-describedby="description-for-coverletterdescription"
+                          data-parsley-errors-container="#description-for-coverletterdescription"
+                          required=""
+                          data-parsley-required-message="@Translate.Text("Cover letter validation message")"
+                          data-parsley-id="22">
+                </textarea>
+            </span>
+            <div id="description-for-coverletterdescription" class="form-field__messages">
+            </div>
+        </div>*@
+    <div class="form-field__button">
+        <button type="submit" class="button button--primary button--next button--centered">@Translate.Text("submit button text")</button>
+    </div>
+}
+<script type="text/javascript">
+    $('.m21-avatar__name').html('@ViewBag.FullName');
+
+    $("#form-field-sourcetype").on("change", function () {
+        FilterSource($(this).val())
+    });
+
+    function FilterSource(val) {
+        var _d = "." + val + "-p";
+        $("#form-field-source").children("option").hide();
+        $("#form-field-source").find(_d).show();
+        $("#form-field-source").find(".defaultopt").show();
+        $("#form-field-source").val('');
+    }
+
+    FilterSource($("#form-field-sourcetype").val())
+</script>

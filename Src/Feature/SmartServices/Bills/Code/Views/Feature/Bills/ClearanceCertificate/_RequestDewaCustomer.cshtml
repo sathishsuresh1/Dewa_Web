@@ -1,0 +1,425 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Globalization
+@model DEWAXP.Feature.Bills.ClearanceCertificate.AuthenticatedClearanceCertificateModel
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j26/m26-page-title")
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+    </div>
+</div>
+
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <p class="intro-text">
+            @Html.Sitecore().Placeholder("j26/m14-formatted-text-intro")
+        </p>
+        <div id="clearance-certificate-placeholder">
+            <input type="hidden" id="hdnContractAccountNumber" value="@ViewBag.ContractAccountNumber" />
+            @if (ViewBag.ContractAccountNumber != null && !string.IsNullOrEmpty(ViewBag.ContractAccountNumber))
+            {
+                <div class="form-field form-field--text">
+                    <label class="form-field__label form-field__label--readonly form-field__label--account-details" for="form-field-contractAccountNumber">
+                        @Translate.Text("Contract Account")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--account-details">
+                        <input class="form-field__input form-field__input--readonly form-field__input--account-details keep-ltr"
+                               readonly=""
+                               id="form-field-contractAccountNumber"
+                               name="ContractAccountNumber"
+                               type="text"
+                               value="@ViewBag.ContractAccountNumber"
+                               aria-describedby="description-for-contractAccountNumber"
+                               data-parsley-trigger="focusout" />
+                    </div>
+                    <div class="form-field__messages" id="description-for-contractAccountNumber"></div>
+                </div>}
+            else
+            {
+                <div class="form-field form-field--account-details">
+                    <!-- m43-account-selector-start -->
+                    <fieldset class="fieldset ">
+                        <legend class="legend-color">.</legend>
+                        <div class="form-field form-field--account-details">
+                            <form id="form-account-selector" data-form="true" action="#" method="POST" form-skipvalidation="true">
+                                @Html.Sitecore().Placeholder("j26/m43-account-selector")
+                            </form>
+
+                        </div>
+                    </fieldset>
+                    <!-- m42-account-selector-end -->
+                </div>}
+            <div id="clearancecertificate-error" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;">
+            </div>
+
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "clearancecertificateform", @class = "post-login-clear-cert-form form form--inline hidden", enctype = "multipart/form-data", @data_form = "true" }))
+            {
+                @Html.AntiForgeryToken()
+
+
+
+                <fieldset class="fieldset" id="clearance-cert-placeholder">
+                    <legend class="legend">@Translate.Text("Customer details")</legend>
+
+                    @*<div class="form-field form-field--account-details">
+                            @Html.Sitecore().Placeholder("j26/m43-account-selector")
+                        </div>*@
+
+                    <div class="form-field form-field--text">
+                        <label class="form-field__label form-field__label--readonly form-field__label--account-details" for="form-field-moveoutdate">
+                            @Translate.Text("Move Out Date")
+                        </label>
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--account-details">
+                            <input class="form-field__input form-field__input--readonly form-field__input--account-details keep-ltr"
+                                   readonly=""
+                                   id="form-field-moveoutdate"
+                                   name="MoveoutDate"
+                                   type="text"
+                                   @*value="@Model.MoveOutDate.ToString("dd/MM/yyyy")"*@
+                                   aria-describedby="description-for-moveoutdate"
+                                   data-parsley-trigger="focusout" />
+                        </div>
+                        <div class="form-field__messages" id="description-for-moveoutdate"></div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label class="form-field__label form-field__label--readonly form-field__label--account-details" for="form-field-firstname">
+                            @if (ViewBag.ContractAccountNumber != null && !string.IsNullOrEmpty(ViewBag.ContractAccountNumber))
+                            {
+                                <span id="organizationaccount" class="hidden"> @Translate.Text("EV.Name")</span>
+                                <span id="firstnameaccount"> @Translate.Text("First name")</span>
+                            }
+                            else
+                            {
+                                <span id="firstname"> @Translate.Text("First name")</span>
+                                <span id="organization"> @Translate.Text("CC.Organzation")</span>
+                            }
+                        </label>
+
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--account-details">
+                            <input class="form-field__input form-field__input--readonly form-field__input--account-details keep-ltr"
+                                   readonly=""
+                                   id="form-field-firstname"
+                                   name="FirstName"
+                                   type="text"
+                                   @*value="@Model.FirstName"*@
+                                   aria-describedby="description-for-firstname"
+                                   data-parsley-trigger="focusout" />
+                        </div>
+                        <div class="form-field__messages" id="description-for-firstname"></div>
+                    </div>
+
+                    <div class="form-field form-field--text" id="lastname">
+                        <label class="form-field__label form-field__label--readonly form-field__label--account-details" for="form-field-lastname">
+                            @Translate.Text("Last name")
+                        </label>
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--account-details">
+                            <input class="form-field__input form-field__input--readonly form-field__input--account-details"
+                                   readonly=""
+                                   id="form-field-lastname"
+                                   name="LastName"
+                                   type="text"
+                                   @*value="@Model.LastName"*@
+                                   aria-describedby="description-for-lastname"
+                                   data-parsley-trigger="focusout" />
+                        </div>
+                        <div class="form-field__messages" id="description-for-lastname"></div>
+                    </div>
+
+                    <div class="form-field">
+                        <fieldset class="fieldset">
+                            <legend class="form-field__label">
+                                @Translate.Text("CC_LangLabel")
+                                <span class="form-field__label-optional"></span>
+                            </legend>
+                            <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio" id="form-field-radio_languague_1"
+                                           name="Languague"
+                                           type="radio"
+                                           value="EN"
+                                           aria-describedby="description-for-p22dnjrc3"
+                                           data-parsley-errors-container="#description-for-languague"
+                                           aria-label="form-field-radio_languague_1"
+                                           checked>
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @Translate.Text("CC_eng")
+                                    </span>
+                                </label>
+                            </p>
+                            <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio" id="form-field-radio_languague_2"
+                                           name="Languague"
+                                           type="radio"
+                                           value="AR"
+                                           aria-describedby="description-for-p22dnjrc3"
+                                           aria-label="form-field-radio_languague_2"
+                                           data-parsley-errors-container="#description-for-languague">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @Translate.Text("CC_Ar")
+                                    </span>
+                                </label>
+                            </p>
+                            <div id="description-for-languague" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label class="form-field__label" for="form-field_EmailAddress">
+                            @Translate.Text("Email address")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input type="email"
+                                   name="EmailAddress"
+                                   @*aria-required="true"*@
+                                   required="required"
+                                   id="form-field_EmailAddress"
+                                   @*value="@Model.EmailAddress"*@
+                                   placeholder="@Translate.Text("CC.Email.Placeholder")"
+                                   aria-describedby="description-for-email"
+                                   data-parsley-error-message="@Translate.Text("CC.Email.Validation")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-errors-container="#description-for-email"
+                                   class="form-field__input form-field__input--text ajax-input" />
+                        </span>
+                        <div id="description-for-email" class="form-field__messages">
+                            @*@Html.ValidationMessageFor(x => x.EmailAddress, string.Empty, new { @class = "parsley-errors-list" })*@
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label class="form-field__label" for="form-field__MobileNumber">
+                            @Translate.Text("Mobile number")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input type="tel"
+                                   name="MobileNumber"
+                                   @*aria-required="true"*@
+                                   aria-describedby="description-for-mobile"
+                                   required="required"
+                                   id="form-field__MobileNumber"
+                                   @*value="@Model.MobileNumber"*@
+                                   placeholder="@Translate.Text("Mobile number placeholder")"
+                                   data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                                   data-parsley-type="digits"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-mobile_number=""
+                                   data-parsley-errors-container="#description-for-mobile"
+                                   class="form-field__input form-field__input--text form-field__input--prefixed ajax-input" />
+                        </span>
+                        <div id="description-for-mobile" class="form-field__messages">
+                            @*@Html.ValidationMessageFor(x => x.MobileNumber, string.Empty, new { @class = "parsley-errors-list" })*@
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text form-field--textarea">
+                        <label class="form-field__label" for="form-field-remarks">
+                            @Translate.Text("Reason for the request")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                      maxlength="250"
+                                      data-textarea="remarks"
+                                      id="form-field-remarks"
+                                      name="Remarks"
+                                      type="textarea"
+                                      placeholder="@Translate.Text("Enter reason for the request")"
+                                      aria-describedby="description-for-remarks"
+                                      required=""
+                                      data-parsley-error-message="@Translate.Text("Enter reason for the request")"
+                                      data-parsley-errors-container="#description-for-remarks"
+                                      data-parsley-id="15"></textarea>
+                        </span>
+                        <div class="form-field__messages" id="description-for-remarks">
+                            <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="remarks">0</span>/250 @Translate.Text("Characters")</p>
+                        </div>
+                    </div>
+
+
+                    <input type="hidden" name="Amount" id="Amount" />
+                    <input type="hidden" name="ContractAccountNumber" id="ContractAccountNumber" />
+                    <input type="hidden" name="BusinessPartnerNumber" id="BusinessPartnerNumber" />
+
+                </fieldset>
+
+                <div class="form-field__button">
+                    <a id="continue-button-popup" name="continue-button-popup" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@(Translate.Text("Pay") + "\t" + Model.Amount.ToString("N") + "\t" + Translate.Text("AED"))</a>
+                </div>
+
+                @* Payment Type Popup module *@
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            }
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    docReady(function () {
+        var flag = true;
+        jQuery('.accountselector-moveoutreference').each(function () {
+            jQuery(this).closest('label').find('.form-field__input--radio').attr('disabled', true).addClass('disabled');
+            jQuery(this).closest('label').find('.form-field__fakeradio').off('click');
+        });
+
+        function handleAccountSelection(e, accountNum) {
+
+            var accountNumber;
+            var bpNumber;
+
+            if (e == null) {
+                flag = false;
+                accountNumber = accountNum;//jQuery('input[name="SelectedAccountNumber"]:checked').val();
+                //bpNumber = '10015587';//jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+
+            }
+            else {
+                accountNumber = jQuery('input[name="SelectedAccountNumber"]:checked').val();
+                bpNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+                accountcattype = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-account-category-type");
+
+                if (accountcattype == "2") {
+                    $("#lastname").hide();
+                    $("#firstname").hide();
+                    $("#organization").show();
+                }
+                else {
+                    $("#lastname").show();
+                    $("#firstname").show();
+                    $("#organization").hide();
+                }
+            }
+
+
+            if (accountNumber.length != 0) {
+                var api = "/api/ClearanceCertificateV2/GetAcccount/?contractaccount=" + accountNumber + "&param=";
+                var url = api;
+                //url = api.replace("{z}", accountNumber);
+
+                jQuery.ajax(url, {
+                    beforeSend: function () {
+                        jQuery("#clearancecertificateform").hide();
+                        jQuery("#clearancecertificate-error").hide();
+                        window.attachSpinner('#clearance-certificate-placeholder', { zIndex: 10, bgColor: "#fff", minHeight: 300 });
+                        window.attachSpinner('#charges-placeholder', { zIndex: 9, bgColor: "#fff", minHeight: 400 });
+                        jQuery('.m43-accountsel__selected').hide();
+                    },
+                    complete: function () {
+                        window.detachSpinner('#clearance-certificate-placeholder', { zIndex: 1, bgColor: "#fff", minHeight: 300 });
+                        window.detachSpinner('#charges-placeholder', { zIndex: 1, bgColor: "#fff", minHeight: 300 });
+                        jQuery('.m43-accountsel__selected').show();
+                    },
+                    dataType: 'json',
+                    method: 'GET',
+                    success: function (response) {
+                        jQuery("#clearancecertificateform").show();
+                        clearValidation();
+                        update(response, bpNumber);
+                    },
+                    error: function (response) {
+                        jQuery("#clearancecertificateform").hide();
+                        jQuery("#clearancecertificate-error").html(response.responseJSON.Message);
+                        jQuery("#clearancecertificate-error").show();
+                        //console.log("error");
+                    }
+                });
+            }
+            return false;
+        }
+
+        function clearValidation() {
+            jQuery(".post-login-clear-cert-form input").removeClass("form-field__input--error");
+            jQuery(".post-login-clear-cert-form label").removeClass("form-field__input-wrapper--error");
+
+            jQuery('#credit-balance-error').hide();
+            jQuery('#continue-button').removeAttr('disabled');
+            jQuery('#continue-button-popup').removeAttr('disabled');
+        }
+
+        function update(response, bpNumber) {
+            var currency = '@Translate.Text("AED")';
+
+            var bal = parseFloat(response.Amount);
+
+            var total = bal;
+
+            //jQuery("input[name='ContractAccountNumber']").val(response.ContractAccountNumber);
+
+
+
+            jQuery("input[name='MoveoutDate']").val(response.MoveOutDate);
+            jQuery("input[name='FirstName']").val(response.FirstName);
+            jQuery("input[name='LastName']").val(response.LastName);
+            jQuery("input[name='EmailAddress']").val(response.EmailAddress);
+            jQuery("input[name='MobileNumber']").val(response.MobileNumber[0] === '0' ? response.MobileNumber.substring(1) : response.MobileNumber);
+
+
+            jQuery('#Amount').attr('value', total);
+            jQuery('#ContractAccountNumber').attr('value', response.ContractAccountNumber);
+            jQuery('#BusinessPartnerNumber').attr('value', bpNumber);
+
+            $("#lastname").show();
+            if (response.LastName != null && (response.LastName == "." || response.LastName == ""))
+            {
+                $("#lastname").hide();
+            }
+            if (total <= 0) {
+                jQuery("#clearance-cert-placeholder").show();
+                jQuery("#continue-button").text('@Translate.Text("J87 Submit")');
+                jQuery("#continue-button-popup").text('@Translate.Text("J87 Submit")');
+            }
+            else {
+                jQuery("#clearance-cert-placeholder").hide();
+
+                jQuery("#continue-button").text('@Translate.Text("Pay"):' + " " + numeral(total).format('0,0.00') + " " + currency);
+                jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                jQuery("#continue-button-popup").text('@Translate.Text("Pay"):' + " " + numeral(total).format('0,0.00') + " " + currency);
+            }
+            if (!flag && (response.LastName != null && (response.LastName == "." || response.LastName == "")))
+            {
+                $("#lastname").hide();
+                $("#firstnameaccount").hide();
+                $("#organizationaccount").show();
+
+            }
+
+        }
+
+        if ($("#hdnContractAccountNumber").val() != "") {
+            //getData($("#hdnContractAccountNumber").val(), "");
+            handleAccountSelection(null, $("#hdnContractAccountNumber").val());
+
+        }
+        else {
+            jQuery('#form-account-selector').submit(handleAccountSelection);
+            jQuery('#form-account-selector').submit();
+        }
+    });
+
+    // Open Payment Method popup
+    jQuery('#continue-button-popup').on('click', function () {
+        var total = jQuery('#Amount').val();
+        var currency = '@Translate.Text("AED")';
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (numeral(total) > 0) {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        } else {
+            $("#clearancecertificateform").submit();
+        }
+    });
+</script>

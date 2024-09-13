@@ -1,0 +1,122 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.EasyPay.EasyPayModel
+@{
+    var ca = Model != null ? Model.EasyPayNumber : "";
+
+    string beneficiariesJson = Convert.ToString(ViewBag.BeneficaryJson);
+}
+
+<div class="grid j121-beneficiary-easy-pay" data-journey="j121-beneficiary-easy-pay">
+    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form form--inline", @id = "findEasyPay", @data_form = "true", @novalidate = string.Empty }))
+    {
+        @Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()
+        <div class="j105-drrg">
+            <div class="m66-preloader j105-drrg--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Sitecore().Placeholder("j15/m26-page-title")
+                @Html.Sitecore().Placeholder("j15/m38-step-tracker")
+                @Html.Sitecore().Placeholder("j14/m99-intro-text")
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <fieldset>
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-easypaynumber" class="form-field__label">
+                            @Translate.Text("easypay.number")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        @if (!string.IsNullOrEmpty(beneficiariesJson) && beneficiariesJson != "[]")
+                        {
+
+                            <span class="form-field__input-arrow form-field__input-wrapper">
+                                <span class="icon-open"></span>
+                                <input class="form-field__input form-field__input--text form-field__input-autoselect"
+                                       id="form-field-easypaynumber"
+                                       name="EasyPayNumber"
+                                       type="text"
+                                       placeholder="@Translate.Text("MBBeneficieryListPalceholder")"
+                                       aria-describedby="description-for-easypaynumber"
+                                       data-beneficiary-number='@beneficiariesJson'
+                                       data-parsley-errors-container="#description-for-easypaynumber"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("easypay.enter")"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="8"
+                                       autocomplete="off"
+                                       value="@ca" />
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text" id="form-field-easypaynumber"
+                                       name="EasyPayNumber"
+                                       type="number" lang="en"
+                                       placeholder="@Translate.Text("easypay.enterplaceholder")"
+                                       aria-describedby="description-for-easypaynumber"
+                                       required=""
+                                       value="@ca"
+                                       data-parsley-error-message="@Translate.Text("easypay.enter")"
+                                       data-parsley-errors-container="#description-for-easypaynumber"
+                                       data-parsley-account_premise_number=""
+                                       autocomplete="off" />
+
+
+                            </span>
+                        }
+
+
+
+                        <div id="description-for-easypaynumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.EasyPayNumber, "", new { @class = "parsley-errors-list" })
+                            <p class="form-field__helplink">
+                                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EASYPAY_UNDERSTAND_YOUR_BILL)" class="link">@Translate.Text("easypay.get")</a>
+                            </p>
+                        </div>
+
+                        @Html.Sitecore().Placeholder("content-easypaybottom-placeholder")
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="form-field__button">
+                    <button class="button button--primary" id="btnsubmit" type="submit">@Translate.Text("easypay.enquire")</button>
+                    @if (User != null && User.Identity.IsAuthenticated && ViewBag.IsLoggedIn)
+                    {
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.ADD_BENEFICIARY)" class="button button--quaternary tooltipstered">@Translate.Text("Manage Beneficiary Account List")</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+@if (ca != "")
+{
+    <script type="text/javascript">
+        window.onload = function () {
+            jQuery('.m66-preloader').show();
+            jQuery('.m66-preloader').css('top', $(window).scrollTop());
+            document.getElementById("findEasyPay").submit();
+
+        }
+    </script>
+}

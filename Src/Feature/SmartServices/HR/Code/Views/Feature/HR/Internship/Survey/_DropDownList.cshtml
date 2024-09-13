@@ -1,0 +1,48 @@
+﻿@using DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey
+@using System.Linq
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    bool select2 = ViewData["select2"] != null&& !string.IsNullOrWhiteSpace(ViewData["select2"].ToString());
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+    var selectedflag = Model.Optionslist.Any(x =>!string.IsNullOrWhiteSpace(x.Selectedflag)&& x.Selectedflag.Equals("X"));
+}
+<div class="form-field form-field--select form-field--select-single">
+    @if (!string.IsNullOrWhiteSpace(Model.Asheading) && Model.Asheading.Equals("X")) { }
+    else
+    {
+        <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label">
+            @Model.Question
+        </label>
+    }
+    <span class="form-field__input-wrapper form-field__input-wrapper--select @(select2?"form-field__input-wrapper--select2":string.Empty)">
+        <select class="form-field__input form-field__input--select form-field__input--select-full @(select2?"form-field__input--select2":string.Empty)  @(displayonly ? " disabled" : string.Empty)"
+                id="form-field-group@(groupnumber)_question@(Model.Questionnumber)" name="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                data-parsley-required-message="@Model.Questionplaceholder"
+                       data-parsley-error-message="@Model.Questionplaceholder"
+                data-parsley-trigger="change"
+                @(displayonly ? "disabled" : string.Empty)
+                @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                @(select2 ? "multiple" : string.Empty)
+                data-parsley-id="14">
+            @foreach (Optionslist optionitem in Model.Optionslist)
+            {
+                if (displayonly)
+                {
+                    <option value="@optionitem.Questionoption" @(!string.IsNullOrWhiteSpace(optionitem.Selectedflag) && optionitem.Selectedflag.Equals("X") ? "selected" : string.Empty)>@optionitem.Questionoptiondescription</option>
+                }
+                else
+                {
+                    <option value="@optionitem.Questionoption" @(!select2? (Model.Optionslist.IndexOf(optionitem).Equals(0) ? "selected" : string.Empty):string.Empty)>@optionitem.Questionoptiondescription</option>
+                }
+
+            }
+        </select>
+    </span>
+    <div id="description-for-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+        <p class="form-field__description">@Model.Questionnote</p>
+    </div>
+</div>

@@ -1,0 +1,94 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using DEWAXP.Feature.CommonComponents.Models.Renderings
+@model MultipleTargetTabs
+
+@{
+    var additionalBoxCssClasses = Model.InModal ? "m41-tabs-box__tabs--modal" : string.Empty;
+    var pageUrl = LinkManager.GetItemUrl(Sitecore.Context.Item);
+    MultipleTargetTab selectedTab = null;
+
+}
+
+@if (Model.Children != null && Model.Children.Count() > 0)
+{
+    <div class="m25-tabs m25-tabs--variant" data-component="m25-tabs" data-selected-tab-id="m25-tab-5" data-helper="toggle-menu" data-toggle-breakpoint='m'>
+        <div class="box--news">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--4">
+
+                        <div class="m21-avatar">
+                            <div class="m21-avatar__content">
+                                <div class="m21-avatar__image" style="background-image: url(../../images/SR-teaser_img.jpg);">
+                                    <div class="m21-avatar__image--control icon-photo">
+                                        Update
+                                    </div>
+                                </div>
+                                <div class="m21-avatar__details">
+                                    <h2 class="m21-avatar__name">Apple UAE</h2>
+                                    <p class="m21-avatar__bp">BP: 01234567891234</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        @Html.Sitecore().Placeholder("main/content/tab-top")
+
+                        <div class="m25-tabs__menu" data-m25-tabs-menu="true">
+                            <ul aria-role="tablist">
+                                @foreach (var tab in Model.Children)
+                                {
+                                    var index = Model.Children.ToList().IndexOf(tab);
+
+                                    var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                                    var tabSecondTargetUrl = tab.SecondTarget != null ? LinkManager.GetItemUrl(tab.SecondTarget) : null;
+                                    var active = Convert.ToBoolean(tab.ActivePageList != null && tab.ActivePageList.Where(x => x.Url.Equals(pageUrl)).Count() > 0) ? true : pageUrl.Equals(tabTargetUrl) || pageUrl.Equals(tabSecondTargetUrl) || (Model.InModal && index == 0);
+                                    var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+                                    <li>
+                                        <a href="@(active? string.Format("#m25-panel-"+index):tabTargetUrl)"  aria-controls="m25-panel-@index" class="m25-tabs__tab @(active?"m25-tabs__tab--active":"")" data-m25-tabs-tab="true" id="m25-tab-@index">@tab.Title</a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="m25-tabs__body grid__column grid__column--8">
+                        @foreach (var tab in Model.Children)
+                        {
+                            var index = Model.Children.ToList().IndexOf(tab);
+
+                            var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                            var tabSecondTargetUrl = tab.SecondTarget != null ? LinkManager.GetItemUrl(tab.SecondTarget) : null;
+                            var active = Convert.ToBoolean(tab.ActivePageList != null && tab.ActivePageList.Where(x => x.Url.Equals(pageUrl)).Count() > 0) ? true : pageUrl.Equals(tabTargetUrl) || pageUrl.Equals(tabSecondTargetUrl) || (Model.InModal && index == 0);
+                            var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+
+                            <div class="toggle-menu__item @(active?"toggle-menu__itemactive":"")">
+                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                    <h2 class="m25-tabs__title toggle-menu__title icon-share">Change of landlord information</h2>
+                                </div>
+                                <div aria-labelledby="m25-tab-@index" aria-role="tabpanel" id="m25-panel-@index" class="m25-tabs__content toggle-menu__content @(active?"m25-tabs__content--active":"")" data-m25-tabs-content="true" data-toggle-content="true">
+                                    @Html.Sitecore().Placeholder("main/content/tab-boxcontent")
+                                </div>
+                            </div>
+                        }
+                        <div class="m15-tabs--mobile">
+                            <div class="m25-tabs--title-mobile">
+                                About DEWA
+                            </div>
+                            <div class="form-field form-field--select form-field--select-single">
+                                <label for="form-field-m41vermultab" class="form-field__label"><span class="aria-only">select</span></label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select m25-tabs--select-mobile--wrapper">
+                                    <select id="form-field-m41vermultab" class="m25-tabs--select-mobile form-field__input form-field__input--select"></select>
+                                </span>
+                            </div>
+                            <div class="m25-tabs--container-mobile">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

@@ -1,0 +1,351 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.DRRG.Models.PVModule
+@{
+    int manulist = (int)ViewBag.manuref;
+    string detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Details);
+    if (manulist.Equals(2))
+    {
+        detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_UpdatedProfile);
+    }
+    else if (manulist.Equals(3))
+    {
+        detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_RejectedApplication);
+    }
+
+}
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j02-drrg-dashboard">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+
+        <div class="grid__row mb24">
+            <div class="grid__column grid__column--12">
+                <form id="form-application-filter" action="#" method="POST" form-skipvalidation="true">
+                    @Html.AntiForgeryToken()
+                    @if (ViewBag.manuref != null && ViewBag.manuref == 1)
+                    {
+                        <legend class="legend">
+                            <strong>New User Registration Applications in Queue</strong>
+                        </legend>
+                    }
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-SearchText" class="form-field__label">
+                            <span class="aria-only">Text Field</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--search">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-SearchText"
+                                   name="SearchText"
+                                   type="text"
+                                   placeholder="Search by reference number or name"
+                                   aria-describedby="description-for-SearchText"
+                                   data-parsley-errors-container="#description-for-SearchText"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="6"
+                                   aria-invalid="false">
+                            <button type="submit" class="icon-search"><span class="aria-only">Submit</span></button>
+                        </span>
+                        <div id="description-for-SearchText" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form--single_line">
+                        @*<div class="form-field form-field--select form-field--select_new">
+                                <label for="form-field-applicationtype" class="form-field__label">
+                                    Type
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-applicationtype"
+                                            name="applicationtype" aria-describedby="description-for-applicationtype" data-parsley-errors-container="#description-for-applicationtype" data-parsley-trigger="change" data-parsley-id="12">
+                                        <option value="" selected="">All</option>
+                                        <option value="1">PV Module</option>
+                                        <option value="2">Inverter Module</option>
+                                        <option value="3">Interface Module</option>
+                                    </select>
+                                </span>
+                                <div id="description-for-applicationtype" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--select form-field--select_new">
+                                <label for="form-field-lcjasldad" class="form-field__label">
+                                    Status
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-lcjasldad" name="select" aria-describedby="description-for-lcjasldad" data-parsley-errors-container="#description-for-lcjasldad" data-parsley-trigger="change" data-parsley-id="16">
+                                        <option value="" selected="">All</option>
+                                        <option value="1">Approved</option>
+                                        <option value="2">Pending</option>
+                                        <option value="3">Rejected</option>
+                                    </select>
+                                </span>
+                                <div id="description-for-lcjasldad" class="form-field__messages">
+                                </div>
+                            </div>*@
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div id="application-list">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--centered">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Dashboard)" class="button button--outline button--back backbutton" role="button">@Translate.Text("Back to Home page")</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="application-item-template" type="text/x-handlebars-template">
+    <div class="pagination-list">
+    </div>
+    <div class="m23-table m23-table--variant2" data-component="m23-table">
+        <h3 class="m23-table__title "></h3>
+        <table class="m23-table__content-table">
+            <thead class="m23-table__content-table-header">
+                <tr class="m23-table__content-table-row" tabindex="0">
+                    <th class="m23-table__content-table-cell--header">Serial No.</th>
+                    <th class="m23-table__content-table-cell--header">Reference No.</th>
+                    <th class="m23-table__content-table-cell--header">Full Legal Name of Manufacturer</th>
+                    <th class="m23-table__content-table-cell--header">User's Role</th>
+                    <th class="m23-table__content-table-cell--header">Date Submitted</th>
+                </tr>
+            </thead>
+            <tbody class="m23-table__content-table-body">
+                {{#results}}
+                <tr class="m23-table__content-table-row middle" tabindex="0">
+                    <td data-label="Serial No." class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{serialnumber}}
+                        <div class="m23-table__content-table-th-mobile" style="">Serial No.</div>
+                    </td>
+                    <td data-label="Reference No." class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        <a class="link" href="@(detailedurl)?id={{referenceNumber}}">
+                            {{referenceNumber}}
+                        </a>
+                        <div class="m23-table__content-table-th-mobile" style="">Reference No.</div>
+                    </td>
+                    <td data-label="Application Type" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{modelName}}
+                        <div class="m23-table__content-table-th-mobile" style="">Name of Manufacturer</div>
+                    </td>
+                    <td data-label="Model" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{type}}
+                        <div class="m23-table__content-table-th-mobile" style="">User's Role</div>
+                    </td>
+                    <td data-label="Date" class="m23-table__content-table-cell initialized" style="min-height: 23.9062px;">
+                        {{dateSubmitted}}
+                        <div class="m23-table__content-table-th-mobile" style="">Date</div>
+                    </td>
+                </tr>
+                {{/results}}
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination-list">
+    </div>
+</script>
+<script id="application-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination m34-pagination--variant m34-pagination--variant_end mt24">
+        <span>
+            {{firstitem}} - {{lastitem}} of {{totalitem}}
+        </span>
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="ajaxpage({{previouspagenumber}})" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev"><span class="aria-only">@Translate.Text("Previous")</span></a>
+            {{else}}
+            <a disabled="" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev disabled"><span class="aria-only">@Translate.Text("Previous")</span></a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="ajaxpage({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next"><span class="aria-only">@Translate.Text("Next")</span></a>
+            {{else}}
+            <a disabled="" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next disabled"><span class="aria-only">@Translate.Text("Next")</span></a>
+            {{/if}}
+
+        </div>
+    </div>
+</script>
+<script id="application-norecord-template" type="text/x-handlebars-template">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m40v2-status-message m40v2-status-message--success  icon icon-new-success-message " data-component="m40v2-status-message">
+                <div class="m40v2-status-message__text">@Translate.Text("No record")</div>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    docReady(function () {
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('toLowerCase', function (str) {
+            return str.toLowerCase();
+        });
+
+        Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        });
+        setTimeout(function () {
+            jQuery('select[name="applicationtype"]').change(handleFilterSelection);
+        }, 200);
+        jQuery("#form-application-filter").on('submit', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            handleSearchFilter(event);
+        });
+        jQuery(".mymainpassesbutton,.mysubpassesbutton").on('click', function (event) {
+            handleSearchFilter(event);
+        });
+        jQuery('#form-application-filter').submit();
+        function handleSearchFilter(e) {
+            e.preventDefault();
+            ajaxpage(1);
+        }
+    });
+    function ajaxpage(page, pagesize,) {
+        var view;
+        var keyword = jQuery("#form-field-SearchText").val();
+        var url = "/api/Sitecore/DRRGEvaluator/ManufacturerListAjax";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            traditional: true,
+            data: AddForgeryToken({
+                pagesize: pagesize,
+                keyword: keyword,
+                //applicationtype: applicationtype,
+                statustxt: "",
+                page: page,
+                namesort: "",
+            }, "form-application-filter"),
+            beforeSend: function () {
+                jQuery('.m66-preloader').show();
+                jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.m66-preloader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status && response.Message != null && response.Message.Lstmodule != null && response.Message.Lstmodule.length > 0) {
+                    var context = {
+                        results: response.Message.Lstmodule,
+                    };
+
+                    renderApplicationsReceived(context);
+                    if (response.Message.pagination) {
+                        var pagedata = {
+                            previouspage: function () {
+                                if (response.Message.page > 1)
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            nextpage: function () {
+                                if (response.Message.page < response.Message.totalpage)
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            firstitem: response.Message.firstitem,
+                            lastitem: response.Message.lastitem,
+                            totalitem: response.Message.totalitem,
+                            page: response.Message.page,
+                            previouspagenumber: response.Message.page - 1,
+                            nextpagenumber: response.Message.page + 1,
+                            //pagenumbers: response.Message.pagenumbers,
+                            totalpage: response.Message.totalpage,
+                        }
+                        renderSearchPagination(pagedata);
+
+                    }
+                    //}
+
+                }
+                else {
+                    renderApplicationsNorecordReceived(null);
+                }
+
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+
+            }
+        });
+    }
+    function transform(response, Message) {
+        var r = {
+            lstmodule: JSON.parse(Message.lstmodule),
+            //strnamesort: Message.namesort
+        }
+        return r;
+    }
+    function handleFilterSelection() {
+        ajaxpage(1);
+    }
+    function renderApplicationsReceived(context) {
+        var markup = jQuery('#application-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#application-list').html(rendering);
+    }
+    function renderApplicationsNorecordReceived(context) {
+        var markup = jQuery('#application-norecord-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        //jQuery("#form-application-filter").hide();
+        jQuery('#application-list').html(rendering);
+    }
+    function renderSearchPagination(context) {
+        var markup = jQuery('#application-pagination-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.pagination-list').html(rendering);
+    }
+    AddForgeryToken = function (data, formid) {
+        data.__RequestVerificationToken = $('#' + formid + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+</script>

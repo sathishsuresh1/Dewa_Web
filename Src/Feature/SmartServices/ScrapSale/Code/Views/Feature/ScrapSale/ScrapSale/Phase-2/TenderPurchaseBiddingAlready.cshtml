@@ -1,0 +1,110 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.ScrapSale.TenderBiddingPaymentModel
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP3)">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">@Translate.Text("SS_BD_Header") @Model.TenderNumber</h2>
+                <p class="text-page__intro">
+                    @if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft)
+                    {
+                        @Model.TenderARDescription
+                    }
+                    else
+                    {
+                        @Model.TenderEndDescription
+                    }
+                </p>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                @if (Model.IsJustPaid && Model.IsOnline)
+                {
+                    <div class="m40-status-message__title">@Translate.Text("SS_BD_P_PaidSuccess")</div>
+                }
+
+                <div class="m40-status-message__text">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.TenderBidRefNumber))
+                    {
+                        <strong>@Html.Raw(string.Format("{0}<br/>{1}", Translate.Text("Reference Number"), Model.ReferenceNo))</strong>
+                    }
+
+                    @if (Model.IsOnline)
+                    {
+                        <p style="display:none;">
+                            Tender No: @(Model.TenderNumber) <br />
+                            Epay No: @(Model.Epnumber)<br />
+                            Ept ype: @(Model.Eptype)<br />
+                            Refrence No: @(Model.ReferenceNo)<br />
+                            Deg TransactionId: @(Model.DegTransactionId)<br />
+                            Dewa TransactionId: @(Model.DewaTransactionId)<br />
+                            @Html.Raw(string.Format("<br/>{0}<br/>{1}", Translate.Text("Receipt"), Model.ReceiptIdentifiers))
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.IsOnline)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="success-summery">
+                    <h2 class="summery-title">@Translate.Text("SS_BD_EarnestMoney")</h2>
+                    <h2 class="summery-value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Model.tenderFeeAmount)</h2>
+                </div>
+            </div>
+        </div>
+        if (Model.PaidSuqiaAmount > 0)
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--content  grid__column--centered">
+
+                    <div class="success-summery">
+                        <h2 class="summery-title">@Translate.Text("TH.Total amount")</h2>
+                        <h2 class="summery-value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Convert.ToDecimal(Model.tenderFeeAmount) + Model.PaidSuqiaAmount)</h2>
+                    </div>
+
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.PaidSuqiaAmount)
+                </div>
+            </div>
+        }
+
+    }
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+            <div class="m17-sectiontitle">
+                <h2 class="text__section-title"><strong>@Translate.Text("SS_BD_Whatbext")</strong></h2>
+                <div class="m14-richtext mb0">
+                    @if (Model.IsOnline)
+                    {
+                        <p class="text__content-copy">
+                            @Translate.Text("SS_BD_SubmitDesc_On")
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text__content-copy">
+                            @Translate.Text("SS_BD_SubmitDesc_Off")
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

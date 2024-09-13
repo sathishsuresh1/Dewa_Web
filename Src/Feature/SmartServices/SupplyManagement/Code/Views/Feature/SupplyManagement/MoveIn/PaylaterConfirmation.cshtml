@@ -1,0 +1,223 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.SupplyManagement.Movein.MoveInViewModelv3
+
+@Html.Sitecore().Placeholder("j25/page-title")
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+            <div class="m40-status-message__title icon--success">@Translate.Text("Movein.request submitted")</div>
+            @if (!string.IsNullOrWhiteSpace(Model.SkiptoPayment) && Model.Owner && !Model.occupiedbyowner)
+            {
+                <div class="m40-status-message__text">@Translate.Text("movein.landlordrequesttext")</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.SkiptoPayment) && Model.Owner && Model.occupiedbyowner)
+            {
+                <div class="m40-status-message__text">@Translate.Text("movein.moveinrequesttext")</div>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.payother))
+            {
+                <div class="m40-status-message__text">@Translate.Text("movein.moveinpayothertext")</div>
+            }
+            else
+            {
+                <div class="m40-status-message__text">@string.Format(Translate.Text("movein.requesttext"), Model.Total.ToString("0,0.00")) </div>
+            }
+            <p>
+                <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <fieldset class="fieldset ">
+            <legend class="legend-color">.</legend>
+            <div class="form-field form-field--account-details">
+                <div class="m42-keyvalue">
+                    <dl>
+                        <dt class="m42-keyvalue__key">@Translate.Text("Movein.referrence")</dt>
+                        <dd class="m42-keyvalue__value">@Model.MoveInNotificationNumber</dd>
+                    </dl>
+                </div>
+                @if (string.IsNullOrWhiteSpace(Model.SkiptoPayment))
+                {
+                    <hr style="width: 110%;margin: 36px -5% 0px;" />
+                }
+                else
+                {
+                    <br />
+                }
+            </div>
+        </fieldset>
+        @if (!string.IsNullOrWhiteSpace(Model.SkiptoPayment))
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <div class="m44-bill-selector" data-component="m44-bill-selector" data-currency-suffix="@Translate.Text("AED")">
+                        <div class="m44-bill-selector__partner">
+                            <div class="m44-bill-selector__accounts-list">
+                                @foreach (var receipt in Model.premiseAmountDetails)
+                                {
+                                    var indicatorClass = "active";
+                                    <div class="m44-bill-selector__account_confirmation--detail">
+                                        <span class="m44-bill-selector__account m44-bill-selector__account--confirm" data-acc-detail="wrapper">
+                                            <span class="m44-bill-selector__header">
+                                                <span class="m44-bill-selector__name" data-acc-detail="acc_name">
+                                                    @(Model.FirstName +" " + ((!string.IsNullOrWhiteSpace(Model.LastName) && !Model.LastName.Equals(".")) ? Model.LastName : string.Empty))
+                                                    <span dir="@dir" class="m44-bill-selector__status m44-bill-selector__status--@indicatorClass"></span>
+                                                </span>
+                                                @if (!string.IsNullOrWhiteSpace(receipt.contractaccountnumber) && !receipt.contractaccountnumber.Equals(receipt.premise))
+                                                {
+                                                    <span class="m44-bill-selector__details">
+                                                        <abbr title="@Translate.Text("movein.accountnumber")">@Translate.Text("movein.accountnumber")</abbr>: <span data-acc-detail="acc_number">@receipt.contractaccountnumber</span><span class="aria-only"> | </span>
+                                                    </span>
+                                                }
+                                                <span class="m44-bill-selector__details">
+                                                    <abbr title="@Translate.Text("movein.premisenumber")">@Translate.Text("movein.premisenumber")</abbr>: <span data-acc-detail="acc_number">@receipt.premise</span>
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            foreach (var premiseamount in Model.premiseAmountDetails)
+            {
+                <div class="transaction-history">
+                    <div class="transaction-history__item">
+                        <span class="transaction-history__detail-amount--bill">
+                            <span class="transaction-history__detail-item--content">@Convert.ToDecimal(premiseamount.amount).ToString("0,0.00") @Translate.Text("AED")</span>
+                        </span>
+                        <ul class="transaction-history__detail moveinul">
+                            @if (!string.IsNullOrWhiteSpace(premiseamount.contractaccountnumber) && !premiseamount.contractaccountnumber.Equals(premiseamount.premise))
+                            {
+                                <li class="transaction-history__detail-item">
+                                    <span class="transaction-history__detail-item--content">@Translate.Text("movein.accountnumber")</span>
+                                    <span class="transaction-history__detail-item--divider">:</span>
+                                    <span class="transaction-history__detail-item--content">@premiseamount.contractaccountnumber</span>
+                                </li>
+                            }
+                            <li class="transaction-history__detail-item">
+                                <span class="transaction-history__detail-item--content">@Translate.Text("movein.premisenumber")</span>
+                                <span class="transaction-history__detail-item--divider">:</span>
+                                <span class="transaction-history__detail-item--content">@premiseamount.premise</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+        @if (string.IsNullOrWhiteSpace(Model.SkiptoPayment))
+        {
+            if (!string.IsNullOrWhiteSpace(Model.payother))
+            {
+                <div class="moveinTotal">
+                    <h3>
+                        <strong>
+                            @Translate.Text("movein.Total")
+                        </strong>
+                        <strong class="floatRight">
+                            @Convert.ToDecimal(Model.Total).ToString("0,0.00") @Translate.Text("AED")
+                        </strong>
+                    </h3>
+                </div>
+            }
+            else
+            {
+                <div class="moveinTotal">
+                    <h3>
+                        <strong>
+                            @Translate.Text("movein.Total")
+                        </strong>
+                    </h3>
+                    <h3 class="floatRight">
+                        <strong>
+                            @Convert.ToDecimal(Model.Total).ToString("0,0.00") @Translate.Text("AED")
+                        </strong>
+                    </h3>
+                    <p>
+                        @Translate.Text("movein.willbeinfirstbill")
+                    </p>
+                </div>
+            }
+        }
+        <div class="form-field__button">
+        </div>
+    </div>
+</div>
+
+<div class="grid__row noprint">
+    <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+        <h2 class="text__section-title">@Translate.Text("WhatNext")</h2>
+        @*@if (!string.IsNullOrWhiteSpace(Model.SkiptoPayment) && Model.Owner && !Model.occupiedbyowner)
+                {
+                @Translate.Text("movein.landlordrequesttext whatnext")
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.SkiptoPayment) && Model.Owner && Model.occupiedbyowner)
+            {
+                @Html.Raw(Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.J10_SUPPLIMENTARY).Fields["Confirmation Blurb"])
+            }
+            else
+            {
+                @Html.Raw(Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.J10_SUPPLIMENTARY).Fields["Confirmation Blurb"])
+            }*@
+        @if (Model.messagewhatsnext != null && Model.messagewhatsnext.Length > 0)
+        {
+            foreach (var txt in Model.messagewhatsnext)
+            {
+                <p class="text__content-copy">@txt</p>
+            }
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.payother))
+        {
+            if (Model.Easypayflag && Model.payotherchannelflag)
+            {
+                if (Model.Easypayflag)
+                {
+                    <div class="button-container--single">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EASYPAY)" class="button button--primary" role="button">@Translate.Text("movein.confirmation.easypay")</a>
+                    </div>
+                }
+                if (Model.payotherchannelflag)
+                {
+                    <br />
+                    <div class="link button--text">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.Methodofbillpayment)" class="link button--text" role="button"><strong>@Translate.Text("movein.confirmation.methodofbillpayment")</strong></a>
+                    </div>
+                }
+            }
+            else if (Model.payotherchannelflag)
+            {
+                <div class="button-container--single">
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.Methodofbillpayment)" class="button button--primary" role="button"><strong>@Translate.Text("movein.confirmation.methodofbillpayment2")</strong></a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="button-container--single">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" class="button button--primary button--next" role="button">@Translate.Text(DictionaryKeys.Global.Home)</a>
+            </div>
+        }
+
+    </div>
+</div>

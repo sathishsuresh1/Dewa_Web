@@ -1,0 +1,61 @@
+﻿@using System.Globalization
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Data.Items
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Mvc
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Download
+@{
+
+    string bookurl = Html.Sitecore().CurrentRendering.Parameters["bookurl"] != null ? Html.Sitecore().CurrentRendering.Parameters["bookurl"] : string.Empty;
+    string flipbookurl = Html.Sitecore().CurrentRendering.Parameters["flipbookurl"] != null ? Html.Sitecore().CurrentRendering.Parameters["flipbookurl"] : string.Empty;
+    bool isFileDisabled = Convert.ToBoolean(Html.Sitecore().CurrentRendering.Parameters["DisableFile"] == "1");
+}
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        <div class="m10-download ">
+            <div class="m10-download__content icon @(!string.IsNullOrWhiteSpace(Model.Icon)?Model.Icon:"icon-new-pdf")">
+                @if (!isFileDisabled && Model.File != null)
+                {
+                    var mediaItem = Model.FileMediaItem;
+                    if (mediaItem != null)
+                    {
+                        string _title = (Model.File.Id + "--" + Guid.NewGuid().ToString("D"));
+                        <div>
+                            <h2 class="m10-download__title" id="@(_title)">@Model.Text</h2>
+                            <p class="teaser__copy">@mediaItem.Extension.ToUpper() | @Sizer.FullSize(mediaItem.Size) | @(((Item)mediaItem).Statistics.Updated.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture))</p>
+                            <a target="_blank" href="@MediaManager.GetMediaUrl(mediaItem)" class="button button--fithtiary button--next button--small" aria-describedby="@(_title)">@Translate.Text("Download")</a>
+
+                            @if (!string.IsNullOrWhiteSpace(bookurl))
+                            {
+                                <a target="_blank" href="@bookurl" class="button button--outline button--small">@Translate.Text("View")</a>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(flipbookurl))
+                            {
+                                <a target="_blank" href="@flipbookurl" class="button button--outline button--small">@Translate.Text("View")</a>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div>
+                        <h2 class="m10-download__title">@Model.Text</h2>
+                        @if (!string.IsNullOrWhiteSpace(bookurl))
+                        {
+                            <a target="_blank" href="@bookurl" class="button button--outline button--small">@Translate.Text("View")</a>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(flipbookurl))
+                        {
+                            <a target="_blank" href="@flipbookurl" class="button button--outline button--small">@Translate.Text("View")</a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

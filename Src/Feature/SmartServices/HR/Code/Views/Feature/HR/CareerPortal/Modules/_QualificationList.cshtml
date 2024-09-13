@@ -1,0 +1,150 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@{
+    var lastRowClass = "";
+}
+@if (Model.CandidateQualification != null && Model.CandidateQualification.Count > 0)
+{
+    var cnt = 1;
+    var totalCnt = Model.CandidateQualification.Count;
+    foreach (var qualification in Model.CandidateQualification)
+    {
+        if (totalCnt == cnt)
+        {
+            lastRowClass = "last-row";
+        }
+        <div class="form--data-table-row  @lastRowClass" data-component="m73-form-expand-tab" data-seq-no="@qualification.sequenceNo#@qualification.objectid#@qualification.objectversion#@qualification.planversion" data-row-of="@qualification.QualificationGrp">
+            <span data-toggle="true" aria-controls="_xu6ptl5ev_content" class="form--data-table-tab form--data-table-title tab-large m73-form-trigger-expand" id="_xu6ptl5ev_trigger">
+                <div class="tab-title tab-expand">@qualification.QualificationGrp</div>
+            </span>
+            <div data-content="true" aria-labelledby="_xu6ptl5ev_trigger" aria-expanded="false" class="m73-form-content-expand" id="_xu6ptl5ev_content">
+                <div class="form--data-table-buttons">
+                    <div class="form-field--add_button edit-qua">@Translate.Text("edit button text")</div>
+                    <div class="form-field--add_button remove remove-qua">@Translate.Text("remove button text")</div>
+                </div>
+                <div class="form--data-table-content">
+                    <div class="form--data-table-wrapper" data-table-wrapper-id="form-field-qualificationgrp">
+                        <label class="form-data-table__label"> @Translate.Text("qualification group label")</label>
+                        <span data-select="true" data-val="@qualification.QualificationGrpId" class="form-data-table__value">@qualification.QualificationGrp</span>
+                    </div>
+                    <div class="form--data-table-wrapper" data-table-wrapper-id="form-field-qualificationlist">
+                        <label class="form-data-table__label">@Translate.Text("qualification label")</label>
+                        <span data-select="true" data-val="@qualification.QualificationId" class="form-data-table__value">@qualification.QualificationName</span>
+                    </div>
+                    @*<div class="form--data-table-wrapper" data-table-wrapper-id="form-field-qualificationlist">
+                            <label class="form-data-table__label">@Translate.Text("proficiency label")</label>
+                            <span data-select="true" data-val="@qualification.ProficiencyId" class="form-data-table__value">@qualification.ProficiencyName</span>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+        cnt++;
+    }
+}
+<script type="text/javascript">
+    setTimeout(function () {
+        jQuery(window).trigger('proprogress', [@Model.ProfileProgress]);
+    }, 500);
+    $('.remove-qua').bind('click',function(){
+        //console.log($(this).closest('.form--data-table-row').attr('data-seq-no'));
+        var thisTarget = $('#' + $(this).closest('[data-table-form]').attr('id').replace('_table', '_target') + '');
+        var thisTargetBtn = $('#' + $(this).closest('[data-table-form]').attr('id').replace('_table', '_button') + '');
+        var postedQualificationlist = jQuery('#postedQualificationjson');
+        var qualificationlist = [];
+        var obj = {};
+        if ($(this).closest('.form--data-table-row').attr('data-seq-no') != undefined) {
+            var objData = $(this).closest('.form--data-table-row').attr('data-seq-no').split('#');
+            if (objData.length > 0) {
+                obj.sequenceNo = objData[0];
+                obj.objectid = objData[1];
+                obj.objectversion = objData[2];
+                obj.planversion = objData[3];
+            }
+            qualificationlist.push(obj);
+            postedQualificationlist[0].value = JSON.stringify(qualificationlist);
+            var url = "/api/sitecore/CareerPortal/AjaxSaveQualification";
+            var formId = "candidateprofile" + @Model.Section;
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                traditional: true,
+                data: AddForgeryToken({ qualificationData: $("#postedQualificationjson").val(), IsDelete: "true", IsCert: "false" }, formId),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                $("#qualificationList").html('');
+                $("#qualificationList").html(response);
+                thisTarget.addClass('fieldset--hidden');
+                thisTargetBtn.removeClass('form_button_disable');
+
+                @*if (response.Success) {
+                    $("#qualificationList").html('');
+                    $("#qualificationList").html(response);
+
+                } else {
+                    $("#educationError").html('');
+                    $("#educationError").html(response.strMessage);
+                    if (response.errorCode == "10510") {
+                        window.location.href = '@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_LOGIN))';
+                    }
+                }*@
+            });
+        }
+    });
+    $('.edit-qua').bind('click', function () {
+        //var $this = editBtn,
+        jQuery('#educationError').html('');
+        var $this = $(this),
+            _this = this,
+            thisRow = $this.closest('.form--data-table-row'),
+            tableId = $this.closest('[data-table-form]').attr('id').replace('_table', ''),
+            thisButton = $('#' + tableId + '_button'),
+            thisGroup = $this.closest('.form-field--group'),
+            thisId = $('#' + tableId + '_target'),
+            thisRowData = thisRow.attr('data-row-of'),
+            thisSeqNo = thisRow.attr('data-seq-no'),
+            $formField = thisId.find('.form-field'),
+            time = 0,
+            $thisRowContent = thisRow.find('.form--data-table-content .form--data-table-wrapper');
+        thisRow.addClass('on-edit');
+        thisButton.addClass('form_button_disable');
+        $thisRowContent.each(function (index) {
+            var __this = this;
+            setTimeout(function () {
+                var num = index + 1;
+                var inputLabel = $(__this).find('.form-data-table__label').text(),
+                    inputVal = $(__this).find('.form-data-table__value').text(),
+                    selectVal = $(__this).find('.form-data-table__value').data('val'),
+                    $formField = thisId.find('.form-field'); thisId.find('.form-field:nth-child(' + num + ') .form-field__label').text(inputLabel)
+                thisId.find('.form-field:nth-child(' + num + ') .form-field__input').val(inputVal)
+                if ($(__this).find('.form-data-table__value').data('select')) {
+                    thisId.find('.form-field:nth-child(' + num + ') .form-field__input').val(selectVal)
+
+                    if (num == 2) {
+                        setTimeout(function () { },50000); }
+                        thisId.find('.form-field:nth-child(' + num + ') .form-field__input').trigger('change')
+                        console.log(selectVal)
+
+                    console.log(selectVal);
+                }
+
+            }, time);
+            time = time + 500;
+        });
+        if (thisId.hasClass('fieldset--hidden')) {
+            thisId.removeClass('fieldset--hidden');
+            thisId.attr('data-area-valid', true);
+        }
+        thisId.attr('data-form-of', thisRowData);
+        thisId.attr('data-seq-no', thisSeqNo);
+    });
+</script>

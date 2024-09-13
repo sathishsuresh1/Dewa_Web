@@ -1,0 +1,111 @@
+﻿@using Newtonsoft.Json
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+
+<div id="billplaceholderdiv">
+    @Html.AntiForgeryToken()
+    <div id="bill-placeholder" data-component="m81-total-amount" class="ajax-placeholder bill-placeholder">
+    </div>
+</div>
+
+<!--Handlerbar Section-->
+<script id="totalamount-component-template" type="text/x-handlebars-template">
+    <div class="m81-total-amount" data-currency="@Translate.Text("AED")" data-total="{{total}}" data-series='[{"name":"@Translate.Text("SL.Bill")", "data":[{"name":"@Translate.Text("SL.DEWA")", "color":"#69B086", "y":"{{dewaamtformat}}"},  {"name":"@Translate.Text("SL.Dubai_Municipality")", "color":"#B2B7D1", "y":"{{dubaimunicipalityformat}}"}, {"name":"@Translate.Text("SL.Nakheel")", "color":"#ACD3EC", "y":"{{nakheelformat}}"},{"name":"@Translate.Text("SL.Othersbill")", "color":"#F0DCBB", "y":"{{othersformat}}"}]}]'>
+        <div class="m81-total-amount--graph_wrapper">
+            <div class="m81-total-amount--graph_text">
+                <div class="m81-total-amount--graph_header">@Translate.Text("SL.Total_Amout_Due")</div>
+                <div class="m81-total-amount--graph_amount">
+                    <span dir="ltr">{{totalformat}}</span>
+                </div>
+                <div class="m81-total-amount--graph_suffix">@Translate.Text("AED")</div>
+            </div>
+            <div class="m81-total-amount--graph_placeholder"></div>
+            <div class="m81-total-amount--graph" data-chart-container="true">
+
+            </div>
+
+            <div class="mt12">
+                <a class="button button--primary button--fullwidth" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EASYPAY)?ac={{account}}">
+                    @Translate.Text("SL.Pay_Now")
+                </a>
+            </div>
+
+        </div>
+        <div class="m81-total-amount--list">
+            {{#if totalflag}}
+            <ul>
+                {{#unless dewaamtflag}}
+                <li class="m81-total-amount--list_item toggled toggle-open">
+                    <span class="iconsquare" style="background:#69B086;"></span>
+                    <span>@Translate.Text("SL.DEWA")</span>
+                    <span class="m81-total-amount--list_amount">{{dewaamt}} @Translate.Text("AED")</span>
+                </li>
+                <div class="m81-total-amount--list_item--toggled">
+                    {{#unless electricityflag}}
+                    <div class="m81-total-amount--list_item--toggleditem icon-Lighting">
+                        @Translate.Text("SL.DEWA_Electricity")
+                        <span>{{electricity}} @Translate.Text("AED")</span>
+                    </div>
+                    {{/unless}}
+                    {{#unless waterflag}}
+                    <div class="m81-total-amount--list_item--toggleditem icon-Water">
+                        @Translate.Text("SL.DEWA_Water")
+                        <span>{{water}} @Translate.Text("AED")</span>
+                    </div>
+                    {{/unless}}
+                </div>
+                {{/unless}}
+                {{#unless dubaimunicipalityflag}}
+                <li class="m81-total-amount--list_item toggled">
+                    <span class="iconsquare" style="background:#B2B7D1;"></span>
+                    <span>@Translate.Text("SL.Dubai_Municipality")</span>
+                    <span class="m81-total-amount--list_amount">{{dubaimunicipality}} @Translate.Text("AED")</span>
+                </li>
+                <div class="m81-total-amount--list_item--toggled">
+                    {{#unless seweragefeesflag}}
+                    <div class="m81-total-amount--list_item--toggleditem icon-new-sewerage">
+                        @Translate.Text("SL.SewerageFees")
+                        <span>{{seweragefees}} @Translate.Text("AED")</span>
+                    </div>
+                    {{/unless}}
+                    {{#unless housingfeesflag}}
+                    <div class="m81-total-amount--list_item--toggleditem icon-new-housing">
+                        @Translate.Text("SL.Housingfees")
+                        <span>{{housingfees}} @Translate.Text("AED")</span>
+                    </div>
+                    {{/unless}}
+                    {{#unless dmchargesflag}}
+                    <div class="m81-total-amount--list_item--toggleditem icon-irrigation">
+                        @Translate.Text("SL.DMCharges")
+                        <span>{{dmcharges}} @Translate.Text("AED")</span>
+                    </div>
+                    {{/unless}}
+                </div>
+                {{/unless}}
+                {{#unless nakheelflag}}
+                <li class="m81-total-amount--list_item">
+                    <span class="iconsquare" style="background:#ACD3EC;"></span>
+                    <span>@Translate.Text("SL.Nakheel")</span>
+                    <span class="m81-total-amount--list_amount">{{nakheel}} @Translate.Text("AED")</span>
+                </li>
+                {{/unless}}
+                {{#unless othersflag}}
+                <li class="m81-total-amount--list_item">
+                    <span class="iconsquare" style="background:#F0DCBB;"></span>
+                    <span>@Translate.Text("SL.Othersbill")</span>
+                    <span class="m81-total-amount--list_amount">{{others}} @Translate.Text("AED")</span>
+                </li>
+                {{/unless}}
+            </ul>
+            {{else}}
+            <div class="mt56 centered mb24">
+                @Translate.Text("SL.all_bills_paid")
+            </div>
+            @*<a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_PAST_BILLS)" class="button button--senary">@Translate.Text("SL.Payment_History")</a>*@
+            {{/if}}
+        </div>
+    </div>
+</script>
+@Scripts.Render("~/bundles/totalbillamount")

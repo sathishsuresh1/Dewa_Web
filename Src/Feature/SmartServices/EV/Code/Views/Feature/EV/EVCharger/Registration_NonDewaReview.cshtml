@@ -1,0 +1,134 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.EV.Models.EVCharger.EVAccountSetup
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+@Html.Sitecore().Placeholder("j100/m26-page-title")
+<div class="grid__row mb24">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @*@Html.Sitecore().Placeholder("j100/m14-formatted-text")*@
+        <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="4" data-current-step="4">
+            <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="EV Login Card">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__row mb24">
+    <div class="grid__column grid__column--12 grid__column--form grid__column--centered mt12">
+        <p class="intro-text">
+            @Translate.Text("EV.View and Bill")
+        </p>
+
+    </div>
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="m14-richtext">
+            <h3>@Translate.Text("EV.Review Summary")</h3>
+            <span class="mt0 m39-modal__tncev">
+                @Translate.Text("EV.Review Description")
+                @Html.Sitecore().Placeholder("j26/m39-modal-overlay1")
+                <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                @Html.HiddenFor(x => x.AgreedToPayment, new { @value = false })
+            </span>
+        </div>
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+
+@if (Model != null && Model.EvCardPaymentDetail != null && Model.EvCardPaymentDetail.Count > 0)
+{
+
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", data_form = "true", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="RegistrationStage" name="RegistrationStage" value="@Model.RegistrationStage" />
+                @*@Html.HiddenFor(x => x.RegistrationStage, new { id = "RegistrationStage", @value = Model.RegistrationStage })*@
+
+                <!-- m42-key-value--start -->
+                <div class="m42-keyvalue">
+                    <dl>
+                        @{ int i = 0;
+                            foreach (DEWAXP.Feature.EV.Models.EVCharger.EvCardPaymentDetail item in Model.EvCardPaymentDetail)
+                            {
+
+                                if (i > 0)
+                                {
+                                    <hr class="clear_both">
+                                }
+                                if (!string.IsNullOrWhiteSpace(item.evCardNumber))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EV_CardNumber")</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@Html.Raw(!string.IsNullOrWhiteSpace(item.evCardNumber) ? item.evCardNumber : "&nbsp;")</dd>
+                                }
+                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EV.Plate Number")</dt>
+                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.plateNumber</dd>
+
+                                if (!string.IsNullOrWhiteSpace(item.sdAmount))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EV.Security Deposit")</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><span data-numeric-format="0,0.00">@item.sdAmount</span> @Translate.Text("Currency")</dd>
+
+                                }
+                                if (!string.IsNullOrWhiteSpace(item.courierCharge))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EV.Courier Charges")</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail=""><span data-numeric-format="0,0.00">@item.courierCharge</span> @Translate.Text("Currency")</dd>
+
+                                }
+                                if (!string.IsNullOrWhiteSpace(item.courierVatAmount))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EV.VAT")</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail=""><span data-numeric-format="0,0.00">@item.courierVatAmount</span> @Translate.Text("Currency")</dd>
+                                }
+                                i++;
+                            }
+                        }
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--totalev m42-keyvalue--justified-dt clear_both"><strong>@Translate.Text("EV.TOTAL")</strong></dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--totalev m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail=""><span data-numeric-format="0,0.00">@Model.PayingAmount</span> @Translate.Text("Currency")</dd>
+                    </dl>
+                </div>
+                <!-- m42-key-value--end -->
+
+                <div class="form-field__button">
+                    <a id="paynow-popup" data-text="False" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">
+                        @Translate.Text("Pay"):
+                        <span class="amount_label">@Model.PayingAmount.ToString("0,0.00") @Translate.Text("Currency")</span>
+                    </a>
+                </div>
+
+
+                @* Payment Type Popup module *@
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            }
+        </div>
+    </div>
+}
+
+<script>
+    jQuery('#paynow-popup').on('click', function () {
+        var total = @Model.PayingAmount;
+        var currency = '@Translate.Text("AED")';
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (numeral(total) > 0)
+        {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        }
+    });
+</script>
+<script type="text/javascript">
+            $(".title_message").prepend("<div class='m26-page-title__links'><p class='m26-page-title__backlink'><a class='button button--text button--back' href='@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_Registration) + "?s=1")'>@Translate.Text("Back")</a></p></div>");
+</script>

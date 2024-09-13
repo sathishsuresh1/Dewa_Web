@@ -1,0 +1,171 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@{
+    var lastRowClass = "";
+}
+@if (Model.CandidateWorkExperience != null && Model.CandidateWorkExperience.Count > 0)
+{
+    var cnt = 1;
+    var totalCnt = Model.CandidateWorkExperience.Count;
+    foreach (var workExp in Model.CandidateWorkExperience)
+    {
+        if (totalCnt == cnt)
+        {
+            lastRowClass = "last-row";
+        }
+        <div class="form--data-table-row @lastRowClass" data-component="m73-form-expand-tab" data-seq-no="@workExp.sequenceNo#@workExp.objectid#@workExp.objectversion#@workExp.planversion" data-row-of="@workExp.EmployerName">
+            <span data-toggle="true" aria-controls="_sw4pr99kd_content" class="form--data-table-tab form--data-table-title tab-large m73-form-trigger-expand" id="_sw4pr99kd_trigger">
+                <div class="tab-title tab-expand">@workExp.EmployerName</div>
+            </span>
+            <div data-content="true" aria-labelledby="_sw4pr99kd_trigger" aria-expanded="false" class="m73-form-content-expand" id="_sw4pr99kd_content">
+                <div class="form--data-table-buttons">
+                    <div class="form-field--add_button workedit">@Translate.Text("edit button text")</div>
+                    <div class="form-field--add_button remove">@Translate.Text("remove button text")</div>
+                </div>
+                <div class="form--data-table-content">
+                    <div class="form--data-table-wrapper" data-table-wrapper-id="form-field-EmployerName">
+                        <label class="form-data-table__label">@Translate.Text("employer name label")</label>
+                        <span data-select="false" data-val="@workExp.EmployerName" class="form-data-table__value">@workExp.EmployerName</span>
+                    </div>
+                    <div class="form--data-table-wrapper" data-table-wrapper-id="form-field-CurrentEmployer">
+                        <label class="form-data-table__label">@Translate.Text("current employer label")</label>
+                        <span data-select="false" data-currentemp="@workExp.CurrentEmployer.ToString().ToLower()" data-val="@workExp.CurrentEmployer.ToString().ToLower()" class="form-data-table__value">@(workExp.CurrentEmployer ? Translate.Text("Yes") : Translate.Text("No"))</span>
+                    </div>
+                    <div class="form--data-table-wrapper" data-table-wrapper-id="form-field-jobtitle">
+                        <label class="form-data-table__label">@Translate.Text("designation label")</label>
+                        <span data-select="false" data-val="@workExp.Designation" class="form-data-table__value">@workExp.Designation</span>
+                    </div>
+                    <div class="form--data-table-wrapper" data-table-wrapper-id="form-field-JobLocation">
+                        <label class="form-data-table__label">@Translate.Text("job location label")</label>
+                        <span data-select="true" data-val="@workExp.JobLocation" class="form-data-table__value">@workExp.JobLocation</span>
+                    </div>
+                    <div class="form--data-table-wrapper column-2" data-table-wrapper-id="form-field-startdate">
+                        <label class="form-data-table__label">@Translate.Text("start date label")</label>
+                        <span data-select="false" data-val="@workExp.StartDate" class="form-data-table__value">@workExp.StartDate</span>
+                    </div>
+                    <div class="form--data-table-wrapper column-2" data-table-wrapper-id="form-field-enddate">
+                        <label class="form-data-table__label">@Translate.Text("end date label")</label>
+                        <span data-select="false" data-val="@workExp.EndDate" class="form-data-table__value">@(workExp.CurrentEmployer ? "" : workExp.EndDate)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    <script type="text/javascript">
+        setTimeout(function () {
+        jQuery(window).trigger('proprogress', [@Model.ProfileProgress]);
+    }, 500);
+
+    $('.remove').bind('click', function () {
+        //console.log($(this).closest('.form--data-table-row').attr('data-seq-no'));
+        //debugger;
+        var thisTarget = $('#' + $(this).closest('[data-table-form]').attr('id').replace('_table', '_target') + '');
+        var thisTargetBtn = $('#' + $(this).closest('[data-table-form]').attr('id').replace('_table', '_button') + '');
+        var postedWorkExplist = jQuery('#postedWorkExperience');
+
+        var workExperiencelist = [];
+        var obj = {};
+        if ($(this).closest('.form--data-table-row').attr('data-seq-no') != undefined) {
+            var objData = $(this).closest('.form--data-table-row').attr('data-seq-no').split('#');
+            if (objData.length > 0) {
+                obj.sequenceNo = objData[0];
+                obj.objectid = objData[1];
+                obj.objectversion = objData[2];
+                obj.planversion = objData[3];
+            }
+            workExperiencelist.push(obj);
+            postedWorkExplist[0].value = JSON.stringify(workExperiencelist);
+            var url = "/api/sitecore/CareerPortal/AjaxSaveWorkExpDetails";
+            var formId = "candidateprofile" + @Model.Section;
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                traditional: true,
+                data: AddForgeryToken({ workExpData: $("#postedWorkExperience").val(), IsDelete: "true" }, formId),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                $("#workExpList").html('');
+                $("#workExpList").html(response);
+                thisTarget.addClass('fieldset--hidden');
+                thisTargetBtn.removeClass('form_button_disable');
+            });
+        }
+        });
+
+        $('.workedit').bind('click', function () {
+            //var $this = editBtn,
+            jQuery('#workExpError').html('');
+            var $this = $(this),
+                _this = this,
+                thisRow = $this.closest('.form--data-table-row'),
+                tableId = $this.closest('[data-table-form]').attr('id').replace('_table', ''),
+                thisButton = $('#' + tableId + '_button'),
+                thisGroup = $this.closest('.form-field--group'),
+                thisId = $('#' + tableId + '_target'),
+                thisRowData = thisRow.attr('data-row-of'),
+                thisSeqNo = thisRow.attr('data-seq-no'),
+                $formField = thisId.find('.form-field'),
+                time = 0,
+                $thisRowContent = thisRow.find('.form--data-table-content .form--data-table-wrapper');
+            thisRow.addClass('on-edit');
+            thisButton.addClass('form_button_disable');
+            $thisRowContent.each(function (index) {
+                var __this = this;
+                setTimeout(function () {
+                    var num = index + 1;
+                    var inputLabel = $(__this).find('.form-data-table__label').text(),
+                        inputVal = $(__this).find('.form-data-table__value').text(),
+                        selectVal = $(__this).find('.form-data-table__value').data('val'),
+                        $formField = thisId.find('.form-field'); thisId.find('.form-field:nth-child(' + num + ') .form-field__label').text(inputLabel)
+                    thisId.find('.form-field:nth-child(' + num + ') .form-field__input').val(inputVal)
+                    if ($(__this).find('.form-data-table__value').data('select')) {
+                        thisId.find('.form-field:nth-child(' + num + ') .form-field__input').val(selectVal)
+                        thisId.find('.form-field:nth-child(' + num + ') .form-field__input').trigger('change')
+                    }
+                    if ($(__this).find('.form-data-table__value').is("[data-currentemp]")) {
+                        thisId.find('.form-field:nth-child(' + num + ') .required-checkbox').val(selectVal);
+                        thisId.find('.form-field:nth-child(' + num + ') .required-checkbox').prop('checked', selectVal);
+                        //thisId.find('.form-field:nth-child(' + num + ') .required-checkbox').attr('checked', 'checked');
+                        //thisId.find('.form-field:nth-child(' + num + ') .required-checkbox').trigger('click')
+
+                        var thisCheckBox = thisId.find('.form-field:nth-child(' + num + ') .required-checkbox'),
+                            thisCheckBoxTargetId = thisCheckBox.data('target'),
+                            thisCheckBoxTarget = $("[data-checkbox='" + thisCheckBoxTargetId + "']"),
+                            thisCheckBoxTargetFrom = thisCheckBoxTarget.closest('.form-field');
+                        if (thisCheckBox.is(':checked')) {
+                            thisCheckBoxTarget.prop('required', false);
+                            thisCheckBoxTargetFrom.addClass('form-field--disabled');
+                            thisCheckBoxTarget.val('');
+                            thisCheckBoxTarget.prop('disabled', true);
+                        } else {
+                            thisCheckBoxTarget.prop('required', true);
+                            thisCheckBoxTargetFrom.removeClass('form-field--disabled');
+                            thisCheckBoxTarget.val('')
+                            thisCheckBoxTarget.prop('disabled', false);
+                        }
+                    }
+
+                }, time);
+                time = time + 500;
+            });
+            if (thisId.hasClass('fieldset--hidden')) {
+                thisId.removeClass('fieldset--hidden');
+                thisId.attr('data-area-valid', true);
+            }
+            thisId.attr('data-form-of', thisRowData);
+            thisId.attr('data-seq-no', thisSeqNo);
+        });
+    </script>
+}
+

@@ -1,0 +1,129 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.Footer
+@using System.Globalization
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Feature.CommonComponents.Utils
+@using DEWAXP.Feature.CommonComponents
+@using DEWAXP.Foundation.Content
+@using Sitecore.Mvc
+
+@model Footer
+
+@{
+    var web_lang = Language.Current.Name.ToLowerInvariant();
+}
+@if (Model != null && Model.Images != null)
+{
+    <footer class="m13-footer" data-component="m13-footer">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--8">
+                    <div class="m13-footer--links">
+                        <ul class="m13-footer--links_list">
+                            @if (Model.PrimaryLinks != null)
+                            {
+                                foreach (var link in Model.PrimaryLinks)
+                                {
+                                    var url = UtilSitecore.GetMenuURL(link);
+                                    <li class="m13-footer--links_item"><a href="@url">@link.MenuLabel</a></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid__column grid__column--4 align_right">
+                    <ul class="m13-footer--medialinks_list">
+                        <li class="m13-footer--medialinks_item twitter">
+                            <a href="https://twitter.com/dewaofficial" target="_blank" rel="noopener noreferrer" title="@Translate.Text("Twitter")">
+                                @Translate.Text("Twitter")
+                            </a>
+                        </li>
+                        <li class="m13-footer--medialinks_item facebook">
+                            <a href="https://www.facebook.com/dewaofficial" target="_blank" rel="noopener noreferrer" title="@Translate.Text("Facebook")">
+                                @Translate.Text("Facebook")
+                            </a>
+                        </li>
+                        <li class="m13-footer--medialinks_item instagram ">
+                            <a href="https://instagram.com/dewaofficial" target="_blank" rel="noopener noreferrer" title="@Translate.Text("Instagram")">
+                                @Translate.Text("Instagram")
+                            </a>
+                        </li>
+                        @*<li class="m13-footer--medialinks_item snapchat ">
+                            <a href="https://www.snapchat.com/add/dewaofficial" target="_blank" title="@Translate.Text("Snapchat")">
+                                @Translate.Text("Snapchat")
+                            </a>
+                        </li>*@
+                        <li class="m13-footer--medialinks_item youtube">
+                            <a href="https://www.youtube.com/user/DEWAVIDEOGALLERY/videos" target="_blank" rel="noopener noreferrer" title="@Translate.Text("YouTube")">
+                                @Translate.Text("YouTube")
+                            </a>
+                        </li>
+                        <li class="m13-footer--medialinks_item linkedin">
+                            <a href="https://www.linkedin.com/company/dewaofficial/" target="_blank" rel="noopener noreferrer" title="@Translate.Text("LinkedIn")">
+                                @Translate.Text("LinkedIn")
+                            </a>
+                        </li>
+                    </ul>
+                    <span class="m13-footer--medialinks-desc">@Translate.Text("DEWAOFFICIAL")</span>
+                </div>
+
+                <div class="grid__column grid__column--8">
+                    <div class="m13-footer--msg">
+                        © @DateTime.UtcNow.Year @Html.Raw(Html.Glass().Editable(x => x.Subnote))
+                    </div>
+                </div>
+
+                <div class="grid__column grid__column--4">
+                    <div class="m13-footer--msg">
+                        @Translate.Text("Page last updated on") @Model.Updated.ToString("d MMMM yyyy", global::Sitecore.Context.Language.CultureInfo).Replace("يوليه", "يوليو")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="m13-footer--floating">
+            <div class="m13-footer--floating_inner">
+                <div class="m13-footer--floating_item">
+                    @Html.Sitecore().Rendering(SitecoreRenderingIds.HappinessIndicator)
+                    <a id="o4trigger" class="m13-footer--floating_link m13-footer--floating_link--2 m13-footer--floating_link--o4 m13-footer--floating_linkmobile-hide fancybox fancybox.iframe iframe" data-04-fancybox data-type="iframe" data-src="https://04.gov.ae/case-generate?entity=c3f2f61a-bc06-ec11-b6e5-0022486fc780&lang=@Language.Current.CultureInfo.TwoLetterISOLanguageName" href="https://04.gov.ae/case-generate?entity=c3f2f61a-bc06-ec11-b6e5-0022486fc780&lang=@Language.Current.CultureInfo.TwoLetterISOLanguageName">
+                        <span class="aria-only">@Translate.Text("o4 Icon")</span>
+                        <img src="~/images/04.png" alt="@Translate.Text("o4 Icon")" class="logo">
+                    </a>
+                    <a href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.ConsumerGuide)" class="green m13-footer--floating_link m13-footer--floating_link--2 icon-b-services-sdg">
+                        <span class="mobile-hide">
+                            @Translate.Text("Services")
+                        </span>
+                    </a>
+                </div>
+                @Html.Sitecore().Rendering(SitecoreRenderingIds.WebsiteSurveyPopup)
+                <div class="m13-footer--floating_item">
+                    @if (Model.ShowRammas)
+                    {
+                        @Html.Sitecore().Rendering(SitecoreRenderingIds.M74Expander, new { DataSource = DataSources.RammasDatasource })
+                    }
+                </div>
+
+            </div>
+        </div>
+    </footer>
+    <script>
+        docReady(function () {
+            if (jQuery("#notfoundurl").length != 0) {
+                var url = window.location.href,
+                    originalUrl = url.substring(0, url.indexOf('/404')) + url.substring(url.indexOf('&item=') + 6, url.indexOf('&user'));
+                jQuery("#notfoundurl").text(decodeURIComponent(originalUrl));
+                window.history.pushState("object or string", "Title", decodeURIComponent(originalUrl));
+            }
+        });
+    </script>
+}
+@{
+    if (Model != null && Model.IsPopupModal)
+    {
+        <div>
+            @Html.Raw(Model.PopupModal)
+        </div>
+    }
+}
+

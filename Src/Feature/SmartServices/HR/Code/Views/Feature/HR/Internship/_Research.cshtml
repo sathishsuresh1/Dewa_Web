@@ -1,0 +1,1000 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.HR.Models.Internship.Internship
+
+@{
+    var maxvalue = 15;
+    var isNational = "no";
+
+    if (!String.IsNullOrEmpty(ViewBag.queryString))
+    {
+        isNational = ViewBag.queryString;
+    }
+    else
+    {
+        isNational = Request.QueryString["q"];
+    }
+
+    if (isNational == "yes")
+    {
+        maxvalue = 9;
+    }
+}
+
+<style>
+    .form-field__input--intnumber {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        margin-top: 0px;
+    }
+
+    .form-field__input--intcode {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+</style>
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div id="tracker">
+
+            @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+        </div>
+    </div>
+</div>
+
+<div class="grid__row activate-idlewatch" data-timer="20">
+
+    <div class="grid__column grid__column--12 grid__column--form">
+
+        <p class="text__content-copy">@Translate.Text("INT.LBL.RESERCH.DESCRIPTION")</p>
+        <p class="text__content-copy">@Translate.Text("INT.LBL.RESEARCH.NOTE")</p>
+
+
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @id = "ApplyInternship", @enctype = "multipart/form-data", @data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+            <fieldset class="fieldset form-section" id="f1">
+                <legend class="legend hidden">@Translate.Text("INT.LBL.PERSONAL.DETAILS")</legend>
+                <div class="form-field form-field--text  ">
+
+                    <label for="Name" class="form-field__label">
+                        @Translate.Text("INT.LBL.FULLNAME")
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text review"
+                               maxlength="25"
+                               data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.FULLNAME")"
+                               id="Name"
+                               value="@Model.Name"
+                               name="Name" type="text"
+                               placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.FULLNAME") "
+                               aria-describedby="description-for-wos5al3j9"
+                               data-parsley-errors-container="#description-for-wos5al3j9"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.FULLNAME")"
+                               data-parsley-trigger="focusout" data-parsley-id="8">
+                    </span>
+
+                    <div id="description-for-wos5al3j9" class="form-field__messages">
+                    </div>
+
+                </div>
+
+
+                <div id="datepicker-container-8z9a6rgcv" class="hidden form-field form-field--text  ">
+
+                    <label for="form-field-9wvspoer8" class="form-field__label">
+                        @Translate.Text("INT.LBL.DATE")
+                    </label>
+
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                               id="form-field-9wvspoer8"
+                               value="@Model.Date"
+                               name="Date"
+                               type="text"
+                               placeholder="@Translate.Text("INT.LBL.PH.DATE")"
+                               aria-describedby="description-for-9wvspoer8"
+                               data-parsley-errors-container="#description-for-9wvspoer8"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.DATE")"
+                               data-el="datepicker-future" data-picker-options="true"
+                               data-parsley-trigger="focusout" data-parsley-id="38" readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false">
+                    </span>
+                    <div id="description-for-9wvspoer8" class="form-field__messages">
+                    </div>
+
+                </div>
+
+
+                <div class="form-field form-field--text  ">
+
+                    <label for="Subject" class="form-field__label">
+
+                        @Translate.Text("INT.LBL.SUBJECT.PROJECT")
+
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+                        @Html.TextAreaFor(x => x.Subject, new
+                   {
+                       @class = "review form-field__input form-field__input--text",
+                       @id = "Subject",
+                       @maxlength = "100",
+                       @data_parsley_error_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.SUBJECT.PROJECT"),
+                       @type = "text",
+                       @placeholder = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.SUBJECT.PROJECT"),
+                       @aria_describedby = "description-for-51g21xmbk",
+                       @data_parsley_errors_container = "#description-for-51g21xmbk",
+                       @required = "",
+                       @data_parsley_required_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.SUBJECT.PROJECT"),
+                       @data_parsley_trigger = "focusout",
+                       @data_parsley_id = "12"
+                   }
+                   )
+                    </span>
+
+                    <div id="description-for-51g21xmbk" class="form-field__messages">
+                    </div>
+
+                </div>
+
+                <div class="form-field form-field--text  ">
+                    <label for="University" class="form-field__label">
+                        @Translate.Text("INT.LBL.UNIVERSITY")
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+                        @Html.TextAreaFor(x => x.University, new
+                   {
+                       @class = "review form-field__input form-field__input--text",
+                       @id = "University",
+                       @maxlength = "40",
+                       @data_parsley_error_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.UNIVERSITY"),
+                       @type = "text",
+                       @placeholder = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.UNIVERSITY"),
+                       @aria_describedby = "description-for-9zybaad4r",
+                       @data_parsley_errors_container = "#description-for-9zybaad4r",
+                       @required = "",
+                       @data_parsley_required_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.UNIVERSITY"),
+                       @data_parsley_trigger = "focusout",
+                       @data_parsley_id = "12"
+                   }
+                   )
+
+                    </span>
+
+                    <div id="description-for-9zybaad4r" class="form-field__messages">
+                    </div>
+                </div>
+
+                <div class="form-field form-field--text  ">
+
+                    <label for="Project" class="form-field__label">
+                        @Translate.Text("INT.LBL.PROJECT")
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+                        @Html.TextAreaFor(x => x.Project, new
+                   {
+                       @class = "review form-field__input form-field__input--text",
+                       @id = "Project",
+                       @maxlength = "150",
+                       @data_parsley_error_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.PROJECT"),
+                       @type = "text",
+                       @placeholder = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.PROJECT"),
+                       @aria_describedby = "description-for-bjheto8vv",
+                       @data_parsley_errors_container = "#description-for-bjheto8vv",
+                       @required = "",
+                       @data_parsley_required_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.PROJECT"),
+                       @data_parsley_trigger = "focusout",
+                       @data_parsley_id = "12"
+                   }
+                   )
+
+                    </span>
+
+
+
+
+                    <div id="description-for-bjheto8vv" class="form-field__messages">
+                    </div>
+
+                </div>
+
+
+                <div class="form-field form-field--text  ">
+
+                    <label for="Major" class="form-field__label">@Translate.Text("INT.LBL.MAJOR")</label>
+
+                    <span class="form-field__input-wrapper">
+                        @Html.TextAreaFor(x => x.Major, new
+                   {
+                       @class = "review form-field__input form-field__input--text",
+                       @id = "Major",
+                       @maxlength = "60",
+                       @data_parsley_error_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.MAJOR"),
+                       @type = "text",
+                       @placeholder = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.MAJOR"),
+                       @aria_describedby = "description-for-18s6y7igm",
+                       @data_parsley_errors_container = "#description-for-18s6y7igm",
+                       @required = "",
+                       @data_parsley_required_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.MAJOR"),
+                       @data_parsley_trigger = "focusout",
+                       @data_parsley_id = "12"
+                   }
+                   )
+
+                    </span>
+
+                    <div id="description-for-18s6y7igm" class="form-field__messages">
+                    </div>
+
+                </div>
+
+
+                <div class="form-field form-field--text  ">
+
+                    <label for="form-field-k85z8qm3o" class="form-field__label">
+                        @Translate.Text("INT.LBL.EMAILADDRESS")
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+                        <input class="review form-field__input form-field__input--text form-field--vanilla_email"
+                               value="@Model.Email_Address"
+                               id="form-field-k85z8qm3o" name="Email_Address" type="email"
+                               placeholder="@Translate.Text("email placeholder text")"
+                               aria-describedby="description-for-k85z8qm3o"
+                               data-parsley-errors-container="#description-for-k85z8qm3o"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.EMAILADDRESS")"
+                               data-parsley-email=""
+                               data-parsley-error-message="@Translate.Text("Please enter a valid email address")"
+                               data-parsley-trigger="focusout" data-parsley-id="22">
+                    </span>
+
+                    <div id="description-for-k85z8qm3o" class="form-field__messages">
+                    </div>
+
+                </div>
+
+                <div class="form-field form-field--text form-field--6 forcefloat_left">
+
+                    <label for="CountryCode" id="M1" class="form-field__label">
+                        @Translate.Text("INT.LBL.MOBILENUMBER")
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+
+                        <!-- country codes (ISO 3166) and Dial codes. -->
+
+                        @Html.DropDownListFor(model => model.CountryCode, Model.CountryCallingCodesList, Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.COUNTRY.CODE"), new
+                   {
+                       @class = "review form-field__input form-field__input--select form-field__input--select-full form-field__input--intcode",
+                       @id = "CountryCode",
+                       @required = "required",
+                       @data_parsley_error_message = Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.COUNTRY.CODE"),
+                       @data_parsley_errors_container = "#description-for-0fv5572k11",
+                       @aria_describedby = "description-for-0fv5572k11",
+                   })
+
+                    </span>
+                    <div id="description-for-0fv5572k11" class="form-field__messages">
+                    </div>
+                </div>
+
+
+                <div class="form-field form-field--text form-field--6 forcefloat_left">
+
+                    <label for="mobile_number" class="form-field__label" id="M2">
+                        @Translate.Text("INT.LBL.MOBILENUMBER")
+
+                    </label>
+
+                    <span class="form-field__input-wrapper">
+
+
+                        <input class="form-field__input form-field__input--text form-field__input--intnumber"
+                               id="mobile_number"
+                               name="mobile_number"
+                               value="@Model.Mobile_Number"
+                               data-parsley-minlength="7"
+                               @*minlength="7"*@
+                               type="number"
+                               placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MOBILENUMBER")"
+                               aria-describedby="description-for-0fv5572k1"
+                               data-parsley-errors-container="#description-for-0fv5572k1"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MOBILENUMBER")"
+                               data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MOBILENUMBER")"
+                               data-parsley-trigger="focusout" data-parsley-id="20"
+                               data-parsley-max_number="" data-max-length="@maxvalue">
+                    </span>
+
+                    <div id="description-for-0fv5572k1" class="form-field__messages">
+                    </div>
+
+
+
+                </div>
+
+                <div class="form-field form-field--services">
+                    <fieldset class="fieldset clear_both">
+                        <legend class="legend-color">.</legend>
+                        <label class="form-field__label">
+                            @Translate.Text("INT.LBL.SURVEY.QUESTION")
+                        </label><br />
+                        <p class="form-field__radio ">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="form-field-service_1_1" aria-label="form-field-service_1_1" name="SQ" type="radio" value="1" aria-describedby="description-for-60d5jlivs" data-parsley-errors-container="#description-for-60d5jlivs" checked>
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("INT.LBL.SURVEY")
+                                </span>
+
+                            </label>
+                        </p>
+                        <p class="form-field__radio ">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="form-field-service_1_2" aria-label="form-field-service_1_2" name="SQ" type="radio" value="2" aria-describedby="description-for-60d5jlivs" data-parsley-errors-container="#description-for-60d5jlivs">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("INT.LBL.QUESTION")
+                                </span>
+                            </label>
+                        </p>
+                        <p class="form-field__radio ">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="form-field-service_1_2" aria-label="form-field-service_1_2" name="SQ" type="radio" value="3" aria-describedby="description-for-60d5jlivs" data-parsley-errors-container="#description-for-60d5jlivs">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("INT.LBL.FIELD.TRIP")
+                                </span>
+                            </label>
+                        </p>
+                        <div id="description-for-60d5jlivs" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                </div>
+
+
+                <fieldset class="fieldset clear_both">
+                    <legend class="legend-color">.</legend>
+                    <label class="legend">
+                        @Translate.Text("INT.LBL.DOCUMENT.UPLOADS")
+                    </label>
+                    <br />
+                    <br />
+
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+
+                                <img src="/images/preview@2x.png"
+                                     data-src="/images/preview@2x.png"
+                                     data-success="/images/upload_success@2x.png"
+                                     class="form-field__preview"
+                                     aria-hidden="true"
+                                     role="presentation"
+                                     alt="" data-uploader-image="xklg1vul2">
+
+                            </div>
+                            <div class="form-field__uploader-details">
+
+                                <label for="form-field-xklg1vul2" class="form-field__label">
+                                    @Translate.Text("INT.LBL.OFFICIAL.LETTERS")
+                                </label>
+
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("Please select a file")"
+                                               id="form-field-xklg1vul2" name="File_Official_Letter"
+                                               type="file"
+                                               aria-describedby="description-for-xklg1vul2"
+                                               data-parsley-errors-container="#description-for-xklg1vul2"
+                                               data-uploader-field="xklg1vul2"
+                                               accept="image/png,,image/jpeg,,application/pdf"
+                                               data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                               data-size="2048000"
+                                               data-parsley-trigger="focusout"
+                                               data-parsley-id="25">
+                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("INT.LBL.CHOOSE")</span>
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="xklg1vul2"></p>
+                                <p><button class="button button--text button--remove hidden" data-uploader-remove="xklg1vul2">@Translate.Text("Remove")</button></p>
+                            </div>
+                        </div>
+                        <div id="description-for-xklg1vul2" class="form-field__messages">
+
+
+
+                            <p class="form-field__description">
+                                @Translate.Text("INT.LBL.ATTACHMENT")
+                            </p>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--upload" id="surveyattachment">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+
+                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" data-success="../images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="sy7i9mbif">
+
+                            </div>
+                            <div class="form-field__uploader-details">
+
+                                <label for="form-field-sy7i9mbif" class="form-field__label">
+                                    @Translate.Text("INT.LBL.SURVEY.QUESTIONS")
+                                </label>
+
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("Please select a file")"
+                                               id="form-field-sy7i9mbif"
+                                               name="File_Survey_Questions"
+                                               type="file"
+                                               aria-describedby="description-for-sy7i9mbif"
+                                               data-parsley-errors-container="#description-for-sy7i9mbif"
+                                               data-uploader-field="sy7i9mbif"
+                                               accept="image/png,,image/jpeg,,application/pdf"
+                                               data-accepts="&quot;jpg&quot;, &quot;bmp&quot;,&quot;gif&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;,&quot;doc&quot;,&quot;docx&quot;,&quot;xls&quot;,&quot;csv&quot;, &quot;xlsx&quot;"
+                                               data-size="2048000"
+                                               data-parsley-trigger="focusout"
+                                               data-parsley-id="26">
+                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("INT.LBL.CHOOSE")</span>
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="sy7i9mbif"></p>
+                                <p><button class="button button--text button--remove hidden" data-uploader-remove="sy7i9mbif">@Translate.Text("Remove")</button></p>
+                            </div>
+                        </div>
+                        <div id="description-for-sy7i9mbif" class="form-field__messages">
+                            <p class="form-field__description">
+                                @Translate.Text("INT.LBL.ATTACHMENT")
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--upload hidden" id="interviewattachment">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+
+                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" data-success="../images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="im6pqommv">
+
+                            </div>
+                            <div class="form-field__uploader-details">
+
+                                <label for="form-field-im6pqommv" class="form-field__label">
+                                    @Translate.Text("INT.LBL.INTERVIEW.QUESTIONS")
+                                </label>
+
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload" id="form-field-im6pqommv"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("Please select a file")"
+                                               name="File_Interview_Questions"
+                                               type="file"
+                                               aria-describedby="description-for-im6pqommv"
+                                               data-parsley-errors-container="#description-for-im6pqommv"
+                                               data-uploader-field="im6pqommv"
+                                               accept="image/png,,image/jpeg,,application/pdf"
+                                               data-accepts="&quot;jpg&quot;, &quot;bmp&quot;,&quot;gif&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;,&quot;doc&quot;,&quot;docx&quot;,&quot;xls&quot;,&quot;csv&quot;, &quot;xlsx&quot;"
+                                               data-size="2048000"
+                                               data-parsley-trigger="focusout" data-parsley-id="28">
+                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("INT.LBL.CHOOSE")</span>
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="im6pqommv"></p>
+                                <p><button class="button button--text button--remove hidden" data-uploader-remove="im6pqommv">@Translate.Text("Remove")</button></p>
+                            </div>
+                        </div>
+                        <div id="description-for-im6pqommv" class="form-field__messages">
+                            <p class="form-field__description">
+                                @Translate.Text("INT.LBL.ATTACHMENT")
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+
+                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" data-success="../images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="fqnd0jdvj">
+
+                            </div>
+                            <div class="form-field__uploader-details">
+
+                                <label for="form-field-fqnd0jdvj" class="form-field__label">
+                                    @Translate.Text("INT.LBL.PROJECT.BRIEF")
+                                </label>
+
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("Please select a file")"
+                                               id="form-field-fqnd0jdvj" name="File_Project_Description"
+                                               type="file"
+                                               aria-describedby="description-for-fqnd0jdvj"
+                                               data-parsley-errors-container="#description-for-fqnd0jdvj"
+                                               data-uploader-field="fqnd0jdvj"
+                                               accept="image/png,,image/jpeg,,application/pdf"
+                                               data-accepts="&quot;jpg&quot;, &quot;bmp&quot;,&quot;gif&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;,&quot;doc&quot;,&quot;docx&quot;,&quot;xls&quot;,&quot;csv&quot;, &quot;xlsx&quot;"
+                                               data-size="2048000"
+                                               data-parsley-trigger="focusout"
+                                               data-parsley-id="30">
+                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("INT.LBL.CHOOSE")</span>
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="fqnd0jdvj"></p>
+                                <p><button class="button button--text button--remove hidden" data-uploader-remove="fqnd0jdvj">@Translate.Text("Remove")</button></p>
+                            </div>
+                        </div>
+                        <div id="description-for-fqnd0jdvj" class="form-field__messages">
+                            <p class="form-field__description">
+                                @Translate.Text("INT.LBL.ATTACHMENT")
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--toggles inline-terms" id="divTermsConditions">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1_terms" aria-label="form-field-checkbox_1_1_terms" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="form-field-checkbox_1_1_terms" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                            </label>
+                        </div>
+                        <fieldset class="fieldset m39-modal__tnc">
+                            <legend class="legend-color">.</legend>
+                            <span class="text"></span> @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                        </fieldset>
+
+                        <div id="description-for-accept-terms" class="form-field__messages"></div>
+                        <input type="hidden" name="AgreedToPayment" value="false" />
+                    </div>
+
+
+                </fieldset>
+            </fieldset>
+
+            <fieldset class="fieldset form-section" id="f2">
+                <legend class="legend">@Translate.Text("INT.LBL.REVIEW")</legend>
+                <div class="r1">
+
+                </div>
+                <br />
+                <div class="g-recaptcha" data-sitekey="@ViewBag.SiteKey"></div>
+            </fieldset>
+
+            <div class="form-navigation form-field__button">
+
+                <button type="button" class="button button--tertiary previous">@Translate.Text("Previous")</button>
+                <button type="button" class="button button--primary button--next next">@Translate.Text("Next") </button>
+                <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                <span class="clearfix"></span>
+            </div>
+
+
+
+
+        }
+    </div>
+</div>
+
+<script id="review-tem" type="text/x-handlebars-template">
+    <legend class="legend">@Translate.Text("INT.LBL.PERSONAL.DETAILS")</legend>
+    {{#fields}}
+
+    <div class="form-field form-field--text ">
+        <label for="form-field-full_name" class="form-field__label">
+            {{key}}
+        </label>
+        <span class="form-field__input form-field__input-wrapper--readonly form-field__input--readonly">
+            {{value}}
+        </span>
+    </div>
+    {{/fields}}
+
+
+</script>
+<script type="text/javascript">
+    docReady(function () {
+
+
+        var q = '@isNational';
+
+        if (q == "yes") {
+            $('#CountryCode').attr("disabled", true);
+            $('#Nationality').attr("disabled", true);
+        } else {
+            $('#CountryCode').attr("disabled", false);
+            $('#Nationality').attr("disabled", false);
+
+        }
+
+        $("#ApplyInternship").submit(function (event) {
+            $('#CountryCode').prop("disabled", false);
+            $('#Nationality').prop("disabled", false);
+        });
+
+        var total = 3;
+        var current = 1;
+        var txt = jQuery("#f1").find('legend').text();
+        steptracker(total, current, txt);
+
+        var lang = '@Language.Current.Name.ToLowerInvariant()';
+
+        if (lang == "ar-ae") {
+            $('#M1').attr('style', 'visibility: hidden', 'display: block');
+        }
+        else {
+            $('#M2').attr('style', 'visibility: hidden', 'display: block');
+        }
+
+
+        $("input[name=SQ]").change(function () {
+
+            var radionSelection = $(this).val();
+
+            if (radionSelection == "3") {
+                $('#interviewattachment').hide();
+                $('#surveyattachment').hide();
+            }
+            else if (radionSelection == "2") {
+                $('#interviewattachment').show();
+                $('#surveyattachment').hide();
+            }
+            else {
+
+                $('#interviewattachment').hide();
+                $('#surveyattachment').show();
+            }
+        });
+
+
+
+
+
+        //  window.initComponents('request-tracker');
+
+        var $sections = jQuery('.form-section');
+
+        $("#form-field-full_name").trigger("focusout");
+
+        function navigateTo(index) {
+            var txt = $sections
+             .hide()
+             .eq(index).find('legend').text();
+            steptracker(total, index + 1, txt);
+
+            // Mark the current section with the class 'current'
+            $sections
+             .removeClass('current')
+             .eq(index)
+               .addClass('current');
+            $sections
+              .hide()
+              .eq(index)
+                .show();
+
+
+            // Show only the navigation buttons that make sense for the current section:
+            jQuery('.form-navigation .previous').toggle(index > 0);
+            var atTheEnd = index >= $sections.length - 1;
+            jQuery('.form-navigation .next').toggle(!atTheEnd);
+            jQuery('.form-navigation [type=submit]').toggle(atTheEnd);
+            if (atTheEnd) {
+                //
+                var data = {};
+                var fields = [];
+                var fields2 = [];
+                var fields3 = [];
+
+
+                data.fields = fields;
+                data.fields2 = fields2;
+                data.fields3 = fields3;
+
+
+                jQuery("#ApplyInternship").find("#f1 .review").each(function () {
+                    // do something
+                    var field;
+
+
+
+                    var lang = '@Language.Current.Name.ToLowerInvariant()';
+
+
+                    if ($(this)[0].id == "CountryCode") {
+
+                        if (lang == "ar-ae") {
+                            var str = $("#CountryCode option:selected").text();
+
+                            var searchtoken = $("#CountryCode option:selected").val();
+
+                            var concatedText = "(" + searchtoken + "+)";
+
+                            var formatedvalue = str.replace(searchtoken, "").replace("+", "").replace("(", "").replace(")", "") + " " + $("#mobile_number").val() + concatedText;
+                        }
+                        else {
+
+                            var formatedvalue = $("#CountryCode option:selected").text() + $("#mobile_number").val();
+                        }
+
+
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: formatedvalue
+
+                        }
+                    }
+                    else if ($(this)[0].tagName == "SELECT") {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).closest(".form-field").find("select").find('option:selected').text(),
+
+                        }
+                    }
+
+                    else {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).val()
+                        }
+                    }
+                    data.fields.push(field);
+                });
+                jQuery("#ApplyInternship").find("#f2 .review").each(function () {
+                    // do something
+                    var field;
+                    if ($(this).id == "form-field-0fv5572k1") {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).closest(".form-field").find("select").val + $(this).val()
+                        }
+                    } else {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).val()
+                        }
+                    }
+
+                    data.fields2.push(field);
+                });
+                jQuery("#ApplyInternship").find("#f3 .review").each(function () {
+                    // do something
+                    var field = {
+                        key: $(this).closest(".form-field").find("label").html(),
+                        value: $(this).val()
+                    }
+                    data.fields3.push(field);
+                });
+
+                var markup = jQuery('#review-tem').html();
+                var template = Handlebars.compile(markup);
+
+
+
+                var rendering = template(data);
+                jQuery('.r1').empty().html(rendering);
+            }
+            $('html, body').animate({
+                scrollTop: $("#rs_area").offset().top
+            }, 2000);
+        }
+        function steptracker(total, current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', total);
+            $('.m38-step-tracker').attr('data-current-step', current + 1);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+
+            jQuery(window).trigger('reinit_m38');
+        }
+        function curIndex() {
+            // Return the current index by looking at which section has the class 'current'
+            return $sections.index($sections.filter('.current'));
+        }
+
+        // Previous button is easy, just go back
+        jQuery('.form-navigation .previous').click(function (e) {
+            e.preventDefault();
+
+            navigateTo(curIndex() - 1);
+        });
+
+        // Next button goes forward if current block valida5tes
+        jQuery('.form-navigation .next').click(function (e) {
+
+            require(['parsley'], function () {
+                jQuery('#ApplyInternship').parsley().whenValidate({
+                    group: 'block-' + curIndex()
+                }).done(function () {
+                    navigateTo(curIndex() + 1);
+                });
+            });
+
+
+        });
+
+        // Prepare sections by setting the `data-parsley-group` attribute to 'block-0', 'block-1', etc.
+        $sections.each(function (index, section) {
+            jQuery(section).find(':input').attr('data-parsley-group', 'block-' + index);
+        });
+        jQuery('.j105-drrg--loader').show();
+        $('body').addClass('unscrollable');
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        setTimeout(function () {
+            navigateTo(0);
+            jQuery('.j105-drrg--loader').hide();
+            $('body').removeClass('unscrollable');
+        }, 5000);
+        // Start at the beginning
+
+
+
+
+
+
+    });
+
+    var afile = [];
+
+    jQuery('.form-field__input--upload').each(function () {
+        jQuery(this).on('change', function (event) {
+            var obj = {};
+            var thisvar = jQuery(this);
+            var flag = false;
+            if (afile.length == 0) {
+                obj.index = jQuery(this)[0].id;
+                obj.name = jQuery(this)[0].files[0].name;
+                afile.push(obj);
+            }
+            else {
+                jQuery.each(afile, function (index, afileobj) {
+                    if (afileobj.name == thisvar[0].files[0].name) {
+                        thisvar.val('');
+                        var specificField = thisvar.closest('.form-field__input-wrapper').next().find('.parsley-required');
+                        specificField.html('@Translate.Text("INT.LBL.FILE.DUPLICATE")');
+                        flag = true;
+                        return;
+                    }
+                });
+                if (flag == false) {
+                    jQuery.each(afile, function (index, afileobj) {
+                        if (afileobj.index.indexOf(thisvar[0].id) == true) {
+                            afileobj.name = thisvar[0].files[0].name;
+                            //var index = afile.indexOf(x => x.index === thisvar[0].id);
+                            var index = function () {
+                                var i = 0;
+                                jQuery(afile).each(function () {
+                                    if (jQuery(this).index == thisvar[0].id) {
+                                        return i;
+                                    } else {
+                                        i++;
+                                    };
+                                });
+                            };
+                            afile.splice(index, 1);
+                            afile.push(afileobj);
+                            flag = true;
+                            return;
+                        }
+                    });
+                }
+                if (flag == false) {
+                    obj.index = jQuery(this)[0].id;
+                    obj.name = jQuery(this)[0].files[0].name;
+                    afile.push(obj);
+                }
+                else {
+                    return;
+                }
+            }
+        });
+
+
+    });
+
+    jQuery('.button--remove[data-uploader-remove]').each(function () {
+        jQuery(this).on('click', function () {
+            var id = jQuery(this).closest('.form-field--upload').find('.form-field__input--upload')[0].id;
+            var name = jQuery(this).parent().parent().find('.form-field__input--upload')[0].files[0].name;
+            //var index = afile.findIndex(x => x.index === id);
+            var index = function () {
+                var i = 0;
+                jQuery(afile).each(function () {
+                    if (jQuery(this).index == thisvar[0].id) {
+                        return i;
+                    } else {
+                        i++;
+                    };
+                });
+            };
+            afile.splice(index, 1);
+        });
+    });
+</script>
+
+
+<script>
+
+    function preventNumberInput(e) {
+        var keyCode = (e.keyCode ? e.keyCode : e.which);
+        if (keyCode > 47 && keyCode < 58 || keyCode > 95 && keyCode < 107) {
+            e.preventDefault();
+        }
+    }
+
+    $(function () {
+
+        $('#Name').keydown(function (e) {
+            preventNumberInput(e);
+        });
+        $('#Subject').keydown(function (e) {
+            preventNumberInput(e);
+        });
+        $('#Purpose').keydown(function (e) {
+            preventNumberInput(e);
+        });
+        $('#University').keydown(function (e) {
+            preventNumberInput(e);
+        });
+        $('#Major').keydown(function (e) {
+            preventNumberInput(e);
+        });
+
+
+
+
+    })
+
+</script>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

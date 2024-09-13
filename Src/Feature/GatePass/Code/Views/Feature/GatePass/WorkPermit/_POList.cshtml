@@ -1,0 +1,130 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using X.PagedList.Mvc;
+@using X.PagedList;
+@using X.PagedList.Mvc.Common
+@using X.PagedList.Web.Common
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.WorkPermit.PoDetailsListModel
+
+@if (Model != null && Model.ITEMPagedList != null && Model.ITEMPagedList.Count > 0)
+{
+    foreach (var _POList in Model.ITEMPagedList)
+    {
+        <p class="form-field__radio form-field__radio--accselector">
+            <label>
+                @Html.RadioButtonFor(m => m.SelectedAccount, _POList.Po_No, new { @class = "form-field__input form-field__input--radio", @aria_label = "SelectedAccount", @data_input = "radio" })
+                <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+
+                    <span class="m43-accountsel__account" data-acc-detail="wrapper">
+
+                        <span class="m43-accountsel__header">
+                            <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                <span class="inline-block" dir="ltr" data-acc-detail="acc_namedesc">@_POList.PO_desc</span>
+                            </span>
+                            <span class="m43-accountsel__details">
+                                <abbr title="Epass.Project #" style="text-decoration: none;">@Translate.Text("Epass.Project")</abbr>: <span dir="rtl" data-acc-detail="acc_number">@_POList.Po_No</span><span class="aria-only"> | </span>
+                            </span>
+                        </span>
+                    </span>
+                </span>
+            </label>
+        </p>}
+    <!-- m34-pagination-start -->
+
+    <div id="myPager" class="centerpage">
+        @if (Model.ITEMPagedList.PageCount > 1)
+        {
+            <div class="fix" id="pager" style="bottom:-10px;">
+                <div class="m34-pagination__content">
+                    <div id="pagerContent">
+                        @Html.PagedListPager(Model.ITEMPagedList, page => Url.Action("DisplayPOAccountSelector", new
+                   {
+                       pageNo = page,
+                       search = string.Empty
+
+                   }
+      ),
+
+     new PagedListRenderOptions
+     {
+         LiElementClasses = new string[] { "m34-pagination__page-list-item" },
+         //LinkToFirstPageFormat = "|<",
+         LinkToPreviousPageFormat = @Translate.Text("Epass.Prev"),
+         LinkToNextPageFormat = @Translate.Text("Epass.Next"),
+         //LinkToLastPageFormat = ">|",
+         MaximumPageNumbersToDisplay = 3,
+         DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+         DisplayLinkToLastPage = PagedListDisplayMode.Never,
+         DisplayLinkToFirstPage = PagedListDisplayMode.Never,
+
+
+     }
+ )
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div id="description-for-" class="form-field__messages">
+    </div>
+
+    <script type="text/javascript">
+        var isclick;
+        docReady(function () {
+            $('#m49-list-filter--input').off().on('keypress', function (e) {
+                if (e.keyCode == 13) {
+                    var existingString = $("#m49-list-filter--input").val();
+                    var url = "/api/sitecore/WorkPermit/DisplayPOAccountSelector?pageNo=1&search=" + existingString;
+                    GetRecords(url);
+                    return false;
+                }
+            });
+            $('.m49-list-filter--button').off('click').on('click', function () {
+                var existingString = $("#m49-list-filter--input").val();
+                var url = "/api/sitecore/WorkPermit/DisplayPOAccountSelector?pageNo=1&search=" + existingString;
+                GetRecords(url);
+                return false;
+            });
+            $('#pagerContent a').on('click', function () {
+                event.preventDefault();
+                isclick = true;
+                var existingString = $("#m49-list-filter--input").val();
+                var url = this.href
+                if (existingString != "") {
+                    var url = "/api/sitecore/WorkPermit/DisplayPOAccountSelector?pageNo=1&search=" + existingString;
+                }
+                GetRecords(url);
+                return false;
+            });
+            function GetRecords(_url) {
+                if (_url != '' && _url != null) {
+                    jQuery.ajax({
+                        url: _url,
+                        type: 'GET',
+                        cache: false,
+                        success: function (result) {
+                            $(".polistContent").html(result);
+                            $('.pager_update').click();
+                            $('.polistContent').animate({
+                                scrollTop: 0
+                            }, 600);
+                        }
+                    });
+                }
+            }
+
+        })
+    </script>
+
+}
+else
+{
+    <strong class="">
+        @Translate.Text("Epass.Nomatchfound")
+    </strong>
+}

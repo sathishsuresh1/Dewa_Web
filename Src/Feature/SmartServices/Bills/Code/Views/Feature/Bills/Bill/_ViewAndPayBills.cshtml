@@ -1,0 +1,112 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model Sitecore.Mvc.Presentation.RenderingModel
+
+@Html.Sitecore().Placeholder("j14/page-title")
+
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j14/step-tracker")
+        @Html.Sitecore().Placeholder("j14/intro-text")
+    </div>
+</div>
+
+<form id="form-bill-selector" action="#" class="form" method="POST" novalidate="novalidate" billform="true" form-skipvalidation="true">
+    @Html.AntiForgeryToken()
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Sitecore().Placeholder("j14/bill-selector")
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+            <button id="btnSubmit" type="submit" data-m44-next="" aria-label="Next" class="button button--primary button--next">@Translate.Text("Next")</button>
+        </div>
+    </div>
+</form>
+
+<form id="billdownloadfrom" method="post">
+    <input type="hidden" name="test" />
+</form>
+
+<div class="grid__row" id="altpayments">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j14/expander")
+    </div>
+</div>
+<div class="grid__row" id="noaccounts">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="m14-richtext">
+            @Html.Sitecore().Placeholder("j14/NoAccounts")
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    docReady(function () {
+        require(['parsley'], function () {
+            jQuery('form[data-form="true"]').parsley();
+        });
+        jQuery('#noaccounts').hide();
+        if (!jQuery("input.form-field__input--checkbox:checkbox").length) {
+            jQuery('form[billform="true"]').hide();
+            jQuery('#altpayments').hide();
+            jQuery('#noaccounts').show();
+        }
+        var handleBillSelection = function (e) {
+
+            var selection = [];
+            $(dewaGlobal.billAccountsListSelected).each(function (i, obj) {
+                selection.push(obj.AccountNumber);
+            });
+            submitSelected(selection, function (result) {
+
+                location.href = result;
+            });
+            return false;
+
+        };
+        function submitSelected(selection, callback) {
+
+            jQuery.ajax({
+                url: '/api/sitecore/Bill/ViewAndPayBills_ajax',
+                type: 'POST',
+                dataType: 'json',
+                cache: false,
+                data: {
+                    model: selection
+                },
+                success: function (result) {
+                    //alert(result);
+
+                    callback(result);
+                }, error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+
+                }
+            });
+        }
+        jQuery("#form-bill-selector").submit(handleBillSelection);
+    });
+</script>

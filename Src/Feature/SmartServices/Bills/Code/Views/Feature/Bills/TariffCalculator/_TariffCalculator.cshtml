@@ -1,0 +1,373 @@
+﻿@using Sitecore.Mvc.Presentation
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.TariffCalculator.CalculatorViewModel
+
+@if (Model != null && Model.CalculatorDs != null)
+{
+    var x = Model.Residential;
+
+    <div data-journey="j34-tariff-calculator" 
+         data-slab-tariff='@Html.Raw(Model.tariffJson)' 
+         data-resedential='{"baseelec":"@Model.Residential.Electricity.Green.To","basewater":"@Model.Residential.Water.Green.To","gelec":"@Model.Residential.Electricity.Green.From - @Model.Residential.Electricity.Green.To","yelec":"@Model.Residential.Electricity.Yellow.From - @Model.Residential.Electricity.Yellow.To","oelec":"@Model.Residential.Electricity.Orange.From - @Model.Residential.Electricity.Orange.To","relec":"@Model.Residential.Electricity.Red.From - @Model.Residential.Electricity.Red.To","gwater":"@Model.Residential.Water.Green.From - @Model.Residential.Water.Green.To","ywater":"@Model.Residential.Water.Yellow.From - @Model.Residential.Water.Yellow.To","owater":"@Model.Residential.Water.Orange.From - @Model.Residential.Water.Orange.To"}' 
+         data-commercial='{"baseelec":"@Model.Commercial.Electricity.Green.To","basewater":"@Model.Commercial.Water.Green.To","gelec":"@Model.Commercial.Electricity.Green.From - @Model.Commercial.Electricity.Green.To","yelec":"@Model.Commercial.Electricity.Yellow.From - @Model.Commercial.Electricity.Yellow.To","oelec":"@Model.Commercial.Electricity.Orange.From - @Model.Commercial.Electricity.Orange.To","relec":"@Model.Commercial.Electricity.Red.From - @Model.Commercial.Electricity.Red.To","gwater":"@Model.Commercial.Water.Green.From - @Model.Commercial.Water.Green.To","ywater":"@Model.Commercial.Water.Yellow.From - @Model.Commercial.Water.Yellow.To","owater":"@Model.Commercial.Water.Orange.From - @Model.Commercial.Water.Orange.To"}' 
+         data-industrial='{"baseelec":"@Model.Industrial.Electricity.Green.To","basewater":"@Model.Industrial.Water.Green.To","gelec":"@Model.Industrial.Electricity.Green.From - @Model.Industrial.Electricity.Green.To","yelec":"@Model.Industrial.Electricity.Yellow.From - @Model.Industrial.Electricity.Yellow.To","gwater":"@Model.Industrial.Water.Green.From - @Model.Industrial.Water.Green.To","ywater":"@Model.Industrial.Water.Yellow.From - @Model.Industrial.Water.Yellow.To","owater":"@Model.Industrial.Water.Orange.From - @Model.Industrial.Water.Orange.To"}' 
+         data-d33='{"baseelec":"@Model.D33.Electricity.Green.To","basewater":"@Model.D33.Water.Green.To","gelec":"@Model.D33.Electricity.Green.From - @Model.D33.Electricity.Green.To","gwater":"@Model.D33.Water.Green.From - @Model.D33.Water.Green.To","ywater":"@Model.D33.Water.Yellow.From - @Model.D33.Water.Yellow.To","owater":"@Model.D33.Water.Orange.From - @Model.D33.Water.Orange.To"}' 
+         data-elec2k="@Model.Residential.Electricity.Green.Tariff" 
+         data-elec4k="@Model.Residential.Electricity.Yellow.Tariff" 
+         data-elec6k="@Model.Residential.Electricity.Orange.Tariff" 
+         data-elec6kp="@Model.Residential.Electricity.Red.Tariff" 
+         data-elec10k="@Model.Industrial.Electricity.Green.Tariff" 
+         data-elec10kp="@Model.Industrial.Electricity.Yellow.Tariff" 
+         data-elec10kd33="@Model.D33.Electricity.Green.Tariff" 
+         data-water6k="@Model.Residential.Water.Green.Tariff" 
+         data-water12k="@Model.Residential.Water.Yellow.Tariff" 
+         data-water12kp="@Model.Residential.Water.Orange.Tariff" 
+         data-nelec2k="0.075" 
+         data-nelec4k="0.09" 
+         data-nelec6k="0.105" 
+         data-nelec6kp="0.125" 
+         data-nwater10k="Exempted" 
+         data-nwater10kp="0.015" 
+         data-fswatervalue="@Model.Residential.Water.FuelSurchargeTariff" 
+         data-fselecvalue="@Model.Residential.Electricity.FuelSurchargeTariff" 
+         data-vat="@VATConfig.VatPercentage">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="j34-tariff__form" data-form-container="true">
+                <form method="get" class="form" data-form="true" novalidate>
+                    <fieldset class="fieldset ">
+                        <legend class="legend-color">.</legend>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-q7ncivhb0" class="form-field__label">
+                                @Translate.Text(DictionaryKeys.TariffCalculator.Labels.TariffType)
+                                <span class="form-field__label-required aria-only">@Translate.Text(DictionaryKeys.TariffCalculator.ErrorMessages.Required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-q7ncivhb0" name="select" data-type="true" aria-required="true" required="" data-parsley-error-message="@Translate.Text(DictionaryKeys.TariffCalculator.ErrorMessages.EnterAValue)" data-parsley-errors-container="#description-for-q7ncivhb0" aria-describedby="description-for-q7ncivhb0" data-parsley-id="8">
+                                    <option value="" selected="">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.SelectFromDropdown)</option>
+                                    @if (Model.CalculatorDs.CustomerTypes != null && Model.CalculatorDs.CustomerTypes.Any())
+                                    {
+                                        foreach (var customerType in Model.CalculatorDs.CustomerTypes)
+                                        {
+                                            <option value="@customerType.Name.ToLower()">@customerType.Title</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-q7ncivhb0" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-8pgbdmemq" class="form-field__label">
+                                @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)
+                                <span class="form-field__label-required aria-only">@Translate.Text(DictionaryKeys.TariffCalculator.ErrorMessages.Required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text form-field__input--hide-spinner"
+                                       id="form-field-8pgbdmemq" name="electricity" min="0" max="9999999" type="number" lang="en"
+                                       placeholder="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.EnterValueKwH)"
+                                       aria-describedby="description-for-8pgbdmemq" data-electricity="true"
+                                       @*aria-required="true"*@ required="required"
+                                       data-parsley-error-message="@Translate.Text(DictionaryKeys.TariffCalculator.ErrorMessages.PositiveNumber)"
+                                       data-parsley-errors-container="#description-for-8pgbdmemq" data-parsley-id="10"
+                                       data-input-numbers
+                                       data-parsley-maxnumber="7">
+                            </span>
+                            <div id="description-for-8pgbdmemq" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.KiloWattsPerHour)</p>
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-ik3hjvc2m" class="form-field__label">
+                                @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Water)
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text form-field__input--hide-spinner"
+                                       id="form-field-ik3hjvc2m" name="water" min="0" max="9999999" type="number" lang="en"
+                                       placeholder="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.EnterValueIg)"
+                                       aria-describedby="description-for-ik3hjvc2m" data-water="true" @*aria-required="true"*@ required="required"
+                                       data-parsley-error-message="@Translate.Text(DictionaryKeys.TariffCalculator.ErrorMessages.PositiveNumber)"
+                                       data-parsley-errors-container="#description-for-ik3hjvc2m" data-parsley-id="12"
+                                       data-input-numbers
+                                       data-parsley-maxnumber="7">
+                            </span>
+                            <div id="description-for-ik3hjvc2m" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.ImperialGallon)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="form-field__button">
+                        <button class="button button--primary">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Calculate)</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div data-results-container="true" class="j34-tariff__results">
+                <!-- electricity table -->
+                <!-- m23-table--start -->
+
+                <div class="m23-table" data-component="m23-table">
+                    <h3 class="m23-table__title m23-table__title--icon m23-table__title--electricity">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)</h3>
+                    <table class="m23-table__content-table">
+                        @RenderSlabTableHead()
+
+                        <tbody class="m23-table__content-table-body">
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--g">G</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_grelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_delec2k"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.ElectricityUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.ConsumptionPerMonthKwh")" id="ctl00_ContentPlaceHolder1_ygrelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_fgrelec"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_yltr">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--y">Y</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_yelelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_yeltariff"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.ElectricityUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)" id="ctl00_ContentPlaceHolder1_yyelelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_fyelelec"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_ortr">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--o">O</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_orelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_delec6k"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.ElectricityUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)" id="ctl00_ContentPlaceHolder1_yorelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_forelec"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_redtr">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--r">R</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumption")" id="ctl00_ContentPlaceHolder1_redelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_delec6kp"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.ElectricityUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)" id="ctl00_ContentPlaceHolder1_yredelec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_fredelec"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="" colspan="5">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Total)
+                                </td>
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Total)" id="ctl00_ContentPlaceHolder1_subtotalelec"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- m23-table--end -->
+                <!-- water table -->
+                <!-- m23-table--start -->
+                <div class="m23-table" data-component="m23-table">
+                    <h3 class="m23-table__title m23-table__title--icon m23-table__title--water">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Water)</h3>
+                    <table class="m23-table__content-table">
+
+                        @RenderWaterSlabTableHead()
+
+                        <tbody class="m23-table__content-table-body">
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Slab)">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--g">G</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumptionIG")" id="ctl00_ContentPlaceHolder1_grwater"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_lblwater1"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.WaterUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)" id="ctl00_ContentPlaceHolder1_ygrwater"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_fgrwater"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Slab)">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--y">y</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumptionIG")" id="ctl00_ContentPlaceHolder1_yelwater"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_lblwater2"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.WaterUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="Your consumption" id="ctl00_ContentPlaceHolder1_yyelwater"></td>
+                                <td class="m23-table__content-table-cell" data-label="Your Bill" id="ctl00_ContentPlaceHolder1_fyelwater"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Slab)">
+                                    <span class="j34-tariff-calculator__slab j34-tariff-calculator__slab--r">R</span>
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("tariff.SlabMonthlyConsumptionIG")" id="ctl00_ContentPlaceHolder1_orwater"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_lblwater3"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.WaterUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="Your consumption" id="ctl00_ContentPlaceHolder1_yorwater"></td>
+                                <td class="m23-table__content-table-cell" data-label="Your Bill" id="ctl00_ContentPlaceHolder1_forwater"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="" colspan="5">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Total)
+                                </td>
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Total)" id="ctl00_ContentPlaceHolder1_subtotalwater"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- m23-table--end -->
+                <!-- surcharge table -->
+                <!-- m23-table--start -->
+                <div class="m23-table" data-component="m23-table">
+                    <h3 class="m23-table__title ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.FuelSurcharge)</h3>
+                    <table class="m23-table__content-table">
+                        <thead class="m23-table__content-table-header">
+                            <tr class="m23-table__content-table-row">
+                                <th class="m23-table__content-table-cell--header "></th>
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text("tariff.fuelsurchargelbl")</th>
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)</th>
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)</th>
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="m23-table__content-table-body">
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell" data-label="Fuel Type">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_lblfsElecvalue"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.ElectricityUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)" id="ctl00_ContentPlaceHolder1_lblConElec"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_lblfsElec"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell" data-label="Fuel Type">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Water)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)" id="ctl00_ContentPlaceHolder1_lblfsWatervalue"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.WaterUnits)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Yourconsumption)" id="ctl00_ContentPlaceHolder1_lblConWater"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)" id="ctl00_ContentPlaceHolder1_lblfsWater"></td>
+                            </tr>
+                            <tr class="m23-table__content-table-row">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="" colspan="4">
+                                    @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Total)
+                                </td>
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Total)" id="ctl00_ContentPlaceHolder1_lblfsTotal"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- m23-table--end -->
+                <!-- summary table -->
+                <!-- m23-table--start -->
+                <div class="m23-table" data-component="m23-table">
+                    <h3 class="m23-table__title ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Summary)</h3>
+                    <table class="m23-table__content-table">
+                        <thead class="m23-table__content-table-header">
+                            <tr class="m23-table__content-table-row">
+                                @*<th class="m23-table__content-table-cell--header " colspan="2">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Summary)</th>*@
+
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)</th>
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Water)</th>
+                                <th class="m23-table__content-table-cell--header m23-table__content-table-cell--total">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.TotalBill)</th>
+                                <th class="m23-table__content-table-cell--header ">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.VATPercentage)</th>
+                                <th class="m23-table__content-table-cell--header m23-table__content-table-cell--total">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.TotalAmountinclVAT)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="m23-table__content-table-body">
+                            <tr class="m23-table__content-table-row">
+                                @*<td class="m23-table__content-table-cell" data-label="">
+                                        @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)
+                                    </td>*@
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)" id="ctl00_ContentPlaceHolder1_totalelecamt"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)" id="ctl00_ContentPlaceHolder1_totalwateramt"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)" id="ctl00_ContentPlaceHolder1_totalbill"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)" id="ctl00_ContentPlaceHolder1_totalvatamt"></td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Electricity)" id="ctl00_ContentPlaceHolder1_totalbillincludingvat"></td>
+                            </tr>
+                            @* <tr class="m23-table__content-table-row">
+                                    <td class="m23-table__content-table-cell" data-label="">
+                                        @Translate.Text(DictionaryKeys.TariffCalculator.Labels.Water)
+                                    </td>
+                                    <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Water)" id="ctl00_ContentPlaceHolder1_totalwateramt"></td>
+                                </tr>
+                                <tr class="m23-table__content-table-row">
+                                    <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="">
+                                        @Translate.Text(DictionaryKeys.TariffCalculator.Labels.TotalBill)
+                                    </td>
+                                    <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.TotalBill)" id="ctl00_ContentPlaceHolder1_totalbill"></td>
+                                </tr>
+                                <tr class="m23-table__content-table-row">
+                                    <td class="m23-table__content-table-cell" data-label="">
+                                        @Translate.Text(DictionaryKeys.TariffCalculator.Labels.VATPercentage)
+                                    </td>
+                                    <td class="m23-table__content-table-cell" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.VATPercentage)" id="ctl00_ContentPlaceHolder1_totalvatamt">
+                                    </td>
+                                </tr>
+                                <tr class="m23-table__content-table-row">
+                                    <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="">
+                                        @Translate.Text(DictionaryKeys.TariffCalculator.Labels.TotalAmountinclVAT)
+                                    </td>
+                                    <td class="m23-table__content-table-cell m23-table__content-table-cell--total" data-label="@Translate.Text(DictionaryKeys.TariffCalculator.Labels.TotalAmountinclVAT)" id="ctl00_ContentPlaceHolder1_totalbillincludingvat"></td>
+                                </tr>*@
+                        </tbody>
+                    </table>
+                </div>
+                <!-- m23-table--end -->
+                <div class="form-field__button">
+                    <button data-recalculate-button="true" style="padding-bottom:24px" class="button button--primary">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Recalculate)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@helper RenderSlabTableHead()
+{
+    <thead class="m23-table__content-table-header">
+        <tr class="m23-table__content-table-row">
+            @*<th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Slab)</th>
+                <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.ConsumptionPerMonth)</th>*@
+            <th class="m23-table__content-table-cell--header" colspan="2">@Translate.Text("tariff.SlabMonthlyConsumption")</th>
+            <th class="m23-table__content-table-cell--header" style="display:none;">@Translate.Text("tariff.SlabMonthlyConsumption")</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text("tariff.ConsumptionPerMonthKwh")</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)</th>
+        </tr>
+    </thead>
+}
+
+@helper RenderWaterSlabTableHead()
+{
+    <thead class="m23-table__content-table-header">
+        <tr class="m23-table__content-table-row">
+            @*<th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Slab)</th>
+                <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.ConsumptionPerMonth)</th>*@
+            <th class="m23-table__content-table-cell--header" colspan="2">@Translate.Text("tariff.SlabMonthlyConsumptionIG")</th>
+            <th class="m23-table__content-table-cell--header" style="display:none;">@Translate.Text("tariff.SlabMonthlyConsumptionIG")</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Tariff)</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.Units)</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text("tariff.ConsumptionPerMonthIG")</th>
+            <th class="m23-table__content-table-cell--header">@Translate.Text(DictionaryKeys.TariffCalculator.Labels.YourBill)</th>
+        </tr>
+    </thead>
+}

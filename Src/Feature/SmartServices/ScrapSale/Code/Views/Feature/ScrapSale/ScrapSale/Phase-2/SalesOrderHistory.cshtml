@@ -1,0 +1,102 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model scrapOrdersList
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m23-table" data-component="m23-table">
+            <div class="j131-scrap-sales--table_title">
+                <p style="line-height: 26px!important;">@Html.Raw(Translate.Text("SOS_SalesOrderHistoryTitle"))</p>
+                @*<a href="" class="link">View all</a>*@
+            </div>
+            <table class="m23-table__content-table" style="background-color: #fff">
+                <thead class="m23-table__content-table-header">
+                    <tr class="m23-table__content-table-row" tabindex="0">
+                        @*<th class="m23-table__content-table-cell--header center-text">@Translate.Text("SSO_SlNo")</th>*@
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SOS_OrderNo")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SOS_TenderNo")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SOS_OrderValue")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SOS_OutstandingVAT")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SOS_Description")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_Download")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SOS_Action")</th>
+                    </tr>
+                </thead>
+                <tbody class="m23-table__content-table-body">
+                    @if (Model != null && Model.scraporderslist != null)
+                    {
+                        foreach (salesOrderDetails item in Model.scraporderslist)
+                        {
+                            <tr class="m23-table__content-table-row" tabindex="0">
+                                @*<td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("SSO_SlNo")">
+                                        @(item.serialNumber)
+                                    </td>*@
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SOS_OrderNo")">
+                                    @(item.salesdocumentnumber)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SOS_TenderNo")">
+                                    @(item.materialnumber)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SOS_OrderValue")">
+                                    @(item.totalregamount)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SOS_OutstandingVAT")">
+                                    @(item.totaldueamount)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SOS_Description")">
+                                    @(item.materialdescription)
+                                </td>
+                                <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_Download")">
+                                    <a href="javascript:void(0)" data-tid="@(item.materialnumber)" data-soid="@(item.salesdocumentnumber)" class="button button--primary button--very_small sosdocu-downloadbtn">@Translate.Text("SS_Download")</a>
+                                </td>
+                                <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SOS_Action")">
+                                    <a href="javascript:void(0)" data-pid="@(item.totaldueamount)" data-tid="@(item.materialnumber)" data-soid="@(item.salesdocumentnumber)" class="button button--primary button--very_small sospay-downloadbtn">@Translate.Text("easypay.pay")</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div style="display:none">
+    <form id="scrap-sosdocument-form" action="/api/sitecore/ScrapSale/DownloadSalesOrderDocument" method="post">
+        @Html.AntiForgeryToken();
+        <input type="text" name="ssono" id="ssono" class="ssono" />
+        <input type="text" name="tno" id="tno" class="tno" />
+    </form>
+    <form id="scrap-sospay-form" action="/api/sitecore/ScrapSale/SalesOrderPaymentMethod" method="post">
+        @Html.AntiForgeryToken();
+        <input type="text" name="salesDocumentNo" id="ssono" class="ssono" />
+        <input type="text" name="SalesTenderNo" id="tno" class="tno" />
+        <input type="text" name="SalesPaymentAmt" id="pno" class="pno" />
+    </form>
+</div>
+
+
+<script>
+    setTimeout(function () {
+        // Download sales order document
+        $(".sosdocu-downloadbtn").on("click", function () {
+            // alert();
+            $(".ssono").val($(this).data("soid"))
+            $(".tno").val($(this).data("tid"))
+            $("#scrap-sosdocument-form").submit();
+        });
+
+        // Payment sales order
+        $(".sospay-downloadbtn").on("click", function () {
+            // alert();
+            $(".ssono").val($(this).data("soid"))
+            $(".tno").val($(this).data("tid"))
+            $(".pno").val($(this).data("pid"))
+            $("#scrap-sospay-form").submit();
+        });
+
+    }, 500);
+
+</script>

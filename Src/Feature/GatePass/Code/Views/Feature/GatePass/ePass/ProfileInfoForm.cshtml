@@ -1,0 +1,201 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Foundation.Content
+@model UserRegistration
+
+
+<div class="grid">
+    @*<div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+                    <h3 class="m17-sectiontitle__title  text__section-title"Profile Info</h3>
+                    <h5 class="m17-sectiontitle__subtitle text__section-subtitle">This service enables you to edit your Profile Info</h5>
+                </div>
+            </div>
+        </div>*@
+    @if (Model != null)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12  grid__column--form"></div>
+            <div class="grid__column grid__column--12  grid__column--form" style="padding-left:16px;">
+                @if (ViewBag.success != null && (bool)ViewBag.success)
+                {
+                    <div class="m40-status-message m40-status-message--success  icon icon-new-success-message" data-component="m40-status-message">
+                        <div class="m40-status-message__title  "> @Translate.Text("Epass.Success")</div>
+                        <div class="m40-status-message__text ">
+                            @Translate.Text("Epass.Profileupdated")
+                        </div>
+                    </div>
+                }
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+                {
+                    @Html.Sitecore().FormHandler("ePass", "ePassProfileInfo")
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    <fieldset class="fieldset">
+                        <legend class="legend-color">.</legend>
+                        @*<legend class="legend">My Information</legend>*@
+                        <div class="form-field form-field--text">
+                            <label for="form-field-fullname" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("Epass.Fullname")
+                            </label>
+                            <div class="form-field__input-wrapper">
+                                @Html.TextBoxFor(x => x.Fullname,
+                          new
+                          {
+                              @class = "form-field__input form-field__input--text",
+                              @name = "first-name",
+                              @id = "form-field-fullname",
+                              @placeholder = @Translate.Text("Epass.Enterfullname"),
+                              @required = "",
+                              @data_parsley_error_message = @Translate.Text("Epass.Requiredfield"),
+                              @data_parsley_errors_container = "#description-for-fullname",
+                              @aria_describedby = "description-for-fullname",
+                              @data_parsley_id = "8",
+                              @data_parsley_trigger = "focusout",
+                              @step = "any"
+
+                          })
+                            </div>
+                            <div id="description-for-fullname" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-MobilePhone" class="form-field__label">@Translate.Text("movein.mobilenumber") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                @Html.TextBoxFor(x => x.MobilePhone,
+                                        new
+                                        {
+                                            @type = "tel",
+                                            @class = "form-field__input form-field__input--text form-field__input--prefixed",
+                                            @name = "MobilePhone",
+                                            @id = "form-field-MobilePhone",
+                                            @placeholder = Translate.Text("Enter UAE mobile number"),
+                                            @required = "",
+                                            @data_parsley_error_message = Translate.Text("Please enter a valid UAE mobile number"),
+                                            @data_parsley_errors_container = "#description-for-MobilePhone",
+                                            @aria_describedby = "description-for-MobilePhone",
+                                            @data_parsley_id = "14",
+                                            @data_parsley_type = "digits",
+                                            @data_parsley_mobilenumber = "",
+                                            @step = "any",
+                                        })
+
+                            </span>
+                            <div id="description-for-MobilePhone" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.MobilePhone, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-companyname" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("Epass.Companyname")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly=""
+                                       id="form-field-companyname"
+                                       name="CompanyName"
+                                       type="text"
+                                       value="@Model.CompanyName"
+                                       aria-describedby="description-for-companyname"
+                                       data-parsley-errors-container="#description-for-companyname"
+                                       data-parsley-trigger="focusout">
+                            </div>
+                            <div id="description-for-companyname" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-EmailAddress" class="form-field__label">
+                                @Translate.Text("Epass.Emailaddress") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <label class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                @Html.TextBoxFor(x => x.Emailid,
+                                    new
+                                    {
+                                        @class = "form-field-EmailAddress form-field__input--readonly",
+                                        @id = "form-field-EmailAddress",
+                                        @placeholder = Translate.Text("Enter email ID"),
+                                        @required = "",
+                                        @data_parsley_error_message = Translate.Text("Please enter a valid email address"),
+                                        @data_parsley_errors_container = "#description-for-EmailAddress",
+                                        @aria_describedby = "description-for-EmailAddress",
+                                        @data_parsley_id = "14",
+                                        @step = "any",
+                                        @data_parsley_email = "",
+                                        @type = "email",
+                                        @maxlength = "50"
+                                    })
+
+                            </label>
+                            <div id="description-for-EmailAddress" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.Emailid, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-vendorid" class="form-field__label form-field__input--readonly">
+                                @Translate.Text("Epass.Forgotvendorid")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly"
+                                       id="form-field-vendorid"
+                                       name="VendorId"
+                                       type="text"
+                                       aria-describedby="description-for-vendorid"
+                                       data-parsley-errors-container="#description-for-vendorid"
+                                       required
+                                       readonly
+                                       data-parsley-required-message="@Translate.Text("Epass.Requiredfield")"
+                                       value="@Model.VendorId" />
+                            </div>
+                            <div id="description-for-vendorid" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-username" class="form-field__label form-field__input--readonly">
+                                @Translate.Text("Epass.Username")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly"
+                                       id="form-field-username"
+                                       name="Username"
+                                       type="text"
+                                       aria-describedby="description-for-username"
+                                       data-parsley-errors-container="#description-for-username"
+                                       required
+                                       readonly
+                                       data-parsley-required-message="@Translate.Text("Epass.Requiredfield")"
+                                       value="@Model.Username" />
+                            </div>
+                            <div id="description-for-username" class="form-field__messages">
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="form-field__button">
+                        <button class="button button--primary button--fullwidth" type="submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Update")</button>
+                    </div>
+                }
+            </div>
+
+            <div class="grid__column grid__column--12  grid__column--form"></div>
+        </div>
+    }
+    else
+    {
+        <div class="m64-inbox--title">
+            @Translate.Text("Epass.Nodataavailable")
+        </div>
+    }
+</div>

@@ -1,0 +1,52 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.RenderingParameters
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using Glass.Mapper.Sc.Web.Mvc
+@using DEWAXP.Foundation.Content.Repositories
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@model DEWAXP.Foundation.Content.Models.Common.FormattedText
+@{
+    IMvcContext _requestContext = new MvcContext(new SitecoreService(Sitecore.Context.Database));
+    IRenderingRepository renderingRepository = new RenderingRepository(_requestContext);
+}
+@if (Model != null && Model.Id != Guid.Empty)
+{
+    var parameters = renderingRepository.GetRenderingParameters<FormattedTextSettings>();
+
+    if (parameters.DisplayRaw)
+    {
+        @Html.Sitecore().Field("Rich Text")
+    }
+
+    else if (parameters.DisplayRawNoGrid)
+    {
+        <div class="m14-richtext" style="margin-bottom:0px">
+            @Html.Sitecore().Field("Rich Text")
+        </div>
+    }
+
+    else if (!parameters.DisplayInHalfColumn)
+    {
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="m14-richtext">
+                    @Html.Sitecore().Field("Rich Text")
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+
+
+        <div class="grid__column grid__column--6">
+            <div class="m14-richtext">
+                @Html.Sitecore().Field("Rich Text")
+            </div>
+        </div>
+    }
+}
+

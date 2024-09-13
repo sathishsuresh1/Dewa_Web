@@ -1,0 +1,195 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.Bills.ViewFriendsBillsModel
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        @Html.Sitecore().Placeholder("j15/m26-page-title")
+    </div>
+</div>
+
+<div class="grid__row">
+    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form", @novalidate = "novalidate" }))
+    {
+        @Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()
+
+        @Html.HiddenFor(m => m.SearchCriteria)
+        @Html.HiddenFor(m => m.Bills[0].AccountNumber)
+        @Html.HiddenFor(m => m.Bills[0].PremiseNumber)
+        @Html.HiddenFor(m => m.Bills[0].CustomerPremiseNumber)
+        @Html.HiddenFor(m => m.Bills[0].Balance)
+        @Html.HiddenFor(m => m.Bills[0].Active)
+        @Html.HiddenFor(m => m.Bills[0].BillingClass)
+        @Html.HiddenFor(m => m.Bills[0].ElectricityBill)
+        @Html.HiddenFor(m => m.Bills[0].WaterBill)
+        @Html.HiddenFor(m => m.Bills[0].Category)
+        @Html.HiddenFor(m => m.Bills[0].CoolingCharges)
+        @Html.HiddenFor(m => m.Bills[0].HoldingFees)
+        @Html.HiddenFor(m => m.Bills[0].HousingFees)
+        @Html.HiddenFor(m => m.Bills[0].SewerageFees)
+        @Html.HiddenFor(m => m.Bills[0].PartialPaymentPermitted)
+
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j15/m38-step-tracker")
+
+        <div class="m42-keyvalue">
+            <dl>
+                <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Friends account to pay")</dt>
+                <dd class="m42-keyvalue__value--stacked">@Sitecore.Globalization.Translate.Text("Acc"): @Model.Bills[0].AccountNumber</dd>
+            </dl>
+        </div>
+
+        <div class="edit-toggle" data-helper="edit-toggle">
+            @*@if (Model.Bills[0].PartialPaymentPermitted)
+            {*@
+            <a class="edit-toggle__trigger button button--text button--edit" data-edit-toggle-trigger="true">@Sitecore.Globalization.Translate.Text("Edit amount")</a>
+            @*}*@
+            <div class="m37-expander" data-component="m37-expander">
+                <button data-toggle="true" aria-haspopup="true" aria-expanded="false" class="m37-expander__trigger m37-expander__trigger--open" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].Balance</button>
+                <div data-content="true" class="m37-expander__content m37-expander__content--open">
+
+                    <div class="m42-keyvalue">
+                        <dl>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text("Electricity")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].ElectricityBill</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text("Water")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].WaterBill</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text(DictionaryKeys.FeesAndCharges.Labels.SewerageFee)</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].SewerageFees</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text(DictionaryKeys.FeesAndCharges.Labels.CoolingCharges)</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].CoolingCharges</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text(DictionaryKeys.FeesAndCharges.Labels.HousingCharges)</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].HousingFees</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text("SL.DMCharges")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].DMCharges</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Sitecore.Globalization.Translate.Text(DictionaryKeys.FeesAndCharges.Labels.OtherCharges)</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Bills[0].OtherCharges</dd>
+
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt m42-keyvalue--summary">@Sitecore.Globalization.Translate.Text("Total selected"):</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd m42-keyvalue--summary">
+                                <span data-edit-toggle-target="true" data-numeric-format="0,0.00">@Model.Bills[0].Balance</span> @Translate.Text("AED")
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <div class="edit-toggle__field" data-edit-toggle-field="true">
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-editpayment" class="form-field__label">
+                                @Sitecore.Globalization.Translate.Text("Make Partial Payment")
+                                <span class="form-field__label-optional">(@(Sitecore.Globalization.Translate.Text("optional")))</span>
+                            </label>
+                            <div class="edit-toggle__input-wrapper">
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--currency">
+                                    <input id="form-field-editpayment"
+                                           name="Bills[0].ElectedPaymentAmount"
+                                           type="number" lang="en"
+                                           class="form-field__input form-field__input--text form-field__input--prefixed  form-field__input--error parsley-error"
+                                           @*aria-required="true"*@
+                                           aria-describedby="description-for-editpayment"
+                                           required="required"
+                                           value="@Model.Bills[0].ElectedPaymentAmount"
+                                           min="0.00"
+                                           max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                                           step="any"
+                                           data-parsley-max-message="@Translate.Text("Maximum partial payment amount", PaymentConstants.MaximumAllowedPaymentAmount.ToString("0,0.00"))"
+                                           data-parsley-errors-container="#description-for-editpayment"
+                                           data-parsley-currency=""
+                                           data-input-truncate="9"
+                                           data-parsley-min="0"
+                                           data-parsley-max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-required-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                                           data-parsley-range-message />
+                                </span>
+
+                                <div class="edit-toggle__cancel">
+                                    <button type="button" class="button button--text button--cancel" data-edit-toggle-cancel="true">
+                                        @Sitecore.Globalization.Translate.Text("Cancel")
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="description-for-editpayment" class="form-field__messages">
+                                @Html.ValidationMessageFor(m => m.Bills[0].ElectedPaymentAmount)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            @Html.Hidden("Amounts", Model.Bills[0].Balance)
+            @Html.Hidden("ContractAccounts", Model.Bills[0].AccountNumber)
+
+    <div class="form-field m48-payment-total-submit" data-component="m48-payment-total-submit" data-currency-suffix="@Sitecore.Globalization.Translate.Text("AED")" data-bill-default="@Model.Bills[0].ElectedPaymentAmount" data-payment-max="@PaymentConstants.MaximumAllowedPaymentAmount">
+        <a id="pay-button-popup" class="button button--primary button--next m48-payment-total-submit--button">
+            @Sitecore.Globalization.Translate.Text("Pay")
+            <span class="amount_label"></span>
+        </a>
+
+        <span class="form-field__input-wrapper form-field__input-wrapper--error-noicon">
+            <input class="form-field__input form-field__input--text form-field__input--error parsley-error"
+                   id="form-field-billtotal"
+                   name="billtotal"
+                   type="hidden"
+                   aria-describedby="description-for-billtotal"
+                   data-parsley-errors-container="#description-for-billtotal"
+                   data-parsley-billtotalmax="@PaymentConstants.MaximumAllowedPaymentAmount"
+                   data-parsley-billtotalmax-message="@Translate.Text("Maximum aggregate payment amount", PaymentConstants.MaximumAllowedPaymentAmount.ToString("0,0.00"))"
+                   data-parsley-billtotalmin="0"
+                   data-parsley-billtotalmin-message="@Translate.Text("Payment amount invalid")">
+        </span>
+
+        <div id="description-for-billtotal" class="form-field__messages"></div>
+
+        @* Payment Type Popup module *@
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+    </div>
+
+
+        }
+        else
+        {
+            <p class="form-field__button">
+                <a href="@ViewBag.LoginRedirect" class="button button--primary">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Login.LoginToMakePayment)</a>
+            </p>
+        }
+        @Html.Sitecore().Placeholder("j14/expander")
+    </div>
+    }
+</div>
+
+<script type="text/javascript">
+    // Open Payment method popup.
+    jQuery('#pay-button-popup').on('click', function () {
+        var total = jQuery("#form-field-billtotal").val();
+        var currency = '@Translate.Text("AED")';
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (numeral(total) > 0)
+        {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        }
+    });
+</script>

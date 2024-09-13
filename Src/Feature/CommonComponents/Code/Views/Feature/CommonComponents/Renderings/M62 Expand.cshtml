@@ -1,0 +1,41 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore
+@using Sitecore.Mvc
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Expand
+@{
+    var rc = Sitecore.Mvc.Presentation.RenderingContext.CurrentOrNull;
+    string id = "";
+    if (rc != null)
+    {
+        var parms = rc.Rendering.Parameters;
+        if (parms != null && parms.Count() > 0)
+        {
+            id = parms["id"] != null ? parms["id"] : string.Empty;
+        }
+    }
+}
+
+<div class="m62-expand m62-expand-variant" data-component="m62-expand">
+    <div data-m62-expands-menu="true">
+        <ul>
+            @foreach (var tab in Model.Children)
+            {
+                var index = Model.Children.ToList().IndexOf(tab);
+                <li data-m62-expands-trigger="true" class="m62-expand-tab" data-m62-expands-expand="true" aria-controls="expand-content-@index">
+                    <div class="m62-expand-title">
+                        @Html.Glass().Editable(tab, x => x.ExpandTitle)
+                    </div>
+                    <div data-m62-expands-content="true" class="m62-expand-content" id="expand-content-@index">
+                        @Html.Glass().Editable(tab, x => x.Expandcontent)
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(id))
+    {
+    <div class="m62-expand--footnote">
+        @Html.Sitecore().Placeholder(id)
+    </div>
+    }
+</div>

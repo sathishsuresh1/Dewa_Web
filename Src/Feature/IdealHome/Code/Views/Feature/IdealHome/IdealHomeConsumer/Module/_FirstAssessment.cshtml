@@ -1,0 +1,49 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@{
+    var btnDisabled = "disabled";
+    var btnText = string.Empty;
+    var showscore = true;
+
+    if (!Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted)
+    {
+        btnDisabled = string.Empty;
+        btnText = Translate.Text("J106.ContinueLabel");
+        showscore = false;
+    }
+    else
+    {
+        btnDisabled = "disabled";
+        showscore = true;
+        btnText = Translate.Text("J106.CompletedLabel");
+    }
+}
+
+<div class="grid__column grid__column--6">
+    <div class="j106-ideal-home__stat-card">
+        <div class="j106-ideal-home__stat-step">@Translate.Text("J106.Step1Label")</div>
+        <div class="j106-ideal-home__stat-title">@Translate.Text("J106.Self-assessment")</div>
+        <div class="j106-ideal-home__stat-progress">
+            <span class="j106-ideal-home__stat-progress--progress">@Translate.Text("J106.ProgressLabel") @Model.SurveyResponses.Select(x => x.Progress).FirstOrDefault().ToString()%</span>
+            @if (showscore)
+            {
+                <span class="j106-ideal-home__stat-progress--correct">@Model.SurveyResponses.Select(x => x.Correct).FirstOrDefault().ToString()  @Translate.Text("J106.CorrectLabel")</span>
+                <span class="j106-ideal-home__stat-progress--wrong">@Model.SurveyResponses.Select(x => x.Wrong).FirstOrDefault().ToString()  @Translate.Text("J106.WrongLabel")</span>
+
+            }
+            <br /><br />
+            <span class="j106-ideal-home__stat-progress--progress">@Translate.Text("J106.ScoreLabel") : @Model.SurveyResponses.Select(x => x.Marks).FirstOrDefault().ToString()%</span>
+        </div>
+
+        <div class="j106-ideal-home__buttons">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_SURVEY)" @btnDisabled class="@btnDisabled button button--primary button--small">
+                @btnText
+            </a>
+        </div>
+    </div>
+</div>

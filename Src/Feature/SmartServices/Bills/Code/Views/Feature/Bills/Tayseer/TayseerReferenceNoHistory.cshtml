@@ -1,0 +1,370 @@
+﻿@using System.Activities.Statements
+@using DEWAXP.Foundation.Integration.Extensions
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Integration.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Feature.Bills.Models.Tayseer.TayseerReferenceListDetail
+@{
+    var existingAccountURL = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TAYSEER_EXISTING_ACCOUNT);
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+
+}
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="box box--1">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("j87/m26-page-title")
+        </div>
+    </div>
+</div>
+@Html.Sitecore().Placeholder("j87/m41-tab-box")
+@if (ViewBag.Message != null)
+{
+    <div class="grid__row" id="divgriderrormsg">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text">@ViewBag.Message</div>
+            </div>
+        </div>
+    </div>
+}
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form" }))
+{
+    @Html.Sitecore().FormHandler()
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.TotalAmountPay)
+    //PaymentDewaReferenceNumber
+    @Html.HiddenFor(m => m.PaymentDewaReferenceNumber)
+    <div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    <a href="@existingAccountURL" class="j102-tayseer-service--add button mb12" id="idCreateNewReferenceNumber"><strong> + </strong>@Translate.Text("Create New Reference Number")</a>
+                    <div class="j102-tayseer-service-account-head">
+                        <div class="head-actions">
+                            <span class="total-page">@Translate.Text("Page") <span class="total-page-num">1</span> @Translate.Text("of") <span class="total-page-of-num">2</span></span>
+                        </div>
+                    </div>
+                    @*<div class="pagination-container" style="text-align:center"><ul id="pagin" class="pagin pagination"></ul></div>*@
+
+                    <div class="m49-list-filter" data-component="m49-list-filter" data-filter-list="[name='history-line-content']">
+                        <input class="m49-list-filter--input" id="m49-list-filter--input" name="m49-list-filter--input" placeholder="@Translate.Text("Search by Reference Number")" pattern="\d*" maxlength="20" type="text" data-parsley-maxnumber="20" >
+                        <button class="m49-list-filter-reset-button hidden mt0" title="@Translate.Text("Clear Filter")" type="button" aria-label="@Translate.Text("Clear Filter")"> <span class="aria-only">Filter</span></button>
+                        <button class="m49-list-filter--button" title="@Translate.Text("Filter Results")" type="button" role="search" id="btnSearch" aria-label="@Translate.Text("Filter Results")"><span class="aria-only">Filter</span></button>
+                    </div>
+
+                    @if (Model.TayseerReferenceListDetails != null)
+                    {
+                        <div class="form-field form-field--toggles" name="history-line-content">
+                            <fieldset class="fieldset">
+                                @foreach (var data in Model.TayseerReferenceListDetails)
+                                {
+                                    var referencedetailsUrl = ViewBag.SelectReferenceDetailsURL + "?refno=" + data.DewaReferenceNumber;
+                                    var easyPayURL = ViewBag.SelecEasyPayURL + "?ac=" + data.DewaReferenceNumber;
+                                    var regenrateRefnoUrl = existingAccountURL + "?refno=" + data.DewaReferenceNumber;
+                                    <div class="form-field__checkbox j102-tayseer-service--chckbx j102-tayseer-service-history-rows line-content" data-id="@data.DewaReferenceNumber">
+                                        <div class="j102-tayseer-service-history">
+                                            <div class="j102-tayseer-service-history_left-col">
+                                                <div class="j102-tayseer-service--acc-num">@Translate.Text("Reference Number"): <strong data-acc-detail="acc_number">@data.DewaReferenceNumber</strong></div>
+                                                <div class="j102-tayseer-service--easypay">@Html.Raw(Translate.Text("Easy Pay Logo"))</div>
+                                                <div class="j102-tayseer-service--date">@(lang == "ar" ? data.CreatedDate.Replace("Jan", "يناير").Replace("Feb", "فبراير").Replace("Mar", "مارس").Replace("Apr", "أبريل").Replace("May", "مايو").Replace("Jun", "يونيو").Replace("Jul", "يوليو").Replace("Aug", "أغسطس").Replace("Sep", "سبتمبر").Replace("Oct", "أكتوبر").Replace("Nov", "نوفمبر").Replace("Dec", "ديسمبر").Replace("AM", "صباحا").Replace("PM", "مساء") : data.CreatedDate)</div>
+                                                <div class="j102-tayseer-service--ac-number">@Translate.Text("Total Accounts") (@data.TotalAccounts)</div>
+                                            </div>
+                                            <div class="j102-tayseer-service-history_right-col" data-okpay="@data.OkPay">
+                                                <div class="j102-tayseer-service--to-amount">@Translate.Text("Total Amount") (@Translate.Text("Currency")) <span class="amount-pay-button-text">@data.TotalAmount</span></div>
+                                                @if (data.OkPay == "R")
+                                                {
+                                                    <div class="j102-tayseer-service--payment-status">@Translate.Text("Cheque paid but not cleared")</div>
+                                                }
+                                                else
+                                                {
+
+                                                    <div class="j102-tayseer-service--payment-status">@data.PaymentStatus</div>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(data.CheckNumber))
+                                                {
+                                                    <div class="j102-tayseer-service--payment-cheque">@Translate.Text("Cheque Number") - @(data.CheckNumber)</div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="j102-tayseer-service--custom-pay">
+                                            <div class="j102-tayseer-service--custom-links">
+                                                <a class="link button button--text" href="@regenrateRefnoUrl">@Translate.Text("Regenerate")</a>
+                                            </div>
+                                            <div class="j102-tayseer-service--custom-pay-buttons">
+                                                <a role="button" href="@referencedetailsUrl" data-trigger="true" class="button button--primary button--small">@Translate.Text("View Details")</a>
+                                                @if (!string.IsNullOrWhiteSpace(data.Status) && data.Status != "5")
+                                                {
+                                                    <button role="button" type="button" class="button button--outline button--small continue-button-popup" data-dewareferencenumber="@data.DewaReferenceNumber" data-totalamount="@data.TotalAmount">@Translate.Text("Pay") <span class="amount-pay-button-text">@data.TotalAmount</span> @Translate.Text("AED")</button>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(data.NoCheckPay) && data.NoCheckPay.ToLower() == "x")
+                                        {
+                                            <p><span class="red">*</span>@Translate.Text("Cheque payment not allowed")</p>
+                                        }
+                                    </div>
+                                }
+                            </fieldset>
+                            <div class="m49-no-matches hidden">@Translate.Text("M43.NoMatchesFound")</div>
+                        </div>
+                    }
+                    <div class="pagination-container" style="text-align:center"><ul id="pagin" class="pagin pagination"></ul></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @* Payment Type Popup module *@
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+}
+<script>
+
+    jQuery(document).ready(function () {
+
+        setTimeout(function () {         
+
+            jQuery("#m49-list-filter--input").keydown(function (event) {
+                if (event.keyCode == 13) {
+                    if (jQuery("#m49-list-filter--input").val() != '')
+                        jQuery('#btnSearch').click();
+                }
+            });
+            
+            jQuery("#m49-list-filter--input").focusin(function (e) {
+               
+                console.log('focusin');
+                jQuery("form").submit(function (e) {
+                    e.preventDefault();
+                });
+            });
+
+            jQuery("form").submit(function (e) {
+                e.preventDefault();
+            });
+            jQuery('.button.button--primary.button--pay.mb12').on('click', function (event) {
+                event.preventDefault()
+                jQuery('#form-field-SuqiaDonationAmt').parsley().validate()
+                if (jQuery('#form-field-SuqiaDonationAmt').is(':visible')) {
+                    if (jQuery('#form-field-SuqiaDonationAmt').parsley().isValid()) {
+                        jQuery(this).closest('.form').submit();
+                    }
+                } else {
+                    jQuery(this).closest('.form').submit();
+                }
+            });
+
+        }, 500);
+
+    });
+
+
+
+
+    jQuery('.continue-button-popup').on('click', function () {
+
+        jQuery('form').unbind('submit');
+
+        //jQuery("form").submit(function (e) {
+        //    return true;
+        //});
+
+
+        if (!jQuery('.continue-button-popup').parent().hasClass('disabled')) {
+            var currency = '@Translate.Text("AED")';
+            var total = $(this).data("totalamount");
+
+            jQuery('#divPaymentAmountVal').attr('data-value', total);
+            jQuery('#divPaymentAmountVal').data('value', total);
+
+            if (numeral(total) > 0) {
+                //Set payment method based on paid amount
+                setPaymentMethod(total);
+
+                var dewaReferencenumber = $(this).data("dewareferencenumber");
+                jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+                jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                jQuery('.btnmodaltrigger').trigger('click');
+
+                jQuery("#TotalAmountPay").val(total);
+                jQuery("#PaymentDewaReferenceNumber").val(dewaReferencenumber);
+            }
+        }
+    });
+        //Pagination
+        var pageSize = @Translate.Text("PageSize");
+        var pageCount = $(".line-content").length / pageSize;
+
+    
+    jQuery('.m49-list-filter--input').on('keypress', function (e) {
+            if (e.charCode == 13) {
+                jQuery('.m49-list-filter-reset-button').removeClass('hidden');
+                jQuery('.m49-list-filter--button').click();
+            }
+        });
+
+        jQuery('.m49-list-filter--button').on('click', function (e) {
+            jQuery('.m49-list-filter-reset-button').removeClass('hidden');
+            setTimeout(function () {
+                setSearchPagination();
+            }, 700);
+
+           
+        });
+
+        jQuery('.m49-list-filter-reset-button').on('click', function (e) {
+            //debugger;
+            jQuery('.j102-tayseer-service--chckbx').removeClass('line-search-content');
+            if (!(jQuery('.m49-list-filter-reset-button').hasClass('hidden'))) {
+
+                jQuery('.m49-list-filter-reset-button').addClass('hidden');
+            }
+            jQuery("#m49-list-filter--input").val('');
+            setTimeout(function () {
+                pageCount = $(".line-content").length / pageSize;
+                $(".total-page-of-num").html(Math.ceil(pageCount));
+                $(".pagin").html('');
+                setPagination();
+                $(".total-page-num").html(1);
+            }, 400);
+        });
+        setPagination();
+        function setSearchPagination() {
+            $(".line-content:visible").each(function (n) {
+                $(this).addClass('line-search-content');
+            });
+            pageCount = $(".line-search-content").length / pageSize;
+            if (pageCount > 1) {
+                $(".head-actions").show();
+            }
+            else {
+                $(".head-actions").hide();
+            }
+            $(".pagin").html('');
+            $(".total-page-num").html(1);
+            $(".total-page-of-num").html(Math.ceil(pageCount));
+            for (var i = 0; i < pageCount; i++) {
+                if (pageCount > 1) {
+                    if (i == 0) {
+                        $(".pagin").append('<li class="active"><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                    else {
+                        $(".pagin").append('<li><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                }
+            }
+            $(".pagin li").first().find("li").addClass("active");
+            showSearchPage = function (page) {
+                $(".line-search-content").hide();
+                $(".line-search-content").each(function (n) {
+                    if (n >= pageSize * (page - 1) && n < pageSize * page)
+                        $(this).show();
+                });
+            }
+            showSearchPage(1);
+            $(".pagin li a").click(function () {
+                var _this = this;
+                $(".pagin li").removeClass("active");
+                $(".pagin li a").each(function () {
+                    if ($(this).html() == $(_this).html()) {
+                        $(this).parent().addClass("active");
+                    }
+                });
+                showSearchPage(parseInt($(this).text()));
+                $(".total-page-num").html(Math.ceil($(this).text()));
+            });
+        }
+        function setPagination() {
+            if (pageCount > 1) {
+                $(".head-actions").show();
+            }
+            else {
+                $(".head-actions").hide();
+            }
+            $(".total-page-of-num").html(Math.ceil(pageCount));
+            for (var i = 0; i < pageCount; i++) {
+                if (pageCount > 1) {
+                    if (i == 0) {
+                        $(".pagin").append('<li class="active"><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                    else {
+                        $(".pagin").append('<li><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                }
+            }
+            $(".pagin li").first().find("li").addClass("active");
+            showPage = function (page) {
+                $(".line-content").hide();
+                $(".line-content").each(function (n) {
+                    if (n >= pageSize * (page - 1) && n < pageSize * page)
+                        $(this).show();
+                });
+            }
+
+            showPage(1);
+
+            $(".pagin li a").click(function () {
+                var _this = this;
+
+                $(".pagin li").removeClass("active");
+                $(".pagin li a").each(function () {
+                    if ($(this).html() == $(_this).html()) {
+                        $(this).parent().addClass("active");
+                    }
+                });
+                //$(this).parent().addClass("active");
+                showPage(parseInt($(this).text()));
+                $(".total-page-num").html(Math.ceil($(this).text()));
+            });
+        }
+    $.fn.digits = function(){
+        return this.each(function(){
+            $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") );
+        })
+    }
+    $('.j102-tayseer-service--outstanding').digits();
+    $('.amount-pay-button-text').digits();
+    
+  
+
+    
+
+</script>
+<style>
+    .j102-tayseer-service--amount-pay-form {
+        display: none;
+    }
+
+    .current {
+        color: green;
+    }
+
+    .pagin li {
+        display: inline-block;
+    }
+
+    ul.pagination li a {
+        border: 0px solid #ddd;
+    }
+
+    .pagin li a {
+        color: black;
+        float: left;
+        padding: 5px 7px;
+        text-decoration: none;
+        font-weight: bold;
+        /*transition: background-color 0.3s;*/
+        /*border: 1px solid #ddd;*/
+    }
+
+
+    .pagination-container .active a {
+        /*background-color: #4CAF50;*/
+        color: #007560 !important;
+        font-weight: bold;
+        /*border: 1px solid #4CAF50;*/
+    }
+</style>

@@ -1,0 +1,386 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Foundation.Content.Models.AccountModel.UpdateCustomerInfoModel
+@{
+    var cnt = 1;
+    //var disabledClass = (Model.Success == "" || Model.Success == "1") ? "disabled" : string.Empty;
+}
+
+@foreach (var famliyMember in Model.FamilyMembers)
+{
+   
+    <div class="j69-customer--details_field--remove icon-new-bin"></div>
+    <fieldset id="_sjpmvqtts" class="j69-customer--details_field form-field">
+        @Html.Hidden("Action_" + @cnt, famliyMember.Action, new { @class = "podaction" })
+        <div class="j69-customer--details_title collapsed">
+            <div class="j69-customer--details_name"
+                 id="_ene3m3foc_@cnt"
+                 binding-default="@famliyMember.FamilyMemberName">
+                @famliyMember.FamilyMemberName
+            </div>
+            <div class="j69-customer--details_account" id="_ghvf2787s_@cnt" binding-default="@Translate.Text("cust.selectAccount")">
+                @Translate.Text("cust.account.number") @famliyMember.AccountNumber
+            </div>
+        </div>
+        <div class="j69-customer--details_forms hidden">
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-_8yorpjjhq_@cnt" class="form-field__label">
+                    @Translate.Text("cust.selectAccount")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--text-binded reside_dp @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")"
+                            id="form-field-_8yorpjjhq_@cnt"
+                            name="accountselector_@cnt"
+                            aria-describedby="description-for-_8yorpjjhq_@cnt"
+                            binding-target="#_ghvf2787s_@cnt"
+                            data-parsley-errors-container="#description-for-_8yorpjjhq_@cnt"
+                            data-parsley-trigger="change"
+                            data-parsley-id="28"
+                            @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                            required="">
+                        <option value="0">@Translate.Text("cust.select.account")</option>
+                        @{
+                            if (Model.CustomerAccountList != null)
+                            {
+                                foreach (var item in Model.CustomerAccountList)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(famliyMember.AccountNumber) && item.Value == famliyMember.AccountNumber.TrimStart(new char[] { '0' }))
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-_8yorpjjhq_@cnt" class="form-field__messages"> </div>
+            </div>
+            <div class="form-field form-field--text">
+                <label for="form-field-_oixsu8ph1_@cnt" class="form-field__label"> @Translate.Text("cust.family.member.name") </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text form-field__input--text-binded fam_name"
+                           id="form-field-_oixsu8ph1_@cnt"
+                           binding-target="#_ene3m3foc_@cnt"
+                           name="_oixsu8ph1_@cnt"
+                           type="text"
+                           value="@famliyMember.FamilyMemberName"
+                           placeholder="@Translate.Text("cust.enter.familyName")"
+                           aria-describedby="description-for-_oixsu8ph1_@cnt"
+                           data-parsley-errors-container="#description-for-_oixsu8ph1_@cnt"
+                           required=""
+                           maxlength="50"
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-_oixsu8ph1_@cnt" class="form-field__messages"> </div>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-_f7ejav6j4_@cnt" class="form-field__label"> @Translate.Text("cust.select.relationship") </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full relationship @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")"
+                            id="form-field-_f7ejav6j4_@cnt"
+                            name="_f7ejav6j4_@cnt"
+                            required=""
+                            @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                            aria-describedby="description-for-_f7ejav6j4_@cnt"
+                            data-parsley-errors-container="#description-for-_f7ejav6j4_@cnt"
+                            data-parsley-required-message="@Translate.Text("cust.required.field")"
+                            data-parsley-trigger="change"
+                            data-parsley-id="28">
+                        @{
+                            if (Model.RelationList != null)
+                            {
+                                foreach (var item in Model.RelationList)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(famliyMember.Relationship) && item.Value == famliyMember.Relationship)
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            }
+                        }
+
+                    </select>
+                </span>
+                <div id="description-for-_f7ejav6j4_@cnt" class="form-field__messages"> </div>
+            </div>
+            @if (famliyMember.Relationship == "09")
+            {
+                <div class="form-field form-field--text hidden relationship-others" style="display: block;">
+                    <label for="form-field-_nkx260tiq_@cnt" class="form-field__label">
+                        @Translate.Text("cust.relation.others")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")"
+                               id="form-field-_nkx260tiq_@cnt"
+                               name="_nkx260tiq"
+                               type="text"
+                               @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                               value="@famliyMember.OtherRelationship"
+                               placeholder="@Translate.Text("cust.placeholder.others")"
+                               aria-describedby="description-for-_nkx260tiq_@cnt"
+                               data-parsley-errors-container="#description-for-_nkx260tiq_@cnt"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                               data-parsley-trigger="focusout"
+                               data-parsley-multiple="_nkx260tiq_@cnt">
+                    </span>
+                    <div id="description-for-_nkx260tiq_@cnt" class="form-field__messages">
+                    </div>
+                </div>
+            }
+            <fieldset class="fieldset form-field form-field__radio--toggle">
+                <legend class="form-field__label">
+                    @Translate.Text("cust.category.fallin")
+                </legend>
+                @if (Model.PODCategoryList != null)
+                {
+
+                    foreach (var catItem in Model.PODCategoryList)
+                    {
+                        var chkAttr = famliyMember.PODCategory == catItem.Value ? "checked" : "";
+                        <p class="form-field__radio">
+                            <label>
+                                <input class="form-field__input form-field__input--radio pod_cat"
+                                       id="form-field-radio_2_@catItem.Value-@cnt"
+                                       name="_cy199eohz_@cnt"
+                                       type="radio"
+                                       value="@catItem.Value"
+                                       @chkAttr
+                                       @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                                       data-index="@cnt"
+                                       aria-describedby="description-for-_cy199eohz_@cnt"
+                                       data-parsley-errors-container="#description-for-_cy199eohz_@cnt"
+                                       data-parsley-multiple="radios_groupv"
+                                       toggle-target="._cy199eohz_@catItem.Value-@cnt"
+                                       data-parsley-id="35">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @catItem.Text
+                                </span>
+                            </label>
+                        </p>
+                    }
+                }
+
+                <div id="description-for-_cy199eohz_@cnt" class="form-field__messages">
+                </div>
+            </fieldset>
+            <div class="form-field form-field--toggles _cy199eohz_01-@cnt" style="display: none;">
+                <fieldset class="fieldset">
+                    <legend class="form-field__label">
+                        @Translate.Text("cust.disability.types")
+                    </legend>
+                    @if (Model.DisabilityTypeList != null)
+                    {
+                        foreach (var disabilityItem in Model.DisabilityTypeList)
+                        {
+                            var chkAttr = famliyMember.DisabilityType == disabilityItem.Value ? "checked" : "";
+                            <div class="form-field__checkbox first">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox disability_type"
+                                           id="form-field-checkbox_b_@disabilityItem.Value-@cnt"
+                                           name="radios_disabilitygroupv_@cnt"
+                                           type="checkbox"
+                                           @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                                           value="@disabilityItem.Value" @((famliyMember.MultipleDisableTypes != null && famliyMember.MultipleDisableTypes.Contains(disabilityItem.Value)) ? "checked=\"checked\"" : "")
+                                           aria-describedby="description-for-_g6vns1k53_@cnt"
+                                           data-parsley-errors-container="#description-for-_g6vns1k53_@cnt"
+                                           data-parsley-multiple="radios_disabilitygroupv_@cnt"
+                                           data-parsley-id="45">
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        @disabilityItem.Text
+                                    </span>
+                                </label>
+                            </div>
+                        }
+                    }
+                    <div id="description-for-_g6vns1k53_@cnt" class="form-field__messages">
+                    </div>
+                </fieldset>
+                @if (famliyMember.MultipleDisableTypes != null && famliyMember.MultipleDisableTypes.Contains("11"))
+                {
+                    <div class="form-field form-field--text mt24 _86qgy0jg0_@cnt" style="">
+                        <label for="form-field-3t2ktdhs588_@cnt" class="form-field__label">
+                            @Translate.Text("cust.other")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text otherdisability" @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled") id="form-field-3t2ktdhs588_@cnt" value="@famliyMember.OtherDisabilityType" name="inst_name" type="text" placeholder="@Translate.Text("cust.other")" aria-describedby="description-for-_ntbts11ee_@cnt" data-parsley-errors-container="#description-for-_ntbts11ee_@cnt" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-_ntbts11ee_@cnt" class="form-field__messages">
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="form-field _cy199eohz_02-@cnt" style="display: none;">
+                <div class="form-field form-field--toggles">
+                    <fieldset class="fieldset">
+                        <legend class="form-field__label">
+                            @Translate.Text("cust.medical.situation.types")
+                        </legend>
+                        @if (Model.MedicalSituationTypeList != null)
+                        {
+                            foreach (var medicalSituationItem in Model.MedicalSituationTypeList)
+                            {
+
+                                var chkAttr = famliyMember.MedicalSituationType == medicalSituationItem.Value ? "checked" : "";
+                                <div class="form-field__checkbox first">
+                                    <label>
+                                        <input class="form-field__input form-field__input--checkbox medicalSituation_type"
+                                               id="form-field-checkbox-@cnt-q_@medicalSituationItem.Value"
+                                               name="radios_groupvmedicalSituation_@cnt"
+                                               type="checkbox"
+                                               @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                                               value="@medicalSituationItem.Value" @((famliyMember.MultipleMedicalSituationTypes != null && famliyMember.MultipleMedicalSituationTypes.Contains(medicalSituationItem.Value)) ? "checked=\"checked\"" : "")
+                                               aria-describedby="description-for-_5pz36miac_@cnt"
+                                               data-parsley-errors-container="#description-for-_5pz36miac_@cnt"
+                                               data-parsley-multiple="radios_groupvmedicalSituation_@cnt"
+                                               data-parsley-id="45">
+                                        <span class="form-field__fakecheckbox focus-enabled">
+                                            @medicalSituationItem.Text
+                                        </span>
+                                    </label>
+                                </div>
+                            }
+                        }
+                        <div id="description-for-_5pz36miac_@cnt" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                    @if (famliyMember.MultipleMedicalSituationTypes != null && famliyMember.MultipleMedicalSituationTypes.Contains("OD"))
+                    {
+                        <div class="form-field form-field--text mt24 _cz4fd7ehb_@cnt" style="">
+                            <label for="form-field-3t2ktdhs599_@cnt" class="form-field__label">
+                                @Translate.Text("cust.other")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text othermedicalsituation" value="@famliyMember.OtherMedicalSituationType" @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled") id="form-field-3t2ktdhs599_@cnt" name="inst_name" type="text" placeholder="@Translate.Text("cust.other")" aria-describedby="description-for-_7fedzmdww_@cnt" data-parsley-errors-container="#description-for-_7fedzmdww_@cnt" data-parsley-required-message="@Translate.Text("cust.required.field")" data-parsley-trigger="focusout">
+                            </span>
+                            <div id="description-for-_7fedzmdww_@cnt" class="form-field__messages">
+                            </div>
+                        </div>
+                    }
+                </div>
+                <fieldset class="fieldset form-field">
+                    <legend class="form-field__label"> @Translate.Text("cust.special.medical.equipment.note") </legend>
+                    @if (Model.EquiExistList != null)
+                    {
+                        foreach (var EquiExistItem in Model.EquiExistList)
+                        {
+                            var chkAttr = famliyMember.MedicalEquipmentType == EquiExistItem.Value ? "checked" : "";
+                            <p class="form-field__radio ">
+                                <label for="form-field-_mw052bszr_@EquiExistItem.Value-@cnt">
+                                    <input class="form-field__input form-field__input--radio medicalEquipment_type"
+                                           id="form-field-_mw052bszr_@EquiExistItem.Value-@cnt"
+                                           name="radios__mw052bszr_@cnt"
+                                           type="radio"
+                                           @chkAttr
+                                           @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                                           value="@EquiExistItem.Value"
+                                           aria-describedby="description-for-_mw052bszr_@cnt"
+                                           data-parsley-errors-container="#description-for-_mw052bszr_@cnt"
+                                           data-parsley-multiple="radios__mw052bszr_@cnt"
+                                           data-parsley-id="35">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @EquiExistItem.Text
+                                    </span>
+                                </label>
+                            </p>
+                        }
+                        <div id="description-for-_mw052bszr_@cnt" class="form-field__messages">
+                        </div>
+                    }
+                </fieldset>
+            </div>
+            <div class="form-field form-field--text">
+                <label for="form-field-_6h5bq6pgi_@cnt" class="form-field__label">
+                    @Translate.Text("cust.pod.number")
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled") pod_num"
+                           id="form-field-_6h5bq6pgi_@cnt"
+                           name="podid_@cnt"
+                           type="number"
+                           value="@famliyMember.PODNumber"
+                           maxlength="15"
+                           @((Model.Success == "0" && famliyMember.Action != "U") ? "" : "disabled")
+                           placeholder="@Translate.Text("cust.enter.pod.number")"
+                           aria-describedby="description-for-_6h5bq6pgi_@cnt"
+                           data-parsley-errors-container="#description-for-_6h5bq6pgi_@cnt"
+                           @((Model.Success == "0" && famliyMember.Action != "U") ? "required=required" : "")
+                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                           data-parsley-trigger="focusout">
+                </span>
+                <div id="description-for-_6h5bq6pgi_@cnt" class="form-field__messages">
+                </div>
+            </div>
+            
+            <div class="form-field form-field--upload">
+                <div class="form-field__input-wrapper">
+                    <div class="form-field__preview-wrapper">
+                        <img src="/images/preview_pdf@2x.png"
+                             data-src="/images/preview_pdf@2x.png"
+                             data-success="../../images/upload_success.png"
+                             class="form-field__preview"
+                             aria-hidden="true"
+                             role="presentation"
+                             alt=""
+                             data-uploader-image="_r8k958hqh_@cnt">
+                    </div>
+                    <div class="form-field__uploader-details">
+                        <label for="form-field-_r8k958hqh_@cnt" class="form-field__label _zv9r4zo8s_@cnt" style="">
+                            @if (famliyMember.PODCategory == "02")
+                            {
+                                @Translate.Text("cust.pod.from.medicalreport")
+                            }
+                            else if (famliyMember.PODCategory == "03")
+                            {
+                                @Translate.Text("cust.prof.seniorcitizen.thukurcard")
+                            }
+                            else
+                            {
+                                @Translate.Text("cust.pod.from.ministry")
+                            }
+                        </label>
+                        <div>
+                            <label>
+                                <input class="form-field__input form-field__input--upload senior_file"
+                                       id="form-field-_r8k958hqh_@cnt"
+                                       name="tlupload_r8k958hqh_@cnt"
+                                       type="file"
+                                       aria-describedby="description-for-_r8k958hqh_@cnt"
+                                       data-parsley-errors-container="#description-for-_r8k958hqh_@cnt"
+                                       data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                       data-uploader-field="_r8k958hqh_@cnt"
+                                       @((Model.Success == "0" && famliyMember.Action != "U") ? "required=required" : "")
+                                       accept="image/*"
+                                       data-accepts="&quot;jpg&quot;, &quot;bmp&quot;,&quot;gif&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;,&quot;doc&quot;,&quot;docx&quot;,&quot;xls&quot;,&quot;csv&quot;, &quot;xlsx&quot;"
+                                       data-size="2048000"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="18">
+                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("cust.choose.text")</span>
+                            </label>
+                        </div>
+                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("cust.file.format.validation")</p>
+                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("cust.filesize.validation")</p>
+                        <p class="form-field__input--upload-filename" data-uploader-filename="_r8k958hqh_@cnt"></p>
+                        <p> <button class="button button--text button--remove hidden" data-uploader-remove="_r8k958hqh_@cnt">@Translate.Text("cust.remove.text")</button> </p>
+                    </div>
+                </div>
+                <div id="description-for-_r8k958hqh_@cnt" class="form-field__messages">
+                    <p class="form-field__description">@Translate.Text("cust.fileupload.note")</p>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    cnt++;
+}

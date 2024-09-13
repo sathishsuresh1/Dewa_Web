@@ -1,0 +1,215 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using System.Linq;
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.DRRG.Models.ReportModel
+@{
+    var jsonDataSeries = string.Empty;
+    var xCategories = string.Empty;
+    var totalSubmitted = Model.Submitted + Model.ReviewerApproved + Model.Approved + Model.Rejected + Model.Updated + Model.SchemeMgrRejected;
+
+}
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j05-drrg-manager" data-journey="j05-drrg-manager">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+        <div class="grid__row mb24">
+            <div class="grid__column grid__column--12">
+                <form id="form-report-filter" action="#" method="POST" class="form j05-drrg-form" data-form="true" novalidate="">
+                    @Html.AntiForgeryToken()
+                    <div class="form-field">
+                        <fieldset class="fieldset">
+                            <legend class="form-field__label">
+                                <span class="aria-only">Radio buttons</span>
+                            </legend>
+                            <p class="form-field__radio form-field__radio--inline form-field__radio--toggle">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio" id="form-field-radio_1_1" name="selectedPeriod" type="radio" value="1" aria-describedby="description-for-dq1c9x7bj" data-parsley-errors-container="#description-for-dq1c9x7bj" @(Model.selectedPeriod == "1" ? "checked" : "") toggle-target="">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        Whole Period
+                                    </span>
+                                </label>
+                            </p>
+                            <p class="form-field__radio form-field__radio--inline form-field__radio--toggle">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio" id="form-field-radio_1_2" name="selectedPeriod" type="radio" value="2" aria-describedby="description-for-dq1c9x7bj" data-parsley-errors-container="#description-for-dq1c9x7bj" @(Model.selectedPeriod == "2" ? "checked" : "") toggle-target="#daterange">
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        Selected Period
+                                    </span>
+                                </label>
+                            </p>
+                            <div id="description-for-dq1c9x7bj" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="form-field" id="daterange">
+                        <div id="datepicker-container-fromDate" class="form-field form-field--text form-field--6">
+                            <label for="form-field-pfbcifr3b" class="form-field__label">
+                                From
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input class="form-field__input form-field__input--text form-field__input--datepicker form-field__input--datepicker-binded" data-el-to="#form-field-toDate" data-el-to_min="0" data-el-to_max="indefinite" id="form-field-fromDate" value="@Model.fromDate" name="fromDate" type="text" placeholder="Start Date" aria-describedby="description-for-fromDate" data-parsley-errors-container="#description-for-fromDate" data-el="datepicker-past" data-picker-options='{}' />
+                            </span>
+                            <div id="description-for-fromDate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div id="datepicker-container-toDate" class="form-field form-field--text form-field--6">
+                            <label for="form-field-toDate" class="form-field__label">
+                                To
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input class="form-field__input form-field__input--text form-field__input--datepicker" id="form-field-toDate" value="@Model.toDate" name="toDate" type="text" placeholder="End Date" aria-describedby="description-for-toDate" data-parsley-errors-container="#description-for-toDate" data-el="datepicker-past" data-picker-options='{}' />
+                            </span>
+                            <div id="description-for-toDate" class="form-field__messages">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="grid__row mb24">
+            <div class="grid__column grid__column--12">
+                <div class="j05-drrg-graph--row">
+                    <div class="j05-drrg-graph--card @((totalSubmitted==0) ? "nodata" :"")">
+                        <div class="j05-drrg-graph--title">
+                            Key Performance Indicators
+                        </div>
+                        <div class="j05-drrg-graph" data-series='[{"name":"Key Performance Indicators","color":"#007560","data":[{"name":"Submitted","y":@totalSubmitted,"color":"#007560"},{"name":"Processed","y":@(Model.Approved+Model.Rejected),"color":"#007560"},{"name":"Pending","y":@(Model.Submitted + Model.ReviewerApproved + Model.Updated + Model.SchemeMgrRejected),"color":"#007560"}]}]' data-graph-type='column' data-x-axis-categories="Submitted, Processed, Pending" yaxistitletext="Applications">
+                        </div>
+                        <div class="j05-drrg-graph-nodatatitle">
+                            No data available
+                        </div>
+                    </div>
+                    <div class="j05-drrg-graph--card @((Model.Rejected==0 && Model.Approved == 0 ) ? "nodata" :"")">
+                        <div class="j05-drrg-graph--title">
+                            Processed Applications
+                        </div>
+                        <div class="j05-drrg-graph" data-series='[{"name":"Processed Applications","data":[{"name":"Approved Applications </br> Eligible products","y":@Model.Approved,"color":"#007560"},{"name":"Rejected Applications </br> Ineligible Products","y":@Model.Rejected,"color":"#D52B2E"}]}]' data-graph-type='pie' data-x-axis-categories="Rejected,Approved" yaxistitletext="Applications">
+                        </div>
+                        <div class="j05-drrg-graph-nodatatitle">
+                            No data available
+                        </div>
+                    </div>
+
+                    <div class="j05-drrg-graph--card @((Model.PVModuleApproved==0 && Model.IVModuleApproved == 0 && Model.PVModuleRejected == 0) ? "nodata" :"")">
+                        <div class="j05-drrg-graph--title">
+                            PV Equipment
+                        </div>
+                        <div class="j05-drrg-graph" data-series='[{"name":"Eligible Applications","color":"#007560","data":[{"name":"Eligible Applications","y":@Model.PVModuleApproved,"color":"#007560"},{"name":"Eligible Applications","y":@Model.IVModuleApproved,"color":"#007560"},{"name":"Eligible Applications","y":@Model.IPModuleApproved,"color":"#007560"}]},{"name":"Ineligible Applications","color":"#D52B2E","data":[{"name":"Ineligible Applications","y":@Model.PVModuleRejected,"color":"#D52B2E"},{"name":"Ineligible Applications","y":@Model.IVModuleRejected,"color":"#D52B2E"},{"name":"Ineligible Applications","y":@Model.IPModuleRejected,"color":"#D52B2E"}]}]' data-graph-type='column' data-x-axis-categories="PV Modules, PV Inverters, Interface Protection" yaxistitletext="Applications">
+                        </div>
+                        <div class="j05-drrg-graph-nodatatitle">
+                            No data available
+                        </div>
+                    </div>
+                </div>
+                <div class="j05-drrg-graph--row">
+                    @*<div class="j05-drrg-graph--card @((Model.processedApplicationsMonYear == null || (Model.processedApplicationsMonYear != null && Model.processedApplicationsMonYear.Count==0)) ? "nodata":"")">
+                            <div class="j05-drrg-graph--title">
+                                Approved Applications
+                            </div>
+                            @if (Model.processedApplicationsMonYear != null)
+                            {
+                                foreach (var item in Model.processedApplicationsMonYear)
+                                {
+                                    jsonDataSeries += "{\"name\":\"" + item.MonYear + "\",\"y\":" + item.Applications.ToString() + ",\"color\":\"#007560\"}" + ",";
+                                    xCategories += item.MonYear + ",";
+                                }
+                                if (!string.IsNullOrWhiteSpace(jsonDataSeries) && !string.IsNullOrWhiteSpace(xCategories))
+                                {
+                                    <div class="j05-drrg-graph" data-series='[{"name":"Approved Applications","color":"#007560","data":[@jsonDataSeries.TrimEnd(',')]}]' data-graph-type='bar' data-x-axis-categories="@xCategories.TrimEnd(',')" yaxistitletext="Applications">
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="j05-drrg-graph-nodatatitle">
+                                        No data available
+                                    </div>
+                                }
+                            }
+                        </div>*@
+                    <div class="j05-drrg-graph--card @((Model.processedEquipmentManufacturer == null || (Model.processedEquipmentManufacturer != null && Model.processedEquipmentManufacturer.Count==0)) ? "nodata":"")">
+                        <div class="j05-drrg-graph--title">
+                            Equipments Manufacturers
+                        </div>
+                        @if (Model.processedEquipmentManufacturer != null)
+                        {
+                            foreach (var item in Model.processedEquipmentManufacturer)
+                            {
+                                jsonDataSeries += "{\"name\":\"" + item.ApplicationName + "\",\"y\":" + item.Applications.ToString() + ",\"color\":\"#007560\"}" + ",";
+                                xCategories += item.ApplicationName + ",";
+                            }
+                            if (!string.IsNullOrWhiteSpace(jsonDataSeries) && !string.IsNullOrWhiteSpace(xCategories))
+                            {
+                                <div class="j05-drrg-graph" data-series='[{"name":"Approved Applications","color":"#007560","data":[@jsonDataSeries.TrimEnd(',')]}]' data-graph-type='bar' data-x-axis-categories="@xCategories.TrimEnd(',')" yaxistitletext="Applications">
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="j05-drrg-graph-nodatatitle">
+                                    No data available
+                                </div>
+                            }
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--centered">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Dashboard)" class="button button--outline button--back backbutton" role="button">@Translate.Text("Back to Home page")</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+        AddForgeryToken = function (data, formid) {
+            data.__RequestVerificationToken = $('#' + formid + ' input[name=__RequestVerificationToken]').val();
+            return data;
+        };
+        jQuery('#form-field-fromDate').change(function () {
+            if (jQuery(this).val() != '' && jQuery('#form-field-toDate').val() != '') {
+                jQuery('.m66-preloader').show();
+                jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+                jQuery('#form-report-filter').submit();
+            }
+
+        });
+        jQuery('#form-field-toDate').change(function () {
+            if (jQuery(this).val() != '' && jQuery('#form-field-fromDate').val() != '') {
+                jQuery('.m66-preloader').show();
+                jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+                jQuery('#form-report-filter').submit();
+            }
+        });
+        //form-field-radio_1_2
+        jQuery('#form-field-radio_1_1').change(function () {
+            jQuery('.m66-preloader').show();
+            jQuery('.m66-preloader').css('top', $(window).scrollTop());
+            $('body').removeClass('unscrollable').addClass('unscrollable');
+            jQuery('#form-field-toDate').val('');
+            jQuery('#form-field-fromDate').val('');
+            jQuery('#form-report-filter').submit();
+        });
+
+    });
+</script>

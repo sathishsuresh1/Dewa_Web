@@ -1,0 +1,112 @@
+﻿@using DEWAXP.Feature.Account.Models.CustomerRegistration
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@model VerifyModel
+
+<div class="grid">
+    @Html.Sitecore().Placeholder("j9/m26-page-title")
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+            @Html.Sitecore().Placeholder("j9/m38-step-tracker")
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+            @if (Model.SelectedMethod == VerificationMethods.Email)
+            {
+                <p class="text__content-copy--small-grey">@Translate.Text("sent verification code email text")</p>
+            }
+            else if (Model.SelectedMethod == VerificationMethods.Mobile)
+            {
+                <p class="text__content-copy--small-grey">@Translate.Text("sent verification code mobile text")</p>
+            }
+            <div class="text__content-copy--small-grey">@Html.Sitecore().Placeholder("j9/amend details text")</div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            @if (Model.maxAttempt != "X")
+            {
+                using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    <fieldset class="fieldset ">
+                        <legend class="legend-color">.</legend>
+                        @if (Model.SelectedMethod == VerificationMethods.Email)
+                        {
+                            <div class="form-field form-field--text">
+                                <label for="Email" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("email address label")
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                    @Html.TextBoxFor(m => m.Email, new
+                                    {
+                                        @class = "form-field__input form-field__input--readonly",
+                                        type = "text",
+                                        @readonly = "readonly",
+                                        @aria_readonly = "true"
+                                    })
+                                </div>
+                            </div>
+                        }
+                        @if (Model.SelectedMethod == VerificationMethods.Mobile)
+                        {
+                            <div class="form-field form-field--text">
+                                <label for="Mobile" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text(DictionaryKeys.Registration.MobileNumberLabel)
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                    @Html.TextBoxFor(m => m.Mobile, new
+                                    {
+                                        @class = "form-field__input form-field__input--readonly keep-ltr",
+                                        @type = "text",
+                                        @readonly = "readonly",
+                                        @aria_readonly = "true"
+                                    })
+                                </div>
+                            </div>
+                        }
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-enter_verification_code" class="form-field__label">
+                                @Translate.Text("verification code label")
+                                <span class="form-field__label-required aria-only">@Translate.Text("generic required label")</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input type="number" lang="en"
+                                       id="form-field-enter_verification_code"
+                                       name="VerificationCode"
+                                       class="form-field__input form-field__input--text"
+                                       placeholder="@Translate.Text("verification code placeholder text")"
+                                       required="required"
+                                       @*aria-required="true"*@
+                                       aria-describedby="description-for-enter_verification_code"
+                                       data-parsley-verification_code=""
+                                       data-parsley-error-message="@Translate.Text(DictionaryKeys.Registration.VerificationCodeNotEntered)"
+                                       data-parsley-errors-container="#description-for-enter_verification_code" />
+                            </span>
+                            <div id="description-for-enter_verification_code" class="form-field__messages">
+                                <p class="form-field__description">
+                                    @Translate.Text("verification code not received text")<br /><a class="link" href="@Url.Action("ResendVerification", "CustomerRegistration")">@Translate.Text("verification code resend text")</a>
+                                </p>
+                                @Html.ValidationMessageFor(x => x.VerificationCode, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-field__button">
+                        <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    </div>
+                }
+
+            }
+        </div>
+    </div>
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

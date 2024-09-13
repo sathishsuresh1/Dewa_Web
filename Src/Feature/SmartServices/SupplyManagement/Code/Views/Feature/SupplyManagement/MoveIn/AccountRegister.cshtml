@@ -1,0 +1,1445 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Content.Models.SupplyManagement.Movein
+@model MoveInViewModelv3
+@{
+    var owner = Model.AccountType == "O" ? "" : "hidden";
+    var tenant = Model.AccountType == "T" ? "" : "hidden";
+    var ejari = Model.isEjari == true ? "" : "hidden";
+    var noejari = Model.isEjari == false ? "" : "hidden";
+    var noofrooms = Model.isEjari == true ? "hidden" : "";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j103-move-in">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Sitecore().Placeholder("step-tracker")
+            </div>
+        </div>
+        <div class="grid__row mb0">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            <div class="m41-tabs-box" data-component="m41-tabs-box">
+                <div class="m41-tabs-box__tabs m41-tabs-box--desktop">
+                    <ul class="m41-tabs-box__tab-items">
+                        <li class="m41-tabs-box__tab-item">
+                            <a id="P"
+                               data-value="P"
+                               class="m41-tabs-box__tab-link tabone">
+                                @Translate.Text("movein.accountregister.tabresheader")
+                            </a>
+                        </li>
+                        <li class="m41-tabs-box__tab-item">
+                            <a id="O"
+                               data-value="O"
+                               class="m41-tabs-box__tab-link tabtwo">
+                                @Translate.Text("movein.accountregister.tabnonresheader")
+                            </a>
+                        </li>
+                        <li class="m41-tabs-box__tab-item">
+                            <a id="G"
+                               data-value="G"
+                               class="m41-tabs-box__tab-link tabthree">
+                                @Translate.Text("movein.accountregister.tabgovheader")
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+
+                <div class="journey-intro">
+                    <p class="journey-intro__text">
+                        @Translate.Text("movein.resheader1")
+
+                    </p>
+                </div>
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", data_form = "true", @id = "moveinaccountregister", @data_submit_validate = "enabled", @name = "moveinaccountregister", @novalidate = "novalidate" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+
+                    @Html.HiddenFor(x => x.CustomerCategory, new { Value = "P" })
+                    @Html.HiddenFor(m => m.strPremiseNumberdetails, new { id = "strPremiseNumberdetails", @value = "" })
+                    if (Model.loggedinuser)
+                    {
+
+                        <div class="form-field form-field--select form-field--select-single hidden" id="Pbusinesspartner">
+                            <label for="form-field-pbusinesspartner" class="form-field__label">
+                                @Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Account.BusinessPartnerLabel)
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                                @Html.DropDownListFor(x => x.PBusinessPartner,
+             (IEnumerable<SelectListItem>
+                 )Model.PBusinessPartners,
+                 Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SelectFromDropDown),
+                 new
+                 {
+                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                     @id = "form-field-pbusinesspartner",
+                     aria_describedby = "description-for-pbusinesspartner",
+                     @required = "",
+                     data_parsley_error_message = @Translate.Text("movein.accountregister.resbusinesserrormessage"),
+                     data_parsley_errors_container = "#description-for-pbusinesspartner",
+                     data_parsley_id = "8"
+                 })
+                            </span>
+
+                            <div id="description-for-pbusinesspartner" class="form-field__messages"></div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single hidden" id="Obusinesspartner">
+                            <label for="form-field-obusinesspartner" class="form-field__label">
+                                @Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Account.BusinessPartnerLabel)
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                                @Html.DropDownListFor(x => x.OBusinessPartner,
+             (IEnumerable<SelectListItem>
+                 )Model.OBusinessPartners,
+                 Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SelectFromDropDown),
+                 new
+                 {
+                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                     @id = "form-field-obusinesspartner",
+                     aria_describedby = "description-for-obusinesspartner",
+                     @required = "",
+                     data_parsley_error_message = @Translate.Text("movein.accountregister.resbusinesserrormessage"),
+                     data_parsley_errors_container = "#description-for-obusinesspartner",
+                     data_parsley_id = "8"
+                 })
+                            </span>
+
+                            <div id="description-for-obusinesspartner" class="form-field__messages"></div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single hidden" id="Gbusinesspartner">
+                            <label for="form-field-gbusinesspartner" class="form-field__label">
+                                @Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Account.BusinessPartnerLabel)
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                                @Html.DropDownListFor(x => x.GBusinessPartner,
+             (IEnumerable<SelectListItem>
+                 )Model.GBusinessPartners,
+                 Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SelectFromDropDown),
+                 new
+                 {
+                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                     @id = "form-field-gbusinesspartner",
+                     aria_describedby = "description-for-gbusinesspartner",
+                     @required = "",
+                     data_parsley_error_message = @Translate.Text("movein.accountregister.resbusinesserrormessage"),
+                     data_parsley_errors_container = "#description-for-gbusinesspartner",
+                     data_parsley_id = "8"
+                 })
+                            </span>
+
+                            <div id="description-for-gbusinesspartner" class="form-field__messages"></div>
+                        </div>
+
+                    }
+                    <div class="form-field form-field--select form-field--select-single" id="customerType">
+                        <label for="form-field-custtype" class="form-field__label">
+                            @Translate.Text("movein.accountregister.customertype")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.CustomerType, (IEnumerable<SelectListItem>)Model.CustomerTypeList, Translate.Text("Select from dropdown"),
+                                 new
+                                 {
+                                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                     @id = "form-field-custtype",
+                                     @name = "customer_type",
+                                     @aria_describedby = "description-for-custtype",
+                                     @required = "",
+                                     @data_parsley_error_message = @Translate.Text("movein.accountregister.rescustomertypeerrormessage"),
+                                     @data_parsley_errors_container = "#description-for-custtype",
+                                     @data_parsley_id = "111"
+                                 })
+                        </span>
+                        <div id="description-for-custtype" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.CustomerType, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-acctype" class="form-field__label">
+                            @Translate.Text("movein.accountregister.AccountType")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.AccountType, (IEnumerable<SelectListItem>)Model.AccountTypeList, Translate.Text("Select from dropdown"),
+                                 new
+                                 {
+                                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                     @id = "form-field-acctype",
+                                     @required = "",
+                                     @aria_describedby = "description-for-acctype",
+                                     @data_parsley_error_message = @Translate.Text("movein.accountregister.resacctypeerrormessage"),
+                                     @data_parsley_errors_container = "#description-for-acctype",
+                                     @data_parsley_id = "111"
+                                 })
+                        </span>
+                        <div id="description-for-acctype" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.AccountType, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div class="form-field @owner" id="ownerfields">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <p class="form-field__radio grid__column--6 grid__column ">
+                                <label for="occupiedbyowner">
+                                    @Html.RadioButtonFor(x => x.occupiedbyowner, true, new { @class = "form-field__input form-field__input--radio", id = "occupiedbyowner" })
+
+                                    <span class="form-field__fakeradio focus-enabled">@Translate.Text("movein.accountregister.OccupiedbyOwner")</span><br />
+                                    <span class="form-field__description align-radio-desc--6">@Translate.Text("movein.accountregister.OccupiedbyOwnerInfo")</span>
+                                </label>
+
+                            </p>
+                            <p class="form-field__radio grid__column--6 grid__column ">
+                                <label for="occupiedbytenant">
+                                    @Html.RadioButtonFor(x => x.occupiedbyowner, false, new { @class = "form-field__input form-field__input--radio", id = "occupiedbytenant" })
+
+                                    <span class="form-field__fakeradio focus-enabled">@Translate.Text("movein.accountregister.Occupiedbytenant")</span><br />
+                                    <span class="form-field__description align-radio-desc--6">@Translate.Text("movein.accountregister.OccupiedbytenantInfo")</span>
+                                </label>
+                            </p>
+                            <div id="description-for-p0vepmw6m" class="form-field__messages"></div>
+                            @*<p class="mt12">@Translate.Text("movein.disclaimer")</p>*@
+
+                            <div class="form-field form-field--select form-field--select-single clear_both pt24" id="Propertyid">
+                                <label for="form-field-ownertype" class="form-field__label">
+                                    @Translate.Text("movein.accountregister.Propertyid")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.Propertyid, Model.OwnerTypeList, Translate.Text("Select from dropdown"),
+                                 new
+                                 {
+                                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                     @id = "form-field-ownertype",
+                                     @name = "customer_type",
+                                     @required = "",
+                                     @aria_describedby = "description-for-ownertype",
+                                     @data_parsley_error_message = @Translate.Text("movein.accountregister.resownertypeerrormessage"),
+                                     @data_parsley_errors_container = "#description-for-ownertype",
+                                     @data_parsley_id = "111"
+                                 })
+                                </span>
+                                <div id="description-for-ownertype" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Propertyid, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text mt12" id="puschase_titledeed">
+                                <label for="form-field-puschase_titledeed" id="puschase_titledeedlbl" class="form-field__label">
+                                    @Translate.Text("movein.accountregister.puschase_titledeed_lable")
+                                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           id="form-field-puschase_titledeed"
+                                           name="Purchase_TitleDeed"
+                                           required
+                                           placeholder="@Translate.Text("movein.accountregister.puschase_titledeed_placeholder")"
+                                           data-parsley-error-message="@Translate.Text("movein.accountregister.puschase_titledeed_error")"
+                                           aria-describedby="description-for-puschase_titledeed"
+                                           data-parsley-errors-container="#description-for-puschase_titledeed"
+                                           value="@Model.Purchase_TitleDeed" />
+                                </span>
+                                <div id="description-for-puschase_titledeed" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Purchase_TitleDeed, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                    <div class="form-field @tenant" id="tenantfields">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <p class="form-field__radio grid__column--6 grid__column ">
+                                <label for="Ejari">
+                                    @Html.RadioButtonFor(x => x.isEjari, true, new { @class = "form-field__input form-field__input--radio", id = "Ejari", @aria_label = "Ejari" })
+
+                                    <span class="form-field__fakeradio focus-enabled">@Translate.Text("movein.accountregister.IhaveEjariNumber")</span><br />
+                                    <span class="form-field__description align-radio-desc--6">@Translate.Text("movein.accountregister.IhaveEjariNumberInfo")</span>
+                                </label>
+                            </p>
+                            <p class="form-field__radio grid__column--6 grid__column ">
+                                <label for="noEjari">
+                                    @Html.RadioButtonFor(x => x.isEjari, false, new { @class = "form-field__input form-field__input--radio", id = "noEjari", @aria_label = "noEjari" })
+
+                                    <span class="form-field__fakeradio focus-enabled">@Translate.Text("movein.accountregister.IdonthaveEjariNumber")</span><br />
+                                    <span class="form-field__description align-radio-desc--6">@Translate.Text("movein.accountregister.IdonthaveEjariNumberInfo")</span>
+                                </label>
+                            </p>
+
+                            <div id="description-for-disclaimerEjari" class="form-field__messages clearfix"></div>
+                            <p class="mt12">
+                                @Translate.Text("movein.accountregister.disclaimerEjari")
+                            </p>
+
+                        </fieldset>
+
+                        <fieldset class="fieldset mt12 @ejari" id="tenantfields-ejari">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-Ejari" id="Ejari_label" class="form-field__label">
+                                    @Translate.Text("movein.accountregister.resejarinumber")
+                                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           id="form-field-Ejari"
+                                           name="Ejari"
+                                           placeholder="@Translate.Text("movein.accountregister.nonresejarinumberplaceholder")"
+                                           aria-describedby="description-for-Ejari"
+                                           data-parsley-errors-container="#description-for-Ejari"
+                                           data-parsley-error-message="@Translate.Text("movein.accountregister.ejarinumber_error")"
+                                           required
+                                           data-parsley-type="digits"
+                                           value="@Model.Ejari" />
+                                </span>
+                                <div id="description-for-Ejari" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Ejari, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset mt12 @noejari" id="tenantfields-noejari">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-Tenancy_Contract_Number" id="Tenancy_Contract_Number_label" class="form-field__label">
+                                    @Translate.Text("movein.accountregister.tenancy_contract_number")
+                                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           id="form-field-Tenancy_Contract_Number"
+                                           name="Tenancy_Contract_Number"
+                                           required
+                                           placeholder="@Translate.Text("movein.accountregister.tenancy_contract_numberplaceholder")"
+                                           aria-describedby="description-for-Tenancy_Contract_Number"
+                                           data-parsley-error-message="@Translate.Text("movein.accountregister.tenancy_contract_numbererror")"
+                                           data-parsley-type="alphanum"
+                                           data-parsley-errors-container="#description-for-Tenancy_Contract_Number"
+                                           value="@Model.Tenancy_Contract_Number" />
+                                </span>
+                                <div id="description-for-Tenancy_Contract_Number" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Tenancy_Contract_Number, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+
+                            <div id="datepicker-container-start-date" class="form-field form-field--text ">
+                                <label for="form-field-start-date" class="form-field__label">
+                                    @Translate.Text("Contract start date")
+                                    @if (Model.CustomerType == "O")
+                                    {
+                                        <span class="form-field__label-optional">(@Translate.Text("optional")) </span>
+                                    }
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    @Html.TextBoxFor(x => x.strContractStartDate,
+                         new
+                         {
+                             @class = "form-field__input form-field__input--text form-field__input--datepicker",
+                             @id = "form-field-start-date",
+                             @name = "text-date",
+                             @placeholder = @Translate.Text("Select date"),
+                             @type = "text",
+                             @data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidContractStartDate),
+                             @data_parsley_errors_container = "#description-for-start-date",
+                             @aria_describedby = "description-for-start-date",
+                             @data_el = "datepicker",
+                             @data_parsley_id = "8",
+                             @readonly = "",
+                             @required = "required",
+                             @aria_haspopup = "true",
+                             @aria_expanded = "false",
+                             //@aria_readonly = "false",
+                             @data_ref = "start_date",
+                             @data_picker_options = "{\"selectYears\": true}",
+                             @data_initial_date = Model.ContractStartDate.HasValue ? Model.ContractStartDate.Value.ToString("MMMM dd, yyyy") : string.Empty
+                         })
+                                </span>
+                                <div id="description-for-start-date" class="form-field__messages"></div>
+                            </div>
+                            <div id="datepicker-container-end-date" class="form-field form-field--text ">
+                                <label for="form-field-end-date" class="form-field__label">
+                                    @Translate.Text("Contract end date")
+                                    @if (Model.CustomerType == "O")
+                                    {
+                                        <span class="form-field__label-optional">(@Translate.Text("optional")) </span>
+                                    }
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    @Html.TextBoxFor(x => x.strContractEndDate,
+                         new
+                         {
+                             @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                             @id = "form-field-end-date",
+                             @name = "text-end-date",
+                             @placeholder = @Translate.Text("Select date"),
+                             @data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidContractEndDate),
+                             @data_parsley_errors_container = "#description-for-end-date",
+                             @aria_describedby = "description-for-end-date",
+                             @data_el = "datepicker",
+                             @data_parsley_id = "10",
+                             @readonly = "",
+                             @required = "required",
+                             @aria_haspopup = "true",
+                             @aria_expanded = "false",
+                             //@aria_readonly = "false",
+                             @aria_owns = "form-field-end-date_root",
+                             @data_mindate = "start_date",
+                             @data_mindate_offset = "30",
+                             @type = "text",
+                             @data_picker_options = "{\"selectYears\": true}",
+                             @data_initial_date = Model.ContractEndDate.HasValue ? Model.ContractEndDate.Value.ToString("MMMM dd, yyyy") : string.Empty
+                         })
+                                </span>
+                                <div id="description-for-end-date" class="form-field__messages"></div>
+                            </div>
+
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-contract-value" class="form-field__label">
+                                    @Translate.Text("Contract value")
+                                    @if (Model.CustomerType == "O")
+                                    {
+                                        <span class="form-field__label-optional">(@Translate.Text("optional")) </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                    }
+
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    @Html.TextBoxFor(x => x.ContractValue,
+                        RouteValueDictionaryExtensions.CustomerTypeIndicatesRequired(Model.CustomerType, new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                            @id = "form-field-contract-value",
+                            @placeholder = Translate.Text("Enter contract value"),
+                            @data_input_truncate = "16",
+                            @data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidContractValue),
+                            @data_parsley_errors_container = "#description-for-contract-value",
+                            @aria_describedby = "description-for-contract-value",
+                            @data_parsley_contract_value = "",
+                            @data_parsley_id = "14",
+                            @step = "any"
+                        }))
+                                </span>
+                                <div id="description-for-contract-value" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.ContractValue, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single @noofrooms" id="noofroomsdiv">
+                        <label for="form-field-numberofrooms" class="form-field__label">@Translate.Text("movein.RoomNo")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.NumberOfRooms, (IEnumerable<SelectListItem>)Model.NumberOfRoomsList,
+                            Translate.Text("Select from dropdown"),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-numberofrooms",
+                                @name = "select_optgropus",
+                                @aria_describedby = "description-for-numberofrooms",
+                                @data_parsley_error_message = @Translate.Text("movein.invalidnumberofrooms"),
+                                @data_parsley_errors_container = "#description-for-numberofrooms",
+                                @data_parsley_id = "12"
+                            })
+                        </span>
+                        <div id="description-for-numberofrooms" class="form-field__messages"></div>
+                    </div>
+                    <div class="form-field form-field--text">
+                        <label for="form-field-premiseNo" class="form-field__label">
+                            @Translate.Text("movein.accountregister.respremiselabel")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed">
+                            @if (Model.PremiseNumberdetails != null)
+                            {
+                                <input class="form-field__input form-field__input--text form-field__input--prefixed "
+                                       id="form-field-premiseNo"
+                                       type="text"
+                                       name="PremiseNo"
+                                       placeholder='@Translate.Text("movein.accountregister.respremiseplaceholder")'
+                                       aria-describedby="description-for-premiseNo"
+                                       data-parsley-errors-container="#description-for-premiseNo"
+                                       data-parsley-premise_number=""
+                                       data-parsley-required-message='@Translate.Text("movein.accountregister.respremiserequiredmessage")'
+                                       data-parsley-error-message='@Translate.Text("movein.accountregister.respremiserequiredmessage")'
+                                       value="@Model.PremiseNo" />
+                            }
+                            else
+                            {
+                                <input class="form-field__input form-field__input--text form-field__input--prefixed "
+                                       id="form-field-premiseNo"
+                                       type="text"
+                                       name="PremiseNo"
+                                       placeholder='@Translate.Text("movein.accountregister.respremiseplaceholder")'
+                                       aria-describedby="description-for-premiseNo"
+                                       data-parsley-errors-container="#description-for-premiseNo"
+                                       data-parsley-premise_number=""
+                                       required
+                                       data-parsley-required-message='@Translate.Text("movein.accountregister.respremiserequiredmessage")'
+                                       data-parsley-error-message='@Translate.Text("movein.accountregister.respremiserequiredmessage")'
+                                       value="@Model.PremiseNo" />
+                            }
+                            <div class="form-field__messages">
+                                <p class="form-field__description" id="premisedescription"></p>
+                            </div>
+                            <div id="moveinrestable" style="display:none;">
+                                <table class="m23-table__content-table prlist hidden">
+                                    <thead class="m23-table__content-table-header">
+                                        <tr class="m23-table__content-table-row">
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("movein.accountregister.restablepremisenumber")</th>
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("movein.accountregister.restablepremisedetails")</th>
+                                            <th class="m23-table__content-table-cell--header"><span class="aria-only">hide</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="m23-table__content-table-body prelistbody">
+                                        @if (Model.PremiseNumberdetails != null)
+                                        {
+                                            int i = 1;
+                                            foreach (AddedPremiseDetails details in Model.PremiseNumberdetails)
+                                            {
+                                                <tr class="m23-table__content-table-row" style="display:table-row;">
+                                                    <td data-label="Premise No" data-premise-value="@details.premisenumber" class="m23-table__content-table-cell pre-list">
+                                                        @details.premisenumber
+                                                        <input type="hidden" data-count="@i" name="PremiseAccount[@i]" value="@details.premisenumber">
+                                                    </td>
+                                                    <td data-label="Details" class="m23-table__content-table-cell pre-list-address" id="@details.premisenumber-premiseaddress" data-value="392926491">@(HttpUtility.HtmlDecode(details.premisebuildingname))</td>
+                                                    <td style="color:#ff0000;cursor:pointer;" class="m23-table__content-table-cell delete-pre">
+                                                        <i class="icon icon-cancel"></i>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+
+
+
+                                </table>
+                            </div>
+                            <span class="add-button">@Translate.Text("movein.accountregister.restablesymbol")</span>
+                        </span>
+
+                        <div id="description-for-premiseNo" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.PremiseNo, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div id="move-in-register-error" class="form-field__messages" style="color:#ff0000;cursor:pointer;">
+                    </div>
+                    <div class="form-field__checkbox hidden divD33">
+                        <label>
+                            <input class="form-field__input form-field__input--checkbox" id="checkbox_D33" type="checkbox" aria-describedby="description-for-D33" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                            <span class="form-field__fakecheckbox">@Translate.Text("D33_Label")</span>
+                        </label>
+                        <div class="divcon"></div>
+                    </div>
+                    <div class="form-field__button">
+                        <button type="submit" id="moveinnext" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("movein.accountregister.nextbutton")</button>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+
+    $(function () {
+        var $puschase_titledeed = jQuery("#puschase_titledeed");
+        var $Propertyid = jQuery("#Propertyid");
+        var customerType = jQuery("#customerType");
+        var CustomerCategory = jQuery("#CustomerCategory");
+        var ejarinumber = jQuery("#form-field-Ejari");
+        var $addedpremisenumberdetails = jQuery('#strPremiseNumberdetails');
+        var contractnumber = jQuery("#form-field-Tenancy_Contract_Number");
+        var startdate = jQuery("#form-field-start-date");
+        var enddate = jQuery("#form-field-end-date");
+        var contractvalue = jQuery("#form-field-contract-value");
+        var numberofrooms = jQuery("#form-field-numberofrooms");
+        if ("@Model.CustomerCategory" != "") {
+            CustomerCategory.val("@Model.CustomerCategory");
+            jQuery("#@Model.CustomerCategory").addClass("m41-tabs-box__tab-link--active");
+            if ("@Model.CustomerCategory" == "P") {
+                jQuery("#Pbusinesspartner").show();
+                jQuery("#Obusinesspartner").hide();
+                jQuery("#Gbusinesspartner").hide();
+            }
+            else if ("@Model.CustomerCategory" == "O") {
+                jQuery("#Pbusinesspartner").hide();
+                jQuery("#Obusinesspartner").show();
+                jQuery("#Gbusinesspartner").hide();
+            }
+            else if ("@Model.CustomerCategory" == "G") {
+                jQuery("#Pbusinesspartner").hide();
+                jQuery("#Obusinesspartner").hide();
+                jQuery("#Gbusinesspartner").show();
+            }
+
+        } else {
+            CustomerCategory.val("P");
+            jQuery("#Pbusinesspartner").show();
+            jQuery("#Obusinesspartner").hide();
+            jQuery("#Gbusinesspartner").hide();
+            jQuery("#P").addClass("m41-tabs-box__tab-link--active");
+        }
+        var premisenofield = jQuery('#form-field-premiseNo');
+        premisenofield.on('focusout', function () {
+            var loggedinbp = true;
+            $('#premisedescription').html('');
+            var premiselist = getpremise();
+            if (premisenofield.val() != "") {
+                if ("@Model.loggedinuser" == "True") {
+                    loggedinbp = false;
+                    if (CustomerCategory.val() == "P" && $("#form-field-pbusinesspartner option:selected").val() != '') {
+                        loggedinbp = true;
+                    }
+                    else if (CustomerCategory.val() == "O" && $("#form-field-obusinesspartner option:selected").val() != '') {
+                        loggedinbp = true;
+                    }
+                    else if (CustomerCategory.val() == "G" && $("#form-field-gbusinesspartner option:selected").val() != '') {
+                        loggedinbp = true;
+                    }
+                }
+                if (loggedinbp) {
+                    if ((CustomerCategory.val() != '') && ($("#form-field-acctype option:selected").val() != '') && ((CustomerCategory.val() == "P" && $("#form-field-custtype option:selected").val() != '') || CustomerCategory.val() != "P")) {
+                        var duplicate = false;
+                        jQuery('#description-for-premiseNo').children().remove();
+                        value = premisenofield.val();
+                        if (jQuery.inArray(value, premiselist) != -1) {
+                            jQuery('#description-for-premiseNo').append('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("movein.accountregister.resduplicatepremiseerrormessage")</li></ul>')
+                            duplicate = true;
+                        }
+                        if (!duplicate) {
+                            //premisenofield.attr("data-parsley-premise_number", "");
+                            premisenofield.attr("required", "");
+                            if ((CustomerCategory.val() != '') && ($("#form-field-acctype option:selected").val() != '') && ((CustomerCategory.val() == "P" && $("#form-field-custtype option:selected").val() != '') || CustomerCategory.val() != "P")) {
+                                premisenofield.parsley().validate();
+                                if (premisenofield.parsley().isValid()) {
+                                    //var firstselection = [];
+                                   // firstselection.push(premisenofield.val());
+                                    getPremiseHoverDetails(getpremiselist());
+                                }
+                            }
+                            else {
+                                jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("Please Select Customer Type/Type")</li></ul>')
+                            }
+                        }
+
+                    } else {
+                        jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("Please Select Customer Type/Type")</li></ul>')
+                    }
+                }
+                else {
+                    jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("movein.accountregister.resbusinesserrormessage")</li></ul>')
+                }
+            }
+            else {
+                if (premiselist.length > 0) {
+                    //premisenofield.removeAttr("data-parsley-premise_number", "");
+                    premisenofield.removeAttr("required", "");
+                }
+            }
+        });
+        premisenofield.on("keyup", function (e) {
+            if ((e.keyCode == 8 || e.keyCode == 46)) {
+                jQuery('#description-for-premiseNo').children().remove();
+                if (premisenofield.val() != "") {
+                    //premisenofield.attr("data-parsley-premise_number", "");
+                    premisenofield.attr("required", "");
+                }
+                else {
+                    var premiselist = getpremise();
+                    if (premiselist.length > 0) {
+                        //premisenofield.removeAttr("data-parsley-premise_number", "");
+                        premisenofield.removeAttr("required", "");
+                    }
+                }
+            }
+        });
+
+        $("#checkbox_D33").change(function () {
+            if (this.checked) {
+                var _dynamicField = '<input id="businessNGovt" name = "CustomerTypeForNonIndividual" style="display:none" type="text" value="D" />';
+                $('.divcon').append(_dynamicField);
+
+            }
+            else {
+				 $('.divcon').html('');
+            }
+        });
+
+        switchtab();
+
+        var custTypeNonIndi = '@Model.CustomerTypeForNonIndividual';
+
+        if (custTypeNonIndi == 'D') {
+
+            $("#checkbox_D33").prop('checked', true);
+            var _dynamicField = '<input id="businessNGovt" name = "CustomerTypeForNonIndividual" style="display:none" type="text" value="D" />';
+            $('.divcon').append(_dynamicField);
+
+        }
+
+
+        var formvalue = true;
+        var $content = jQuery('#load_img');
+        var $customerType = jQuery('#form-field-custtype');
+        var $submitBtn = jQuery('#subBtn');
+        var $tabs = jQuery(".m41-tabs-box__tab-item");
+        var deleteflag = false;
+        var value = "";
+        var premiseaccounts = '@string.Join(",", Model.PremiseAccount!=null? Model.PremiseAccount : new string[0])';
+        if (premiseaccounts != '') {
+            // premisenofield.attr("data-parsley-premise_number", "");
+            //premisenofield.attr("required", "");
+            getpremise();
+            deletepremiseno();
+        }
+
+        $tabs.on('click', function () {
+            $tabs.find("a").removeClass('m41-tabs-box__tab-link--active');
+            $(this).find("a").addClass('m41-tabs-box__tab-link--active');
+            CustomerCategory.val($(this).find("a").data("value"));
+            switchtab();
+        });
+
+        $('.add-button1').on('click', function () {
+
+            if (formvalue) {
+                value = $('#form-field-premiseNo').val().trim();
+            }
+            var loggedinbp = true;
+            if ("@Model.loggedinuser"=="True")
+            {
+                loggedinbp = false;
+                if (CustomerCategory.val() == "P" && $("#form-field-pbusinesspartner option:selected").val() != '')
+                {
+                    loggedinbp = true;
+                }
+                else if (CustomerCategory.val() == "O" && $("#form-field-obusinesspartner option:selected").val() != '') {
+                    loggedinbp = true;
+                }
+                else if (CustomerCategory.val() == "G" && $("#form-field-gbusinesspartner option:selected").val() != '') {
+                    loggedinbp = true;
+                }
+            }
+            if (loggedinbp){
+
+                if ((CustomerCategory.val() != '') && ($("#form-field-acctype option:selected").val() != '') && ((CustomerCategory.val() == "P" && $("#form-field-custtype option:selected").val() != '') || CustomerCategory.val() != "P")) {
+                    addpremise(value);
+                    $('.delete-pre').on('click', function () {
+                        var count = parseInt($(this).parent().find('.pre-list').find('input').attr('data-count'));
+                        $(this).parent().remove();
+                        if (count < $('.prlist').find('tbody').find('tr').length) {
+                            var $prelistfirst = jQuery('.pre-list');
+                            if ($prelistfirst.length > 0) {
+                                $($prelistfirst).each(function (i, obj) {
+                                    var premiseaccount = "PremiseAccount[" + i + "]";
+                                    var version = detectIE();
+                                    if (version === false) {
+                                        $(obj).find('input').attr('name', premiseaccount);
+                                    }
+                                    else {
+                                        $(obj).find('input').attr('name', premiseaccount);
+                                    }
+                                });
+                            }
+                        }
+                        if ($('.prlist').find('tbody').find('tr').length < 1) {
+                            //premisenofield.attr("data-parsley-premise_number", "");
+                            premisenofield.attr("required", "");
+                        }
+                        removepremise();
+                    });
+                } else {
+                    jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("Please Select Customer Type/Type")</li></ul>')
+
+                }
+            }
+            else
+            {
+                jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("movein.accountregister.resbusinesserrormessage")</li></ul>')
+            }
+        });
+
+        $('.add-button').on('click', function () {
+            value = $('#form-field-premiseNo').val().trim();
+            var loggedinbp = true;
+            if ("@Model.loggedinuser" == "True") {
+                loggedinbp = false;
+                if (CustomerCategory.val() == "P" && $("#form-field-pbusinesspartner option:selected").val() != '') {
+                    loggedinbp = true;
+                }
+                else if (CustomerCategory.val() == "O" && $("#form-field-obusinesspartner option:selected").val() != '') {
+                    loggedinbp = true;
+                }
+                else if (CustomerCategory.val() == "G" && $("#form-field-gbusinesspartner option:selected").val() != '') {
+                    loggedinbp = true;
+                }
+            }
+            if (loggedinbp) {
+                if ((CustomerCategory.val() != '') && ($("#form-field-acctype option:selected").val() != '') && ((CustomerCategory.val() == "P" && $("#form-field-custtype option:selected").val() != '') || CustomerCategory.val() != "P")) {
+                    addpremise(value);
+
+                } else {
+                    jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("Please Select Customer Type/Type")</li></ul>')
+                }
+            }
+            else {
+                jQuery('#description-for-premiseNo').html('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("movein.accountregister.resbusinesserrormessage")</li></ul>')
+            }
+        });
+function deletepremiseno(){
+        $('.delete-pre').on('click', function () {
+            var count = parseInt($(this).parent().find('.pre-list').find('input').attr('data-count'));
+            $(this).parent().remove();
+            if (count < $('.prlist').find('tbody').find('tr').length) {
+                var $prelistfirst = jQuery('.pre-list');
+                if ($prelistfirst.length > 0) {
+                    $($prelistfirst).each(function (i, obj) {
+                        var premiseaccount = "PremiseAccount[" + i + "]";
+                        var version = detectIE();
+                        if (version === false) {
+                            $(obj).find('input').attr('name', premiseaccount);
+                        }
+                        else {
+                            $(obj).find('input').attr('name', premiseaccount);
+                        }
+                    });
+                }
+            }
+            if ($('.prlist').find('tbody').find('tr').length < 1) {
+                //premisenofield.attr("data-parsley-premise_number", "");
+                premisenofield.attr("required", "");
+            }
+            removepremise();
+            stringpremisedetails();
+        });
+    }
+
+        @*if ("@Model.CustomerType" == "I") {
+            jQuery('select[name="AccountType"]').val("O");
+            jQuery('select[name="AccountType"] option[value="T"]').hide();
+            jQuery('select[name="AccountType"] option[value="T"]').attr("disabled", true);
+            //var $acctypevalue = jQuery('#form-field-acctype');
+            //$acctypevalue[0].value = jQuery("#form-field-acctype").val();
+            jQuery('#form-field-acctype').attr("readonly", true);
+            jQuery('#ownerfields').removeClass('hidden');
+            jQuery('#noofroomsdiv').removeClass('hidden');
+            jQuery('#tenantfields').addClass('hidden');
+        }*@
+        if ("@Model.AccountType" == "O") {
+            jQuery('#noofroomsdiv').removeClass('hidden');
+        }
+        else
+        {
+            if (jQuery('input[type=radio][name="isEjari"]:checked')[0].id == 'Ejari') {
+                jQuery('#noofroomsdiv').addClass('hidden');
+            }
+            else {
+                jQuery('#noofroomsdiv').removeClass('hidden');
+            }
+        }
+        //jQuery("#form-field-custtype").on('change', function () {
+        //    if (jQuery(this).val() == "I") {
+        //        jQuery('select[name="AccountType"]').val("O");
+        //        jQuery('select[name="AccountType"] option[value="T"]').hide();
+        //        jQuery('select[name="AccountType"] option[value="T"]').attr("disabled", true);
+        //        //var $acctypevalue = jQuery('#form-field-acctype');
+        //        //$acctypevalue[0].value = jQuery("#form-field-acctype").val();
+        //        jQuery('#form-field-acctype').attr("readonly", true);
+        //        jQuery('#ownerfields').removeClass('hidden');
+        //        jQuery('#noofroomsdiv').removeClass('hidden');
+        //        jQuery('#tenantfields').addClass('hidden');
+        //    }
+        //    else {
+        //        jQuery('#form-field-acctype').removeAttr("disabled");
+        //        jQuery('select[name="AccountType"] option[value="T"]').show();
+        //        jQuery('select[name="AccountType"] option[value="T"]').removeAttr("disabled");
+        //    }
+        //});
+        jQuery("#form-field-acctype").on('change', function () {
+            jQuery("#form-field-Ejari").val("");
+            jQuery("#form-field-Tenancy_Contract_Number").val("");
+            jQuery("#form-field-puschase_titledeed").val("");
+            jQuery("#form-field-ownertype").val("");
+            jQuery("#form-field-start-date").val("");
+            jQuery("#form-field-end-date").val("");
+            jQuery("#form-field-contract-value").val("");
+            jQuery("#form-field-numberofrooms").val("");
+            if (jQuery(this).val() == "O") {
+                jQuery('#ownerfields').removeClass('hidden');
+                jQuery('#noofroomsdiv').removeClass('hidden');
+                jQuery('#tenantfields').addClass('hidden');
+            }
+            else if (jQuery(this).val() == "T") {
+                jQuery('#tenantfields').removeClass('hidden');
+                jQuery('#ownerfields').addClass('hidden');
+                if (jQuery('input[type=radio][name="isEjari"]:checked')[0].id == 'Ejari') {
+                    jQuery('#noofroomsdiv').addClass('hidden');
+                }
+                else {
+                    jQuery('#noofroomsdiv').removeClass('hidden');
+                }
+
+            }
+            else {
+                jQuery('#ownerfields').addClass('hidden');
+                jQuery('#tenantfields').addClass('hidden');
+                jQuery('#noofroomsdiv').addClass('hidden');
+            }
+
+        });
+        //Add event for ejari radio button
+        var radios = document.querySelectorAll('input[type=radio][name="isEjari"]');
+
+        function changeHandler(event) {
+            jQuery("#form-field-Ejari").val("");
+            jQuery("#form-field-Tenancy_Contract_Number").val("");
+            jQuery("#form-field-numberofrooms").val("");
+            if (this.value === 'True') {
+                jQuery('#tenantfields-ejari').show();
+                jQuery('#tenantfields-noejari').hide();
+                jQuery('#noofroomsdiv').hide();
+            } else if (this.value === 'False') {
+                jQuery('#tenantfields-ejari').hide();
+                jQuery('#tenantfields-noejari').show();
+                jQuery('#noofroomsdiv').show();
+            }
+        }
+
+        Array.prototype.forEach.call(radios, function (radio) {
+            radio.addEventListener('change', changeHandler);
+        });
+        if ("@Model.Owner" == "True") {
+            var propertyid = '@Model.Propertyid';
+            if (propertyid != "") {
+                if (propertyid == "PA") {
+                    jQuery("#puschase_titledeedlbl").html("@Translate.Text("movein.accountregister.puschase__lable")");
+                    jQuery("#form-field-puschase_titledeed").attr("placeholder", "@Translate.Text("movein.accountregister.puschase_placeholder")");
+                    jQuery("#form-field-puschase_titledeed").attr("data-parsley-error-message", "@Translate.Text("movein.accountregister.puschase_error")");
+                }
+                else if (propertyid == "TD") {
+                    jQuery("#puschase_titledeedlbl").html("@Translate.Text("movein.accountregister.titledeed__lable")");
+                    jQuery("#form-field-puschase_titledeed").attr("placeholder", "@Translate.Text("movein.accountregister.titledeed_placeholder")");
+                    jQuery("#form-field-puschase_titledeed").attr("data-parsley-error-message", "@Translate.Text("movein.accountregister.titledeed_error")");
+                }
+            }
+        }
+        jQuery("#form-field-ownertype").on('change', function () {
+            if (jQuery(this).val() == "PA") {
+                jQuery("#puschase_titledeedlbl").html("@Translate.Text("movein.accountregister.puschase__lable")");
+                jQuery("#form-field-puschase_titledeed").attr("placeholder", "@Translate.Text("movein.accountregister.puschase_placeholder")");
+                jQuery("#form-field-puschase_titledeed").attr("data-parsley-error-message", "@Translate.Text("movein.accountregister.puschase_error")");
+            }
+            else if (jQuery(this).val() == "TD") {
+                jQuery("#puschase_titledeedlbl").html("@Translate.Text("movein.accountregister.titledeed__lable")");
+                jQuery("#form-field-puschase_titledeed").attr("placeholder", "@Translate.Text("movein.accountregister.titledeed_placeholder")");
+                jQuery("#form-field-puschase_titledeed").attr("data-parsley-error-message", "@Translate.Text("movein.accountregister.titledeed_error")");
+            }
+            else {
+                jQuery("#puschase_titledeedlbl").html("@Translate.Text("movein.accountregister.puschase_titledeed_lable")");
+                jQuery("#form-field-puschase_titledeed").attr("placeholder", "@Translate.Text("movein.accountregister.puschase_titledeed_placeholder")");
+                jQuery("#form-field-puschase_titledeed").attr("data-parsley-error-message", "@Translate.Text("movein.accountregister.puschase_titledeed_error")");
+            }
+        });
+
+        function getejarinumber() {
+            var ejari;
+            if (ejarinumber.val() != null || ejarinumber.val() == "") {
+                ejari = ejarinumber.val().trim();
+            }
+            return ejari;
+        }
+        function getcontractnumber() {
+            var contract;
+            if (contractnumber.val() != null || contractnumber.val() == "") {
+                contract = contractnumber.val();
+            }
+            return contract;
+        }
+        function getstartdate() {
+            var strstartdate;
+            if (startdate.val() != null || startdate.val() == "") {
+                strstartdate = startdate.val();
+            }
+            return strstartdate;
+        }
+        function getenddate() {
+            var strenddate;
+            if (enddate.val() != null || enddate.val() == "") {
+                strenddate = enddate.val();
+            }
+            return strenddate;
+        }
+        function getcontractvalue() {
+            var strcontractvalue;
+            if (contractvalue.val() != null || contractvalue.val() == "") {
+                strcontractvalue = contractvalue.val();
+            }
+            return strcontractvalue;
+        }
+
+        function getnumberofrooms() {
+            var strnumberofrooms;
+            if ($("#form-field-numberofrooms option:selected").val() != null || $("#form-field-numberofrooms option:selected").val() == "") {
+                strnumberofrooms = $("#form-field-numberofrooms option:selected").val();
+            }
+            return strnumberofrooms;
+        }
+
+        function getoccupiedby() {
+            var stroccupiedby = "";
+            if ($("#form-field-acctype option:selected").val() == "O") {
+                if (jQuery('input[type=radio][name="occupiedbyowner"]:checked').val() == "True") {
+                    stroccupiedby = "O";
+                }
+                else {
+                    stroccupiedby = "T";
+                }
+            }
+            return stroccupiedby;
+        }
+
+        function getPremiseHoverDetails(selection) {
+            $submitBtn.attr('disabled', true);
+            var ejari = getejarinumber();
+            var contract = getcontractnumber();
+            var strstartdate = getstartdate();
+            var strenddate = getenddate();
+            var strcontractvalue = getcontractvalue();
+            var strnumberofrooms = getnumberofrooms();
+            var stroccupiedby = getoccupiedby();
+
+            var strbusinesspartner = '';
+            if ("@Model.loggedinuser" == "True") {
+                if (CustomerCategory.val() == "P" && $("#form-field-pbusinesspartner option:selected").val() != '') {
+                    strbusinesspartner = $("#form-field-pbusinesspartner option:selected").val();
+                }
+                else if (CustomerCategory.val() == "O" && $("#form-field-obusinesspartner option:selected").val() != '') {
+                    strbusinesspartner = $("#form-field-obusinesspartner option:selected").val();
+                }
+                else if (CustomerCategory.val() == "G" && $("#form-field-gbusinesspartner option:selected").val() != '') {
+                    strbusinesspartner = $("#form-field-gbusinesspartner option:selected").val();
+                }
+            }
+
+            var url = "/api/movein/Get";
+
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: {
+                    idtype: '',
+                    businesspartner: strbusinesspartner,
+                    moveoutaccount: '',
+                    moveoutdate: null,
+                    idnumber: '',
+                    customerCategory: CustomerCategory.val(),
+                    customerType: (CustomerCategory.val() != "P" ? "" : $("#form-field-custtype option:selected").val()),
+                    accounttype: $("#form-field-acctype option:selected").val(),
+                    occupiedby: stroccupiedby,
+                    ejarinumber: ejari,
+                    contractnumber: contract,
+                    startdate: strstartdate,
+                    enddate: strenddate,
+                    contractvalue: strcontractvalue,
+                    numberofrooms: strnumberofrooms,
+                    premiselist: selection,
+
+                },
+                beforeSend: function () {
+                    $('#premisedescription').html('');
+                    jQuery('#description-for-premiseNo').children().remove();
+                    $content.show();
+                    $submitBtn.attr('disabled', true);
+                },
+                complete: function () {
+                    $content.hide();
+                },
+                dataType: 'json',
+                type: 'GET',
+                success:function(response) {
+                    if (response.responsecode === "000") {
+                        $.each(response.premiseErrorDetailsList, function (i, el) {
+                            $('#premisedescription').html(el.premisetypecommunity);
+                        });
+                    }
+                    else {
+                        var errormessage = "";
+                        if (response.premiseErrorDetailsList == null) {
+                            errormessage = response.description.length > 0 ? response.description : "";
+                        } else {
+                            $.each(response.premiseErrorDetailsList, function (i, el) {
+                                errormessage = response.description.length > 0 ? response.description : el.message;
+                            });
+                        }
+                        jQuery('#description-for-premiseNo').children().remove();
+                        jQuery('#description-for-premiseNo').append('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">' + errormessage + '</li></ul>')
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.responseJSON) {
+                        $servError.text(xhr.responseJSON.Message);
+                        $servErrorPane.removeClass('hidden');
+                    }
+                }
+            });
+        }
+
+        function getPremiseDetails(selection) {
+            $submitBtn.attr('disabled', true);
+            var ejari = getejarinumber();
+            var contract = getcontractnumber();
+            var strstartdate = getstartdate();
+            var strenddate = getenddate();
+            var strcontractvalue = getcontractvalue();
+            var strnumberofrooms = getnumberofrooms();
+            var stroccupiedby = getoccupiedby();
+
+            var strbusinesspartner = '';
+            if ("@Model.loggedinuser" == "True") {
+                if (CustomerCategory.val() == "P" && $("#form-field-pbusinesspartner option:selected").val() != '') {
+                    strbusinesspartner = $("#form-field-pbusinesspartner option:selected").val();
+                }
+                else if (CustomerCategory.val() == "O" && $("#form-field-obusinesspartner option:selected").val() != '') {
+                    strbusinesspartner = $("#form-field-obusinesspartner option:selected").val();
+                }
+                else if (CustomerCategory.val() == "G" && $("#form-field-gbusinesspartner option:selected").val() != '') {
+                    strbusinesspartner = $("#form-field-gbusinesspartner option:selected").val();
+                }
+            }
+
+            var url = "/api/movein/Get";
+
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: {
+                    idtype: '',
+                    businesspartner: strbusinesspartner,
+                    moveoutaccount: '',
+                    moveoutdate: null,
+                    idnumber: '',
+                    customerCategory: CustomerCategory.val(),
+                    customerType: (CustomerCategory.val() != "P" ? "" : $("#form-field-custtype option:selected").val()),
+                    accounttype: $("#form-field-acctype option:selected").val(),
+                    occupiedby: stroccupiedby,
+                    ejarinumber: ejari,
+                    contractnumber: contract,
+                    startdate: strstartdate,
+                    enddate: strenddate,
+                    contractvalue: strcontractvalue,
+                    numberofrooms: strnumberofrooms,
+                    premiselist: selection,
+
+                },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                    jQuery('#description-for-premiseNo').children().remove();
+                    $content.show();
+                    $submitBtn.attr('disabled', true);
+
+                    if ($('.prlist').find('tbody').find('tr').length < 2) {
+                        $('.prlist').hide();
+                    }
+                    $('#premisedescription').html('');
+                },
+                complete: function () {
+                    $('.prlist').show();
+                    $content.hide();
+                    var premiselist = getpremise();
+                    if (premiselist.length > 0) {
+                       // premisenofield.removeAttr("data-parsley-premise_number", "");
+                        premisenofield.removeAttr("required", "");
+                    }
+                    $('#premisedescription').html('');
+                    deletepremiseno();
+                    stringpremisedetails()
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                dataType: 'json',
+                type: 'GET',
+                success: function (response) {
+                    if (response.responsecode === "000") {
+                        var premiselistcount = getpremiselist();
+                        var newitem = '<tr class="m23-table__content-table-row" style="display:table-row;"><td data-label="Premise No" data-premise-value="' + value + '" class="m23-table__content-table-cell pre-list">' + value + '<input type="hidden" data-count="' + premiselistcount.length + '" name="PremiseAccount[' + premiselistcount.length + ']" value="' + value + '"/></td><td data-label="Details" class="m23-table__content-table-cell pre-list-address"  id="' + value + '-premiseaddress" data-value="' + value + '"></td> <td style="color:#ff0000;cursor:pointer;" class="m23-table__content-table-cell delete-pre"><i class="icon icon-cancel"></i></td></tr>'
+                        $('.prelistbody').append(newitem);
+                        var selection = getpremise();
+                        //if (formvalue) {
+                        $.each(response.premiseErrorDetailsList, function (i, el) {
+                            if ($.inArray(el.premise, selection) != -1) {
+                                if (value == el.premise) {
+                                    $('#' + value + '-premiseaddress').html(el.premisetypecommunity)
+                                }
+                            }
+                        });
+                        // }
+                        //else {
+                        //    $.each(response.premiseErrorDetailsList, function (i, el) {
+                        //        if ($.inArray(el.premise, selection) != -1) {
+                        //            //$('#form-field-premiseNo').val(el.premise);
+                        //            $('#' + el.premise + '-premiseaddress').parent()[0].attributes[1].value = "display:table-row;";
+                        //            $('#' + el.premise + '-premiseaddress').html(el.premisetypecommunity);
+
+                        //        }
+                        //    });
+                        //}
+                        getpremise();
+                        $('#form-field-premiseNo').val('');
+                        formvalue = true;
+                    } else {
+                        var selection = getpremiselist();
+                        var errormessage = "";
+                        if (response.premiseErrorDetailsList == null) {
+                            errormessage = response.description.length > 0 ? response.description : "";
+                        } else {
+                            $.each(response.premiseErrorDetailsList, function (i, el) {
+                                if ($.inArray(el.premise, selection) != -1) {
+                                    if (value == el.premise) {
+                                        errormessage = response.description.length > 0 ? response.description : el.message;
+                                        $('#' + el.premise + '-premiseaddress').parent().remove();
+                                    }
+                                }
+                            });
+                        }
+                        jQuery('#description-for-premiseNo').children().remove();
+                        jQuery('#description-for-premiseNo').append('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">' + errormessage + '</li></ul>')
+                        getpremise();
+                        formvalue = true;
+                        var $registererror = jQuery('#move-in-register-error');
+                        $registererror.html(response.Message);
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.responseJSON) {
+                        $servError.text(xhr.responseJSON.Message);
+                        $servErrorPane.removeClass('hidden');
+                    }
+                    $('body').removeClass('unscrollable');
+                }
+            });
+
+        }
+        function detectIE() {
+            var ua = window.navigator.userAgent;
+
+            // Test values; Uncomment to check result …
+
+            // IE 10
+            // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+
+            // IE 11
+            // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+
+            // Edge 12 (Spartan)
+            // ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
+
+            // Edge 13
+            // ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
+
+            var msie = ua.indexOf('MSIE ');
+            if (msie > 0) {
+                // IE 10 or older => return version number
+                return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+            }
+
+            var trident = ua.indexOf('Trident/');
+            if (trident > 0) {
+                // IE 11 => return version number
+                var rv = ua.indexOf('rv:');
+                return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+            }
+
+            var edge = ua.indexOf('Edge/');
+            if (edge > 0) {
+                // Edge (IE 12+) => return version number
+                return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+            }
+
+            // other browser
+            return false;
+        }
+
+        function addpremise(value) {
+            jQuery('#description-for-premiseNo').children().remove();
+            if (value != '') {
+                var nextTo = $('.prlist tr').last();
+                var premiselist = getpremise();
+                var duplicate = false;
+                if (jQuery.inArray(value, premiselist) != -1) {
+                    jQuery('#description-for-premiseNo').append('<ul class="parsley-errors-list filled" id="parsley-id-16"><li class="parsley-custom-error-message">@Translate.Text("movein.accountregister.resduplicatepremiseerrormessage")</li></ul>')
+                    duplicate = true;
+                }
+                if (!duplicate) {
+                    //var newitem = '<tr class="m23-table__content-table-row" style="display:none"><td data-label="Premise No" data-premise-value="' + value + '" class="m23-table__content-table-cell pre-list">' + value + '<input type="hidden" data-count="' + premiselist.length + '" name="PremiseAccount[' + premiselist.length + ']" value="' + value + '"/></td><td data-label="Details" class="m23-table__content-table-cell pre-list-address"  id="' + value + '-premiseaddress" data-value="' + value + '"></td> <td style="color:#ff0000;cursor:pointer;" class="m23-table__content-table-cell delete-pre"><i class="icon icon-cancel"></i></td></tr>'
+                    //$('.prelistbody').append(newitem);
+                    getPremiseDetails(getpremiselist());
+                }
+            }
+        }
+
+        function removepremise() {
+            jQuery('#description-for-premiseNo').children().remove();
+            deleteflag = true;
+            var premiselist = getpremise();
+        }
+
+        function getpremiselist() {
+            var firstselectionlist = [];
+            var $prelistbody = jQuery('.prelistbody').find('tr');
+            if ($prelistbody.length > 0) {
+                $($prelistbody).each(function (i, obj) {
+                    var $prelistbodytd = $(obj).find('td:first-child');
+                    firstselectionlist.push($prelistbodytd.attr("data-premise-value"))
+                });
+            }
+            firstselectionlist.push(value);
+            return firstselectionlist;
+        }
+
+        function stringpremisedetails()
+        {
+            var premiselist = [];
+            jQuery('.prelistbody').find('tr').each(function (i, obj) {
+                var $prenumber = $(obj).find('td[data-label="Premise No"]');
+                var $prenumberdetails = $(obj).find('td[data-label="Details"]');
+                var premiseobj = {};
+                premiseobj.premisenumber = $prenumber.attr("data-premise-value");
+                premiseobj.premisebuildingname = $prenumberdetails.html();
+                premiselist.push(premiseobj);
+            });
+            $addedpremisenumberdetails[0].value = JSON.stringify(premiselist);
+        }
+
+        function getpremise() {
+            var firstselection = [];
+            var $prelistbody = jQuery('.prelistbody').find('tr');
+            if ($prelistbody.length > 0) {
+                $($prelistbody).each(function (i, obj) {
+                    var $prelistbodytd = $(obj).find('td:first-child');
+                    firstselection.push($prelistbodytd.attr("data-premise-value"))
+                });
+            }
+            if ($prelistbody.length > 0) {
+                $('#moveinrestable').show();
+            }
+            else {
+                $('#moveinrestable').hide();
+            }
+            return firstselection;
+        }
+
+        function fill(premise) {
+            $(premise).each(function (i, obj) {
+                value = obj;
+                formvalue = false;
+                addpremise(value);
+            });
+            $('.delete-pre').on('click', function () {
+                var count = parseInt($(this).parent().find('.pre-list').find('input').attr('data-count'));
+                $(this).parent().remove();
+                if (count < $('.prlist').find('tbody').find('tr').length) {
+                    var $prelistfirst = jQuery('.pre-list');
+                    if ($prelistfirst.length > 0) {
+                        $($prelistfirst).each(function (i, obj) {
+                            var premiseaccount = "PremiseAccount[" + i + "]";
+                            var version = detectIE();
+                            if (version === false) {
+                                $(obj).find('input').attr('name', premiseaccount);
+                            }
+                            else {
+                                $(obj).find('input').attr('name', premiseaccount);
+                            }
+                        });
+                    }
+                }
+                if ($('.prlist').find('tbody').find('tr').length < 1) {
+                   // premisenofield.attr("data-parsley-premise_number", "");
+                    premisenofield.attr("required", "");
+                }
+                removepremise();
+            });
+        }
+        function switchtab() {
+            if (CustomerCategory.val() == "P") {
+                jQuery("#Pbusinesspartner").show();
+                jQuery("#form-field-obusinesspartner").val("");
+                jQuery("#Obusinesspartner").hide();
+                jQuery("#form-field-gbusinesspartner").val("");
+                jQuery("#Gbusinesspartner").hide();
+                //$('#checkbox_D33').prop('checked', false);
+                //$('.divD33').hide();
+                //$('.divcon').html('');
+
+
+            }
+            else if (CustomerCategory.val() == "O") {
+                jQuery("#form-field-pbusinesspartner").val("");
+                jQuery("#Pbusinesspartner").hide();
+                jQuery("#Obusinesspartner").show();
+                jQuery("#form-field-gbusinesspartner").val("");
+                jQuery("#Gbusinesspartner").hide();
+                //$('.divD33').show();
+
+            }
+            else if (CustomerCategory.val() == "G") {
+                jQuery("#Pbusinesspartner").hide();
+                jQuery("#form-field-pbusinesspartner").val("");
+                jQuery("#Obusinesspartner").hide();
+                jQuery("#form-field-obusinesspartner").val("");
+                jQuery("#Gbusinesspartner").show();
+               // $('#checkbox_D33').prop('checked', false);
+                //$('.divD33').hide();
+                //$('.divcon').html('');
+            }
+            if (CustomerCategory.val() != "P") {
+                customerType.hide();
+                if (CustomerCategory.val() == "G") {
+                    $puschase_titledeed.hide();
+                    $Propertyid.hide();
+                } else {
+                    $puschase_titledeed.show();
+                    $Propertyid.show();
+                }
+            } else { customerType.show(); $puschase_titledeed.show(); $Propertyid.show(); }
+        }
+
+    });
+</script>

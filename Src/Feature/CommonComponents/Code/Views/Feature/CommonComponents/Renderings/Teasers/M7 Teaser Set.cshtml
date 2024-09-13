@@ -1,0 +1,34 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Links
+@using DEWAXP.Foundation.Content.Repositories
+
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M7TeaserSet
+
+
+@{
+    var hideinmobile = Html.Sitecore().CurrentRendering.Parameters["hideinmobile"] != null ? true : false;
+    var _cache = DependencyResolver.Current.GetService<ICacheProvider>();
+    bool isnavhide = false;
+    _cache.TryGet("HIDENAV", out isnavhide);
+}
+
+@if (!isnavhide || (isnavhide && !hideinmobile))
+{
+    if (!string.IsNullOrWhiteSpace(Model.Header))
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Generic/M17 Section Title.cshtml", Model)
+    }
+
+
+    if (Model != null && Model.Children != null && Model.Children.Any())
+    {
+        <div class="grid__row">
+            @foreach (var teaser in Model.Children)
+            {
+                <div class="grid__column grid__column--6">
+                    @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Teasers/M7 Teaser.cshtml", teaser)
+                </div>
+            }
+        </div>
+    }
+}

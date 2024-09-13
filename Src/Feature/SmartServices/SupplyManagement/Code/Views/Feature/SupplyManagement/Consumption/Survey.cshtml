@@ -1,0 +1,639 @@
+﻿@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Glass.Mapper
+@using System.Linq;
+@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint;
+@model SurveyInfoDetail
+
+@{
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    string surveyType = Model.SurveyType;
+
+    Model.IntroText = Translate.Text("Introtext" + surveyType);
+}
+
+@if (Model.ShowError)
+{
+
+    <div class="grid__row" style="margin-top:40px;">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title icon--error">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text" dir="@direction">
+                    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                    {
+                        @Html.Raw(Model.ErrorMessage)
+                    }
+                    else
+                    {
+                        @Translate.Text("j120 Invalid Survey Context")
+                    }
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+}
+else
+{
+
+
+
+    <form class="j132-happinex form" id="j132-happinexform" data-journey="j132-happinex" data-form="true" method="post" action="" novalidate="">
+        @Html.AntiForgeryToken()
+
+        @*@Html.HiddenFor(model => model.Key)*@
+        @Html.HiddenFor(model => model.SurveyType, new { @id = "surveryType" })
+        @Html.HiddenFor(model => model.SurveyNo, new { @id = "notificationId" })
+        <div class="grid j132-happinex--screen">
+            <div class="grid__row mb0">
+                <div class="grid__column grid__column--12 grid__column--content j132-happinex--scroll">
+                    <div class="j132-happinex--intro j132-happinex--panel j132-happinex--panel--active">
+                        <div class="j132-happinex--panel_cover">
+                        </div>
+                        <div class="m14-richtext">
+                            @Html.Raw(Model.IntroText)
+                        </div>
+                        <div class="button button--primary mt48 j132-happinex--start">@Translate.Text("StartSurveyBtn")</div>
+                    </div>
+
+                    @if (Model.PreRadioQuestions != null && Model.PreRadioQuestions.Count > 0)
+                    {
+                        foreach (QuestionAndAnsItem PreQusItem in Model.PreRadioQuestions)
+                        {
+                            <div class="j132-happinex--panel prequs">
+                                <div class="j132-happinex--panel_cover">
+                                </div>
+                                <div class="button button--text button--back j132-happinex--back">@Translate.Text("Back")</div>
+                                @if (!string.IsNullOrWhiteSpace(PreQusItem.PreSectionTitle))
+                                {
+                                    <div class="m14-richtext">
+                                        <h4>@Html.Raw(PreQusItem.PreSectionTitle)</h4>
+                                    </div>
+                                }
+
+                                <div class="m14-richtext cqus" data-qid="@(PreQusItem.Id)" data-qus="@(PreQusItem.Question)">
+                                    <h4>@Html.Raw(PreQusItem.Question)</h4>
+                                </div>
+
+                                @if (PreQusItem.AnsList != null && PreQusItem.AnsList.Count > 0)
+                                {
+                                    int i = 0;
+                                    <fieldset class="fieldset j132-happinex--radios form-field__radio--toggle mb0 mt24">
+                                        @foreach (QuestionAndAnsItem item in PreQusItem.AnsList)
+                                        {
+                                            <p class="form-field__radio">
+                                                <label>
+                                                    <input class="form-field__input form-field__input--radio" toggle-target="" id="form-field-radio_1_@(i)" name="radios_group2" type="radio" value="" aria-describedby="description-for-q5fgq3g6b" data-parsley-errors-container="#description-for-q5fgq3g6b" data-parsley-multiple="radios_group2" data-parsley-id="12">
+                                                    <span class="form-field__fakeradio focus-enabled">
+                                                        @Html.Raw(item.Text)
+                                                    </span>
+                                                </label>
+                                            </p>
+                                            i++;
+                                        }
+                                    </fieldset>
+
+                                }
+
+                                @*<fieldset class="fieldset j132-happinex--radios form-field__radio--toggle mb0 mt24">
+                                        <p class="form-field__radio">
+                                            <label>
+
+                                                <input class="form-field__input form-field__input--radio" toggle-target=".others_text" id="form-field-radio_1_7" name="radios_group2" type="radio" value="Others" aria-describedby="description-for-q5fgq3g6b" data-parsley-errors-container="#description-for-q5fgq3g6b" data-parsley-multiple="radios_group2">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    @Html.Raw(@Translate.Text("j120 Others"))
+                                                </span>
+                                            </label>
+                                        </p>
+                                    </fieldset>*@
+                                @*<div class="form-field form-field--text hidden others_text">
+                                        <span class="form-field__input-wrapper">
+                                            <input class="form-field__input form-field__input--text txtSourceOtherDetail" id="form-field-rjngjyddg" name="text_required" type="text"
+                                                   placeholder="@Translate.Text("j120 Please specify")" aria-describedby="description-for-rjngjyddg" data-parsley-errors-container="#description-for-rjngjyddg"
+                                                   required="" data-parsley-required-message="@Translate.Text("j120 Others Required")" data-parsley-trigger="focusout" data-parsley-id="4">
+
+                                             </span>
+                                        <div id="description-for-ym24cutyf" class="form-field__messages">
+                                        </div>
+                                    </div>*@
+                                <div class="button button--primary mt12 j132-happinex--start hidden">@Translate.Text("j120 Next")</div>
+                            </div>
+                        }
+
+                    }
+
+
+                    @if (Model.CustomerEmotion != null)
+                    {
+                        foreach (QuestionAndAnsItem cusEmo in Model.CustomerEmotion)
+                        {
+                            <div class="j132-happinex--panel">
+                                <div class="j132-happinex--panel_cover">
+                                </div>
+                                <div class="button button--text button--back j132-happinex--back">@Translate.Text("Back")</div>
+                                @if (!string.IsNullOrWhiteSpace(cusEmo.PreSectionTitle))
+                                {
+                                    <div class="m14-richtext">
+                                        <h4>@Html.Raw(cusEmo.PreSectionTitle)</h4>
+                                    </div>
+                                }
+                                <div class="m14-richtext">
+                                    <h4 class="cqus" data-qid="@(cusEmo.Id)" data-qus="@(cusEmo.Question)">@Html.Raw(cusEmo.Question)</h4>
+                                </div>
+                                <div class="j132-happinex--emoticon_wrapper">
+                                    @{
+
+                                        foreach (QuestionAndAnsItem item in cusEmo.AnsList)
+                                        {
+                                            string iconname = GetEmoName(cusEmo.AnsList.IndexOf(item));
+
+                                            <div class="j132-happinex--emoticon j132-happinex--start cans" data-aid="@(item.Id)" data-value="@(item.ValueId)" data-mood="@Html.Raw(item.Question)">
+                                                <div class="j132-happinex--emoticon_icon icon-@(iconname)"></div>
+                                                <input type="checkbox" name="" class="j132-happinex--emoticon-cbox">
+                                                <div class="m14-richtext">
+                                                    <h4 class="centered">@Html.Raw(item.Question)</h4>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+
+                                </div>
+                            </div>
+                        }
+
+
+
+                    }
+                    @{
+
+
+
+                        if (Model.FinalQuestionList != null &&
+                            Model.FinalQuestionList.Count > 0)
+                        {
+                            int i = 0;
+
+                            foreach (QuestionAndAnsItem finalItem in Model.FinalQuestionList)
+                            {
+
+                                if (finalItem.AnsList != null && finalItem.AnsList.Count <= 2 &&
+                                    finalItem.SubQuestion != null && finalItem.SubQuestion.Count > 0)
+                                {
+                                    string targetId = "experience" + Guid.NewGuid();
+                                    <div class="j132-happinex--panel happinex-custom">
+                                        <div class="j132-happinex--panel_cover">
+                                        </div>
+                                        <div class="button button--text button--back j132-happinex--back">@Translate.Text("Back")</div>
+                                        @if (!string.IsNullOrWhiteSpace(finalItem.PreSectionTitle))
+                                        {
+                                            <div class="m14-richtext">
+                                                <h4>@Html.Raw(finalItem.PreSectionTitle)</h4>
+                                            </div>
+                                        }
+                                        <div class="m14-richtext">
+                                            <h4 class="survey-qus cqus" data-qid="@(finalItem.Id)" data-qus="@(finalItem.Question)">@Html.Raw(finalItem.Question)</h4>
+                                        </div>
+                                        <fieldset class="fieldset j132-happinex--radios mb0 mt24 custom-radiobtn">
+                                            <legend class="legend-color">.</legend>
+                                            @foreach (QuestionAndAnsItem item in finalItem.AnsList)
+                                            {
+                                                int ind = finalItem.AnsList.IndexOf(item);
+                                                string _class = ind == 0 ? "form-field__input form-field__input--radio j132-happinex--branching d-radiabtn cans" : "form-field__input form-field__input--radio j132-happinex--notbranching d-radiabtn";
+                                                <p class="form-field__radio">
+                                                    <label>
+                                                        <input class="@(_class)" panel-targets="@(targetId)" data-aid="@(item.Id)" data-value="@(item.ValueId)" @*panel-targets="@(targetId)"*@ toggle-target="" id="form-field-radio_1_@(ind)" name="radios_group2" type="radio" value="@item.ValueId" aria-describedby="description-for-q5fgq3876" data-parsley-errors-container="#description-for-q5fgq3876" data-parsley-multiple="radios_group2" data-parsley-id="12">
+                                                        <span class="form-field__fakeradio focus-enabled">
+                                                            @*@Translate.Text("Yes")*@
+                                                            @Html.Raw(item.Question)
+                                                        </span>
+                                                    </label>
+                                                </p>
+                                            }
+                                            <input type="hidden" class="decisionvalue" value="" />
+                                        </fieldset>
+                                    </div>
+
+
+                                    foreach (QuestionAndAnsItem finalsubItem in finalItem.SubQuestion)
+                                    {
+                                        <div class="j132-happinex--panel happinex-custom" panel-tag="@(targetId)">
+                                            <div class="j132-happinex--panel_cover">
+                                            </div>
+                                            <div class="button button--text button--back j132-happinex--back">@Translate.Text("Back")</div>
+                                            @if (!string.IsNullOrWhiteSpace(finalsubItem.PreSectionTitle))
+                                            {
+                                                <div class="m14-richtext">
+                                                    <h4>@Html.Raw(finalsubItem.PreSectionTitle)</h4>
+                                                </div>
+                                            }
+                                            <div class="m14-richtext">
+                                                <h4 class="survey-qus cqus" data-qid="@(finalsubItem.Id)" data-qus="@(finalsubItem.Question)">@Html.Raw(finalsubItem.Question)</h4>
+                                            </div>
+                                            <div class="m76-range-slider mt48 mb0" data-component="m76-range-slider">
+                                                <div class="range-container">
+                                                    <div class="range-container-bg">
+                                                        <input id="rangeslider" data-range-slider="" class="range blue slider" type="range" data-snap='0,1,2,3,4,5' min="0" value="0" max="5" step="1" list="ticks">
+                                                    </div>
+                                                </div>
+                                                <div class="ticks-container" data-range-ticks="">
+                                                    <div class="sliderticks">
+                                                        <span data-option="0" class="ticks"></span>
+                                                        @foreach (QuestionAndAnsItem ansItem in finalsubItem.AnsList)
+                                                        {
+
+                                                            string RatingText = GetRatingText(ansItem.Question);
+                                                            <span data-option="@(ansItem.Question)" class="ticks cans" data-aid="@(ansItem.Id)" data-value="@(ansItem.ValueId)"><span class="ticks-inner-text">@(ansItem.Question)<br>@Translate.Text(RatingText)</span><span class="rangeslider_click"></span></span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @if (finalsubItem.SubQuestion != null)
+                                            {
+                                                foreach (QuestionAndAnsItem SubQusitem in finalsubItem.SubQuestion)
+                                                {
+                                                    <div class="form-field form-field--text form-field--textarea mt48 hidden ctextqus" data-qid="@(SubQusitem.Id)" data-qus="@(SubQusitem.Question)">
+                                                        <label for="form-field-9xqmn7pbk" class="form-field__label">
+                                                            @Html.Raw(SubQusitem.Question)
+                                                        </label>
+                                                        @foreach (QuestionAndAnsItem Ansitem in SubQusitem.AnsList)
+                                                        {<span class="form-field__input-wrapper">
+                                                                <textarea class="comment-textarea form-field__input form-field__input--text form-field__input--textarea textComment cans" data-aid="@(Ansitem.Id)" data-value="@(Ansitem.ValueId)" data-textarea="9xqmn7pbk" id="form-field-9xqmn7pbk" name="textarea" type="textarea" placeholder="@Translate.Text("CommentsSuggestionsPlaceholder")" aria-describedby="description-for-9xqmn7pbk" data-parsley-errors-container="#description-for-9xqmn7pbk"></textarea>
+                                                            </span>
+                                                            <div id="description-for-9xqmn7pbk" class="form-field__messages">
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+
+                                            <div class="button button--primary mt12 j132-happinex--start hidden">@Translate.Text("j120 Next")</div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="j132-happinex--panel happinex-custom">
+                                        <div class="j132-happinex--panel_cover">
+                                        </div>
+                                        <div class="button button--text button--back j132-happinex--back">@Translate.Text("Back")</div>
+
+                                        @if (!string.IsNullOrWhiteSpace(finalItem.PreSectionTitle))
+                                        {
+                                            <div class="m14-richtext">
+                                                <h4>@Html.Raw(finalItem.PreSectionTitle)</h4>
+                                            </div>
+                                        }
+                                        <div class="m14-richtext">
+                                            <h4 class="survey-qus cqus" data-qid="@(finalItem.Id)" data-qus="@(finalItem.Question)">@Html.Raw(finalItem.Question)</h4>
+                                        </div>
+                                        <div class="m76-range-slider mt48 mb0" data-component="m76-range-slider">
+                                            <div class="range-container">
+                                                <div class="range-container-bg">
+                                                    <input id="rangeslider" data-range-slider="" class="range blue slider" type="range" data-snap='0,1,2,3,4,5' min="0" value="0" max="5" step="1" list="ticks">
+                                                </div>
+                                            </div>
+                                            <div class="ticks-container" data-range-ticks="">
+                                                <div class="sliderticks">
+                                                    <span data-option="0" class="ticks"></span>
+
+                                                    @foreach (QuestionAndAnsItem ansItem in finalItem.AnsList)
+                                                    {
+
+                                                        string RatingText = GetRatingText(ansItem.Question);
+                                                        <span data-option="@(ansItem.Question)" class="ticks cans" data-aid="@(ansItem.Id)" data-value="@(ansItem.ValueId)"><span class="ticks-inner-text">@(ansItem.Question)<br>@Translate.Text(RatingText)</span><span class="rangeslider_click"></span></span>
+                                                    }
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if (finalItem.SubQuestion != null)
+                                        {
+                                            foreach (QuestionAndAnsItem SubQusitem in finalItem.SubQuestion)
+                                            {<div class="form-field form-field--text form-field--textarea mt48 hidden ctextqus" data-qid="@(SubQusitem.Id)" data-qus="@(SubQusitem.Question)">
+                                                    <label for="form-field-9xqmn7pbk" class="form-field__label">
+                                                        @Html.Raw(SubQusitem.Question)
+                                                    </label>
+                                                    @foreach (QuestionAndAnsItem Ansitem in SubQusitem.AnsList)
+                                                    {
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="comment-textarea form-field__input form-field__input--text form-field__input--textarea textComment cans" data-aid="@(Ansitem.Id)" data-value="@(Ansitem.ValueId)" data-textarea="9xqmn7pbk" id="form-field-9xqmn7pbk" name="textarea" type="textarea" placeholder="@Translate.Text("CommentsSuggestionsPlaceholder")" aria-describedby="description-for-9xqmn7pbk" data-parsley-errors-container="#description-for-9xqmn7pbk"></textarea>
+                                                        </span>
+                                                        <div id="description-for-9xqmn7pbk" class="form-field__messages">
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                        <div class="button button--primary mt12 j132-happinex--start hidden">@Translate.Text("j120 Next")</div>
+                                    </div>
+
+                                }
+
+
+                            }
+
+                        }
+                    }
+
+                    @foreach (QuestionAndAnsItem SubQusitem in Model.BottomQuestionList)
+                    {
+                        <div class="j132-happinex--panel cbtextqus" data-qid="@(SubQusitem.Id)" data-qus="@(SubQusitem.Question)">
+                            <div class="j132-happinex--panel_cover">
+                            </div>
+                            <div class="button button--text button--back j132-happinex--back">@Translate.Text("Back")</div>
+                            <div class="form-field form-field--text form-field--textarea">
+                                <label for="DetailComment" class="form-field__label">
+                                    <strong>@Html.Raw(SubQusitem.Question)</strong>
+                                </label>
+
+                                @foreach (QuestionAndAnsItem Ansitem in SubQusitem.AnsList)
+                                {
+                                    <span class="form-field__input-wrapper">
+                                        <textarea class="form-field__input form-field__input--text form-field__input--textarea textComment cans" data-aid="@(Ansitem.Id)" data-value="@(Ansitem.ValueId)" data-textarea="9xqmn763f" id="DetailComment" name="textarea" type="textarea" placeholder="@Translate.Text("CommentsSuggestionsPlaceholder")" aria-describedby="description-for-9xqmn763f" data-parsley-errors-container="#description-for-9xqmn763f"></textarea>
+                                    </span>
+                                    <div id="description-for-9xqmn763f" class="form-field__messages">
+                                    </div>
+                                }
+
+                            </div>
+                            <div class="form-field">
+                                <a class="button button--primary" id="btnSurveySubmit">@Translate.Text("Submit")</a>
+                            </div>
+                        </div>
+                    }
+
+
+                </div>
+            </div>
+        </div>
+        <div class="grid j132-happinex--tracker">
+            <div class="grid__row mb0">
+                <div class="grid__column grid__column--12 grid__column--content">
+                    <div class="j132-happinex--trackerbar">
+                        <div class="j132-happinex--trackergreenbar"></div>
+                    </div>
+                    <div class="j132-happinex--trackernum">
+                        <span>0</span>%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="grid__row success-section" style="display:none">
+        <div class="grid__column grid__column--12 grid__column--content">
+
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Translate.Text("SuccessTitle")</div>
+                <div class="m40-status-message__text">
+                    @Translate.Text("SuccessSubTitle")
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="grid__row warning-section" style="display:none">
+        <div class="grid__column grid__column--12 grid__column--content">
+
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text erromsgtext">
+                    @Translate.Text("j120 Invalid Survey Context")
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        /*get*/
+        function getSurveyData() {
+
+            var surveyData = [];
+            jQuery.each(jQuery(".j132-happinex--panel"), function (i, obj) {
+
+                var qusContainer = $(obj);
+
+                //console.log($(obj).html());
+
+                var qusId = "";
+                var ansId = "";
+                var range_ansId = "";
+                var ansValue = "";
+                var ansText = "";
+
+                var qus = $(qusContainer).find(".cqus");
+
+                if (qus != null && qus.length > 0) {
+
+                    qusId = qus.data("qid");
+
+                    //checking range
+                    var isRangeCtrl = $(qusContainer).find(".range-container").length > 0;
+
+                    if (isRangeCtrl) {
+
+                        var emoAns = $(qusContainer).find(".ticks-active");
+
+                        if (emoAns != null && emoAns) {
+
+                            ansId = $(emoAns).data("aid");
+                            ansValue = $(emoAns).data("value");
+                            range_ansId = $(emoAns).data("option");
+                        }
+                        var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                        //console.log(dRangeAns)
+                        surveyData.push(dRangeAns);
+                    }
+
+                    //Radio Buttion Qus and Ans
+                    var isRadioCtrl = $(qusContainer).find(".custom-radiobtn").length > 0;
+
+                    if (isRadioCtrl) {
+
+                        var radioAns = $(qusContainer).find("input[name='radios_group2']:checked");
+
+                        if (radioAns != null && radioAns.length>0) {
+
+                            ansId = $(radioAns).data("aid")
+                            ansValue = $(radioAns).data("value")
+                        }
+                        var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                        //console.log(dRangeAns)
+                        surveyData.push(dRangeAns);
+                    }
+
+
+
+                }
+
+
+
+                //additional comment ctextqus
+                var isComment = $(qusContainer).find(".ctextqus").length > 0;
+                if (isComment) {
+                    qusId = $(qusContainer).find(".ctextqus").data("qid");
+                    var textAnsAns = $(qusContainer).find(".textComment");
+                    if (textAnsAns) {
+
+                        ansText = $(textAnsAns).val();
+                        ansId = $(textAnsAns).data("aid")
+                        ansValue = $(textAnsAns).data("value")
+                    }
+
+                    if (isRangeCtrl && (range_ansId == "1" || range_ansId == "2" || range_ansId == "3")) {
+
+                        var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                        //console.log(dRangeAns)
+                        surveyData.push(dRangeAns);
+                    }
+                }
+
+
+                //bottom text question: cbtextqus
+                var isbottomComment = $(qusContainer).find(".cbtextqus").length > 0;
+                if (isbottomComment) {
+                    qusId = $(qusContainer).find(".cbtextqus").data("qid");
+                    var textAnsAns = $(qusContainer).find(".textComment");
+                    if (textAnsAns) {
+
+                        ansText = $(textAnsAns).val();
+                        ansId = $(textAnsAns).data("aid")
+                        ansValue = $(textAnsAns).data("value")
+                    }
+
+                    var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                    //console.log(dRangeAns)
+                    surveyData.push(dRangeAns);
+                }
+
+
+                var isEmotion = $(qusContainer).find(".j132-happinex--emoticon_wrapper").length > 0;
+                if (isEmotion) {
+                    qusId = $(qusContainer).find(".cqus").data("qid");
+                    var emotionDiv = $(qusContainer).find(".j132-happinex--emoticon_active");
+                    if (emotionDiv != null && emotionDiv.length>0) {
+
+                        ansId = $(emotionDiv).data("aid");
+                        ansValue = $(emotionDiv).data("value");
+                    }
+                    var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                    //console.log(dRangeAns)
+                    surveyData.push(dRangeAns);
+
+                }
+
+            });
+            return surveyData;
+        }
+
+
+        docReady(function () {
+            /*sumit logic*/
+            jQuery("#btnSurveySubmit").on("click", function () {
+
+                var postData = {
+                    __RequestVerificationToken: jQuery("input[name='__RequestVerificationToken']").val(),
+                    s : jQuery("#surveryType").val(),
+                    n : jQuery("#notificationId").val(),
+                    SurveyDatas : getSurveyData()
+                }
+
+                jQuery.ajax({
+
+                    type: "POST",
+                    url: "@Url.Action("Survey")",
+                    data: postData,
+                    success: function (response) {
+                        $("#j132-happinexform").hide();
+                        if (response == null || (response != null && response.ErrorMessage != null)) {
+                            $(".erromsgtext").html(response.ErrorMessage);
+                            $(".warning-section").show();
+
+                        } else if (response != null) {
+                            $(".success-section").show();
+                        }
+
+
+                    }
+
+                });
+            });
+
+
+        });
+
+
+    </script>
+}
+
+
+@functions{
+    public string GetRatingText(string count)
+    {
+        string RatingText = "";
+
+        switch (count)
+        {
+            case "1":
+                RatingText = @Translate.Text("Totally dissatisfied");
+                break;
+            case "2":
+                RatingText = @Translate.Text("Dissatisfied");
+                break;
+            case "3":
+                RatingText = @Translate.Text("Average");
+                break;
+            case "4":
+                RatingText = @Translate.Text("Satisfied");
+                break;
+            case "5":
+                RatingText = @Translate.Text("Totally Satisfied");
+                break;
+            default:
+                break;
+        }
+
+
+        return RatingText;
+    }
+
+    public string GetEmoName(int count)
+    {
+        string iconname = "";
+        switch (count)
+        {
+            case 0:
+                iconname = "happy";
+                break;
+            case 1:
+
+                iconname = "neutral";
+                break;
+            case 2:
+                iconname = "sad";
+                break;
+            default:
+                break;
+        }
+
+        return iconname;
+
+
+
+    }
+}
+

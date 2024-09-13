@@ -1,0 +1,117 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using System.Globalization
+@using Sitecore.Data.Items
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.CarouselSet
+
+
+@{
+    /**/
+
+    string hasTitle = (!string.IsNullOrWhiteSpace(Html.Sitecore().CurrentRendering.Parameters["m9_slider_title"])) ? Html.Sitecore().CurrentRendering.Parameters["m9_slider_title"] : "";
+    string idealhomeInitials = (!string.IsNullOrWhiteSpace(Html.Sitecore().CurrentRendering.Parameters["initiativesClass"])) ? Html.Sitecore().CurrentRendering.Parameters["initiativesClass"] : "";
+}
+@if (Model != null && Model.Children != null)
+{
+    <div class="@(idealhomeInitials == "true" ? "" : "grid box--1")">
+        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Generic/M17 Section Title.cshtml", Model, new ViewDataDictionary { { "Title", @hasTitle } })
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m3-teaser-carousel" data-component="m3-teaser-carousel">
+                    <div class="m3-teaser-carousel__container">
+                        <div class="m3-teaser-carousel__carousel">
+                            @foreach (var item in Model.Children)
+                            {
+                                if (item.FileMediaItem != null)
+                                {
+                                    string downloadBtnText = Translate.Text("Download");
+
+                                    if (!string.IsNullOrEmpty(item.DownloadButtonText))
+                                    {
+                                        downloadBtnText = item.DownloadButtonText;
+                                    }
+                                    <div class="m3-teaser-carousel__slide">
+                                        <div class="m60-teaser m60-teaser--download" data-component="m60-teaser">
+                                            <div class="teaser__link ">
+                                                @if (item.Image != null)
+                                                {
+                                                    string AltHtml = item.Image != null && !string.IsNullOrEmpty(item.Image.Alt) ? string.Format("data-alt=\"{0}\"", item.Image.Alt) : "";
+                                                    <div class="m60-teaser-image" @Html.Raw(AltHtml) style="background-image: url('@item.Image.Src')"></div>
+                                                }
+                                                @{
+
+                                                    string _fileDate = "";
+                                                    if (!item.HideFileDate)
+                                                    {
+                                                        _fileDate = "| " + ((Item)item.FileMediaItem).Statistics.Updated.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+                                                    }
+                                                }
+                                                <div class="teaser__content">
+                                                    <h2 class="teaser__title">@Html.Glass().Editable(item, x => x.Header)</h2>
+                                                    <p class="teaser__copy">@item.FileMediaItem.Extension.ToUpper() | @Sizer.FullSize(item.FileMediaItem.Size) @Html.Raw(_fileDate)</p>
+                                                    <p class="teaser__copy"><a target="_blank" href="@MediaManager.GetMediaUrl(item.FileMediaItem)" class="link" title="@item.DownloadFile.Id">@(downloadBtnText)</a></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(item.DownloadButtonText) && item.ButtonLink != null)
+                                {
+                                    <div class="m3-teaser-carousel__slide">
+                                        <div class="m60-teaser m60-teaser--download" data-component="m60-teaser">
+                                            <div class="teaser__link ">
+                                                @if (item.Image != null)
+                                                {
+                                                    string AltHtml = item.Image != null && !string.IsNullOrEmpty(item.Image.Alt) ? string.Format("data-alt=\"{0}\"", item.Image.Alt) : "";
+                                                    <div class="m60-teaser-image" @Html.Raw(AltHtml) style="background-image: url('@item.Image.Src')"></div>
+                                                }
+                                                <div class="teaser__content">
+                                                    <h2 class="teaser__title">@Html.Glass().Editable(item, x => x.Header)</h2>
+                                                    <p class="teaser__copy">@Html.Glass().Editable(item, x => x.Subheader)</p>
+                                                    <p class="teaser__copy">
+                                                        <a target="_blank" href="@(item.ButtonLink.Url)" class="link" title="@(item.DownloadButtonText)">@(item.DownloadButtonText)</a>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="m3-teaser-carousel__slide">
+                                        <div class="m60-teaser" data-component="m60-teaser">
+                                            @using (Html.Glass().BeginRenderLink(item, x => x.ButtonLink, new { @class = "teaser__link" }))
+                                            {
+                                                if (item.Image != null)
+                                                {
+                                                    string AltHtml = item.Image != null && !string.IsNullOrEmpty(item.Image.Alt) ? string.Format("data-alt=\"{0}\"", item.Image.Alt) : "";
+                                                    <div class="m60-teaser-image" @Html.Raw(AltHtml) style="background-image: url('@item.Image.Src')">
+                                                    </div>
+                                                }
+                                                <div class="teaser__content">
+                                                    <h2 class="teaser__title">@Html.Glass().Editable(item, x => x.Header)</h2>
+                                                    <p class="teaser__copy">@Html.Glass().Editable(item, x => x.Subheader)</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                        </div>
+                        @*<div role="button" class="m3-teaser-carousel__carousel-nav-arrow--left"></div>
+                        <div role="button" class="m3-teaser-carousel__carousel-nav-arrow--right"></div>*@
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+}
+

@@ -1,0 +1,176 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model List<DEWAXP.Feature.DRRG.Models.ApplicationHistory>
+@{
+    var count = Model.Count;
+    var cnt = 0;
+    var publishedDate = string.Empty;
+    var lastStatus = string.Empty;
+}
+<div class="m70-status-tracker m70-status-tracker-new" data-component="m70-status-tracker">
+
+    @foreach (var item in Model)
+    {
+        publishedDate = item.StatusText.Equals("Published") ? item.Date.ToString("dd-MM-yyyy hh:mm:ss") + "<br />by " + item.User + "<br />" + @item.processingTime : string.Empty;
+        lastStatus = item.Status;
+        <div class="m70-status-tracker--item @(cnt == Model.Count - 1 ? item.StatusText.Equals("Published") ? "m70-status-tracker--green" : "m70-status-tracker--dashed" : "m70-status-tracker--green")">
+            <div class="m70-status-tracker--item_inner">
+                <div class="m70-status-tracker--item_title">
+                    <div class="m70-status-tracker--item_icon icon-pagination_active  @(cnt == Model.Count - 1 ? "m70-status-tracker--item_icon_glow" : "")" style="color: #007560;"></div>
+                    @item.StatusText
+                </div>
+                <div class="m70-status-tracker--item_desc">
+                    @item.Date.ToString("dd-MM-yyyy hh:mm:ss")
+                    <br />
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        @Html.Raw(item.Description)
+                        <br />
+                    }
+
+                    @item.processingTime
+                </div>
+            </div>
+        </div>
+
+        cnt++;
+    }
+    @if (string.IsNullOrWhiteSpace(publishedDate) && !string.IsNullOrWhiteSpace(lastStatus) && !lastStatus.Equals("ReviewerRejected"))
+    {
+        <div class="m70-status-tracker--item @(!string.IsNullOrWhiteSpace(publishedDate) ? "m70-status-tracker--green" :"m70-status-tracker--dashed") ">
+            <div class="m70-status-tracker--item_inner">
+                <div class="m70-status-tracker--item_title">
+                    <div class="m70-status-tracker--item_icon icon-pagination_active" style="@(!string.IsNullOrWhiteSpace(publishedDate) ? "color: #007560;" :"color: #939598;")"></div>
+                    Published
+                </div>
+                <div class="m70-status-tracker--item_desc">
+                    @Html.Raw(publishedDate)
+                </div>
+            </div>
+        </div>
+    }
+
+    @*@if (count == 1)
+        {
+            foreach (var item in Model)
+            {
+                <div class="m70-status-tracker--item m70-status-tracker--green">
+                    <div class="m70-status-tracker--item_inner">
+                        <div class="m70-status-tracker--item_title">
+                            <div class="m70-status-tracker--item_icon icon-pagination_active" style="color: #007560;"></div>
+                            @item.Name - @item.Status
+                        </div>
+                        <div class="m70-status-tracker--item_desc">
+                            @item.Status on @item.Date.Value.ToString("MMMM-ddd-yyyy");
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="m70-status-tracker--item m70-status-tracker--dashed">
+                <div class="m70-status-tracker--item_inner">
+                    <div class="m70-status-tracker--item_title">
+                        <div class="m70-status-tracker--item_icon icon-pagination_active m70-status-tracker--item_icon_glow" style="color: #007560;"></div>
+                        Evaluator Approval
+                    </div>
+                    <div class="m70-status-tracker--item_desc">
+                        On -
+                    </div>
+                </div>
+            </div>
+            <div class="m70-status-tracker--item m70-status-tracker--dashed">
+                <div class="m70-status-tracker--item_inner">
+                    <div class="m70-status-tracker--item_title">
+                        <div class="m70-status-tracker--item_icon icon-pagination_active m70-status-tracker--item_icon_glow" style="color: #007560;"></div>
+                        Published
+                    </div>
+                    <div class="m70-status-tracker--item_desc">
+                        On -
+                    </div>
+                </div>
+            </div>
+        }
+        else if (count == 2)
+        {
+            foreach (var item in Model)
+            {
+                <div class="m70-status-tracker--item m70-status-tracker--green">
+                    <div class="m70-status-tracker--item_inner">
+                        <div class="m70-status-tracker--item_title">
+                            <div class="m70-status-tracker--item_icon icon-pagination_active" style="color: #007560;"></div>
+                            @item.Name - @item.Status
+                        </div>
+                        <div class="m70-status-tracker--item_desc">
+                            @item.Status on @item.Date.Value.ToString("MMMM-ddd-yyyy");
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="m70-status-tracker--item m70-status-tracker--dashed">
+                <div class="m70-status-tracker--item_inner">
+                    <div class="m70-status-tracker--item_title">
+                        <div class="m70-status-tracker--item_icon icon-pagination_active m70-status-tracker--item_icon_glow" style="color: #007560;"></div>
+                        Published
+                    </div>
+                    <div class="m70-status-tracker--item_desc">
+                        On -
+                    </div>
+                </div>
+            </div>
+        }
+        else if (count >= 3)
+        {
+            foreach (var item in Model)
+            {
+                <div class="m70-status-tracker--item m70-status-tracker--green">
+                    <div class="m70-status-tracker--item_inner">
+                        <div class="m70-status-tracker--item_title">
+                            <div class="m70-status-tracker--item_icon icon-pagination_active" style="color: #007560;"></div>
+                            @item.Name - @item.Status
+                        </div>
+                        <div class="m70-status-tracker--item_desc">
+                            @item.Status on @item.Date.Value.ToString("MMMM-ddd-yyyy");
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="m70-status-tracker--item m70-status-tracker--dashed">
+                <div class="m70-status-tracker--item_inner">
+                    <div class="m70-status-tracker--item_title">
+                        <div class="m70-status-tracker--item_icon icon-pagination_active m70-status-tracker--item_icon_glow" style="color: #007560;"></div>
+                        In Progress
+                    </div>
+                    <div class="m70-status-tracker--item_desc">
+                        On -
+                    </div>
+                </div>
+            </div>
+            <div class="m70-status-tracker--item m70-status-tracker--dashed">
+                <div class="m70-status-tracker--item_inner">
+                    <div class="m70-status-tracker--item_title">
+                        <div class="m70-status-tracker--item_icon icon-pagination_active m70-status-tracker--item_icon_glow" style="color: #007560;"></div>
+                        Evaluator Approval
+                    </div>
+                    <div class="m70-status-tracker--item_desc">
+                        On -
+                    </div>
+                </div>
+            </div>
+            <div class="m70-status-tracker--item m70-status-tracker--dashed">
+                <div class="m70-status-tracker--item_inner">
+                    <div class="m70-status-tracker--item_title">
+                        <div class="m70-status-tracker--item_icon icon-pagination_active m70-status-tracker--item_icon_glow" style="color: #007560;"></div>
+                        Published
+                    </div>
+                    <div class="m70-status-tracker--item_desc">
+                        On -
+                    </div>
+                </div>
+            </div>
+        }*@
+</div>

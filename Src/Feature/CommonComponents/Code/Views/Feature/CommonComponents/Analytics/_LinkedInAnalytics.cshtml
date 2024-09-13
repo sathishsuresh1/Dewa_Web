@@ -1,0 +1,32 @@
+﻿@using Sitecore.Data.Items
+@using Glass.Mapper.Sc
+@model DEWAXP.Feature.CommonComponents.Models.Analytics.LinkedInAnalyticConfig
+@using Glass.Mapper.Sc.Web
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Globalization
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    if (Model != null)
+    {
+        var currentItem = _contextRepository.GetCurrentItem<Item>();
+        var IsPageLinkedInEnabledItem = currentItem.Fields["Enabled LinkedIn"];
+        bool IsPageLinkedEnabled = Convert.ToBoolean(IsPageLinkedInEnabledItem != null && IsPageLinkedInEnabledItem.Value == "1");
+
+        if (Model.EnabledCustom && Model.EnabledAllPage)
+        {
+            @Html.Raw(Model.CustomScript)
+        }
+        else if (Model.EnabledCustom && IsPageLinkedEnabled)
+        {
+            @Html.Raw(Model.CustomScript)
+        }
+
+    }
+
+}
+
+

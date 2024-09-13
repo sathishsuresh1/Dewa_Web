@@ -1,0 +1,120 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.UserViewModel
+@using X.PagedList.Mvc.Common;
+@using X.PagedList.Mvc;
+@using X.PagedList;
+@using X.PagedList.Web.Common;
+@using X.PagedList.Web 
+@using DEWAXP.Foundation.Content
+@{
+
+    var dubai = TimeZoneInfo.FindSystemTimeZoneById("Arabian Standard Time");
+    var dateAndOffset = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, dubai);
+}
+<table class="m23-table__content-table" style="font-size: 13px; font-weight: lighter;">
+    <thead class="m23-table__content-table-header">
+        <tr class="m23-table__content-table-row" tabindex="0">
+
+            <th class="m23-table__content-table-cell--header ">
+                User Name<br>
+            </th>
+            <th class="m23-table__content-table-cell--header ">Email Address</th>
+            <th class="m23-table__content-table-cell--header ">Nationality</th>
+            <th class="m23-table__content-table-cell--header ">Mobile</th>
+            <th class="m23-table__content-table-cell--header ">Type of Residence</th>
+            <th class="m23-table__content-table-cell--header ">Number of Residence</th>
+            <th class="m23-table__content-table-cell--header ">DEWA Customer</th>
+            <th class="m23-table__content-table-cell--header ">Account Number</th>
+            <th class="m23-table__content-table-cell--header ">Created On</th>
+
+        </tr>
+    </thead>
+    @{
+
+
+        foreach (DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User usersData in Model.ITEMPagedList)
+        {
+            <tbody class="m23-table__content-table-body">
+                <tr class="m23-table__content-table-row" tabindex="0">
+
+                    <td class="m23-table__content-table-cell" data-label="Customer Happiness Centres">
+                        <strong>@usersData.FullName</strong>
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.EmailAddress
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.Nationality
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.Mobile
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.TypeofResidence
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.NumberofResidence
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.IsDEWACustomer
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @usersData.account_number
+                    </td>
+                    <td class="m23-table__content-table-cell" data-label="Opening Times">
+                        @TimeZoneInfo.ConvertTime(usersData.Item.Statistics.Created, dubai)
+                    </td>
+
+                </tr>
+            </tbody>
+
+        }
+
+    }
+
+
+</table>
+<div id="myPager" class="centerpage">
+    @if (Model.ITEMPagedList.PageCount > 1)
+    {
+        <div class="fix" id="pager" style="margin-top:12px;position:relative;">
+            <div class="m34-pagination__content">
+                <div id="pagerContent">
+                    @Html.PagedListPager(Model.ITEMPagedList, page => Url.Action("GetUserDataAjax", new
+                           {
+                               pageNo = page,
+                           }
+         ),
+
+        new PagedListRenderOptions
+        {
+            LiElementClasses = new string[] { "m34-pagination__page-list-item" },
+            //LinkToFirstPageFormat = "|<",
+            LinkToPreviousPageFormat = "Prev",
+            LinkToNextPageFormat = "Next",
+            //LinkToLastPageFormat = ">|",
+            MaximumPageNumbersToDisplay = 3,
+            DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+            DisplayLinkToLastPage = PagedListDisplayMode.Never,
+            DisplayLinkToFirstPage = PagedListDisplayMode.Never,
+        }
+    )
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script type="text/javascript">
+    docReady(function () {
+        $(".m34-pagination__page-list-item a").click(function () {
+            event.preventDefault();
+            isclick = true;
+            var url = this.href
+            //var url = "/api/sitecore/IdealHomeConsumer/GetUserDataAjax";
+            GetRecords(url);
+            return false;
+        })
+    });
+
+</script>

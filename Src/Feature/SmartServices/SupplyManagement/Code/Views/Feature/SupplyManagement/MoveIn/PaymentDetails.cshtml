@@ -1,0 +1,339 @@
+﻿@using Sitecore.Mvc
+@using System.Web.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.SupplyManagement.Models.MoveIn.PaymentDetailsViewModel
+
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "moveinpaymentform", data_form = "true", enctype = "multipart/form-data" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            double knowledgeandinnovation = Model.KnowledgeFee + Model.InnovationFee;
+
+            @* Payment Type Popup module *@
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            // End
+
+            <fieldset class="fieldset ">
+
+                <legend class="legend">@Translate.Text("movein.Paymentdetails")</legend>
+
+                @*<div class="form-field form-field--text form-field--textblock">
+                    <p class="text__content-copy--small">@Translate.Text("movein.PayAgree") <a href="@Model.TermsLink" target="_blank" class="link">@Translate.Text("Terms and Conditions")</a>.</p>
+                </div>*@
+
+                <div class="form-field form-field--account-details">
+                    <!-- m42-key-value-start -->
+                    <div class="m42-keyvalue">
+                        <dl>
+                            @if (!string.IsNullOrWhiteSpace(Model.BusinessPartner))
+                            {
+                                <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentbusinesspartner")</dt>
+                                <dd class="m42-keyvalue__value align_right">@Model.BusinessPartner</dd>
+                            }
+
+                            <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentcustomername")</dt>
+                            <dd class="m42-keyvalue__value align_right">@Model.UserName</dd>
+
+                            @if (Model.SecurityDeposit > 0.0)
+                            {
+                                if (Model.DiscountApplied)
+                                {
+                                    <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentsecdopdiscount")</dt>
+                                }
+                                else
+                                {
+                                    <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentsecdop")</dt>
+                                }
+                                <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.SecurityDeposit</dd>
+                            }
+                            @if (Model.ReconnectionRegistrationFee > 0.0)
+                            {
+                                <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentreconnection")</dt>
+                                <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.ReconnectionRegistrationFee</dd>
+                                if (Model.ReconnectionVATamt > 0.0)
+                                {
+                                    <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentreconnectionvat", Model.ReconnectionVATrate)</dt>
+                                    <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.ReconnectionVATamt</dd>
+                                }
+                            }
+                            @if (Model.AddressRegistrationFee > 0.0)
+                            {
+                                <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentaddress")</dt>
+                                <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.AddressRegistrationFee</dd>
+                                if (Model.AddressVAtamt > 0.0)
+                                {
+                                    <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentaddressvat", Model.AddressVATrate)</dt>
+                                    <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.AddressVAtamt</dd>
+                                }
+                            }
+                            @if (knowledgeandinnovation > 0.0)
+                            {
+                                <dt class="m42-keyvalue__key">@Translate.Text("movein.Paymentknowledgeandinnovation")</dt>
+                                <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@knowledgeandinnovation</dd>
+                            }
+                            @if (Model.TotalOutstandingAmt > 0.0)
+                            {
+                                <dt class="m42-keyvalue__key">@Translate.Text("movein.totaloutstandingamt")</dt>
+                                <dd class="m42-keyvalue__value align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.TotalOutstandingAmt</dd>
+                            }
+                            @if (Model.Total > 0.0)
+                            {
+                                <dt class="m42-keyvalue__key m42-keyvalue__key--totalmovein"><strong>@Translate.Text("movein.total")</strong></dt>
+                                <dd class="m42-keyvalue__value align_right m42-keyvalue__value--totalmovein" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Total</dd>
+                            }
+                            @if (Model.PayLater)
+                            {
+                                @Html.HiddenFor(x => x.PayLater)
+                            }
+                            else if (Model.PayOther)
+                            {
+                                @Html.HiddenFor(x => x.PayOther)
+                            }
+                            @Html.HiddenFor(x => x.IsPaylaterSelected, new { id = "ispaylaterclicked" })
+                            @Html.HiddenFor(x => x.IsPayotherSelected, new { id = "ispayotherclicked" })
+                            @*<dt class="m42-keyvalue__key">@Translate.Text("InnovationFee")</dt>
+                            <dd class="m42-keyvalue__value  align_right" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.InnovationFee</dd>*@
+                        </dl>
+                    </div>
+                    <!-- m42-key-value-end -->
+                </div>
+
+            </fieldset>
+            <div class="form-field form-field--toggles inline-terms" id="moveinagreeModal">
+                <div class="form-field__checkbox  last">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment1" type="checkbox" value="true" aria-describedby="description-for-accept-terms1" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms1" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                        <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                    </label>
+                </div>
+                <fieldset class="fieldset m39-modal__tnc">
+                    <legend class="legend-color">.</legend>
+                    <span class="text">@Translate.Text("updateiban.Iagree")</span>
+                    @if (Model.NationalTermsLink)
+                    {
+                        @Html.Sitecore().Placeholder("uaenational")
+                    }
+                    else
+                    {
+                        @Html.Sitecore().Placeholder("expat")
+                    }
+                    @*<a href="@Model.TermsLink" target="_blank" class="link">@Translate.Text("Terms and Conditions")</a>*@
+                </fieldset>
+                <div id="description-for-accept-terms1" class="form-field__messages"></div>
+                <input type="hidden" name="AgreedToPayment1" value="false" />
+            </div>
+            if (Model.MaiDubaiGift) {
+            <div class="j103-move-in--redeem">
+                <img class="j103-move-in--redeem_img" src="/images/maidubaigift.png">
+                <div class="j103-move-in--redeem_content">
+                    <div class="j103-move-in--redeem_title">
+                        @Model.MaiDubaiTitle
+                    </div>
+                    <div class="j103-move-in--redeem_text">
+                        @Model.MaiDubaiMsg
+                    </div>
+                </div>
+                <div class="j103-move-in--redeem_check">
+                    <div class="form-field">
+                        <label class="form-field__label" for="maidubaigift">
+                            <span class="aria-only">@Model.MaiDubaiTitle</span>
+                        </label>
+                        <div class="form-field__switch form-field__switch2">
+                            <input class="form-field__switch-checkbox"
+                                   id="maidubaigift"
+                                   name="MaiDubaiContribution" type="checkbox"
+                                   aria-describedby="description-for-MaiDubaiContribution"
+                                   value="true" @(Model.MaiDubaiContribution ? "checked=\"checked\"" : "")
+                                   data-parsley-errors-container="#description-for-MaiDubaiContribution" data-parsley-id="45">
+                            <label class="form-field__switch-main" for="maidubaigift">
+                                <span class="form-field__switch-inner" data-before="Yes" data-after="No"></span>
+                                <span class="form-field__switch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+            @*<div class="form-field form-field--toggles">
+                <fieldset class="fieldset">
+                    <div class="form-field__checkbox">
+                        <label>
+                            <input class="form-field__input form-field__input--checkbox"
+                                   id="form-field-PaybyNoqodi"
+                                   name="PayThroughNoqodi"
+                                   type="checkbox"
+                                   value="true" @(Model.PayThroughNoqodi ? "checked=\"checked\"" : "")
+                                   aria-describedby="description-for-PaybyNoqodi"
+                                   data-parsley-errors-container="#description-for-PaybyNoqodi"
+                                   data-parsley-multiple="checkbox_1_2"
+                                   data-parsley-id="48">
+                            <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("PaybyNoqodi")</span>
+                        </label>
+                    </div>
+                    <div id="description-for-PaybyNoqodi" class="form-field__messages">
+                    </div>
+                </fieldset>
+            </div>*@
+
+            <div class="form-field__button">
+                <div class="m39-modal m39-modal--new m39-modal--form_binded moveinModalPay" target-form="#moveinpaymentform" data-component="m39-modal" id="modal_true">
+                    @*<span class="moveinModalPay--cell">*@
+                    <a id="paynow-popup" data-text="paynow-popup" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">
+                        @Translate.Text("Pay"):
+                        <span class="amount_label">@Model.Total.ToString("0,0.00") @Translate.Text("AED")</span>
+                    </a>
+                    @*<div>
+                        <img src="~/images/Payment/Credit-cards.jpg" alt="@(Translate.Text("Payment_Creditcard"))" class="moveinModalPay--img">
+                        <img src="~/images/Payment/E-dirham.jpg" alt="@(Translate.Text("Payment_edirham"))" class="moveinModalPay--img">
+                        <img src="~/images/Payment/Banks.jpg" alt="@(Translate.Text("Payment_banks"))" class="moveinModalPay--img">
+                        <div class="moveinModalPay--powered">
+                            @(Translate.Text("Powered by"))<img src="~/images/Payment/Dubaipay.jpg" alt="@(Translate.Text("Payment_dubaipay"))" class="moveinModalPay--img">
+                        </div>
+                    </div>*@
+                    @*</span>*@
+                    @if (Model.PayLater)
+                    {
+                        <button type="submit" id="paylater" data-text="paylater" class="link button--text">
+                            @Translate.Text("PayLater")
+                        </button>
+                    }
+                    else if (Model.PayOther)
+                    {
+                        <button data-trigger="true" class="m39-modal__trigger_movein button button--primary  moveinModalPay--cell"
+                                id="m39-modal__trigger_movein">
+                            <strong>@Translate.Text("Pay using other channels")</strong>
+                        </button>
+                        <div>
+                            <div class="moveinModalPay--powered">
+                                @(Translate.Text("Powered by"))<img src="~/images/Payment/EasyPay.jpg" alt="@(Translate.Text("Payment_easypay"))" class="moveinModalPay--img">
+                            </div>
+                        </div>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                            <div class="m39-modal__dialog">
+                                <div class="m39-modal__header">
+                                    <div class="m39-modal__title">@Translate.Text("Payusingotherchannelsheader")</div>
+                                    <a data-close="true" class="m39-modal__button--close">@Translate.Text("Payusingotherchannelsclosetext")</a>
+                                    <div class="m39-modal__subtitle align_left">@Translate.Text("Payusingotherchannelssubtitle")</div>
+                                </div>
+                                <div class="m39-modal__content">
+                                    <div class="m14-richtext">
+                                        @*<p>@Translate.Text("movein.payment channels title text")</p>*@
+                                        @*@if(Model.PayChannelList != null)
+                                        {
+                                            <ol>
+                                            @foreach (var paychannel in Model.PayChannelList)
+                                            {
+                                                <li>@paychannel.Text</li>
+                                            }
+                                                </ol>
+                                                <br />
+                                        }*@
+                                        @Html.Sitecore().Placeholder("paylaterdescription1")
+                                        @if (Model.messagepaychannel != null && Model.messagepaychannel.Length > 0)
+                                        {
+                                            foreach (var txt in Model.messagepaychannel)
+                                            {
+                                                <p class="align_left">@txt</p>
+                                            }
+                                        }
+                                        @*<p>@Model.messagepaychannel</p>*@
+                                        @Html.Sitecore().Placeholder("paylaterdescription2")
+
+                                    </div>
+                                </div>
+                                <div class="m39-modal__footer">
+                                    <button type="submit" id="payother"
+                                            data-text="payother"
+                                            class="button button--primary button--next"
+                                            data-submission-text="@Translate.Text("Submitting")...">
+                                        @Translate.Text("movein.contact.proceed")
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    }
+                </div>
+
+                @*<button type="submit" id="payother" data-text="payother" class="link button--text mt12">
+                    <strong>@Translate.Text("Payusingotherchannels")</strong>
+                </button>*@
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    docReady(function () {
+        var $ispaylaterclicked = jQuery('#ispaylaterclicked');
+        var $ispayotherclicked = jQuery('#ispayotherclicked');
+        $("form button[type=submit]").click(function () {
+            if ($(this).attr("data-text") == "paylater") {
+                $ispaylaterclicked[0].value = true;
+                $ispayotherclicked[0].value = false;
+            }
+            else if ($(this).attr("data-text") == "payother") {
+                $ispaylaterclicked[0].value = false;
+                $ispayotherclicked[0].value = true;
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            }
+            else {
+                $ispaylaterclicked[0].value = false;
+                $ispayotherclicked[0].value = false;
+            }
+        });
+
+        // Open Payment method popup.
+        jQuery('#paynow-popup').on('click', function () {
+            require(['parsley'], function () {
+                if (jQuery('#moveinpaymentform').parsley().validate()) {
+                    var total = @Model.Total;
+                    var currency = '@Translate.Text("AED")';
+
+                    jQuery('#divPaymentAmountVal').attr('data-value', total);
+                    jQuery('#divPaymentAmountVal').data('value', total);
+
+                    if (numeral(total) > 0)
+                    {
+                        //Set payment method based on paid amount
+                        setPaymentMethod(total);
+
+                        jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+                        jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                        jQuery('.btnmodaltrigger').trigger('click');
+                    }
+                };
+            });
+        });
+    });
+</script>

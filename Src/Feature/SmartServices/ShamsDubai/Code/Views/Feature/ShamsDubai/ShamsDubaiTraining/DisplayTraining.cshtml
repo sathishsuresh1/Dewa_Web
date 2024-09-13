@@ -1,0 +1,59 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Presentation
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using DEWAXP.Feature.ShamsDubai.Models.ShamsDubaiTraining
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@model List<DisplayTraining>
+
+@if (Model != null && Model.Count > 0)
+{
+    <div class="m23-table m23-table--asymetric-40" data-component="m23-table">
+        <div class="form-field form-field--select form-field--select-single form-field--select-inline mb32">
+            <label for="form-field-TrainingYear" class="form-field__label">
+                @Translate.Text("pvcc.choose year")
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                <select class="form-field__input form-field__input--select form-field__input--select--toggle" id="form-field-TrainingYear" dir="ltr" name="TrainingYear"
+                        aria-describedby="description-for-TrainingYear"
+                        data-parsley-errors-container="#description-for-TrainingYear"
+                        data-parsley-trigger="change"
+                        data-parsley-id="28">
+                    @foreach (var year in Model.GroupBy(c => c.TrainingYear).ToList().OrderBy(x => x.Key))
+                    {
+                        <option value="@year.Key" toggle-target=".toggleoption-@year.Key">@year.Key</option>
+                    }
+                </select>
+            </span>
+            <div id="description-for-chooseyear" class="form-field__messages">
+            </div>
+        </div>
+
+        <table class="m23-table__content-table">
+            <thead class="m23-table__content-table-header">
+                <tr class="m23-table__content-table-row">
+                    <th class="m23-table__content-table-cell--header center-text">@Translate.Text("pvcc.date")</th>
+                    <th class="m23-table__content-table-cell--header center-text">@Translate.Text("pvcc.training")</th>
+                    <th class="m23-table__content-table-cell--header center-text">@Translate.Text("pvcc.action")</th>
+                </tr>
+            </thead>
+            <tbody class="m23-table__content-table-body">
+                @foreach (DisplayTraining training in Model)
+                {
+                    <tr class="m23-table__content-table-row toggleoption-@training.TrainingYear">
+                        <td data-label="@Translate.Text("pvcc.date")" class="m23-table__content-table-cell">
+                            @training.TrainingDate
+                        </td>
+                        <td data-label="@Translate.Text("pvcc.training")" class="m23-table__content-table-cell">
+                            @training.TrainingDescription
+                        </td>
+                        <td data-label="@Translate.Text("pvcc.action")" class="m23-table__content-table-cell m23-table__content-table-cell--center">
+                            <a href="@string.Format("{0}?t={1}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SHAMS_BOOK_TRAINING),training.TrainingId.ToString())" class="button button--primary" role="button">@Translate.Text("pvcc.book")</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

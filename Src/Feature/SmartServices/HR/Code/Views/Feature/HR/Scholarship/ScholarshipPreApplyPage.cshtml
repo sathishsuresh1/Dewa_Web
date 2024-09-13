@@ -1,0 +1,148 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.HR.Models.Scholarship.ScholarshipPreApplyPageModel
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "PreApplyform", @class = "post-login-clear-cert-form form form--inline", enctype = "multipart/form-data", @data_form = "true" }))
+        {
+            //@Html.Sitecore().FormHandler("ClearanceCertificate", "RequestPropertySeller")
+            @Html.AntiForgeryToken()
+            <div class="form-field">
+                <fieldset class="fieldset">
+                    <legend class="form-field__label">
+                        @Translate.Text("Question1Text")
+                        <span class="form-field__label-optional"></span>
+                    </legend>
+                    <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                        <label for="form-field-radio_IsUniversityYearOk1">
+                            <input class="form-field__input form-field__input--radio radio-preapply"
+                                   id="form-field-radio_IsUniversityYearOk1"
+                                   name="IsUniversityYearOk"
+                                   type="radio"
+                                   value="true"
+                                   aria-describedby="description-for-IsUniversityYearOk"
+                                   data-parsley-errors-container="#description-for-IsUniversityYearOk">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("Yes")
+                            </span>
+                        </label>
+                    </p>
+                    <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                        <label for="form-field-radio_IsUniversityYearOk0">
+                            <input class="form-field__input form-field__input--radio radio-preapply"
+                                   id="form-field-radio_IsUniversityYearOk0"
+                                   name="IsUniversityYearOk"
+                                   type="radio"
+                                   value="false"
+                                   aria-describedby="description-for-IsUniversityYearOk"
+                                   aria-label="form-field-radio_IsUniversityYearOk0"
+                                   data-parsley-errors-container="#description-for-IsUniversityYearOk">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("No")
+                            </span>
+                        </label>
+                    </p>
+                    <div id="description-for-IsUniversityYearOk" class="form-field__messages">
+                    </div>
+                </fieldset>
+            </div>
+
+
+            <div class="form-field gpasection hidden">
+                <fieldset class="fieldset">
+                    <legend class="form-field__label">
+                        @Translate.Text("Question2Text")
+                        <span class="form-field__label-optional"></span>
+                    </legend>
+                    <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                        <label for="form-field-radio_IsGPAOk1">
+                            <input class="form-field__input form-field__input--radio radio-preapply"
+                                   id="form-field-radio_IsGPAOk1"
+                                   name="IsGPAOk"
+                                   type="radio"
+                                   value="true"
+                                   aria-describedby="description-for-IsGPAOk"
+                                   data-parsley-errors-container="#description-for-languague">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("Yes")
+                            </span>
+                        </label>
+                    </p>
+                    <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                        <label for="form-field-radio_IsGPAOk0">
+                            <input class="form-field__input form-field__input--radio radio-preapply"
+                                   id="form-field-radio_IsGPAOk0"
+                                   name="IsGPAOk"
+                                   type="radio"
+                                   value="false"
+                                   aria-describedby="description-for-IsGPAOk"
+                                   data-parsley-errors-container="#description-for-IsGPAOk">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("No")
+                            </span>
+                        </label>
+                    </p>
+                    <div id="description-for-IsGPAOk" class="form-field__messages">
+                    </div>
+                </fieldset>
+            </div>
+
+            @Html.Sitecore().Placeholder("scholarshipapply-bottom-placeholder")
+
+            <div class="form-field__button pre-apply-error hidden">
+                <a href="/api/sitecore/Scholarship/Logout" title="@Translate.Text("Close")s" class="button button--primary">@Translate.Text("Close")</a>
+            </div>
+
+            <div class="form-field__button submitbtn-section hidden">
+                <button id="continue-button-popup" name="continue-button" class="button button--primary" data-submission-text="@Translate.Text("Continue")...">@Translate.Text("Continue")</button>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    docReady(function () {
+        if (window.performance && window.performance.navigation.type == window.performance.navigation.TYPE_BACK_FORWARD) {
+            setTimeout(function () {
+                $("input[name='IsUniversityYearOk']").prop("checked", false);
+                $("input[name='IsGPAOk']").prop("checked", false);
+            }, 50)
+        }
+        jQuery('.radio-preapply').change(function () {
+            var isUniveristyClick = $(this).prop("name") == "IsUniversityYearOk";
+
+            var _trueString = 'true';
+            var _falseString = 'false';
+
+            var _UniversityVal = jQuery('input[name="IsUniversityYearOk"]:checked').val();
+            var _GPAVal = jQuery('input[name="IsGPAOk"]:checked').val();
+
+            if (isUniveristyClick) {
+                $("input[name='IsGPAOk']").prop("checked", false);
+            }
+
+            jQuery(".gpasection").show();
+            jQuery('.pre-apply-error').hide();
+            if (isUniveristyClick && _UniversityVal == _falseString) {
+                $(".gpasection").hide();
+                jQuery('.pre-apply-error').show();
+                jQuery(".submitbtn-section").hide();
+            }
+
+            if (_GPAVal == _falseString) {
+                jQuery('.pre-apply-error').show();
+                jQuery(".submitbtn-section").hide();
+            }
+
+            if (_GPAVal == _trueString && _UniversityVal == _trueString) {
+                jQuery('.pre-apply-error').hide();
+                jQuery(".submitbtn-section").show();
+            }
+        });
+    });
+
+</script>

@@ -1,0 +1,180 @@
+﻿
+@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint;
+@using Sitecore.Globalization;
+@model ConsumptionInsightData
+@using Sitecore.Mvc
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using smConfig = DEWAXP.Foundation.Content.ConsumptionComplaintResponseCofig;
+@using System.Linq
+
+@{
+    @functions{
+        public string GetWaterTarrifColor(string consumption)
+        {
+            string color = "";
+
+            if (!string.IsNullOrWhiteSpace(Model.SlabCaps) && !string.IsNullOrEmpty(consumption))
+            {
+                int consp = Convert.ToInt32(consumption);
+                int Caps = 0;
+                int i = 0;
+                foreach (var item in Model.SlabCaps.Split(','))
+                {
+                    Caps += Convert.ToInt32(item);
+
+
+                    if (i == 0)
+                    {
+                        color = "green";
+                    }
+
+                    if (i == 1)
+                    {
+                        color = "yellow";
+                    }
+                    if (i > 1)
+                    {
+                        color = "red";
+                    }
+                    if (consp <= Caps)
+                    {
+                        break;
+                    }
+
+                    i++;
+                }
+            }
+            return color;
+        }
+
+        public string GetDescription(string consumption)
+        {
+            string _description = "";
+            string _color = GetWaterTarrifColor(consumption);
+            string[] discArray =  Model.ConsumptionSlabDataListSetting.Placeholder.Split(new[] { "||" }, StringSplitOptions.None);
+            for (int i = 0; i < discArray.Length; i++)
+            {
+                if (discArray[i].ToLower().Contains(_color))
+                {
+                    _description = discArray[i];
+                    break;
+                }
+            }
+
+            return _description;
+        }
+    }
+
+}
+
+@if (Model.ConsumptionSlabDataList != null && Model.ConsumptionSlabDataList.Count > 0)
+{
+    string Consumption = "";
+    string Date = "";
+    string PreMonthConsumption = "";
+    string PreMonthDate = "";
+    string PreYearConsumption = "";
+    string PreYearDate = "";
+    ConsumptionData CurrentConsumption = Model.ConsumptionSlabDataList.Where(x => x.Data == "SelectedMonth").FirstOrDefault();
+    if (CurrentConsumption != null)
+    {
+        Consumption = CurrentConsumption.Data2;
+        Date = CurrentConsumption.Data1;
+    }
+    ConsumptionData PreMonthData = Model.ConsumptionSlabDataList.Where(x => x.Data == "SelectedPreMonth").FirstOrDefault();
+
+    if (PreMonthData != null)
+    {
+        PreMonthConsumption = PreMonthData.Data2;
+        PreMonthDate = PreMonthData.Data1;
+    }
+    var PreYearData = Model.ConsumptionSlabDataList.Where(x => x.Data == "SelectedPreYear").FirstOrDefault();
+    if (PreYearData != null)
+    {
+        PreYearConsumption = PreYearData.Data2;
+        PreYearDate = PreYearData.Data1;
+    }
+    <div class="m28-gauge m28-gauge--single" data-component="m28-dashboard-component-gauge">
+
+        <div class="m28-gauge--outerwrapper component-border">
+            <div class="m28-gauge--header">
+                <div class="m28-gauge--header_title">
+                    @_commonHelper.GetSMTranslation(Model.ConsumptionSlabDataListSetting.Btntitle)
+                </div>
+                <span>@_commonHelper.GetBillingMonthFormate(Date)</span>
+            </div>
+
+            <div class="m28-gauge--wrapperdata" data-waterslab="@Html.Raw(Model.SlabCaps)" data-accounttype="20" data-waterconsumption="@(Consumption)" data-water-max="18000">
+                <div class="m28-gauge--wrapper">
+                    <div class="m28-gauge--card">
+                        <div class="m28-gauge--container m28-gauge--container--3 m28-gauge--container--water">
+                            <svg version="1.1" id="chart2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="300" height="300px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
+                            <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%" spreadMethod="pad">
+                            <stop offset="0%" stop-color="#5b1ba1" stop-opacity="1"></stop>
+                            <stop offset="100%" stop-color="#b478da" stop-opacity="1"></stop>
+                                            </linearGradient>
+                                        </defs>
+                            <g class="m28-gauge--bar1">
+                            <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="6px" fill="none" stroke="#eef0f0"></path>
+                            <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="6px" fill="none">
+                                            </path>
+                                        </g>
+                            <g class="m28-gauge--bar2">
+                            <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="6px" fill="none" stroke="#eef0f0"></path>
+                            <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="6px" fill="none">
+                                            </path>
+                                        </g>
+                            <g class="m28-gauge--bar3">
+                            <path class="m28-gauge--bar_bg" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="6px" fill="none" stroke="#eef0f0"></path>
+                            <path id="m28-gauge--bar_fill" class="m28-gauge--bar_fill" d="M 150, 150 m -80, 0 a 80,80 0 1,1 160,0 a 80,80 0 1,1 -160,0 Z" stroke-linecap="round" stroke-width="6px" fill="none">
+                                            </path>
+                                        </g>
+                                    </svg>
+
+
+                            <div class="m28-gauge--details icon-Water">
+                                <div class="m28-gauge--details-value">@(Consumption)</div>
+                                <div class="m28-gauge--details-unit">@_commonHelper.GetSMTranslation("IG")</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="m28-gauge--content">
+                <div class="m28-gauge--content-title">@_commonHelper.GetSMTranslation(GetDescription(Consumption))</div>
+                <div class="m28-gauge--content-list">
+                    <ul>
+
+                        @if (!string.IsNullOrWhiteSpace(PreMonthConsumption) && !string.IsNullOrWhiteSpace(PreMonthDate))
+                        {
+                            <li class="m28-gauge--content-list-item">@_commonHelper.GetBillingMonthFormate(PreMonthDate)<span class="tariff-@GetWaterTarrifColor(PreMonthConsumption)">@(PreMonthConsumption)</span></li>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(PreYearConsumption) && !string.IsNullOrWhiteSpace(PreYearDate))
+                        {
+                            <li class="m28-gauge--content-list-item">@_commonHelper.GetBillingMonthFormate(PreYearDate)<span class="tariff-@GetWaterTarrifColor(PreYearConsumption)">@(PreYearConsumption)</span></li>
+                        }
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <script type="text/javascript">
+        docReady(function () {
+            setTimeout(function () {
+                jQuery(window).trigger('reinit_m28');
+            }, 500)
+        })
+
+    </script>
+}

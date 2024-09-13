@@ -1,0 +1,243 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.Header
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using _scPageTemplate = DEWAXP.Foundation.Content.ScTemplate
+@using _scHelper = DEWAXP.Foundation.Helpers.ScHelper
+
+
+@model Masthead
+
+@{
+    #region Initialization
+    string partnerslink = "https://e-services.dewa.gov.ae/partners_v2/login.aspx";
+    string Careerslink = "https://careers.dewa.gov.ae/irj/portal/anonymous/jsear?lang=en";
+    var j86login = "https://crm.dewa.gov.ae/irj/portal/anonymous";
+    var j87login = "https://srm.dewa.gov.ae/irj/portal/anonymous";
+    var web_lang = Language.Current.Name.ToLowerInvariant();
+    //var yozlink = "https://www.zayed.ae/en/";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        partnerslink = "https://e-services.dewa.gov.ae/arabic/partners_v2/login.aspx";
+        Careerslink = "https://careers.dewa.gov.ae/irj/portal/anonymous/jsear_ar?lang=ar";
+        // yozlink = "https://www.zayed.ae/";
+    }
+    string epasstemplateid = "{255C4545-C106-4D40-BE2A-10F8988AB89A}".ToLower();
+    var tabindexcounter = 0;
+    //var j86login = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J86_LOGIN_PAGE);
+    if (string.IsNullOrEmpty(j86login))
+    {
+        j86login = "https://crm.dewa.gov.ae/irj/portal/anonymous";
+    }
+    //var j87login = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J87_LOGIN_PAGE);
+    if (string.IsNullOrEmpty(j87login))
+    {
+        j87login = "https://srm.dewa.gov.ae/irj/portal/anonymous";
+    }
+    #endregion
+
+
+    bool isScrapSaleRegion = _scHelper.IsPageExistedInCurrentPageOrDescendent(Guid.Parse(_scPageItemId.SCRAPESALE_INTROPAGE), Model.CurrentItem.ID.Guid);
+
+}
+@{
+    Sitecore.Data.Items.ItemAxes careerItem1 = new Sitecore.Data.Items.ItemAxes(Model.CurrentItem);
+    var query = "ancestor-or-self::*[@@id='{D79C0670-9EE4-429C-B873-8ED5A7F69FA1}']";
+    var selectedItem = careerItem1.SelectItems(query);
+    bool careerspage = selectedItem != null ? true : false;
+}
+<div class="m12-menuover-footer--link">
+    @if (Model.Mastheadv1 != null)
+    {
+        if (!User.Identity.IsAuthenticated || (User.Identity.IsAuthenticated && !ViewBag.IsLoggedIn))
+        {
+            if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.ConsumerLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.DewaHomePage))
+            {
+                if (Model.CurrentItem.TemplateID.ToGuid().Equals(Guid.Parse(_scPageTemplate.CareerPortalTemplate)) || careerspage)
+                {
+                    <a data-tid="@Model.ActiveLanding.Id" href="@LinkHelper.GetItemUrl(_scPageItemId.CAREER_POTAL_LOGIN)" data-label="My Account" data-m12-myaccount-link="true" class="button--very_small button button--outline lgnBtn"><span class="">@Translate.Text("header.login")</span></a>
+                }
+                else if (isScrapSaleRegion)
+                {
+                    <a data-tid="@Model.ActiveLanding.Id" href="@LinkHelper.GetItemUrl(_scPageItemId.SCRAPESALE_PORTAL_LOGINPAGE)" data-label="My Account" data-m12-myaccount-link="true" class="button--very_small button button--outline lgnBtn"><span class="">@Translate.Text("header.login")</span></a>
+                }
+                else
+                {
+                    <a data-tid="@Model.ActiveLanding.Id" href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGIN_PAGE)" data-label="My Account" data-m12-myaccount-link="true" class="button--very_small button button--outline lgnBtn"><span class="">@Translate.Text("header.login")</span></a>
+                }
+            }
+            else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.BuilderLandingPage))
+            {
+                <!--  Consultants and Contractors-->
+                <a data-tid="@Model.ActiveLanding.Id" aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="button--very_small button button--outline @(web_lang == "ar-ae" ? "non_arabic_link" : "") lgnBtn" href="@j86login"><span class="">@Translate.Text("header.login")</span></a>
+            }
+            else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.StudentLandingPage))
+            {
+                <!--  Consultants and Contractors-->
+                @*<a data-tid="@Model.ActiveLanding.Id" aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="button--very_small button button--outline @(web_lang == "ar-ae" ? "non_arabic_link" : "") lgnBtn" href="@LinkHelper.GetItemUrl(_scPageItemId.SCHOLARSHIP_SIGNIN_PAGE)"><span class="">@Translate.Text("header.login")</span></a>*@
+            }
+            else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.SupplierLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.PartnerLandingPage))
+            {
+                <!--  Suppliers and Partners-->
+                if (Model.CurrentItem.Template.ID.ToString().ToLower().Equals(epasstemplateid))
+                {
+                    <a data-tid="@Model.ActiveLanding.Id" aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="button--very_small button button--outline @(web_lang == "ar-ae" ? "non_arabic_link" : "") lgnBtn" href="@(LinkHelper.GetItemUrl(_scPageItemId.EPASS_LOGIN))"><span class="">@Translate.Text("header.login")</span></a>
+                }
+                else
+                {
+                    <a data-tid="@Model.ActiveLanding.Id" aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="button--very_small button button--outline @(web_lang == "ar-ae" ? "non_arabic_link" : "") lgnBtn" href="@j87login"><span class="">@Translate.Text("header.login")</span></a>
+                }
+            }
+
+            <input type="hidden" class="@(Guid.Parse(_scPageItemId.PartnerLandingPage)) @(Guid.Parse(_scPageItemId.SupplierLandingPage))" value="@j87login" />
+            <input type="hidden" class="@(Guid.Parse(_scPageItemId.BuilderLandingPage))" value="@j86login" />
+            <input type="hidden" class="@(Guid.Parse(_scPageItemId.StudentLandingPage))" value="@LinkHelper.GetItemUrl(_scPageItemId.SCHOLARSHIP_SIGNIN_PAGE)" />
+            <input type="hidden" class="@(Guid.Parse(_scPageItemId.ConsumerLandingPage)) @(Guid.Parse(_scPageItemId.DewaHomePage)) _defaultType" value="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGIN_PAGE)" />
+
+
+            <script type="text/javascript">
+
+                docReady(function () {
+
+                    setTimeout(function () {
+                        //console.log(jQuery(".lgnBtn").length);
+                        jQuery(".lgnBtn").click(function () {
+                            var IsItemActive = jQuery(".m12-menuover-main_itemactive-mobile").length > 0 || (jQuery(".m12-menuover--active").length > 0 && jQuery(".m12-menuover-main_itemactive").length > 0)
+
+                            var isDesktop = jQuery(".m12-menuover--active").length > 0;
+                            var isMobile = jQuery(".mobile-menu--active").length > 0;
+                            if (IsItemActive && (isDesktop || isMobile)) {
+
+                                var cssClass = "";
+                                if (isDesktop) {
+                                    cssClass = jQuery(".m12-menuover-main_itemactive").data("tid");
+                                }
+                                if (isMobile) {
+                                    cssClass = jQuery(".m12-menuover-main_itemactive-mobile").data("tid");
+                                }
+                                //cssClass = (cssClass != null && cssClass != undefined && cssClass != "" ? cssClass : "_defaultType");
+                                if (cssClass != undefined && cssClass != "") {
+                                    var _dataEle = jQuery("." + cssClass).val();
+
+                                    if (_dataEle == undefined) {
+                                        cssClass = "_defaultType";
+                                    }
+                                    event.preventDefault();
+                                    window.location.href = jQuery("." + cssClass).val();
+
+                                }
+                            }
+
+                            return true;
+                        });
+                    }, 1000)
+
+
+
+
+                })
+
+            </script>
+        }
+        else
+        {
+            if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.ConsumerLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.DewaHomePage))
+            {<!-- Customer and Home -->
+                <a href="@LinkHelper.GetItemUrl(_scPageItemId.J69_CUSTOMER_DASHBOARD)" data-mobile-menu-myaccount="true" class="mobile-menu__tool-button mobile-menu__tool-button--myaccount button button--primary lgnBtn">@Model.UserName</a>
+            }
+            else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.BuilderLandingPage))
+            {
+                <!--  Consultants and Contractors-->
+                <a data-label="@Translate.Text("My Account")" data-mobile-menu-myaccount="true" class="mobile-menu__tool-button mobile-menu__tool-button--myaccount button button--primary @(web_lang == "ar-ae" ? "non_arabic_link" : "") lgnBtn" href="@j86login">@Translate.Text("My Account")</a>
+            }
+            else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.SupplierLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.PartnerLandingPage))
+            {
+                <!--  Suppliers and Partners-->
+                <a data-label="@Translate.Text("My Account")" data-mobile-menu-myaccount="true" class="mobile-menu__tool-button mobile-menu__tool-button--myaccount button button--primary @(web_lang == "ar-ae" ? "non_arabic_link" : "") lgnBtn" href="@j87login">@Translate.Text("My Account")</a>
+            }
+
+            <input type="hidden" data-btntext="@Translate.Text("My Account")" class="@(Guid.Parse(_scPageItemId.PartnerLandingPage)) @(Guid.Parse(_scPageItemId.SupplierLandingPage))" value="@j87login" />
+            <input type="hidden" data-btntext="@Translate.Text("My Account")" class="@(Guid.Parse(_scPageItemId.BuilderLandingPage))" value="@j86login" />
+            <input type="hidden" data-btntext="@Model.UserName" class="@(Guid.Parse(_scPageItemId.ConsumerLandingPage)) @(Guid.Parse(_scPageItemId.DewaHomePage)) _defaultType" value="@LinkHelper.GetItemUrl(_scPageItemId.J69_CUSTOMER_DASHBOARD)" />
+
+
+            <script type="text/javascript">
+
+                docReady(function () {
+
+                    setTimeout(function () {
+                        //console.log(jQuery(".m12-menuover-main_item").length);
+                        jQuery(".m12-menuover-main_item").click(function () {
+                            var cssClass = jQuery(this).data("tid");
+                            cssClass = (cssClass != null && cssClass != undefined && cssClass != "" ? cssClass : "_defaultType");
+                            var d = jQuery("." + cssClass);
+                            if (d != null && d != undefined) {
+                                var btntext = jQuery(d).data("btntext");
+                                jQuery(".lgnBtn").text(btntext);
+                            }
+
+                        });
+
+                        //console.log(jQuery(".lgnBtn").length);
+                        jQuery(".lgnBtn").click(function () {
+                            var IsItemActive = jQuery(".m12-menuover-main_itemactive-mobile").length > 0 || (jQuery(".m12-menuover--active").length > 0 && jQuery(".m12-menuover-main_itemactive").length > 0)
+
+                            var isDesktop = jQuery(".m12-menuover--active").length > 0;
+                            var isMobile = jQuery(".mobile-menu--active").length > 0;
+                            if (IsItemActive && (isDesktop || isMobile)) {
+                                var cssClass = "";
+                                if (isDesktop) {
+                                    cssClass = jQuery(".m12-menuover-main_itemactive").data("tid");
+                                }
+                                if (isMobile) {
+                                    cssClass = jQuery(".m12-menuover-main_itemactive-mobile").data("tid");
+                                }
+                                //cssClass = (cssClass != null && cssClass != undefined && cssClass != "" ? cssClass : "_defaultType");
+                                if (cssClass != undefined && cssClass != "") {
+                                    var _dataEle = jQuery("." + cssClass).val();
+
+                                    if (_dataEle == undefined) {
+                                        cssClass = "_defaultType";
+                                    }
+                                    event.preventDefault();
+                                    window.location.href = jQuery("." + cssClass).val();
+
+                                }
+
+                            }
+                            return true;
+
+                        });
+                    }, 1000)
+
+
+
+
+                })
+
+            </script>
+
+        }
+    }
+</div>
+
+<script type="text/javascript">
+
+    docReady(function () {
+        setTimeout(function () {
+            jQuery(".m12-menuover-closebutton,.mobile-menu-closebtn").click(function () {
+                var _text = jQuery(".user").data("label");
+
+                if (_text != null && _text != undefined) {
+                    //jQuery(".user").text(_text);
+                }
+            })
+
+        }, 1000);
+    })
+
+</script>
+<!--M12-2 Masthead Login Popup Button.cshtml end-->

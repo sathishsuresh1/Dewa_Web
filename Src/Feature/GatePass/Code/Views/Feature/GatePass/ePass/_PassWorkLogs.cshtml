@@ -1,0 +1,93 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.ePass.SecurityPassWorkLogFilterModel
+
+@if (Model != null)
+{
+    <table class="j113-epass--table">
+        <thead class="j113-epass--table_header">
+            <tr>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Checkin")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Checkout")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Hours")</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.ListWorkLogs != null && !Model.ListWorkLogs.Any())
+            {
+                <tr class="j113-epass--table_row">
+                    <td class="j113-epass--table_cell" colspan="6">
+                        <p class='centered'>@Translate.Text("No Results found")</p>
+                    </td>
+
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model.ListWorkLogs)
+                {
+                    <tr class="j113-epass--table_row">
+                        <td class="j113-epass--table_cell">
+                            @item.CheckIn
+                        </td>
+                        <td class="j113-epass--table_cell">
+                            @item.CheckOut
+                        </td>
+                        <td class="j113-epass--table_cell">
+                            @item.Hours
+                        </td>
+                    </tr>
+                }
+
+            }
+        </tbody>
+    </table>
+    if (Model.pagination)
+    {
+        <div class="grid__column grid__column--12 pagination-list" id="pagination-list">
+            <div class="m34-pagination">
+                <div class="m34-pagination__content">
+                    @if (Model.page > 1)
+                    {
+                        <a onclick="PagerClick(@(1));" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                            <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                            <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+                        </a>
+                        <a onclick="PagerClick(@(Model.page-1));" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+                    }
+                    <ul class="m34-pagination__page-list">
+                        @if (Model.pagenumbers != null && Model.pagenumbers.Count() > 0)
+                        {
+                            foreach (int pagenumber in Model.pagenumbers)
+                            {
+                                if (Model.page.Equals(pagenumber))
+                                {
+                                    <li data-index="@pagenumber" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                                        <a onclick="PagerClick(@(pagenumber));" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pagenumber</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li data-index="@pagenumber" class="m34-pagination__page-list-item">
+                                        <a onclick="PagerClick(@(pagenumber));" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pagenumber</a>
+                                    </li>
+                                }
+                            }
+                        }
+                    </ul>
+
+                    @if (Model.page < Model.totalpage)
+                    {
+                        <a onclick="PagerClick(@(Model.page + 1));" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+                        <a onclick="PagerClick(@(Model.totalpage));" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                            <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                            <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+}

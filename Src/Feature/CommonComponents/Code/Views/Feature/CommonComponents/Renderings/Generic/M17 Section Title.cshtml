@@ -1,0 +1,54 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Links
+@using Sitecore.Mvc
+
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.SectionTitle
+
+@{
+    string hastitle = ViewData["Title"]!=null &&!string.IsNullOrWhiteSpace(ViewData["Title"].ToString())? ViewData["Title"].ToString():string.Empty;
+    bool underlinesection = (Html.Sitecore().CurrentRendering.Parameters["underline"] != null && Html.Sitecore().CurrentRendering.Parameters["underline"] == "true") ? true : false;
+    bool titlesection = (Html.Sitecore().CurrentRendering.Parameters["title"] != null && Html.Sitecore().CurrentRendering.Parameters["title"] == "true") ? true : false;
+    var sectionclass = underlinesection ? " m17-sectiontitle-centerlined" : string.Empty;
+}
+@if (Model != null)
+{
+    <div class="grid__row @hastitle">
+        <div class="grid__column grid__column--12">
+            <div class="m17-sectiontitle @sectionclass" data-component="m17-sectiontitle">
+                @if (!string.IsNullOrWhiteSpace(Model.Header))
+                {
+
+                    if (underlinesection)
+                    {
+                        <h3 class="m17-sectiontitle__title  text__section-title">
+                            <span class="m17-center_lined_block">
+                                @Html.Glass().Editable(x => x.Header)
+                            </span>
+                        </h3>
+                    }
+                    else
+                    {
+                        <h3 class="m17-sectiontitle__title  text__section-title @(titlesection?"green":string.Empty)">@Html.Glass().Editable(x => x.Header)</h3>
+                    }
+
+                }
+
+
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <h5 class="m17-sectiontitle__subtitle  text__section-subtitle">@Html.Glass().Editable(x => x.Description)</h5>
+                }
+                @if (!string.IsNullOrEmpty(Model.ButtonText) && Model.ButtonLink != null)
+                {
+                    <p class="m17-sectiontitle__strong-cta">
+                        <a href="@LinkManager.GetItemUrl(Model.ButtonLink)" class="m17-sectiontitle__cta button button--text">@Html.Glass().Editable(x => x.ButtonText)</a>
+                    </p>
+                }
+                @if (!string.IsNullOrEmpty(Model.RedirectText) && Model.RedirectLink != null)
+                {
+                    <a class="m17-sectiontitle__cta button button--text" href="@LinkManager.GetItemUrl(Model.RedirectLink)">@Html.Glass().Editable(x => x.RedirectText)</a>
+                }
+            </div>
+        </div>
+    </div>
+}

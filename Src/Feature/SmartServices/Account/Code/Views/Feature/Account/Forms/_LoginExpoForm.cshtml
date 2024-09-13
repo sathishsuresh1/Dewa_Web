@@ -1,0 +1,208 @@
+﻿@model DEWAXP.Foundation.Content.Models.AccountModel.LoginModel
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@{
+    var rUsername = ViewBag.movein != null && (bool)ViewBag.movein == true && !string.IsNullOrEmpty(Model.Username) ? "readonly" : string.Empty;
+    string _lang = Translate.Text("lang");
+    bool _IsloginActive = !string.IsNullOrEmpty(Model.Username);
+}
+<div class="j07-customer-login">
+    <div class="grid">
+        <div class="grid__row mt24">
+            <div class="grid__column grid__column--12 p0">
+                <div class="m17-sectiontitle m17-sectiontitle__title--green" data-component="m17-sectiontitle">
+                    <h3 class="m17-sectiontitle__title  text__section-title">@Translate.Text("Welcome to DEWA")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <!-- start pre logged content -->
+            <div class="grid__column grid__column--3">
+                <h2 class="m12-subsection__title">@Translate.Text("I am a")</h2>
+                <ul class="links-list">
+                    <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_LOGIN_PAGE)" class="links-list__link">@Translate.Text("Individual")</a></li>
+                    <li class="links-list__item"><a href="https://crm.dewa.gov.ae/irj/portal/anonymous" class="links-list__link">@Translate.Text("Contractors & Consultants")</a></li>
+                    <li class="links-list__item"><a href="https://srm.dewa.gov.ae/irj/portal/anonymous" class="links-list__link">@Translate.Text("Suppliers")</a></li>
+                    <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_LOGIN)" class="links-list__link">@Translate.Text("Careers")</a></li>
+                    <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J8_GOVT_LOGIN_PAGE)" class="links-list__link">@Translate.Text("Government")</a></li>
+                    <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EXPO_LOGIN_PAGE)" class="links-list__link active">@Translate.Text("Expo2020login")</a></li>
+                    <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.MISCELLANEOUS_LOGIN)" class="links-list__link">@Translate.Text("SS_MiscellaneousTitle")</a></li>
+                </ul>
+            </div>
+
+            <div class="grid__column grid__column--6">
+                <div class="m12-subsection_login-wrapper" style="border:none;">
+                    <h2 class="m12-subsection__title mobile-hide">@Translate.Text("EXPO 2020 Participant Login")</h2>
+                    <div class="m12-myaccount__login-form">
+                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @id = "expo2020Form", @data_parsley_focus = "true", @data_form = "true", @class = "form", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+                        {
+                            @Html.Sitecore().FormHandler()
+                            @Html.AntiForgeryToken()
+                            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+                            <div class="form-field form-field--text">
+                                <label for="form-field-login-main-username" class="form-field__label">
+                                    @Translate.Text("username label")
+
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    @Html.TextBoxFor(x => x.Username, new
+                               {
+                                   @class = "form-field__input form-field__input--text" + " " + rUsername,
+                                   @type = "text",
+                                   @id = "form-field-login-main-username",
+                                   @placeholder = Translate.Text("username label"),
+                                   @required = "required",
+                                   //@data_parsley_pattern = "/[0-9a-zA-Z]{6,}/",
+                                   //@data_parsley_pattern_message = Translate.Text("register username validation message"),
+                                   @data_parsley_required_message = Translate.Text("Username Required Message"),
+                                   @data_parsley_errors_container = "#description-for-login-main-username",
+                                   @aria_describedby = "description-for-login-main-username",
+                                   @tabindex = "1",
+                                   @maxlength="20"
+                               })
+                                </span>
+                                <div id="description-for-login-main-username" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Username, "", new { @class = "parsley-errors-list" })
+                                    <p class="form-field__helplink">
+                                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_FORGOT_USERNAME)">@Translate.Text("forgot username link text")</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-field form-field--text mt0">
+                                <label for="form-field-login-main-password" class="form-field__label">
+                                    @Translate.Text("login password label")
+
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    @Html.PasswordFor(x => x.Password, new
+                               {
+                                   @class = "form-field__input form-field__input--text",
+                                   @id = "form-field-login-main-password",
+                                   @placeholder = Translate.Text("login password label"),
+                                   @type = "password",
+                                   @required = "required",
+                                   @data_parsley_errors_container = "#description-for-login-main-password",
+                                   @aria_describedby = "description-for-login-main-password",
+                                   @data_parsley_error_message = Translate.Text(DictionaryKeys.Global.Login.PleaseEnterPassword),
+
+                                   @autocomplete = "off",
+                                   @tabindex = "1"
+                               })
+                                </span>
+                                <div id="description-for-login-main-password" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Password, "", new { @class = "parsley-errors-list" })
+                                    <p class="form-field__helplink">
+                                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_FORGOT_PASSWORD)">@Translate.Text("forgot password link text")</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="form-field form-field--toggles mt0">
+                                <fieldset class="fieldset">
+                                    <legend class="form-field__label aria-only">
+                                        @Translate.Text("header.rememberme")
+                                        <span class="form-field__label-optional">(optional)</span>
+                                    </legend>
+                                    <div class="form-field__checkbox  last  first">
+                                        <label for="rememberme">
+                                            <input class="form-field__input form-field__input--checkbox" id="rememberme" name="checkbox_rememberme1" type="checkbox" value="1" aria-describedby="description-for-jpjw6rpk1" data-parsley-errors-container="#description-for-jpjw6rpk1">
+                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                @Translate.Text("header.rememberme")
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div id="description-for-jpjw6rpk1" class="form-field__messages">
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="form-field__button">
+                                <button id="loginButton" type="submit" class="button button--primary" data-submission-text="@Translate.Text("Logging in")...">@Translate.Text("login button text")</button>
+                            </div>
+
+                        }
+                        <span class="create form-links">
+                            @Translate.Text("or") <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J9_CUSTOMER_REGISTRATION)" class="form-links__link"> @Translate.Text("header.createnewaccount")</a>
+                        </span>
+                    </div>
+                    @Html.Sitecore().Placeholder("loginsession")
+                </div>
+            </div>
+
+            <!-- end pre logged content -->
+        </div>
+
+    </div>
+</div>
+<script>
+    if ('@rUsername' != "") {
+        docReady(function () {
+            var username = jQuery('#form-field-login-main-username');
+            if (username.val() != "") {
+                username.attr('readonly', "");
+            }
+        });
+    } else {
+
+
+        docReady(function () {
+            if (inIframe()) {
+                var returnURL = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_UAE_ID_LOGIN)' + '?returnUrl=' + '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.UNIVERSAL_SERVICE_CENTRE)' + '&isFrame=true';
+                jQuery(".uaepassreturnurl").attr("href", returnURL);
+                jQuery(".uaepassreturnurl").attr("target", "_top");
+            }
+            function inIframe() {
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true;
+                }
+            }
+            
+            setTimeout(function () {
+
+                if ('@rUsername' == "") {
+
+                    try {
+                        var uid = readCookie("cuid");
+                        if (uid != null && uid != undefined && uid != "" && jQuery("#form-field-login-main-username").val() == "") {
+                            jQuery("#form-field-login-main-username").val(window.atob(uid));
+                            jQuery("#rememberme").prop("checked", true);
+                        }
+
+                    }
+                    catch (e) {
+                    }
+                }
+
+
+
+                jQuery("#expo2020Form").submit(function () {
+                    try {
+                        var isRemember = jQuery("#rememberme").prop("checked");
+                        if (isRemember) {
+                            var v = jQuery("#form-field-login-main-username").val();
+                            if (v != null && v != undefined && v != "") {
+                                createCookie("cuid", window.btoa(v), 7);
+                            }
+                        } else {
+                            eraseCookie("cuid");
+                        }
+                    } catch (e) {
+                    }
+                    return true;
+                })
+
+            }, 100);
+        });
+
+    }
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+
+

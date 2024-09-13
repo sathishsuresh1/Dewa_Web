@@ -1,0 +1,57 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+
+@Html.Sitecore().Placeholder("j15/m26-page-title")
+
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { q = Request.QueryString["q"] }, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true",@id="sddocumentform", @class = "form", @novalidate = "novalidate" }))
+{
+    
+    @Html.Sitecore().FormHandler()
+    @Html.AntiForgeryToken()
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            <p>@Html.Sitecore().Placeholder("billdescription")</p>
+            @if ((bool)ViewBag.Recaptcha)
+            {
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--centered">
+                        <br />
+                        <div class="g-recaptcha inline-block" id="captcha" data-sitekey="@(ViewBag.SiteKey)"></div>
+                        <br />
+                        <span id='errorContainer' class="parsley-errors-list"></span>
+                    </div>
+                </div>
+            }
+            @*else
+            {
+                <div class="aspcaptcha">
+                    @Html.Captcha(Translate.Text("Bill-Refresh"), Translate.Text("Bill-Captcha"), 5, "Is required field", true)
+                </div>
+            }*@
+        </div>
+
+        <div class="grid__column grid__column--12 grid__column--centered">
+            <button style="padding: 6px 32px;" id="billdownload-button" type="submit" class="button button--secondary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("movein.sdDownload")</button>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    docReady(function () {
+        //jQuery('.m12-main__navs').hide();
+        //jQuery('#rs_area').addClass('forceEN');
+        jQuery('a').each(function () {
+            if (jQuery(this).attr('href') == '#CaptchaImage') {
+                jQuery(this).attr('href', 'javascript:void(0);');
+            }
+        });
+        jQuery("button[type='submit']").off('click.submit').on('click.submit', function (e) {
+             e.preventDefault();
+            if (GoogleRecaptchaCallback('errorContainer', '@Translate.Text("You cant leave Captcha Code empty")')) {
+                jQuery("#sddocumentform").submit();
+            }
+        });
+    });
+</script>

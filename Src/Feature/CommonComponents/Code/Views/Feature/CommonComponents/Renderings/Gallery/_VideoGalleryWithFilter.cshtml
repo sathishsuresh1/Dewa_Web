@@ -1,0 +1,103 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using DEWAXP.Feature.CommonComponents.Models.Gallery
+@model MediaVidoeGalleryModel
+
+@if (Model != null)
+{
+
+    <div class="grid j134-media" data-journey="j134-media">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m35-filter m35-filter--left">
+                    <div class="m35-filter__column--combination">
+                        <label for="form-field-CatType" class="form-field__label">
+                            <span class="aria-only">@Translate.Text("CatType")</span>
+                        </label>
+                        <label for="form-field-searchText" class="form-field__label">
+                            <span class="aria-only">@Translate.Text("searchText")</span>
+                        </label>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select mt0">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-CatType" name="months"
+                                        onchange="FilterByText()">
+                                    <option value="">@Translate.Text("All")</option>
+                                    @foreach (string item in Model.FilterDataList)
+                                    {
+                                        <option value="@item" @Html.Raw(item == Model.SelectedFilter ? "selected" : "")>@item</option>
+                                    }
+                                </select>
+                            </span>
+                        </div>
+                        <div class="form-field form-field--text">
+                            <span class="form-field__input-wrapper mt0">
+                                <input maxlength="25" class="form-field__input form-field__input--text actionElement" id="form-field-searchText" name="text-optional" type="text" value="@Model.SearchText" placeholder="@Translate.Text("PP_SearchPlaceholder")" aria-describedby="description-for-fb64gohtk" data-parsley-errors-container="#description-for-fb64gohtk" data-parsley-trigger="focusout" data-parsley-id="6">
+                            </span>
+                        </div>
+                        <button type="submit" onclick="FilterByText()" class="icon-search actionElement"><span class="aria-only">@Translate.Text("searchText")</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row grid__row--tight">
+            <div class="j143_media--mscroll j134-media-presspack" data-datasrcid="@Model.DatasourceId">
+                @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Gallery/_VideoGalleryWithFilterLoadSection.cshtml", Model)
+            </div>
+        </div>
+    </div>
+
+
+
+    <script type="text/javascript">
+    var apiUrl = '@Url.Action("VideoGalleryWithFilter", "Renderings")';
+        function LoadMore() {
+            var pageno = $(".loadmore-container").data("pageno");
+            RenderAndFilterData(pageno, ".data-appender-container")
+
+    }
+
+    function FilterByText() {
+        RenderAndFilterData(1, ".j134-media-presspack");
+    }
+
+
+    function RenderAndFilterData(pageno, container_element) {
+        var datasrcid = $(".j134-media-presspack").data("datasrcid");
+        var searchTxt = $("#form-field-searchText").val();
+        var listItem = $("#form-field-CatType").val();
+
+        jQuery.ajax({
+            type: "GET",
+            url: apiUrl + '?i=' + datasrcid + "&s=" + searchTxt + "&li=" + listItem + "&p=" + pageno + "&m=true",
+            beforeSend: function () {
+                $(".m66-preloader-fullpage").show();
+            },
+            success: function (response) {
+                $(".loadmore-container").remove();
+                if (pageno == 1) {
+                    $(container_element).html(response);
+                } else {
+                    $(container_element).append(response);
+                }
+            },
+            complete: function () {
+                $(".m66-preloader-fullpage").fadeOut();
+            }
+
+        });
+    }
+
+        docReady(function () {
+
+            $('.actionElement').on('keypress', function (e) {
+                if (e.keyCode == 13) {
+                    FilterByText();
+                }
+            });
+
+        })
+    </script>
+}

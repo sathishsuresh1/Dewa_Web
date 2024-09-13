@@ -1,0 +1,65 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Foundation.Content.Models.SelectedAccountViewModel
+
+@{
+    var defaultStatusIndicatorClass = Model != null && Model.Account.Active ? "active" : "inactive";
+    var defaultStatusIndicatorText = Model != null && Model.Account.Active ? "Active" : "Inactive";
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+
+<div data-component="m43-account-selector" class="m43-accountsel">
+    @if (!string.IsNullOrWhiteSpace(Model.FieldLabel))
+    {
+        <p class="m43-accountsel__labelstyle">@Model.FieldLabel</p>
+    }
+    <p class="m43-accountsel__selected relative">
+        <span data-acc-detail="wrapper" class="m43-accountsel__account">
+            @if (!string.IsNullOrWhiteSpace(Model.Account.ImageUrl))
+            {
+                <img data-acc-detail="acc_image" role="presentation" alt="@Model.Account.Name @Sitecore.Globalization.Translate.Text("profile picture")" class="m43-accountsel__image" src="@Model.Account.ImageUrl">
+            }
+            else
+            {
+                <img src="/images/accounts/Customer.png" data-src="/images/accounts/Customer.png" class="m43-accountsel__image tooltipstered" alt="@Model.Account.Name" role="presentation" data-acc-detail="acc_image">
+            }
+            <span class="m43-accountsel__header">
+                <span data-acc-detail="acc_name" class="m43-accountsel__name"><span class="inline-block" dir="@direction">@Model.Account.Name</span><span dir="@direction" class="m43-accountsel__status m43-accountsel__status--@defaultStatusIndicatorClass">@*@Translate.Text(defaultStatusIndicatorText)*@</span></span>
+                <span class="m43-accountsel__details">
+                    @if ((!string.IsNullOrWhiteSpace(Model.Account.BillingClass.ToString()) && !Model.Account.BillingClass.Equals("-")))
+                    {
+                        <span dir="@direction" data-acc-detail="type">@Model.Account.BillingClass</span> @("|")
+                    }
+                    else
+                    {
+                        <span dir="@direction" data-acc-detail="type" style="display:none">@Model.Account.BillingClass</span>
+                    }
+
+                    @if ((!string.IsNullOrWhiteSpace(Model.Account.AccountNumber) && !Model.Account.AccountNumber.Equals("-")))
+                    {
+                        <span title="Account">@Translate.Text("global.accountnumber")</span>
+                        <span dir="@direction" data-acc-detail="acc_number">(@Model.Account.AccountNumber)</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Account.Street) && !string.IsNullOrWhiteSpace(Model.Account.Location))
+                    {
+                        <span class="m43-accountsel__details m43-accountsel__secondarydetails">
+                            <span dir="@direction" data-acc-detail="address">
+                                @Model.Account.Street, @Model.Account.Location
+                            </span>
+                        </span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Account.NickName))
+                    {
+                        <span class="m43-accountsel__secondarydetails">
+                            <span class="inline-block mt12" dir="@direction">
+                                <strong>@Model.Account.NickName</strong>
+                            </span>
+                        </span>
+                    }
+                </span>
+            </span>
+        </span>
+    </p>
+</div>
+

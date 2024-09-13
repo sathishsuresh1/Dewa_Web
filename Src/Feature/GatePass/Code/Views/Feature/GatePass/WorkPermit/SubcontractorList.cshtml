@@ -1,0 +1,362 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+<div class="j113-epass">
+    <div class="j113-epass">
+        <div class="m66-preloader j113-epass--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid" style="max-width:1400px;width:90%">
+        @Html.Sitecore().Placeholder("pagetitle")
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m15-filter subcontractors-div" data-component="m15-filter">
+                    <form id="form-mypasses-filter" action="#" method="POST" form-skipvalidation="true">
+                        @Html.AntiForgeryToken()
+                        <div class="m15-filter--input_wrapper">
+                            <input placeholder="@Translate.Text("search by id or name")" class="m15-filter--input" id="mypasseskeyword" type="text" name="">
+                            <button class="m15-filter--input_button icon-search" id="mypassesbutton"></button>
+                        </div>
+                    </form>
+                    <div class="m15-filter--select_wrapper icon-open" data-title="Page size">
+                        @Translate.Text("Epass.Pagesize")
+
+                        @Html.DropDownList("pagesizefilter", EpassHelper.GetPageSize(),
+                            new
+                            {
+                                @class = "m15-filter--select",
+                                @id = "pagesizefilter",
+                                @name = "pagesizefilter",
+                                @aria_describedby = "description-for-pagesizefilter",
+                                @data_parsley_id = "20"
+                            })
+                    </div>
+                </div>
+                <div id="canceldetailsdiv"></div>
+                <div class="subcontractors-panels" id="subcontractorspanel">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="mypasses-item-template" type="text/x-handlebars-template">
+    <div class="m41-tabs-box__tab-panel" data-index="{{strdataindex}}" style="display: block;">
+        <div class="grid" style="max-width:1400px;">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <table class="j113-epass--table">
+                        <thead class="j113-epass--table_header">
+                            <tr>
+                                <th class="j113-epass--table_cell">@Translate.Text("wp.Subcontractor Id")</th>
+                                <th class="j113-epass--table_cell j113-epass--table_cell--name j113-epass--table_filter j113-epass--subcontractor-table_filter {{strnamesort}} ">@Translate.Text("wp.Subcontactor Name")</th>
+                                <th class="j113-epass--table_cell">@Translate.Text("wp.License Number")</th>
+                                <th class="j113-epass--table_cell">@Translate.Text("wp.subStart Date")</th>
+                                <th class="j113-epass--table_cell">@Translate.Text("wp.subEnd Date")</th>
+                                <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#results}}
+                            <tr class="j113-epass--table_row">
+                                <td class="j113-epass--table_cell">
+                                    <a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.WP_ADDSUBCONTRACTOR)?id={{displaysubcontractorid}}"> {{displaysubcontractorid}}</a>
+                                </td>
+                                <td class="j113-epass--table_cell">
+                                    {{displaysubcontractorname}}
+                                </td>
+                                <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                                    {{displaytradelicensenumber}}
+                                </td>
+                                <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                                    {{displaytradeissuedate}}
+                                </td>
+                                <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                                    {{displaytradeenddate}}
+                                </td>
+                                <td class="j113-epass--table_cell">
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.WP_ADDSUBCONTRACTOR)?id={{displaysubcontractorid}}" class="link icon-edit" data-id="{{displaysubcontractorid}}">@Translate.Text("Epass.Edit")</a>
+                                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{displaysubcontractorid}}">@Translate.Text("delete") </a>
+                                </td>
+                            </tr>
+                            {{/results}}
+                        </tbody>
+                    </table>
+                    <div class="j113-epass--keypair">
+
+                        {{#results}}
+                        <div class="m42-keyvalue">
+                        <dl>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Subcontractor Id")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?id={{displaysubcontractorid}}"> {{displaysubcontractorid}}</a></dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Subcontactor Name")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{displaysubcontractorname}}</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Country")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{displaytradelicensenumber}}</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Start Date")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{displaytradeissuedate}}</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("End Date")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{displaytradeenddate}}</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.WP_ADDSUBCONTRACTOR)?id={{displaysubcontractorid}}" class="link icon-edit" data-id="{{displaysubcontractorid}}">@Translate.Text("Epass.Edit")</a>
+                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{displaysubcontractorid}}">@Translate.Text("delete") </a>
+                            </dd>
+                        </dl>
+                    </div>
+                    {{/results}}
+
+
+                </div>
+                <div class="grid__column grid__column--12 pagination-list" id="pagination-list">
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</script>
+
+<script id="mypasses-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination">
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="ajaxpage(1,undefined,undefined)" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+            </a>
+            {{/if}}
+            {{#if previouspage}}
+            <a onclick="ajaxpage({{previouspagenumber}},undefined,undefined)" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev">@Translate.Text("Previous")</a>
+            {{/if}}
+            <ul class="m34-pagination__page-list">
+                {{#pagenumbers}}
+                {{#ifCond ../page this}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                    <a onclick="ajaxpage({{this}},undefined,undefined)" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{else}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                    <a onclick="ajaxpage({{this}},undefined,undefined)" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{/ifCond}}
+                {{/pagenumbers}}
+            </ul>
+            {{#if nextpage}}
+            <a onclick="ajaxpage({{nextpagenumber}},undefined,undefined)" role="button" aria-label="@Translate.Text("Next")" class="button button--text button--next m34-pagination__button--next">@Translate.Text("Next")</a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="ajaxpage({{totalpage}},undefined,undefined)" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</script>
+
+<script id="mypasses-cancel-template" type="text/x-handlebars-template">
+    @Html.Partial("~/Views/Feature/GatePass/WorkPermit/_CancelSubcontractorList.cshtml")
+</script>
+<script type="text/javascript">
+    docReady(function () {
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('toLowerCase', function (str) {
+            return str.toLowerCase();
+        });
+        Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        });
+
+        jQuery("#form-mypasses-filter").on('submit', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            handleSearchFilter(event);
+        });
+        jQuery('#form-mypasses-filter').submit();
+        function handleSearchFilter(e) {
+            e.preventDefault();
+            ajaxpage(1);
+        }
+        jQuery('select[name="pagesizefilter"]').change(handleFilterSelection);
+    });
+    function HandleFilterClick () {
+        var $fil = jQuery(this);
+        if (!$fil.hasClass('ascending') && !$fil.hasClass('descending')) {
+            $fil.addClass('ascending');
+            ajaxpage(1, undefined, undefined, "ascending");
+        } else if ($fil.hasClass('ascending') && !$fil.hasClass('descending')) {
+            $fil.removeClass('ascending');
+            $fil.addClass('descending');
+            ajaxpage(1, undefined, undefined, "descending");
+        } else {
+            $fil.removeClass('ascending');
+            $fil.removeClass('descending');
+            ajaxpage(1, undefined, undefined, "ascending");
+        }
+    }
+    function ajaxpage(page, pagesize, statustxt,namesort)
+    {
+        var view;
+        if (typeof (pagesize) === 'undefined')
+            pagesize = parseInt(jQuery("#pagesizefilter option:selected").val());
+        if (typeof (statustxt) === 'undefined')
+            statustxt = "";
+        if (typeof (namesort) === 'undefined') {
+            namesort = "";
+            if (!jQuery(".j113-epass--table_filter").hasClass('ascending') && jQuery(".j113-epass--table_filter").hasClass('descending')) {
+                namesort = "descending";
+            } else if (jQuery(".j113-epass--table_filter").hasClass('ascending') && !jQuery(".j113-epass--table_filter").hasClass('descending')) {
+                namesort = "ascending";
+            }
+        }
+        var url = "/api/Sitecore/WorkPermit/WorkPermitSubcontractorAjax";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            traditional: true,
+            data: AddForgeryToken({
+                pagesize: pagesize,
+                keyword: jQuery('#mypasseskeyword').val(),
+                statustxt: statustxt,
+                page: page,
+                namesort: namesort
+            }, "form-mypasses-filter"),
+            beforeSend: function () {
+                jQuery('.j113-epass--loader').show();
+                jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j113-epass--loader').hide();
+                jQuery('.m41-tabs-box__tab-panel').show();
+                jQuery('.j113-epass--table_filter').off('click.filter').on('click.filter', HandleFilterClick);
+                //renderMypassesShare();
+                renderMypassesCancel();
+                $('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status && response.Message != null) {
+                    var Jsondata = JSON.parse(response.Message.lstsubcontractors);
+                    if (Jsondata.length > 0) {
+                        var context = {
+                            results: Jsondata,
+                            strnamesort: response.Message.namesort,
+                            strdataindex: response.Message.strdataindex
+                        };
+                        renderMypassesReceived(context);
+
+                        if (response.Message.pagination) {
+                            var pagedata = {
+                                previouspage: function () {
+                                    if (response.Message.page > 1)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                nextpage: function () {
+                                    if (response.Message.page < response.Message.totalpage)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                page: response.Message.page,
+                                previouspagenumber: response.Message.page - 1,
+                                nextpagenumber: response.Message.page + 1,
+                                pagenumbers: response.Message.pagenumbers,
+                                totalpage: response.Message.totalpage,
+                                receivedorsentstr: response.Message.receivedorsent
+                            }
+                            renderSearchPagination(pagedata);
+
+                        }
+                    }
+                    else {
+                        jQuery('.subcontractors-div').hide();
+                        jQuery('.subcontractors-panels').html("<p class='centered' style='margin-top: 48px;'>@Translate.Text("Epass.Noresultsfound")</p>");
+                    }
+                }
+                else {
+                    jQuery('.subcontractors-div').hide();
+                    jQuery('.subcontractors-panels').html("<p class='centered' style='margin-top: 48px;'>@Translate.Text("Epass.Noresultsfound")</p>");
+                }
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+
+            }
+        });
+    }
+    function transform(response,Message) {
+        var r = {
+            lstpasses: JSON.parse(Message.lstpasses),
+            strnamesort: Message.namesort
+        }
+        return r;
+    }
+    function handleFilterSelection() {
+        var pagesize = parseInt(jQuery(this).val());
+        ajaxpage(1, pagesize, undefined);
+    }
+    function renderMypassesReceived(context) {
+        var markup = jQuery('#mypasses-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.subcontractors-panels').html(rendering);
+    }
+    function renderSearchPagination(context) {
+        var markup = jQuery('#mypasses-pagination-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.pagination-list').html(rendering);
+    }
+    function renderMypassesShare() {
+        var markup = jQuery('#mypasses-share-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template();
+        jQuery('#sharedetailsdiv').html('');
+        jQuery('#sharedetailsdiv').html(rendering);
+    }
+    function renderMypassesCancel() {
+        var markup = jQuery('#mypasses-cancel-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template();
+        jQuery('#canceldetailsdiv').html('');
+        jQuery('#canceldetailsdiv').html(rendering);
+    }
+
+</script>
+

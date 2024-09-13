@@ -1,0 +1,56 @@
+﻿@using DEWAXP.Foundation.Content.Repositories
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc
+@using Sitecore.Links
+
+@model DEWAXP.Foundation.ORM.Models.PageBase
+
+@{
+    var showredirectlink = true;
+    var _cache = DependencyResolver.Current.GetService<ICacheProvider>();
+    bool moveinsuccess;
+    if (_cache.TryGet("MoveOutIsSuccess", out moveinsuccess))
+    {
+        showredirectlink = !moveinsuccess;
+        _cache.Remove("MoveOutIsSuccess");
+    }
+
+    bool _isBackEnabled = System.Convert.ToBoolean(HttpContext.Current.Request.QueryString["bck"] == "1");
+
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m26-page-title title_message">
+            @if (!string.IsNullOrEmpty(Model.RedirectText) || Model.ShowShareLink || _isBackEnabled)
+            {
+                <div class="m26-page-title__links">
+                    @if (_isBackEnabled)
+                    {
+                        <p class="m26-page-title__backlink">
+                            <a class="button button--text button--back" title="@Sitecore.Globalization.Translate.Text("Back")" href="javascript:history.back()">@Sitecore.Globalization.Translate.Text("Back")</a>
+                        </p>
+                    }
+                    else if (!string.IsNullOrEmpty(Model.RedirectText) && showredirectlink)
+                    {
+                        <p class="m26-page-title__backlink">
+                            <a class="button button--text button--back" href="@LinkManager.GetItemUrl(Model.RedirectLink)">@Html.Glass().Editable(x => x.RedirectText)</a>
+                        </p>
+                    }
+
+                    @if (Model.ShowShareLink)
+                    {
+                        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Share/M30 Share.cshtml")
+                    }
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Header))
+            {
+                <h2 class="text__page-title">@Html.Glass().Editable(x => Sitecore.Globalization.Translate.Text(x.Header))</h2>
+            }
+            @if (!string.IsNullOrEmpty(Model.Subheader))
+            {
+                <p class="text-page__intro">@Html.Glass().Editable(x => x.Subheader)</p>
+            }
+        </div>
+    </div>
+</div>

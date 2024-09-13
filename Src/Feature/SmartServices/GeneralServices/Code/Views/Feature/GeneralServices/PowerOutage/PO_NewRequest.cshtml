@@ -1,0 +1,920 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Feature.GeneralServices.Models.PowerOutage
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model PoweOutageNewRequest
+<style>
+    .bookingsection .ticks-inner-subtext {
+        position: absolute;
+        width: 100px;
+        right: -50px;
+        top: 70px;
+        font-size: 0.8em;
+        color: #3d3d3d;
+    }
+</style>
+@{
+    var now = DEWAXP.Foundation.Helpers.DateHelper.DubaiNow().AddDays(4);
+    var maxDate = DEWAXP.Foundation.Helpers.DateHelper.DubaiNow().AddDays(89);
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <!-- step tracker-->
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="" data-current-step="" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="true">
+                        <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            <div id="divstep_1" class="bookingsection">
+                <legend class="legend hidden" id="legend1">@Translate.Text("pwo_step1note")</legend>
+                <div id="accountSelector" class="mb32 mt24">
+                    @Html.Sitecore().Placeholder("j69/account-selector")
+                </div>
+            </div>
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+        FormMethod.Post, new
+        {
+            @class = "form",
+            @id = "PowerOutageForm",
+            data_form = "true",
+            data_parsley_focus = "none",
+            @data_submit_validate = "enabled",
+            enctype = "multipart/form-data",
+            @autocomplete = "off"
+        }))
+            {
+
+
+                @Html.AntiForgeryToken()
+                <!-- step 1 -->
+
+                <!-- step 1 -->
+                <!-- step 2 -->
+                @Html.HiddenFor(x => x.AccountNo, new { @id = "form-field-accountno" })
+
+                <div id="divstep_2" class="bookingsection hidden">
+                    <legend class="legend hidden" id="legend2">@Translate.Text("pwo_step2note")</legend>
+                    <div class="form-field form-field--select form-field--select-single clear_both">
+                        <label for="form-field-typeofwork" class="form-field__label">
+                            @Translate.Text("pwo_TypeOfWork")
+                            <span class="form-field__label-required aria-only">(required)</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(model => model.TypeOfWork, Model.TypeOfWorkList, Translate.Text("pwo_TypeOfWorkPlaceholder"), new
+                       {
+                           @class = "form-field__input form-field__input--select form-field__input--select-full",
+                           @id = "form-field-typeofwork",
+                           @required = "required",
+                           @data_parsley_required_message = Translate.Text("pwo_TypeOfWorkRequired"),
+                           @data_parsley_errors_container = "#description-for-typeofwork",
+                           @aria_describedby = "description-for-TypeOfWork",
+
+                       })
+                        </span>
+                        <div id="description-for-TypeOfWork" class="form-field__messages">
+
+                        </div>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single clear_both">
+                        <label for="form-field-powerinterruption" class="form-field__label">
+                            @Translate.Text("pwo_PowerInterruption")
+                            <span class="form-field__label-required aria-only">(required)</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(model => model.PowerInterruption, Model.PowerInterruptionList, Translate.Text("pwo_PowerInterruptionPlaceholder"), new
+                       {
+                           @class = "form-field__input form-field__input--select form-field__input--select-full",
+                           @id = "form-field-powerinterruption",
+                           @required = "required",
+                           @data_parsley_required_message = Translate.Text("pwo_PowerInterruptionRequired"),
+                           @data_parsley_errors_container = "#description-for-powerinterruption",
+                           @aria_describedby = "description-for-powerinterruption",
+                       })
+                        </span>
+                        <div id="description-for-powerinterruption" class="form-field__messages">
+
+                        </div>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single clear_both">
+                        <label for="form-field-purposeofwork" class="form-field__label">
+                            @Translate.Text("pwo_PurposeOfWork")
+                            <span class="form-field__label-required aria-only">(required)</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                    aria-required="true"
+                                    id="form-field-purposeofwork"
+                                    name="PurposeOfWork"
+                                    required="required"
+                                    data-parsley-required-message="@Translate.Text("pwo_PurposeOfWorkRequired")"
+                                    data-parsley-error-container="#description-for-purposeofwork"
+                                    aria-describedby="description-for-purposeofwork">
+                                <option value="">
+                                    @Translate.Text("pwo_PurposeOfWorkPlaceholder")
+                                </option>
+                                @foreach (var item in Model.PurposeOfWorkList)
+                                {
+                                    <option class="@string.Format("wpurpose i{0} o{1}",item.InterruptionCode,item.OutageCode)" value="@item.WorkCode">
+                                        @item.WorkDescription
+                                    </option>
+                                }
+                            </select>
+                            @*@Html.DropDownListFor(model => model.PurposeOfWork, Model.PurposeOfWorkList, Translate.Text("pwo_PurposeOfWorkPlaceholder"), new
+                                {
+                                    @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                    @id = "form-field-purposeofwork",
+                                    @required = "required",
+                                    @data_parsley_required_message = Translate.Text("pwo_PurposeOfWorkRequired"),
+                                    @data_parsley_errors_container = "#description-for-purposeofwork",
+                                    @aria_describedby = "description-for-purposeofwork",
+
+                                })*@
+                        </span>
+                        <div id="description-for-purposeofwork" class="form-field__messages">
+
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-isolationpoint" class="form-field__label">
+                            @Translate.Text("pwo_isolationpoint")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-isolationpoint"
+                                   name="IsolationPoint"
+                                   type="text"
+                                   required=""
+                                   value="@Model.IsolationPoint"
+                                   placeholder="@Translate.Text("pwo_isolationpointPlaceHolder")"
+                                   aria-describedby="description-for-isolationpoint"
+                                   data-parsley-errors-container="#description-for-isolationpoint"
+                                   data-parsley-required-message="@Translate.Text("pwo_isolationpointRequiredMsg")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-isolationpoint" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-dewasubstationnumber" class="form-field__label">
+                            @Translate.Text("pwo_DEWASubStationNumber")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-dewasubstationnumber"
+                                   name="DEWASubStationNumber"
+                                   type="text"
+                                   required=""
+                                   value="@Model.CustomerAuthorizedPersonName"
+                                   placeholder="@Translate.Text("pwo_DEWASubStationNumberPlaceholderText")"
+                                   aria-describedby="description-for-dewasubstationnumber"
+                                   data-parsley-errors-container="#description-for-dewasubstationnumber"
+                                   data-parsley-required-message="@Translate.Text("pwo_DEWASubStationNumberRequireMsg")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-dewasubstationnumber" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-CompanyName" class="form-field__label">
+                            @Translate.Text("pwo_CompanyName")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-CompanyName"
+                                   name="CompanyName"
+                                   type="text"
+                                   required=""
+                                   value="@Model.CompanyName"
+                                   placeholder="@Translate.Text("pwo_CompanyNamePlaceholderText")"
+                                   aria-describedby="description-for-CompanyName"
+                                   data-parsley-errors-container="#description-for-CompanyName"
+                                   data-parsley-required-message="@Translate.Text("pwo_CompanyNameRequireMsg")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-CompanyName" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-customerauthorizedpersonname" class="form-field__label">
+                            @Translate.Text("pwo_CustomerAuthorizedPersonName")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-customerauthorizedpersonname"
+                                   name="CustomerAuthorizedPersonName"
+                                   type="text"
+                                   required=""
+                                   value="@Model.CustomerAuthorizedPersonName"
+                                   placeholder="@Translate.Text("pwo_CustomerAuthorizedPersonNamePlaceholder")"
+                                   aria-describedby="description-for-customerauthorizedpersonname"
+                                   data-parsley-errors-container="#description-for-customerauthorizedpersonname"
+                                   data-parsley-required-message="@Translate.Text("pwo_CustomerAuthorizedPersonNameRequired")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-companytradelicencenumber" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--6 form-field--6-mobile_full form-field--text mb0">
+                        <label for="form-field-startdate" class="form-field__label">
+                            @Translate.Text("pwo_StartDate")
+                            <span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("pwo_datetime_note")"></span>
+                            <span class="form-field__label-required aria-only">(required)</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            <input id="form-field-startdate"
+                                   name="StartDate"
+                                   value="@Model.StartDate"
+                                   placeholder="@Translate.Text("pwo_StartDatePlaceholder")"
+                                   data-parsley-required-message="@Translate.Text("pwo_StartDateRequired")"
+                                   aria-describedby="description-for-startdate"
+                                   data-parsley-errors-container="#description-for-startdate"
+                                   class="form-field__input form-field__input--datepicker-binded form-field__input--text form-field__input--datepicker"
+                                   data-el-to=".enddate" type="text" data-el-to_min="0" data-el-to_max="90"
+                                   data-el="datepicker"
+                                   required=""
+                                   data-parsley-group="startdatetimepickervalidation"
+                                   data-picker-options='{"min": ["@(now.Year)","@(now.Month-1)","@((now.Day))"],"max": ["@(maxDate.Year)","@(maxDate.Month-1)","@((maxDate.Day))"]}' />
+                        </span>
+                        <div id="description-for-startdate" class="form-field__messages" dir="@(direction)">
+                            @Html.ValidationMessageFor(x => x.StartDate)
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--6 form-field--6-mobile_full form-field--text mb0s form-field-Starttime-wapper" dir="ltr">
+                        <label for="form-field-Starttime" class="form-field__label">
+                            @Translate.Text("pwo_Starttime")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text-fix-padding form-field__input--text-force-rtl" data-el="timepicker"
+                                   id="form-field-Starttime"
+                                   name="StartTime"
+                                   type="text"
+                                   value="@Model.StartTime"
+                                   placeholder="@Translate.Text("pwo_StarttimePlaceholderText")"
+                                   aria-describedby="description-for-Starttime"
+                                   data-parsley-errors-container="#description-for-Starttime"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("pwo_StarttimeRequireMsg")"
+                                   data-parsley-trigger="focusout" data-parsley-id="4"
+                                   data-close="@Translate.Text("Close")"
+                                   data-parsley-group="startdatetimepickervalidation">
+                        </span>
+                        <div id="description-for-Starttime" class="form-field__messages" dir="@(direction)">
+                        </div>
+                    </div>
+
+                    <div class="form-field clear_both mt0"></div>
+
+                    <div class="form-field form-field--6 form-field--6-mobile_full form-field--text form-field-enddate-wapper">
+                        <label for="form-field-enddate" class="form-field__label">
+                            @Translate.Text("pwo_EndDate")
+                            <span class="form-field__label-required aria-only">(required)</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            <input id="form-field-enddate"
+                                   name="EndDate"
+                                   value="@Model.EndDate"
+                                   placeholder="@Translate.Text("pwo_EndDatePlaceholder")"
+                                   data-parsley-required-message="@Translate.Text("pwo_EndDateRequired")"
+                                   aria-describedby="description-for-enddate"
+                                   data-parsley-errors-container="#description-for-enddate"
+                                   class="enddate form-field__input form-field__input--text form-field__input--datepicker"
+                                   data-el="datepicker"
+                                   required=""
+                                   data-picker-options='{}'
+                                   data-parsley-group="enddatetimepickervalidation" />
+                        </span>
+                        <div id="description-for-enddate" class="form-field__messages" dir="@(direction)">
+                            @Html.ValidationMessageFor(x => x.EndDate)
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--6 form-field--6-mobile_full form-field--text form-field-Endtime-wapper" dir="ltr">
+                        <label for="form-field-Endtime" class="form-field__label">
+                            @Translate.Text("pwo_Endtime")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text form-field__input--text-fix-padding form-field__input--text-force-rtl" data-el="timepicker"
+                                   id="form-field-Endtime"
+                                   name="EndTime"
+                                   type="text"
+                                   value="@Model.EndTime"
+                                   placeholder="@Translate.Text("pwo_EndtimePlaceholderText")"
+                                   aria-describedby="description-for-Endtime"
+                                   data-parsley-errors-container="#description-for-Endtime"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("pwo_EndtimeRequireMsg")"
+                                   data-parsley-trigger="focusout" data-parsley-id="4"
+                                   data-close="@Translate.Text("Close")"
+                                   data-parsley-group="enddatetimepickervalidation">
+                        </span>
+                        <div id="description-for-Endtime" class="form-field__messages" dir="@(direction)">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text clear_both">
+                        <label for="form-field-emailid" class="form-field__label">@Translate.Text("pwo_EmailID") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                        <label class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.EmailID,
+                        new
+                        {
+                            @type = "email",
+                            @class = "form-field-EmailID",
+                            @id = "form-field-emailid",
+                            @placeholder = Translate.Text("pwo_EmailIDPlaceholder"),
+                            @required = "",
+                            @data_parsley_error_message = Translate.Text("pwo_EmailIDErrorMsg"),
+                            @data_parsley_errors_container = "#description-for-emailid",
+                            @aria_describedby = "description-for-emailid",
+                            @data_parsley_id = "14",
+                            @data_parsley_email = "",
+                            @step = "any"
+                        })
+                        </label>
+                        <div id="description-for-emailid" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.EmailID, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-mobilenumber" class="form-field__label">
+                            @Translate.Text("wpo_mobilenumber")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input type="tel"
+                                   name="MobileNumber"
+                                   id="form-field-mobilenumber"
+                                   value="@(!string.IsNullOrWhiteSpace(Model.MobileNumber) ? Model.MobileNumber:"")"
+                                   aria-describedby="description-for-mobilenumber"
+                                   required="required"
+                                   placeholder="@Translate.Text("wpo_mobilenumberPlaceholder")"
+                                   data-parsley-error-message="@Translate.Text("wpo_mobilenumberErrorMsg")"
+                                   data-parsley-type="digits"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-mobile_number
+                                   data-parsley-errors-container="#description-for-mobilenumber"
+                                   class="form-field__input form-field__input--text form-field__input--prefixed" />
+                        </span>
+                        <div id="description-for-mobilenumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.MobileNumber)
+
+                        </div>
+                        @*<p>@Translate.Text("pwo_mobilenote")</p>*@
+                    </div>
+
+
+                </div>
+                <!-- step 2 -->
+                <!-- step 3 -->
+                <div id="divstep_3" class="bookingsection hidden">
+                    <legend class="legend hidden" id="legend3">@Translate.Text("pwo_step3note")</legend>
+                    <fieldset class="fieldset">
+                        <legend class="legend">@Translate.Text("pwo_CompanyLetterAttachementLabel")</legend>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png"
+                                         data-src="/images/preview@2x.png"
+                                         data-success="/images/preview@2x.png"
+                                         class="form-field__preview"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt=""
+                                         data-uploader-image="CompanyLetterAttachement">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-companyletterattachement" class="form-field__label">
+                                        <strong class="form-field__label-description"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-companyletterattachement"
+                                                   name="CompanyLetterAttachement"
+                                                   type="file"
+                                                   aria-describedby="description-for-companyletterattachement"
+                                                   data-parsley-errors-container="#description-for-companyletterattachement"
+                                                   data-parsley-error-message="@Translate.Text("pwo_CompanyLetterAttachementRequired")"
+                                                   data-parsley-required-message="@Translate.Text("pwo_CompanyLetterAttachementRequired")"
+                                                   data-uploader-field="CompanyLetterAttachement"
+                                                   required=""
+                                                   accept="application/pdf,image/x-png,image/jpg,,image/jpeg,image/bmp" data-accepts='"pdf","jpg", "bmp","png","jpeg"' data-size="3145728">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="CompanyLetterAttachement"></p>
+                                    <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="CompanyLetterAttachement">@Translate.Text("Remove")</button></p>
+                                </div>
+                            </div>
+
+                            <div id="description-for-companyletterattachement" class="form-field__messages">
+                                @Html.ValidationMessageFor(m => m.CompanyLetterAttachement)
+                                <p class="form-field__description">@Translate.Text("pwo_CompanyLetterAttachementnote")</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="legend">@Translate.Text("pwo_MethodofStatementAttachmentLabel")</legend>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png"
+                                         data-src="/images/preview@2x.png"
+                                         data-success="/images/preview@2x.png"
+                                         class="form-field__preview"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt=""
+                                         data-uploader-image="MethodofStatementAttachment">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-methodofstatementattachment" class="form-field__label">
+                                        <strong class="form-field__label-description"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-methodofstatementattachment"
+                                                   name="MethodofStatementAttachment"
+                                                   type="file"
+                                                   aria-describedby="description-for-methodofstatementattachment"
+                                                   data-parsley-errors-container="#description-for-methodofstatementattachment"
+                                                   data-parsley-error-message="@Translate.Text("pwo_MethodofStatementAttachmentRequired")"
+                                                   data-parsley-required-message="@Translate.Text("pwo_MethodofStatementAttachmentRequired")"
+                                                   data-uploader-field="MethodofStatementAttachment"
+                                                   required=""
+                                                   accept="application/pdf,image/x-png,image/jpg,,image/jpeg,image/bmp" data-accepts='"pdf","jpg", "bmp","png","jpeg"' data-size="3145728">
+
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="MethodofStatementAttachment"></p>
+                                    <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="MethodofStatementAttachment">@Translate.Text("Remove")</button></p>
+                                </div>
+                            </div>
+
+                            <div id="description-for-methodofstatementattachment" class="form-field__messages">
+                                @Html.ValidationMessageFor(m => m.MethodofStatementAttachment)
+                                <p class="form-field__description">@Translate.Text("pwo_MethodofStatementAttachmentnote")</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="legend">@Translate.Text("pwo_RiskAssessmentAttachmentLabel")</legend>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png"
+                                         data-src="/images/preview@2x.png"
+                                         data-success="/images/preview@2x.png"
+                                         class="form-field__preview"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt=""
+                                         data-uploader-image="RiskAssessmentAttachment">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-riskassessmentattachment" class="form-field__label">
+                                        <strong class="form-field__label-description"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-riskassessmentattachment"
+                                                   name="RiskAssessmentAttachment"
+                                                   type="file"
+                                                   aria-describedby="description-for-riskassessmentattachment"
+                                                   data-parsley-errors-container="#description-for-riskassessmentattachment"
+                                                   data-parsley-error-message="@Translate.Text("pwo_RiskAssessmentAttachmentRequired")"
+                                                   data-parsley-required-message="@Translate.Text("pwo_RiskAssessmentAttachmentRequired")"
+                                                   data-uploader-field="RiskAssessmentAttachment"
+                                                   required=""
+                                                   accept="application/pdf,image/x-png,image/jpg,,image/jpeg,image/bmp" data-accepts='"pdf","jpg", "bmp","png","jpeg"' data-size="3145728">
+
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="RiskAssessmentAttachment"></p>
+                                    <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="RiskAssessmentAttachment">@Translate.Text("Remove")</button></p>
+                                </div>
+                            </div>
+
+                            <div id="description-for-riskassessmentattachment" class="form-field__messages">
+                                @Html.ValidationMessageFor(m => m.RiskAssessmentAttachment)
+                                <p class="form-field__description">@Translate.Text("pwo_RiskAssessmentAttachmentNote")</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="fieldset">
+                        <legend class="legend">@Translate.Text("pwo_CustomerOutageRequestFormLabel")</legend>
+                        <a href="@LinkHelper.GetMediaItemURL(SitecoreItemIdentifiers.PowerOutageRequestForm)" target="_blank" class="button button--text button--next" aria-describedby="download-">
+                            @Translate.Text("pwo_DownloadTestForm")
+                        </a>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png"
+                                         data-src="/images/preview@2x.png"
+                                         data-success="/images/preview@2x.png"
+                                         class="form-field__preview"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt=""
+                                         data-uploader-image="CustomerOutageRequestForm">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-CustomerOutageRequestForm" class="form-field__label">
+                                        <strong class="form-field__label-description"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-CustomerOutageRequestForm"
+                                                   name="CustomerOutageRequestForm"
+                                                   type="file"
+                                                   aria-describedby="description-for-CustomerOutageRequestForm"
+                                                   data-parsley-errors-container="#description-for-CustomerOutageRequestForm"
+                                                   data-parsley-error-message="@Translate.Text("pwo_CustomerOutageRequestFormRequired")"
+                                                   data-parsley-required-message="@Translate.Text("pwo_CustomerOutageRequestFormRequired")"
+                                                   data-uploader-field="CustomerOutageRequestForm"
+                                                   required=""
+                                                   accept="application/pdf,image/x-png,image/jpg,,image/jpeg,image/bmp" data-accepts='"pdf","jpg", "bmp","png","jpeg"' data-size="3145728">
+
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="CustomerOutageRequestForm"></p>
+                                    <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="CustomerOutageRequestForm">@Translate.Text("Remove")</button></p>
+                                </div>
+                            </div>
+
+                            <div id="description-for-CustomerOutageRequestForm" class="form-field__messages">
+                                @Html.ValidationMessageFor(m => m.CustomerOutageRequestForm)
+                                <p class="form-field__description">@Translate.Text("pwo_CustomerOutageRequestFormNote")</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-field form-field--toggles mt24 inline-terms" id="divTermsConditions">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("pwo_Iagree")  @Html.Sitecore().Placeholder("j26/m39-modal-overlay")</span>
+                            </label>
+                        </div>
+
+                        <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                    </div>
+
+                </div>
+                <!-- step 3 -->
+                <div class="grid__column--centered form-navigation form-field__button">
+                    <a role="button" data-m51-next="" aria-label="@Translate.Text("Back")" class="button button--primary previous hidden">@Translate.Text("Back")</a>
+                    <a role="button" data-m51-next="" aria-label="@Translate.Text("Next")" class="button button--primary next">@Translate.Text("Next")</a>
+                    <button type="submit" class="button button--primary button--submit hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    docReady(function () {
+        // Step tracker function
+        var total = parseInt(3);
+        var current = parseInt(1);
+        var txt = jQuery("#divstep_1").find('.legend').text();
+        var acNo = jQuery("#form-field-accountno").val();
+        if (acNo != "") {
+            $("input[name=SelectedAccountNumber][value=" + acNo + "]").prop('checked', true);
+            setTimeout(function () {
+                $(".button--primary[data-modal-confirm='true']").click();
+            }, 1000);
+        }
+        steptracker(total, current, txt);
+        var $sections = jQuery('.bookingsection');
+        FilterWorkPurposeList();
+
+        function steptracker(total, current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', total);
+            $('.m38-step-tracker').attr('data-current-step', current);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+            jQuery(window).trigger('reinit_m38');
+        }
+        function curIndex() {
+            // Return the current index by looking at which section has the class 'current'
+            return $sections.index($sections.filter('.current'));
+        }
+        function navigateTo(index) {
+
+            if (index == 0) {
+                jQuery('.m26-page-title__backlink').show();
+            } else {
+                jQuery('.m26-page-title__backlink').hide();
+                jQuery("#form-field-accountno").val(jQuery('input[name="SelectedAccountNumber"]:checked').val());
+            }
+
+            var txt = "";
+            var legendsList = $sections.hide().eq(index).find('.legend');
+            if (legendsList.length > 0) {
+                txt = $(legendsList[0]).text();
+            }
+            steptracker(total, index + 1, txt);
+
+            // Mark the current section with the class 'current'
+            $sections
+                .removeClass('current')
+                .eq(index)
+                .addClass('current');
+            $sections
+                .hide()
+                .eq(index)
+                .show();
+
+
+            // Show only the navigation buttons that make sense for the current section:
+            jQuery('.form-navigation .previous').toggle(index > 0);
+            var atTheEnd = index >= $sections.length - 1;
+            jQuery('.form-navigation .next').toggle(!atTheEnd);
+            jQuery('.form-navigation [type=submit]').toggle(atTheEnd);
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+            if (atTheEnd) {
+            }
+        }
+
+        // Next button click event
+        jQuery('.form-navigation .next').click(function (e) {
+            $(".error-html").remove()
+            if (jQuery(".parsley-custom-error-message").length > 0) {
+                return false;
+            }
+            if (curIndex() == 0) {
+                jQuery('.m26-page-title__backlink').show();
+            }
+            require(['parsley'], function () {
+                if (jQuery('#PowerOutageForm').parsley().validate()) {
+                    if (curIndex() == 1) {
+                        IsValidDateTime(function (d) {
+
+                            if (d.IsSuccess) {
+                                e.preventDefault();
+                                navigateTo(curIndex() + 1);
+                            } else {
+                                jQuery('html,body').animate({ scrollTop: jQuery('#description-for-Endtime').offset().top - 150 }, 1000);
+                            }
+                        })
+                    } else {
+                        e.preventDefault();
+                        navigateTo(curIndex() + 1);
+                    }
+
+
+                };
+            });
+
+        });
+
+        // Previous button is easy, just go back
+        jQuery('.form-navigation .previous').click(function (e) {
+            e.preventDefault();
+            navigateTo(curIndex() - 1);
+            if (curIndex() == 0) {
+                jQuery('.m26-page-title__backlink').show();
+            }
+        });
+
+        // submit button click event
+        jQuery('.button--submit').off('click.submit').on('click.submit', function (e) {
+            require(['parsley'], function () {
+                if (!jQuery('#PowerOutageForm').parsley().validate()) {
+                    e.preventDefault();
+                }
+                else {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                }
+            });
+        });
+        setTimeout(function () { navigateTo(0); }, 200);
+
+        jQuery("#form-field-typeofwork, #form-field-powerinterruption").on('change', function () {
+
+            FilterWorkPurposeList();
+        })
+        var EndtimeValidation=null;
+
+        jQuery(".form-field-Endtime-wapper,.form-field-Endtime").on("propertychange change click keyup input paste", function () {
+            if (EndtimeValidation != null && EndtimeValidation != undefined) {
+                clearTimeout(EndtimeValidation);
+            }
+            EndtimeValidation = setTimeout(function () {
+                IsValidDateTime(function (d) { });
+            },700)
+        });
+
+        EnableEndTime(jQuery("#form-field-Starttime").val());
+        EnableEndDate(jQuery("#form-field-startdate").val())
+
+        jQuery("#form-field-startdate").on("change", function () {
+            EnableEndDate(jQuery(this).val())
+
+        });
+        jQuery(".form-field-Starttime-wapper,.form-field-Starttime").on("propertychange change click keyup input paste", function () {
+            ValidateStartDateTime();
+            setTimeout(function () {
+                EnableEndTime(jQuery("form-field-Starttime").val());
+            }, 100);
+
+        })
+
+        jQuery("#form-field-enddate").on("change", function () {
+
+            if (jQuery("#form-field-Endtime").val() != "") {
+                IsValidDateTime(function (d) { });
+            }
+        });
+
+    });
+
+    function FilterWorkPurposeList() {
+        var _purpose = '@(Model.PurposeOfWork)'
+
+        $("#form-field-purposeofwork").val('');
+        if (_purpose && _purpose!='') {
+            $("#form-field-purposeofwork").val(_purpose);
+        }
+        jQuery(".wpurpose").hide();
+        var _outageType = $("#form-field-typeofwork").val();
+        var _powerinterruptionType = $("#form-field-powerinterruption").val();
+        jQuery(".i" + _powerinterruptionType + ".o" + _outageType).show();
+    }
+
+
+    function EnableEndTime(sTime) {
+         if (sTime == '') {
+            jQuery("#form-field-Endtime").val("");
+            jQuery(".form-field-Endtime-wapper").css('pointerEvents', 'none');
+        } else {
+            jQuery(".form-field-Endtime-wapper").css('pointerEvents', 'auto');
+        }
+    }
+
+
+    function EnableEndDate(sTime) {
+        if (sTime == '') {
+            jQuery("#form-field-enddate").val("");
+            jQuery(".form-field-enddate-wapper").css('pointerEvents', 'none');
+        } else {
+            jQuery(".form-field-enddate-wapper").css('pointerEvents', 'auto');
+        }
+    }
+
+    function GetStepText(section) {
+        var txt = "";
+        var legendsList = section.hide().eq(index).find('.legend');
+        if (legendsList.length > 0) {
+            txt = $(legendsList[0]).text();
+        }
+
+        return txt;
+    }
+
+    function IsValidDateTime(onCallback) {
+
+        var request = { StartDate: $("#form-field-startdate").val(), StartTime: $("#form-field-Starttime").val(), EndDate: $("#form-field-enddate").val(), EndTime: $("#form-field-Endtime").val() };
+        if (request.StartDate == "" ||
+            request.StartTime == "" ||
+            request.EndDate == "") {
+
+            require(['parsley'], function () {
+                jQuery('#PowerOutageForm').parsley().validate("startdatetimepickervalidation");
+                jQuery('#PowerOutageForm').parsley().validate("enddatetimepickervalidation");
+            });
+            setTimeout(function () {
+                $("#description-for-Endtime .parsley-required").remove();
+            }, 100);
+
+            SetEndTimeError('@Translate.Text("pwo_EndDateRequired")');
+            var r = { IsSuccess :false, Description :"" }
+            return onCallback(r);
+        }
+
+        $.ajax({
+            url: '@Url.Action("ValidateDateTime", "PowerOutage")',
+            type: 'GET',
+            data: request,
+            beforeSend: function () {
+                $(".time-validation-error").remove();
+            },
+            async: false,
+            success: function (responseData) {
+                if (!responseData.IsSuccess) {
+                    SetEndTimeError(responseData.Description);
+                }
+                return onCallback(responseData);
+            }, complete: function () {
+
+                require(['parsley'], function () {
+
+                    jQuery('#PowerOutageForm').parsley().validate("startdatetimepickervalidation");
+                    jQuery('#PowerOutageForm').parsley().validate("enddatetimepickervalidation");
+                });
+                setTimeout(function () {
+                    $("#description-for-Endtime .parsley-required").remove();
+                }, 100);
+            }
+        });
+    }
+
+
+    function SetEndTimeError(description) {
+        $(".time-validation-error").remove();
+        $("#form-field-Endtime").val('');
+        $("#description-for-Endtime").append('<ul class="parsley-errors-list filled time-validation-error" id="parsley-id-22"><li>' + description + '</li></ul>')
+    }
+
+
+    function ValidateStartDateTime() {
+        var request = { StartDate: $("#form-field-startdate").val(), StartTime: $("#form-field-Starttime").val(), IsCheckStart: true };
+
+
+        if (request.StartDate == "" || request.StartTime == "") {
+            require(['parsley'], function () {
+                jQuery('#PowerOutageForm').parsley().validate("startdatetimepickervalidation");
+            });
+
+            return false;
+        }
+         $.ajax({
+            url: '@Url.Action("ValidateDateTime", "PowerOutage")',
+            type: 'GET',
+            data: request,
+            beforeSend: function () {
+                $(".starttime-validation-error").remove();
+            },
+            async: false,
+             success: function (responseData) {
+                 console.log(responseData)
+                 if (!responseData.IsSuccess) {
+                    $(".starttime-validation-error").remove();
+                    $("#form-field-Starttime").val('');
+                     $("#description-for-Starttime").append('<ul class="parsley-errors-list filled starttime-validation-error" id="parsley-id-22"><li>' + responseData.Description + '</li></ul>')
+                 }
+
+            }, complete: function () {
+
+                require(['parsley'], function () {
+                    jQuery('#PowerOutageForm').parsley().validate("startdatetimepickervalidation");
+                });
+                setTimeout(function () {
+                    $("#description-for-Starttime .parsley-required").remove();
+                }, 100);
+            }
+        });
+    }
+</script>

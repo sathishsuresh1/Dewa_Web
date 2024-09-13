@@ -1,0 +1,107 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.AccountModel.VerifyEmailandMobileModel
+@{
+    bool bothoption = (!string.IsNullOrWhiteSpace(Model.EmailAddess)) && (!string.IsNullOrWhiteSpace(Model.Mobile));
+    bool emailchecked = (bothoption || (!string.IsNullOrWhiteSpace(Model.SelectedOption) && Model.SelectedOption.Equals("1")) ||
+        (!bothoption && !string.IsNullOrWhiteSpace(Model.EmailAddess))) ? true : false;
+    bool mobilechecked = (!bothoption || (!string.IsNullOrWhiteSpace(Model.SelectedOption) && Model.SelectedOption.Equals("2")) ||
+        (!bothoption && string.IsNullOrWhiteSpace(Model.EmailAddess) && string.IsNullOrWhiteSpace(Model.Mobile))
+        ) ? true : false;
+}
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="m26-page-title title_message">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a class="button button--text button--back"
+                           href="@ViewBag.BackLink">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">@ViewBag.Title</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_form = "true", @id = "verifyemailandmobileform", @data_parsley_focus = "none", @class = "form", @data_submit_validate = "enabled" }))
+            {
+                if (ViewBag.accountunlock != null && (bool)ViewBag.accountunlock)
+                {
+                    @Html.Sitecore().FormHandler("CareerPortal", "AccountUnlockVerifyOTP")
+                }
+                else
+                {
+                    @Html.Sitecore().FormHandler("CareerPortal", "ForgotPasswordVerifyOTP")
+                }
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Username)
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+                <div class="form-field">
+                    <fieldset class="fieldset">
+                        <legend class="legend-color">.</legend>
+                        <div class="form-field">
+                            <fieldset class="fieldset">
+                                <legend class="legend-color">.</legend>
+                                @if (!string.IsNullOrWhiteSpace(Model.EmailAddess))
+                                {
+                                    <p class="form-field__radio ">
+                                        <label>
+                                            <input class="form-field__input form-field__input--radio" id="form-field-radio_1_1"
+                                                   aria-label="form-field-radio_1_1"
+                                                   name="SelectedOption"
+                                                   type="radio"
+                                                   value="1"
+                                                   @if (emailchecked) { <text> checked="" </text> }
+                                                   aria-describedby="description-for-qiwuv2ro1"
+                                                   data-parsley-errors-container="#description-for-qiwuv2ro1">
+
+                                            <span class="form-field__fakeradio focus-enabled">
+                                                <strong>@(Html.Raw(string.Format(Translate.Text("AR.ReceivedOTP"), Model.EmailAddess)))</strong>
+                                            </span><br />
+                                        </label>
+                                    </p>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Model.Mobile))
+                                {
+                                    <p class="form-field__radio ">
+                                        <label>
+                                            <input class="form-field__input form-field__input--radio" id="form-field-radio_1_2"
+                                                   aria-label="form-field-radio_1_2"
+                                                   name="SelectedOption"
+                                                   type="radio"
+                                                   value="2"
+                                                   @if (mobilechecked) { <text> checked="" </text> }
+                                                   aria-describedby="description-for-qiwuv2ro1"
+                                                   data-parsley-errors-container="#description-for-qiwuv2ro1">
+
+                                            <span class="form-field__fakeradio focus-enabled">
+                                                <strong>@(Html.Raw(string.Format(Translate.Text("AR.ReceivedOTP"), Model.Mobile)))</strong>
+                                            </span><br />
+                                        </label>
+                                    </p>
+                                }
+                                <div id="description-for-qiwuv2ro1" class="form-field__messages">
+                                </div>
+                            </fieldset>
+                        </div>
+                    </fieldset>
+
+                </div>
+
+                <div class="form-field__button">
+                    <a class="button button--quaternary button-2-fit" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_LOGIN)">@Translate.Text("Cancel")</a>
+                    <button class="button button--primary button-2-fit" id="fgpwdbtn" type="submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Next")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,106 @@
+﻿@using DEWAXP.Foundation.Content
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content.Models
+@model DEWAXP.Foundation.Content.Models.MoveOut.ConfirmModel
+
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+    </div>
+</div>
+@{ var failedNotification = false; }
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @if (Model.IsSuccess)
+        {
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text("EV.deactivate.Submission Successful")</div>
+                <div class="m40-status-message__text">
+                    @foreach (var account in Model.Accounts)
+                    {
+                        if (Model.Notifications.Where(x => x.ContractAccountNumber == account.AccountNumber && !string.IsNullOrWhiteSpace(x.NotificationNumber)).Any())
+                        {
+                            var notification = Model.Notifications.Where(x => x.ContractAccountNumber == account.AccountNumber && !string.IsNullOrWhiteSpace(x.NotificationNumber)).FirstOrDefault();
+                            @(string.Format(Translate.Text("EV.deactivate successful"), @notification.NotificationNumber,Model.CardNumber))
+                        }
+                        else
+                        {
+                            failedNotification = true;
+                        }
+                    }
+                </div>
+                @*<p>
+                        @Sitecore.Globalization.Translate.Text("EVdeactivate.ConfimationinfoMessage1")
+                    </p>*@
+                <p class="mt12">
+                    @Sitecore.Globalization.Translate.Text("EVdeactivate.ConfimationinfoMessage2")
+                </p>
+                @if (!failedNotification)
+                {
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Sitecore.Globalization.Translate.Text("Print this page")</button>
+                    </p>
+                }
+            </div>
+
+            if (failedNotification)
+            {
+                <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                    <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                    <div class="m40-status-message__text">
+                        @foreach (var account in Model.Accounts)
+                        {
+                            if (Model.Notifications.Where(x => x.ContractAccountNumber == account.AccountNumber && string.IsNullOrWhiteSpace(x.NotificationNumber)).Any())
+                            {
+                                var notification = Model.Notifications.Where(x => x.ContractAccountNumber == account.AccountNumber && string.IsNullOrWhiteSpace(x.NotificationNumber)).FirstOrDefault();
+                                <br>@notification.ContractAccountNumber <text>:</text> @notification.Message
+                            }
+                        }
+                    </div>
+
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Sitecore.Globalization.Translate.Text("Print this page")</button>
+                    </p>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text">@Model.ErrorMessage</div>
+            </div>
+        }
+    </div>
+</div>
+
+@foreach (var account in Model.Accounts)
+{
+    if (Model.Notifications.Where(x => x.ContractAccountNumber == account.AccountNumber && !string.IsNullOrWhiteSpace(x.NotificationNumber)).Any())
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SelectedAccount.cshtml", new SelectedAccountViewModel(account) { FieldLabel = @Sitecore.Globalization.Translate.Text("Account to ev deactivate") })
+            </div>
+        </div>
+    }
+}
+
+<div class="grid__row noprint">
+    <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+        <h2 class="text__section-title">@Translate.Text("WhatNext")</h2>
+        @Html.Sitecore().Placeholder("whatsnextdescription")
+        <div class="button-container--single">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" class="button button--primary button--next" role="button">@Translate.Text(DictionaryKeys.Global.Home)</a>
+        </div>
+    </div>
+</div>
+
+@*<div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            @Html.Sitecore().Placeholder("j18/m17-sectiontitle")
+        </div>
+    </div>*@

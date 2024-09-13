@@ -1,0 +1,110 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+
+<div class="m39-modal j113-epass_modal--confirm" data-component="m39-modal" id="modal_true">
+    <a data-trigger="true" class="m12-tools__link m39-modal__trigger m39-modal__triggerApprove" id="_hznj48fu1_trigger" aria-controls="_hznj48fu1_content"></a>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_hznj48fu1_content" aria-labelledby="_hznj48fu1_trigger">
+        <div class="m39-modal__dialog">
+            <div class="m39-modal__header">
+                <div class="m39-modal__title">
+                    @Translate.Text("Epass.Unblockuser")
+                </div>
+            </div>
+            <div class="m39-modal__content" style="top: 31px;">
+                <div class="grid__row approvecontent">
+                    @Translate.Text("Epass.WanttoUnblock")
+                </div>
+                <div class="grid__row">
+                    <a class="button m39-m12-no" href="#">
+                        @Translate.Text("Epass.No")
+                    </a>
+                    <a data-eid="" data-id="" id="m39-m12-yesApprove" class="button button--primary m39-m12-yesApprove" href="#"> @Translate.Text("Epass.Yes") </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="m39-modal j113-epass_modal--confirm" data-component="m39-modal" id="successmodal">
+    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="successmodal_trigger" aria-controls="successmodal_content">fdytdsyrstrstr</button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="successmodal_content" aria-labelledby="successmodal_trigger">
+        <div class="m39-modal__dialog">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title" id="successTitle">
+                        @Translate.Text("Epass.SuccessMess")
+                    </div>
+                    <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="success_content"></a>
+                </div>
+                <div class="m39-modal__content">
+                    <div class="grid__row">
+                        <span id="successMessage">@Translate.Text("Epass.Successfullyunblock")</span>
+                    </div>
+                </div>
+                <div class="m39-modal__footer">
+                    <div id="cancelsuccessfulbutton" class="button button--primary m39-m12-no">@Translate.Text("Epass.Ok")</div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="m39-modal__overlay"> </div>
+</div>
+
+
+
+<script language="javascript" type="text/javascript">
+    docReady(function () {
+        jQuery(".j113-epass--records_remove").on('click', function (event) {
+            //debugger;
+            $('#m39-m12-yesApprove').attr("data-id", "");
+            $('#m39-m12-yesApprove').attr("data-id", $(this).data('id'));
+            event.preventDefault();
+            document.querySelector('.m39-modal__triggerApprove').click();
+        });
+
+        jQuery("#cancelsuccessfulbutton").on('click', function (event) {
+            window.location.reload();
+        });
+
+        jQuery(".m39-m12-yesApprove").on('click', function (event) {
+            event.preventDefault();
+            //debugger;
+            var url = "/api/sitecore/Epass/UnblockUserEntry";
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                //data: AddForgeryToken({ id: $(this).attr('data-id') }, "form-cancelrequest"),
+                data: {
+                    eFolderId: $(this).attr('data-id'),
+                    __RequestVerificationToken: $('form input[name=__RequestVerificationToken]').val()
+                },
+                beforeSend: function () {
+                    jQuery('.j113-epass--loader').show();
+                    jQuery('.j113-epass--loader').css({ position: 'fixed', top: '0px' });
+                },
+                complete: function () {
+                    jQuery('.j113-epass--loader').hide();
+                },
+                dataType: 'json',
+                type: 'POST',
+                success: function (response) {
+                    if (!response.status) {
+                        jQuery('#successTitle').html("Error");
+                        jQuery('#successMessage').html("Something went wrong!");
+
+                    }
+                    document.querySelector('.m39-m12-no').click();
+                    jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                }
+            });
+        });
+    });
+    setTimeout(function () {
+        window.initComponents('canceldetailsdiv');
+    }, 750)
+</script>

@@ -1,0 +1,216 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using Sitecorex = Sitecore
+
+<div class="grid">
+    @Html.Sitecore().Placeholder("placeholder-back")
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+    <!--Start JointServices.cshtml-->
+    <div class="grid" id="jointservicediv">
+        <div class="grid__row">
+            <div class="m66-preloader j1-CP--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__column grid__column--12">
+
+                <div class="m23-table-joint-services" data-component="m23-table-joint-services">
+                    <div class="m23-table-joint-services--heading_wrapper">
+                        <span class="m23-table-joint-services--title">@Translate.Text("cpportal.Joint Services")</span>
+                        <span class="m23-table-joint-services--count" dir="ltr"><span class="m23-table-joint-services--count_catch"></span> @Translate.Text("cpportal.Total")</span>
+                    </div>
+                    <!-- m15-filter start -->
+                    <div class="m15-filter" data-component="m15-filter">
+                        <form id="form-jointservice-filter" action="#" method="POST" form-skipvalidation="true">
+                            @Html.AntiForgeryToken()
+                            <div class="m15-filter--input_wrapper">
+                                <input placeholder="@Translate.Text("cpportal.searchkeyword")" class="m15-filter--input" id="jointservicekeyword" type="text" name="">
+                                <button class="m15-filter--input_button icon-search" id="jointservicebutton"></button>
+                            </div>
+                        </form>
+
+                        @* <div class="m15-filter--select_wrapper icon-open" data-title="@Translate.Text("cpportal.sortby")">
+                                <select class="m15-filter--select" id="jointservicefilter" name="jointservicefilter">
+                                    <option value="1" selected="">
+                                        @Translate.Text("cpportal.datesort")
+                                    </option>
+                                    <option value="2">
+                                        @Translate.Text("cpportal.Namesort")
+                                    </option>
+                                </select>
+                            </div>*@
+
+                    </div>
+                    <!-- m15-filter end -->
+                    <table class="m23-table-joint-services--table">
+                        <thead class="m23-table-joint-services--thead">
+                            <tr class="m23-table-joint-services--tr">
+                                <th class="m23-table-joint-services--tcell">
+                                    @Translate.Text("cpportal.Service Name")
+                                    @*<th class="m23-table-joint-services--tcell">
+                                        Type*@
+                                <th class="m23-table-joint-services--tcell">
+                                    @Translate.Text("cpportal.Division")
+
+                            </tr>
+                        </thead>
+                        <tbody class="m23-table-joint-services--tbody" id="jointservice-placeholder"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="Noelementjointservice-item-template" type="text/x-handlebars-template">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <p class="centered">
+                @Translate.Text("cpportal.There is no Jointservices documents")
+            </p>
+        </div>
+    </div>
+</script>
+<script id="jointservice-item-template" type="text/x-handlebars-template">
+    {{#jointservice}}
+    <tr class="m23-table-joint-services--tr">
+        <td data-label="Service Name" class="m23-table-joint-services--tcell">
+            {{serviceName}}
+        </td>
+        @*<td data-label="Type" class="m23-table-joint-services--tcell">
+                {{partnerType}}
+            </td>*@
+        <td data-label="Division/ Department" class="m23-table-joint-services--tcell">
+            {{divisionName}}
+        </td>
+    </tr>
+    {{/jointservice}}
+</script>
+<script id="zeroresultjointservice-item-template" type="text/x-handlebars-template">
+    <tr class="centered">
+        <td colspan="4" style="padding-top:12px;">
+            @Translate.Text("No result(s)")
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+    docReady(function () {
+        var _this = this;
+        handleAccountSelection();
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        jQuery('select[name="jointservicefilter"]').change(handleFilterSelection);
+        jQuery('#jointservicebutton').on('click', function (event) {
+            event.preventDefault();
+            handleAccountSelection();
+        });
+    });
+
+    function handleAccountSelection() {
+        ajaxSelection();
+        return false;
+    }
+
+    function ajaxSelection(sortby) {
+        if (typeof (sortby) === 'undefined')
+            sortby = jQuery('select[name="jointservicefilter"]').val();
+        var url = "/api/Sitecore/CorporatePartnership/JointServicesAjax";
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            traditional: true,
+            data: AddForgeryToken({
+                sortby: sortby,
+                keyword: jQuery('#jointservicekeyword').val()
+            }, "form-jointservice-filter"),
+            beforeSend: function () {
+                jQuery('.j1-CP--loader').show();
+                jQuery('.j1-CP--loader').css('top', $(window).scrollTop());
+                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j1-CP--loader').hide();
+                jQuery('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    if (response.Result.length > 0) {
+                        var result = response.Result;
+                        var context = {
+                            jointservice: function () {
+                                return _.map(result, transform);
+                            }
+                        };
+                        renderHistory(context);
+                        jQuery('.m23-table-joint-services--count_catch').html(response.Result.length);
+                    }
+                    else {
+                        var markup = jQuery('#zeroresultjointservice-item-template').html();
+                        var template = Handlebars.compile(markup);
+                        var rendering = template(context);
+                        jQuery('#jointservice-placeholder').html(rendering);
+                        window.initComponents('jointservice-placeholder');
+                    }
+                }
+                else {
+                    jQuery('#jointservicediv').html();
+                    var markup = jQuery('#Noelementjointservice-item-template').html();
+                    var template = Handlebars.compile(markup);
+                    var rendering = template(context);
+                    jQuery('#jointservicediv').html(rendering);
+                    //window.initComponents('jointservice-placeholder');
+
+                }
+            },
+            error: function () {
+                jQuery('#jointservicediv').html();
+                var markup = jQuery('#Noelementjointservice-item-template').html();
+                var template = Handlebars.compile(markup);
+                var rendering = template(context);
+                jQuery('#jointservicediv').html(rendering);
+            }
+        });
+    }
+
+
+    function handleFilterSelection() {
+        var type = jQuery(this).val();
+        ajaxSelection(type);
+    }
+
+
+    function transform(jointservice) {
+        var r = {
+            divisionName: jointservice.divisionName,
+            partnerType: jointservice.partnerType,
+            serviceName: jointservice.serviceName
+        }
+        return r;
+    }
+
+    function renderHistory(context) {
+        var markup = jQuery('#jointservice-item-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#jointservice-placeholder').html(rendering);
+        window.initComponents('jointservice-placeholder');
+    }
+
+</script>

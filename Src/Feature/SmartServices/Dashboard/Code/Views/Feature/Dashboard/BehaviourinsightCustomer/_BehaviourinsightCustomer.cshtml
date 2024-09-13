@@ -1,0 +1,434 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr"; }
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+<!-- .electricity consumption graph -->
+<h2 class="chart-consumption-title" id="chart-month"><span class="whitespacechart"></span></h2>
+<div class="chart-consumption-subtitle" id="chart-title"></div>
+<div class="m29v1-consumption__key">
+    <div class="m29v1-consumption__legend">
+        <div class="m29v1-consumption__legend--item" id="legend-low-main" style="display:none" data-color="#F9B941 ">
+            <span class="m29v1-consumption__legend--item-icon-lowest"></span>
+            <span class="m29v1-consumption__legend--item-text" id="legend-low"></span>
+        </div>
+        @*<div class="m29v1-consumption__legend--item" data-color="#0074a3 ">
+            <span class="m29v1-consumption__legend--item-icon-efficient"></span>
+            <span class="m29v1-consumption__legend--item-text" id="legend-efficient"></span>
+        </div>
+        <div class="m29v1-consumption__legend--item" data-color="#df9032 ">
+            <span class="m29v1-consumption__legend--item-icon-similar"></span>
+            <span class="m29v1-consumption__legend--item-text" id="legend-smiliar"></span>
+        </div>
+
+        <div class="m29v1-consumption__legend--item" data-color="#88ac2d ">
+            <span class="m29v1-consumption__legend--item-icon-home"></span>
+            <span class="m29v1-consumption__legend--item-text" id="legend-home"></span>
+        </div>*@
+    </div>
+</div>
+
+<br /><br />
+<div id="behaviour-insight-graph-placeholder" style="direction:ltr"></div>
+
+
+<script type="text/javascript">
+
+
+    if (!window.location.hash) {
+        window.location = window.location + '#';
+        window.location.reload(true);
+    }
+    var ConsumtionValue;
+    var AvgConsumtionValue;
+    var LowConsumtionValue;
+    var Title;
+    var LongDateMonth;
+    var ShowTrophy;
+    var lang = "@Sitecore.Context.Language";
+    var paramreversed = true;
+    var paramopposite = true;
+
+    if (lang == "en")
+    {
+        paramreversed = false;
+        paramopposite = false;
+    }
+
+    var CallApi = function (callback) {
+
+
+        var urlParam = "@Request.QueryString["uid"]";
+        var uniqueID = urlParam;
+        var url = "/api/BehaviourinsightCustomer/get?uniqueID=" + uniqueID;
+
+        jQuery.ajax(url, {
+            dataType: 'json',
+            method: 'GET',
+            success:function (data) {
+
+                $.each(data, function (index, value) {
+
+                    ConsumtionValue = data.Items.ConsumtionValue;
+                    AvgConsumtionValue = data.Items.AvgConsumtionValue;
+                    LowConsumtionValue = data.Items.LowConsumtionValue;
+                    Title = data.TitleText;
+                    LongDateMonth = data.LongBillingDateMonth;
+                    ShowTrophy = data.IsShowTrophy;
+
+                    //Display Graph after call api
+                    RenderGraph(ConsumtionValue, AvgConsumtionValue, LowConsumtionValue, Title, LongDateMonth, ShowTrophy);
+                });
+
+            }
+        });
+    };
+
+    CallApi();
+
+
+    //Render Graph
+    function RenderGraph(paramConsumtionValue, paramAvgConsumtionValue, paramLowConsumtionValue, paramTitleCode, LongBillingDateMonth, ShowTrophy) {
+
+        var chart = new Highcharts.chart('behaviour-insight-graph-placeholder', {
+            
+           
+            legend: {
+                showInLegend: true,
+                useHTML: Highcharts.hasBidiBug
+            },
+
+            credits: {
+                enabled: false
+            },
+            chart: {
+                type: 'bar'
+                
+            },
+            subtitle: {
+                text: [paramTitleCode]                   
+                
+            },
+            title: {
+                text: [LongDateMonth]
+            },
+            xAxis: {
+                
+                opposite: paramopposite,
+                categories: ['@Translate.Text("Your Home")', '@Translate.Text("Similar Home")', '@Translate.Text("Efficent Similar Homes")'],
+                labels: {
+                    style: {fontWeight:'bold'}
+                }
+                
+            },
+            yAxis: {
+                reversed: paramreversed,
+                min: '',
+                title: {
+                    text: '@Translate.Text("kwh")',
+                    useHTML: Highcharts.hasBidiBug
+                },
+                labels: {
+                    style: {fontWeight:'bold'}
+                }
+                
+                
+            },
+            tooltip: {
+            //    //headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            //    //pointFormat: '<tr><td style="color:{series.color};padding:0">{series.category}: </td>' +
+            //    //    '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+            //    //footerFormat: '</table>',
+            //    //shared: true,
+                //    //useHTML: true
+                enabled : false
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                },
+                column: {
+                    borderWidth: 0,
+                    pointWidth: 20,
+                    useHTML: true,
+                    colorByPoint: true
+                },               
+                series: {
+                    borderRadius: 15,
+                    pointWidth: 34,
+                    useHTML: true,
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:1f}<image src="https://www.dewa.gov.ae/~/media/6EE7FC8318E04AE5B389BA038D6F1E33.ashx">',
+                        useHTML: true,
+                        align: 'right'//,
+                        //y: -25
+                       
+                    }
+
+                }
+            },
+            series: [
+                {   
+                    showInLegend: false,
+                    data: [
+                        { y: parseFloat(paramConsumtionValue), color: '#8CAD3C' },
+                        { y: parseFloat(paramAvgConsumtionValue), color: '#DB8E40' },
+                        { y: parseFloat(paramLowConsumtionValue), color: '#0074A8' }],
+                    
+                }]            
+        });
+
+        ($('.highcharts-data-labels').find('span')).each(function () {
+            $(this).attr("style", null);
+            $(this).addClass('chart-span-labels');
+            $(this).parent().addClass('chart-parent-labels')
+                       
+        });
+        ($('.highcharts-data-labels').find('img')).each(function () {
+            $(this).css('position', 'absolute');
+            $(this).css('top', '15px');
+            //$(this).css('left', '-10px');
+            $(this).addClass('chart-img-labels');
+           
+        });
+           
+        $("#chart-month>span").html(LongDateMonth);
+        $("#chart-title").html(Title);
+
+        $("#legend-home").html('@Translate.Text("Your Home")');
+        $("#legend-efficient").html('@Translate.Text("Efficent Similar Homes")');
+        $("#legend-smiliar").html('@Translate.Text("Similar Home")');
+        $("#legend-low").html('@Translate.Text("Lowest")');
+        
+        //Display Trophy based on the condition
+        if (ShowTrophy) {
+            $('.highcharts-data-labels').append('<div class="chart-trophy">⋆</div>')
+            $('#legend-low-main').show();
+        }
+
+        //Carbon footprint.
+        $("#horizontal_carbon_fp--emission").html(parseFloat(paramConsumtionValue) * 0.44);
+        
+    }
+    
+
+    $(function () {
+        chart.setOptions({
+            lang: {
+                thousandsSep: ','
+            }
+        });
+    });
+
+    var add_comma = function (val) {
+        while (/(\d+)(\d{3})/.test(val.toString())) {
+            val = val.toString().replace(/(\d+)(\d{3})/, '$1' + '$2');
+        }
+        return val;
+    }
+
+</script>
+
+
+<style type="text/css">
+    .highcharts-xaxis-labels {
+        //display:none;
+    }
+    .m29v1-consumption__key {
+        position: relative;
+        padding: 8px;
+        vertical-align: top;
+        line-height: 20px;
+        background: white;
+        display: block;
+        font-size: 14px;
+    }
+    .m29v1-consumption__legend {
+        *zoom: 1;
+        right: 8px;
+        left: auto;
+        float: right;
+        margin-right: -5px;
+        display: block;
+        max-width: 70%;
+    }
+
+        .m29v1-consumption__legend:before, .m29v1-consumption__legend:after {
+            content: " ";
+            display: table;
+        }
+
+        .m29v1-consumption__legend:after {
+            clear: both;
+        }
+    .m29v1-consumption__legend--item-icon-star {
+        font-size: 64px;
+        color: #F9B941;
+        position: absolute;
+        right: 130px;
+    }
+    .m29v1-consumption__legend--item {
+        float: right;
+        font-size: 0.875em;
+        color: #6D6E71;
+        display: inline-block;
+        font-weight: initial;
+        margin-right: 10px;
+    }
+    .m29v1-consumption__legend--item-text {
+        float: right;
+        line-height: 25px;
+    }
+     .m29v1-consumption__legend--item-icon {
+            float: left;
+            color: transparent;
+        }
+    .m29v1-consumption__legend--item-icon-similar:after {
+            font-size: 80px;
+            line-height: 0px;
+            content: "·";
+            font-family: iconfont;
+            color: #df9032;
+            -webkit-transition: color, 0.3s;
+            -moz-transition: color, 0.3s;
+            transition: color, 0.3s;
+    }
+    .m29v1-consumption__legend--item-icon-efficient:after {
+        font-size: 80px;
+        line-height: 0px;
+        content: "·";
+        font-family: iconfont;
+        color: #0074a3;
+        -webkit-transition: color, 0.3s;
+        -moz-transition: color, 0.3s;
+        transition: color, 0.3s;
+    }
+    .m29v1-consumption__legend--item-icon-home:after {
+        font-size: 80px;
+        line-height: 0px;
+        content: "·";
+        font-family: iconfont;
+        color: #88ac2d;
+        -webkit-transition: color, 0.3s;
+        -moz-transition: color, 0.3s;
+        transition: color, 0.3s;
+    }
+    .m29v1-consumption__legend--item-icon-lowest:after {
+        font-size: 33px;
+        content: "⋆";
+        line-height: 12px;
+        font-family: iconfont;
+        color: #F9B941;
+        -webkit-transition: color, 0.3s;
+        -moz-transition: color, 0.3s;
+        transition: color, 0.3s;
+    }
+        .highcharts-title {
+        display: none;
+    }
+    .chart_bold {
+        font-weight: bold;
+    }
+     .highcharts-subtitle {
+        display: none;
+    }
+    .chart-consumption-title {
+        text-align: center;
+        border-bottom: 1px solid #000;
+        line-height: 0.1em;
+        margin: 20px 10px 20px 20px;
+        font-weight: bold;
+        font-size: 24px;
+        text-transform: uppercase;
+    }
+    .whitespacechart {
+        background: #fff;
+        padding: 0 10px;
+    }
+    .chart-consumption-subtitle {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 1.375em;
+    } 
+    .chart-img-labels {
+        background: #fff;
+        border-radius: 50%;
+        width: 25px;
+        padding: 2px;
+        margin-top: 3px;
+        margin-left: 7px;
+        right: -5px;
+    }
+
+    .chart-span-labels {
+        position: absolute;
+        left: 0px;
+        top: -20px;
+        color: #000;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    [dir=rtl] .chart-span-labels {
+        left: 40px;
+    }
+
+    [dir=rtl] .chart-trophy {
+        left: 815px;
+    }
+     
+        .chart-trophy {
+            position: absolute;
+            top: 40px;
+            width: 32px;
+            height: 30px;
+            background: #fff;
+            border: 1px solid #88AC2D;
+            border-radius: 50%;
+            font-size: 50px;
+            color: #F9B941;
+            line-height: 13px;
+            text-align: center;
+        }
+</style>
+<!--[if IE]>
+    <style type="text/css">
+        .m29v1-consumption__legend--item-icon-similar:after {
+            line-height: 20px;
+    }
+    .m29v1-consumption__legend--item-icon-efficient:after {
+        line-height: 20px;
+    }
+    .m29v1-consumption__legend--item-icon-home:after {
+        line-height: 20px;
+    }
+    
+    .m29v1-consumption__legend--item-text {
+        float: right;
+        line-height: 17px;
+    }
+    .chart-span-labels {
+        position: absolute;
+        left: 20px !important;
+        top: -10px !important;
+        color: #000
+    }
+    [dir=rtl] .chart-span-labels {
+        left: 70px !important;
+    }
+    .chart-trophy{
+        font-size: 40px;
+        line-height: 24px;
+    }
+    </style>
+<![endif]-->
+
+

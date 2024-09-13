@@ -1,0 +1,113 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.VideoList
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@{
+    var btnDisabled = Model.completedVideoSection ? "disabled" : string.Empty;
+}
+
+
+<link href="https://vjs.zencdn.net/6.4.0/video-js.css" rel="stylesheet">
+<div class="grid" data-journey="j106-ideal-home">
+
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("ideal-home-score")
+        </div>
+    </div>
+
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            @foreach (var _videoList in Model.VideoGallery)
+            {
+                <p class="intro-text j106-ideal-home__video-section">@_videoList.VideoTitle</p>
+                <div>
+                    <span class="j106-ideal-home__video--required @(_videoList.Watched? "j106-ideal-home__video--done": string.Empty) ">@(_videoList.Watched? "Watched": "Required")</span>
+                    <video videoItemID="@_videoList.Item.ID" class="video-js vjs-default-skin" controls width="640" height="360" data-setup='{ "techOrder": ["youtube", "html5"], "sources": [{ "type": "video/youtube", "src": "@_videoList.VideoURL"}] }'></video>
+                </div>
+            }
+            @*<p class="intro-text j106-ideal-home__video-section">2. Dubai Police</p>
+                <div>
+                    <span class="j106-ideal-home__video--required">Required</span>
+                    <video userid="shujaat" class="video-js vjs-default-skin" controls width="640" height="360" data-setup='{ "techOrder": ["youtube", "html5"], "sources": [{ "type": "video/youtube", "src": "https://www.youtube.com/watch?v=X8FxAI5wQnA"}] }'></video>
+                </div>
+
+                <p class="intro-text j106-ideal-home__video-section">2. Dubai Municipality</p>
+                <div>
+                    <span class="j106-ideal-home__video--required">Required</span>
+                    <video userid="shujaat" class="video-js vjs-default-skin" controls width="640" height="360" data-setup='{ "techOrder": ["youtube", "html5"], "sources": [{ "type": "video/youtube", "src": "https://www.youtube.com/watch?v=UGYvc33tFcQ"}] }'></video>
+                </div>*@
+
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered">
+            @*<a  href="" @btnDisabled class="@btnDisabled button button--primary button--next">Continue</a>*@
+            <a id="videocontinuebutton" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_DASHBOARD)" @btnDisabled class="@btnDisabled button button--primary button--small">
+                @Translate.Text("J106.ContinueLabel")
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script src="https://vjs.zencdn.net/6.4.0/video.js"></script>
+<script src="~/Scripts/External/nml/Youtube.min.js"></script>
+
+<script type="text/javascript">
+
+    var propagate = false;
+
+    var CallApi = function (callback, itemID) {
+
+        var urlParam = itemID;
+        var uniqueID = urlParam;
+        var url = "/api/IdealHomeConsumerAPI?videoItemID=" + itemID;
+
+        jQuery.ajax(url, {
+            dataType: 'json',
+            method: 'GET',
+            success: function (data) {
+                if (!data.Watched) {
+                    propagate = true;
+                    jQuery("#videocontinuebutton").removeAttr("disabled");
+                    jQuery("#videocontinuebutton").removeClass("disabled");
+                }
+            }
+        });
+    };
+
+
+
+    $('.disabled.button').on('click', function (event) {
+        if (!(propagate)) {
+            event.preventDefault();
+        }
+    });
+    $("video").each(function () {
+        var video = videojs(this).ready(function () {
+            var player = this,
+                span = $("#" + player.id_).prev();
+
+
+            player.on('ended', function () {
+
+                var id = $(player).attr("videoItemID");
+                CallApi(null, id);
+
+                if (!(span.hasClass("j106-ideal-home__video--done"))) {
+                    $(span).addClass("j106-ideal-home__video--done");
+                    $(span).html("Watched");
+
+                } else { };
+            });
+        });
+    });
+</script>

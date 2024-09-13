@@ -1,0 +1,296 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Feature.GeneralServices.Models.PowerOutage
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model PowerOutageTrackingModel
+
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            @if (Model.IsSearched)
+            {
+                using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+           FormMethod.Post, new
+           {
+               @class = "form",
+               @id = "PowerOutageTrackForm",
+               data_form = "true",
+               data_parsley_focus = "none",
+               @data_submit_validate = "enabled",
+               enctype = "multipart/form-data",
+               @autocomplete = "off"
+           }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-field form-field--text">
+                        <label for="form-field-notificationno" class="form-field__label">
+                            @Translate.Text("pwo_t_NotificationNo")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-notificationno"
+                                   name="NotificationNo"
+                                   type="text"
+                                   required=""
+                                   value="@Model.NotificationNo"
+                                   placeholder="@Translate.Text("pwo_NotificationNoPlaceholderText")"
+                                   aria-describedby="description-for-notificationno"
+                                   data-parsley-errors-container="#description-for-notificationno"
+                                   data-parsley-required-message="@Translate.Text("pwo_NotificationNoRequired")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-notificationno" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field__button">
+                        <button class="button button--primary button--fullwidth-mobile" type="submit" data-submission-text="@Translate.Text("pwo_track")...">@Translate.Text("pwo_track")</button>
+                    </div>
+                }
+            }
+
+            @if (Model.TrackingData != null && Model.TrackingData.Count > 0)
+            {
+
+                <div class="m95-power-outage">
+                    @*<div class="m95-power-outage_count">
+                            2 Requests
+                        </div>*@
+                    @foreach (PowerOutageTackItem item in Model.TrackingData)
+                    {
+
+                        <div class="m95-power-outage_card">
+                            <div class="m95-power-outage_card-header">
+                                <div class="m95-power-outage_card-title">
+                                    @Translate.Text("pwo_t_PowerOutageRequest")
+                                </div>
+                                <div class="m95-power-outage_card-notif">
+                                    @Translate.Text("pwo_t_NotificationNo") @item.NotificationNo
+                                </div>
+                            </div>
+
+                            <div class="m95-power-outage_card-content">
+                                <div class="m95-power-outage_card-detail padding p-l-10">
+                                    <div class="m95-power-outage_card-key">
+                                        @Translate.Text("pwo_t_Typeofwork")
+                                    </div>
+                                    <div class="m95-power-outage_card-value">
+                                        @item.TypeOfWork
+                                    </div>
+                                </div>
+                                <div class="m95-power-outage_card-detail">
+                                    <div class="m95-power-outage_card-key">
+                                        @Translate.Text("pwo_t_Startdate")
+                                    </div>
+                                    <div class="m95-power-outage_card-value">
+                                        @item.StartDate @item.StartTime
+                                    </div>
+                                </div>
+                                <div class="m95-power-outage_card-detail">
+                                    <div class="m95-power-outage_card-key">
+                                        @Translate.Text("pwo_t_Enddate")
+                                    </div>
+                                    <div class="m95-power-outage_card-value">
+                                        @item.EndDate @item.EndTime
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="m95-power-outage_card-status @(item.Status.Replace(" ","").ToLower())">
+                                <div class="m95-power-outage_card-statustext">
+                                    @item.Status
+                                </div>
+                                @*<div class="m95-power-outage_card-statusdate">
+                                        @DateTime.Now.ToString("dd MMM yyyy hh:mm tt")
+                                    </div>*@
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    docReady(function () {
+
+        //jQuery("#form-field-notificationno").on("blur", function () {
+        //    event.preventDefault();
+        //    require(['parsley'], function () {
+        //        jQuery('.j105-drrg--loader').show();
+        //        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        //        $('body').removeClass('unscrollable').addClass('unscrollable');
+        //        if (jQuery('#PowerOutageTrackForm').parsley().validate()) {
+
+        //            jQuery("#PowerOutageTrackForm").submit();
+        //        } else {
+        //            jQuery('.j105-drrg--loader').hide();
+        //        }
+
+        //    })
+        //})
+    });
+
+</script>
+
+@*<div class="m95-power-outage">
+        <div class="m95-power-outage_count">
+            2 Requests
+        </div>
+
+        <div class="m95-power-outage_card">
+            <div class="m95-power-outage_card-header">
+                <div class="m95-power-outage_card-title">
+                    Power Outage Request
+                </div>
+                <div class="m95-power-outage_card-notif">
+                    Notification no. 0123456789
+                </div>
+            </div>
+
+            <div class="m95-power-outage_card-content">
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        Type of work
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        maintenance work
+                    </div>
+                </div>
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        Start date
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        15 Jun 2020
+                    </div>
+                </div>
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        End date
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        15 Jun 2020
+                    </div>
+                </div>
+            </div>
+
+            <div class="m95-power-outage_card-status created">
+                <div class="m95-power-outage_card-statustext">
+                    Created
+                </div>
+                <div class="m95-power-outage_card-statusdate">
+                    16 Nov 2020 03:09 pm
+                </div>
+            </div>
+        </div>
+
+        <div class="m95-power-outage_card">
+            <div class="m95-power-outage_card-header">
+                <div class="m95-power-outage_card-title">
+                    Power Outage Request
+                </div>
+                <div class="m95-power-outage_card-notif">
+                    Notification no. 0123456789
+                </div>
+            </div>
+
+            <div class="m95-power-outage_card-content">
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        Type of work
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        maintenance work
+                    </div>
+                </div>
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        Start date
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        15 Jun 2020
+                    </div>
+                </div>
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        End date
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        15 Jun 2020
+                    </div>
+                </div>
+            </div>
+
+            <div class="m95-power-outage_card-status inprocess">
+                <div class="m95-power-outage_card-statustext">
+                    In Process
+                </div>
+            </div>
+        </div>
+
+        <div class="m95-power-outage_card">
+            <div class="m95-power-outage_card-header">
+                <div class="m95-power-outage_card-title">
+                    Power Outage Request
+                </div>
+                <div class="m95-power-outage_card-notif">
+                    Notification no. 0123456789
+                </div>
+            </div>
+
+            <div class="m95-power-outage_card-content">
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        Type of work
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        maintenance work
+                    </div>
+                </div>
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        Start date
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        15 Jun 2020
+                    </div>
+                </div>
+                <div class="m95-power-outage_card-detail">
+                    <div class="m95-power-outage_card-key">
+                        End date
+                    </div>
+                    <div class="m95-power-outage_card-value">
+                        15 Jun 2020
+                    </div>
+                </div>
+            </div>
+
+            <div class="m95-power-outage_card-status completed">
+                <div class="m95-power-outage_card-statustext">
+                    Completed
+                </div>
+            </div>
+        </div>
+    </div>*@

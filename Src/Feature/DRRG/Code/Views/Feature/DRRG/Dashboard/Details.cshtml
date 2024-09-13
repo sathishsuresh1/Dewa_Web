@@ -1,0 +1,104 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.DRRG.Models
+@model ModuleDetail
+
+@if (Model != null)
+{
+    <div class="j04-drrg-evaluator">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("pagetitle")
+
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <div class="j04-drrg-evaluator--detail_wrapper">
+                        @if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber))
+                        {
+                            <div class="j04-drrg-evaluator--detail_ref">
+                                <strong>Reference No.:</strong> @Model.ReferenceNumber
+                            </div>
+                        }
+                        @foreach (ModuleSectionRow moduleSectionRow in Model.moduleSectionRows)
+                        {
+                            <div class="j04-drrg-evaluator--detail_title">
+                                @moduleSectionRow.Title
+                            </div>
+                            <div class="j04-drrg-evaluator--detail_sectionrow">
+                                @if (moduleSectionRow.moduleSections != null && moduleSectionRow.moduleSections.Count > 0)
+                                {
+                                    foreach (ModuleSection moduleSection in moduleSectionRow.moduleSections)
+                                    {
+                                        if (moduleSection != null && moduleSection.moduleItems != null && moduleSection.moduleItems.Count > 0)
+                                        {
+                                            <div class="j04-drrg-evaluator--detail_section">
+                                                @foreach (ModuleKeyValueItem modulekeyvalueitem in moduleSection.moduleItems.Where(x => !string.IsNullOrWhiteSpace(x.Value)))
+                                                {
+                                                    <div class="j04-drrg-evaluator--detail">
+                                                        @if (modulekeyvalueitem.FileLink)
+                                                        {
+                                                            <a data-fileid="@modulekeyvalueitem.Value" href="#" rel="" target="_blank" class="link filelink tooltipstered">
+                                                                @modulekeyvalueitem.Key
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+
+                                                            <div class="j04-drrg-evaluator--key">
+                                                                @modulekeyvalueitem.Key
+                                                            </div>
+                                                            <div class="j04-drrg-evaluator--value">
+                                                                @if (modulekeyvalueitem.Linkvalue)
+                                                                {
+                                                                    <a href="#" rel="" target="_blank" class="link ">@modulekeyvalueitem.Value</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    @Html.Raw(modulekeyvalueitem.Value)
+                                                                }
+                                                            </div>
+
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--content grid__column--centered">
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG_VIEWAPPLICATION)" class="button button--outline button--back backbutton">BACK</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" language="javascript">
+        $(".filelink").click(function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var fileid = $(this).data('fileid');
+            window.open("/api/sitecore/DRRGDashboard/Attachment?id=" + fileid, '_blank');
+        });
+    </script>
+}
+else
+{
+    <div class="j04-drrg-evaluator">
+        <div class="grid mt12">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionErrorV2.cshtml")
+                </div>
+            </div>
+        </div>
+    </div>
+}

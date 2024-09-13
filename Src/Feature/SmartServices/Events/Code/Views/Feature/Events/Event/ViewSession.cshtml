@@ -1,0 +1,116 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Feature.Events.Models.Events.SessionModel
+
+
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "session_form", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IsValidEmail)
+                @Html.HiddenFor(m => m.IsValidCode)
+
+                if (!Model.IsValidCode)
+                {
+                    if (!string.IsNullOrWhiteSpace(Model.Message))
+                    {
+                        <div class="m40-status-message m40-status-message--success" data-component="m40-status-message">
+                            <div class="m40-status-message__text green">
+                                @Model.Message
+                            </div>
+                        </div>
+                    }
+                        <fieldset class="fieldset form-section">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-email" class="form-field__label">
+                                    @Translate.Text("Event_Email")
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           id="form-field-email"
+                                           name="Email"
+                                           type="email"
+                                           placeholder="@Translate.Text("Event_EmailPlaceholder")"
+                                           aria-describedby="description-for-email"
+                                           data-parsley-errors-container="#description-for-email"
+                                           required=""
+                                           maxlength="40"
+                                           value="@Model.Email"
+                                           data-parsley-error-message="@Translate.Text("Event_ErrorMsgEmail")"
+                                           data-parsley-required-message="@Translate.Text("Event_ErrorMsgEmail")"
+                                           data-parsley-trigger="focusout">
+                                </span>
+                                <div id="description-for-email" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Email, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            @if (Model.IsValidEmail)
+                            {
+                                <div class="form-field form-field--text ">
+                                    <label for="form-field-eventcode" class="form-field__label">
+                                        @Translate.Text("Event_EventCode")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text"
+                                               id="form-field-eventcode"
+                                               name="EventCode"
+                                               type="text"
+                                               placeholder="@Translate.Text("Event_EventCodePlaceholder")"
+                                               aria-describedby="description-for-eventcode"
+                                               data-parsley-errors-container="#description-for-eventcode"
+                                               required=""
+                                               maxlength="40"
+                                               data-parsley-error-message="@Translate.Text("Event_ErrorMsgEventCode")"
+                                               data-parsley-required-message="@Translate.Text("Event_ErrorMsgEventCode")"
+                                               data-parsley-trigger="focusout">
+                                    </span>
+                                    <div id="description-for-eventcode" class="form-field__messages">
+                                        @Html.ValidationMessageFor(x => x.EventCode, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                </div>
+                            }
+
+                        </fieldset>
+                    <div class="form-field__button">
+                        <button id="btnSubmit" type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    </div>
+                }
+
+            }
+        </div>
+        @if (Model.IsValidCode)
+        {
+            @Html.Sitecore().Placeholder("eventvideo")
+        }
+    </div>
+</div>
+<script>
+    jQuery('#session_form').submit(function (e) {
+        e.preventDefault();
+        if (jQuery("#session_form").parsley().validate()) {
+            jQuery('.j105-drrg--loader').show();
+            jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+            $('body').removeClass('unscrollable').addClass('unscrollable');
+        }
+        return false;
+    });
+</script>

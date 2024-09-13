@@ -1,0 +1,93 @@
+﻿@model DEWAXP.Feature.Partner.Models.CorporatePartnership.LoginModel
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using CommonContantHelper = DEWAXP.Foundation.Content.RegexConstant;
+<div class="grid">
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            @*<h2 class="m12-subsection__title--login">@Translate.Text("login")</h2>*@
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { returnUrl = ViewBag.ReturnUrl, channelId = Request.QueryString["channelId"], conversationId = Request.QueryString["conversationId"], surl = Request.QueryString["surl"], activityId = Request.QueryString["activityId"], fromId = Request.QueryString["fromId"], fromName = Request.QueryString["fromName"], toId = Request.QueryString["toId"], toName = Request.QueryString["toName"], languageCode = Request.QueryString["languageCode"], loginType = Request.QueryString["loginType"] }, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="loginattempt" value="@ViewBag.loginattempt" />
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+                <fieldset class="fieldset">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--text">
+                        <label for="form-field-login-main-username" class="form-field__label">
+                            @Translate.Text("username label")
+
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.Username, new
+                       {
+                           @class = "form-field__input form-field__input--text",
+                           @type = "text",
+                           @id = "form-field-login-main-username",
+                           @placeholder = Translate.Text("username label"),
+                           //@aria_required = "true",
+                           @required = "required",
+                           @data_parsley_error_message = Translate.Text("register username validation message"),
+                           @data_parsley_errors_container = "#description-for-login-main-username",
+                           @aria_describedby = "description-for-login-main-username"
+                       })
+                        </span>
+                        <div id="description-for-login-main-username" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.Username, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div class="form-field form-field--text">
+                        <label for="form-field-login-main-password" class="form-field__label">
+                            @Translate.Text("login password label")
+
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.PasswordFor(x => x.Password, new
+                       {
+                           @class = "form-field__input form-field__input--text",
+                           @id = "form-field-login-main-password",
+                           @placeholder = Translate.Text("login password label"),
+                           //@aria_required = "true",
+                           @type = "password",
+                           @required = "required",
+                           @data_parsley_errors_container = "#description-for-login-main-password",
+                           @aria_describedby = "description-for-login-main-password",
+                           @data_parsley_required_message = Translate.Text(DictionaryKeys.Global.Login.PleaseEnterPassword),
+                           @data_parsley_pattern = CommonContantHelper.PasswordRegexWithSmallLetterSymbolAndNumber,
+                           @data_parsley_pattern_message = Translate.Text("Password Policy Mismatch Message"),
+                           @autocomplete = "off"
+                       })
+                        </span>
+                        <div id="description-for-login-main-password" class="form-field__messages">
+
+                            @Html.ValidationMessageFor(x => x.Password, "", new { @class = "parsley-errors-list" })
+                        </div>
+                        <p>@Html.Raw(Translate.Text("Password Policy Hmtl text"))
+                        </p>
+                    </div>
+                </fieldset>
+                <div class="form-field__button">
+                    <button id="loginButton" type="submit" class="button button--primary" data-submission-text="@Translate.Text("Logging in")...">@Translate.Text("login button text")</button>
+                    @*<span class="create form-links">
+                        @Translate.Text("or") <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J9_CUSTOMER_REGISTRATION)" class="form-links__link mt12"> @Translate.Text("header.createnewaccount")</a>
+                    </span>*@
+                </div>
+
+            }
+            @*<ul class="form-links">
+                <li class="form-links__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_FORGOT_PASSWORD)" class="form-links__link">@Translate.Text("forgot password link text")</a></li>
+                <li class="form-links__item"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_FORGOT_USERNAME)" class="form-links__link">@Translate.Text("forgot username link text")</a></li>
+            </ul>*@
+
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>

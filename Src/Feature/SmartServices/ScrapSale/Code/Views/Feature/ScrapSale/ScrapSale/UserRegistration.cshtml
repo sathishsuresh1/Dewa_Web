@@ -1,0 +1,2991 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Feature.ScrapSale.Models.ScrapSale
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@model UserRegistrationModel
+@{
+    /**/
+
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+
+
+    var _expDate = !string.IsNullOrEmpty(Model.ExpiryDate) ? DateTime.ParseExact(Model.ExpiryDate, "dd MMMM yyyy",
+                                      System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMMM yyyy") : string.Empty;
+
+    if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft && _expDate != string.Empty)
+    {
+        _expDate = _expDate.Replace("January", "يناير").Replace("February", "فبراير").Replace("March", "مارس").Replace("April", "أبريل").Replace("May", "مايو").Replace("June", "يونيو").Replace("July", "يوليو").Replace("August", "أغسطس").Replace("September", "سبتمبر").Replace("October", "أكتوبر").Replace("November", "نوفمبر").Replace("December", "ديسمبر");
+    }
+
+    var _licenseIssueDate = !string.IsNullOrEmpty(Model.TradeLicenseIssueDate) ? DateTime.ParseExact(Model.TradeLicenseIssueDate, "dd MMMM yyyy",
+                                       System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMMM yyyy") : string.Empty;
+
+    if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft && _licenseIssueDate != string.Empty)
+    {
+        _licenseIssueDate = _licenseIssueDate.Replace("January", "يناير").Replace("February", "فبراير").Replace("March", "مارس").Replace("April", "أبريل").Replace("May", "مايو").Replace("June", "يونيو").Replace("July", "يوليو").Replace("August", "أغسطس").Replace("September", "سبتمبر").Replace("October", "أكتوبر").Replace("November", "نوفمبر").Replace("December", "ديسمبر");
+    }
+
+    var _licenseExpDate = !string.IsNullOrEmpty(Model.TradeLicenseExpiryDate) ? DateTime.ParseExact(Model.TradeLicenseExpiryDate, "dd MMMM yyyy",
+                                   System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMMM yyyy") : string.Empty;
+
+    if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft && _licenseExpDate != string.Empty)
+    {
+        _licenseExpDate = _licenseExpDate.Replace("January", "يناير").Replace("February", "فبراير").Replace("March", "مارس").Replace("April", "أبريل").Replace("May", "مايو").Replace("June", "يونيو").Replace("July", "يوليو").Replace("August", "أغسطس").Replace("September", "سبتمبر").Replace("October", "أكتوبر").Replace("November", "نوفمبر").Replace("December", "ديسمبر");
+    }
+
+    var _appNo = !string.IsNullOrEmpty(Model.RequestNumber) ? Model.RequestNumber : string.Empty;
+    var _viewOnly = !string.IsNullOrEmpty(Model.ViewResubmit) ? Model.ViewResubmit : string.Empty;
+
+
+}
+
+
+@if (Model.IsSucceed && !string.IsNullOrWhiteSpace(Model.ApplicationNO))
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Translate.Text("SS_SuccessMessage")</div>
+                <div class="m40-status-message__text" dir="@direction">
+                    @string.Format(@Translate.Text("SS_SuccessMessageDescription"), string.Empty)
+                </div>
+                @*<p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("SS_Print")</button>
+                    </p>*@
+            </div>
+
+        </div>
+    </div>
+
+    <div class="grid__row">
+
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <div class="charge-box charge-completed">
+
+                <div class="m42-keyvalue">
+
+                    <dl>
+
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("ER_DateLabel")</dt>
+
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular">@DateTime.Now.ToString("dd MMM yyyy | hh:mm:ss")</dd>
+
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("ER_ApplicationNumberLabel")</dt>
+
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular">@Model.ApplicationNO</dd>
+
+                    </dl>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+            <div class="whatsnext">
+                <h2 class="text__section-title">@Translate.Text("SS_MoreTitle")</h2>
+                <div class="m14-richtext mb0">
+                    <p class="text__content-copy">
+                        @Html.Raw(Translate.Text("SS_UserReadMoreDescription"))
+                    </p>
+                </div>
+            </div>
+            <div class="button-container--single grid__column--centered">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TRACKAPPLICATION)?appno=@Model.ApplicationNO" class="button button--primary" role="button">@Translate.Text("SS_TrackApplication")</a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        setTimeout(function () {
+
+            $(".m26-page-title").hide();
+
+        }, 100)
+    </script>
+}
+else
+{
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <div class="grid__row error-html hidden" id="_erDiv">
+                <div class="grid__column grid__column--12">
+                    <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                        <div class="m40-status-message__title icon--error">
+                            @Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)
+                        </div>
+                        <div class="m40-status-message__text" id="_erDivMsg" dir="@direction">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "ScrapSaleRegistrationFrom", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                @Html.HiddenFor(m => m.OtpRequestId)
+                @Html.HiddenFor(m => m.CustomerType)
+                @Html.HiddenFor(m => m.isEIDAFetch)
+                @Html.HiddenFor(m => m.isTradeLicenseFetch)
+                @Html.HiddenFor(m => m.TestFlag)
+                @Html.HiddenFor(m => m.RequestNumber)
+                <script type="text/javascript">
+            $( document ).ready(function() {
+                if('@ViewData.ModelState.IsValid' == 'False')
+                {
+                         $('.text-page__intro').hide();
+                 }
+
+                });
+                </script>
+
+
+                <!--New Design-->
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="j171-masar" data-journey="j171-masar">
+                            <form method="get" class="form" data-form="true" action="#" novalidate="">
+                                <div class="form-field">
+                                    <fieldset class="fieldset">
+                                        <legend class="fieldset_legend-title">@Translate.Text("SS_UR_CompanyDetails")</legend>
+                                        <div class="form-field form-field__radio-fieldset">
+                                            <label class="form-field__label">@Translate.Text("SS_UR_CompanyType")</label>
+                                            <div class="form-field__radio-row">
+                                                <p class="form-field__radio">
+                                                    <label>
+                                                        @Html.RadioButtonFor(m => m.UserType, "O", new
+                                                   {
+                                                       @id = "form-field-radio_1_1",
+                                                       @aria_describedby = "description-for-v2xhvhp5r",
+                                                       @data_parsley_errors_container = "#description-for-v2xhvhp5r",
+                                                       @data_parsley_multiple = "radios_group1",
+                                                       @class = "form-field__input form-field__input--radio rButton",
+                                                       @checked = true,
+
+                                                   })
+
+                                                        <span class="form-field__fakeradio focus-enabled">
+                                                            @Translate.Text("SS_UR_Organization")
+                                                        </span>
+                                                    </label>
+                                                </p>
+                                                <p class="form-field__radio ">
+                                                    <label>
+                                                        @Html.RadioButtonFor(m => m.UserType, "I", new
+                                                   {
+                                                       @id = "form-field-radio_1_2",
+                                                       @aria_describedby = "description-for-v2xhvhp5r",
+                                                       @data_parsley_errors_container = "#description-for-v2xhvhp5r",
+                                                       @data_parsley_multiple = "radios_group1",
+                                                       @class = "form-field__input form-field__input--radio rButton",
+
+                                                   })
+                                                        <span class="form-field__fakeradio focus-enabled">
+                                                            @Translate.Text("SS_UR_Individual")
+                                                        </span>
+                                                    </label>
+                                                </p>
+                                            </div>
+                                            <div id="description-for-v2xhvhp5r" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="fieldset onlyOrg" style="margin-top:24px">
+                                        <div class="form-field form-field--select form-field--select-single">
+                                            <label for="form-field-z198vv0ad" class="form-field__label">
+                                                @Translate.Text("SS_UR_TradeLicenseIssuedBy")
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                @Html.DropDownListFor(model => model.TradeLicenseIssuingAuthorityKey, Model.TradeLicenseIssuingAuthority, new
+                                           {
+                                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                               @id = "form-field-TradeLicenseIssuedBy",
+                                               @required = "",
+                                               @data_parsley_required_message = Translate.Text("SS_UR_TradeLicenseIssuePlaceRequired"),
+                                               @data_parsley_errors_container = "#description-for-z198vv0ad",
+                                               @aria_describedby = "description-for-z198vv0ad",
+
+                                           })
+                                            </span>
+                                            <div id="description-for-z198vv0ad" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text hidden authDescription">
+                                            <label for="form-field-IssuingAuthorityDescription" class="form-field__label">
+                                                @Translate.Text("SS_UR_IssuingAuthorityDescription")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text _attachedTextChange"
+                                                       id="form-field-IssuingAuthorityDescription"
+                                                       name="IssuingAuthorityDescription"
+                                                       asp-for="@Model.IssuingAuthorityDescription"
+                                                       value="@Model.IssuingAuthorityDescription"
+                                                       type="text"
+                                                       placeholder="@Translate.Text("SS_UR_IssuingAuthorityDescription")"
+                                                       aria-describedby="description-for-IssuingAuthorityDescription"
+                                                       data-parsley-errors-container="#description-for-IssuingAuthorityDescription"
+                                                       data-parsley-required-message="@Translate.Text("SS_UR_IssuingAuthorityRequired")"
+                                                       data-attid="form-field-IssuingAuthorityDescription"
+                                                       data-parsley-trigger="focusout"
+                                                       maxlength="40">
+                                            </span>
+                                            <div id="description-for-IssuingAuthorityDescription" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text form-field--6 form-field--6-mobile_full mb0">
+                                            <label for="form-field-uj0dpkni5" class="form-field__label">
+                                                @Translate.Text("SS_UR_TradelicenseNumber")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text _attachedTextChange"
+                                                       id="TradelicenseNumber"
+                                                       name="TradelicenseNumber"
+                                                       required=""
+                                                       asp-for="@Model.TradelicenseNumber"
+                                                       value="@Model.TradelicenseNumber"
+                                                       type="text"
+                                                       placeholder="@Translate.Text("SS_UR_TradelicenseNumberPlaceholder")"
+                                                       aria-describedby="description-for-TradelicenseNumber"
+                                                       data-parsley-errors-container="#description-for-TradelicenseNumber"
+                                                       data-parsley-type="alphanum"
+                                                       data-parsley-required-message="@Translate.Text("SS_UR_TradelicenseNumberRequired")"
+                                                       data-parsley-alphanum-message="@Translate.Text("SS_UR_TradelicenseNumberInValid")"
+                                                       data-attid="form-field-TradeLicenseAttachment"
+                                                       data-parsley-trigger="focusout"
+                                                       maxlength="30">
+                                            </span>
+                                            <div id="description-for-TradelicenseNumber" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div id="datepicker-container-mzb2dv01m" class="form-field form-field--text picker--6 form-field--6 mb0">
+                                            <label for="form-field-mzb2dv01m" class="form-field__label">
+                                                @Translate.Text("SS_TradeLicense-DateofExpiry")
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                                                       id="form-field-mzb2dv01m" name="TradeLicenseExpiryDate" type="text"
+                                                       placeholder="@Translate.Text("SS_TradeLicense-DateofExpiry")" aria-describedby="description-for-mzb2dv01m"
+                                                       data-parsley-errors-container="#description-for-mzb2dv01m" data-el="datepicker-future"
+                                                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 }' data-parsley-id="14" readonly="" aria-haspopup="true"
+                                                       aria-expanded="false" aria-readonly="false"
+                                                       data-parsley-required-message="@Translate.Text("SS_UR_TradelicenseExpiryDateRequired")"
+                                                       asp-for="@Model.TradeLicenseExpiryDate"
+                                                       value="@_licenseExpDate"
+                                                       aria-owns="form-field-mzb2dv01m_root" aria-invalid="false"><span data-clicker="#datepicker-container-mzb2dv01m"
+                                                                                                                        class="form-field__datepicker-icon-clicker"></span>
+                                                <input type="hidden" name="text-date_submit">
+                                            </span>
+                                            <div id="description-for-mzb2dv01m" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form--single_line _tlverifydiv form--single_line_scrapsale-button hidden">
+                                            <div class="form-field__button">
+                                                <div class="red hidden _err" style="margin-bottom: 10px;padding:0px 10px;">@Translate.Text("SS_UR_FetchTradeLicenseExpiryError")</div>
+                                                <a class="button button--primary button--fullwidth-mobile _btnVerifyTL">@Translate.Text("SS_UR_VerifyTradeLicense")</a>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="fieldset onlyOrg-2" style="margin-top:24px">
+                                        <div id="datepicker-container-mzb2dv01mi" class="form-field form-field--text">
+                                            <label for="form-field-mzb2dv01mi" class="form-field__label">
+                                                @Translate.Text("SS_TradeLicense-DateofIssue")
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                                                       id="form-field-mzb2dv01mi" name="TradeLicenseIssueDate" type="text"
+                                                       placeholder="@Translate.Text("SS_TradeLicense-DateofIssue")" aria-describedby="description-for-mzb2dv01mi"
+                                                       data-parsley-errors-container="#description-for-mzb2dv01mi" data-el="datepicker-past"
+                                                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 }' data-parsley-id="14" readonly="" aria-haspopup="true"
+                                                       aria-expanded="false" aria-readonly="false"
+                                                       data-parsley-required-message="@Translate.Text("SS_UR_TradelicenseIssueDateRequired")"
+                                                       asp-for="@Model.TradeLicenseIssueDate"
+                                                       value="@_licenseIssueDate"
+                                                       aria-owns="form-field-mzb2dv01mi_root" aria-invalid="false"><span data-clicker="#datepicker-container-mzb2dv01mi"
+                                                                                                                         class="form-field__datepicker-icon-clicker"></span>
+                                                <input type="hidden" name="text-date_submit">
+                                            </span>
+                                            <div id="description-for-mzb2dv01mi" class="form-field__messages">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--text">
+                                            <label for="form-field-uj0dpkni52" class="form-field__label">
+                                                @Translate.Text("SS_UR_CompanyName")
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                @Html.TextBoxFor(m => m.CompanyName, new
+                                           {
+                                               @placeholder = @Translate.Text("SS_UR_CompanyNamePlaceholder"),
+                                               @aria_describedby = "description-for-CompanyName",
+                                               @data_parsley_errors_container = "#description-for-CompanyName",
+                                               @required = "",
+                                               @maxlength = "80",
+                                               @data_parsley_required_message = Translate.Text("SS_UR_CompanyNameRequired"),
+                                               @class = "form-field__input form-field__input--text",
+                                           })
+                                            </span>
+                                            <div id="description-for-CompanyName" class="form-field__messages">
+
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text">
+                                            <label for="form-field-uj0dpkni53" class="form-field__label">
+                                                @Translate.Text("SS_UR_VATRegistrationNumber")&nbsp;(@Translate.Text("optional"))
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                @Html.TextBoxFor(m => m.VatRegistrationNo, new
+                                               {
+                                                   @placeholder = @Translate.Text("SS_UR_VATRegistrationNumber"),
+                                                   @aria_describedby = "description-for-VatRegistrationNo",
+                                                   @maxlength = "15",
+                                                   @data_parsley_errors_container = "#description-for-VatRegistrationNo",
+                                                   @data_parsley_required_message = Translate.Text("SS_UR_VatRegistrationNoRequired"),
+                                                   @class = "form-field__input form-field__input--text",
+                                               })
+                                            </span>
+                                            <div id="description-for-VatRegistrationNo" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field">
+                                            <div class="form-field_contact-ext-fieldset contact-country-code">
+                                                <div class="form-field form-field--select form-field--select-single form-field_select-code-col3">
+                                                    <label for="form-field-xd3qt0c4q" class="form-field__label">
+                                                        @Translate.Text("SS_UR_Code")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                        @Html.DropDownListFor(model => model.CompanyTelephoneCode, Model.CompanyTelephoneCodeList, new
+                                                          {
+                                                          @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                          @id = "form-field-CompanyTelCode",
+                                                          @data_parsley_errors_container = "#description-for-CompanyTelCode",
+                                                          @aria_describedby = "description-for-CompanyTelCode",
+
+                                                          })
+                                                    </span>
+                                                </div>
+                                                <div class="form-field form-field--text form-field--text form-field_contact-number-col3">
+                                                    <label for="form-field-xd3qt0c4q" class="form-field__label">
+                                                        @Translate.Text("SS_UR_CompanyTelephoneNumber")&nbsp;(@Translate.Text("optional"))
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text"
+                                                               id="form-field-xd3qt0c4q"
+                                                               asp-for="@Model.CompanyTelephone"
+                                                               type="tel"
+                                                               data-input-numbers
+                                                               name="CompanyTelephone"
+                                                               placeholder="@Translate.Text("SS_UR_CompanyTelephoneNumber")"
+                                                               aria-describedby="description-for-CompanyTelephoneNumber"
+                                                               data-parsley-errors-container="#description-for-CompanyTelephoneNumber"
+                                                               data-parsley-required-message="@Translate.Text("SS_UR_TelephoneNumberRequired")"
+                                                               data-parsley-type="number"
+                                                               maxlength="8"
+                                                               value="@Model.CompanyTelephone"
+                                                               data-parsley-mobile_number-message="@Translate.Text("SS_UR_CompanyTelephoneNumberRequired")"
+                                                               data-parsley-trigger="focusout" data-parsley-id="8"
+                                                               aria-invalid="false"
+                                                               data-parsley-pattern-message="@Translate.Text("SS_UR_TelephoneNumberInvalid")"
+                                                               data-parsley-telephonenumber="true"
+                                                               data-parsley-pattern="/^(?:2|3|4|6|7|9)\d{7}$/">
+                                                    </span>
+                                                </div>
+                                                <div class="form-field form-field--text form-field_ext-col3">
+                                                    <label for="form-field-uj0dpkni54" class="form-field__label">
+                                                        @Translate.Text("SS_UR_Extention")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text"
+                                                               id="form-field-Extention" asp-for="@Model.CompanyTelephoneExtension"
+                                                               name="CompanyTelephoneExtension"
+                                                               value="@Model.CompanyTelephoneExtension"
+                                                               type="tel"
+                                                               data-input-numbers
+                                                               maxlength="10"
+                                                               aria-describedby="description-for-Extention"
+                                                               data-parsley-errors-container="#description-for-Extention"
+                                                               data-parsley-id="4">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div id="description-for-CompanyTelephoneNumber" class="form-field__messages">
+
+                                            </div>
+                                        </div>
+                                        <div class="form-field">
+                                            <div class="form-field_contact-ext-fieldset contact-country-code">
+                                                <div class="form-field form-field--select form-field--select-single form-field_select-code-col3">
+                                                    <label for="form-field-CompanyMobCode"
+                                                           class="form-field__label">
+                                                        @Translate.Text("SS_UR_Code")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                        @Html.DropDownListFor(model => model.CompanyMobileCode, Model.CompanyTelephoneCodeList, new
+                                                          {
+                                                          @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                          @id = "form-field-CompanyMobCode",
+                                                          @data_parsley_errors_container = "#description-for-CompanyMobCode",
+                                                          @aria_describedby = "description-for-CompanyMobCode",
+
+                                                          })
+                                                    </span>
+                                                </div>
+                                                <div class="form-field form-field--text form-field--text form-field_contact-number-col3">
+                                                    <label for="CompanyMobileNumber" class="form-field__label">
+                                                        @Translate.Text("SS_UR_MobileNumber")
+                                                        <span class="form-field__label-required aria-only">(required)</span>
+                                                    </label>
+
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text"
+                                                               id="CompanyMobileNumber"
+                                                               name="CompanyMobileNumber"
+                                                               type="tel"
+                                                               placeholder="@Translate.Text("SS_UR_MobileNumberPlaceholder")"
+                                                               aria-describedby="description-for-CompanyMobileNumber"
+                                                               data-parsley-errors-container="#description-for-CompanyMobileNumber"
+                                                               required
+                                                               data-input-numbers
+                                                               maxlength="9"
+                                                               data-parsley-required-message="@Translate.Text("SS_UR_MobileNumberRequired_Outside")"
+                                                               data-parsley-type="number"
+                                                               asp-for="@Model.CompanyMobileNumber"
+                                                               value="@Model.CompanyMobileNumber"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-pattern="/^(?:50|51|52|53|54|55|56|57|58|59|52|54|55|56)\d{7}$/"
+                                                               data-parsley-pattern-message="@Translate.Text("SS_UR_MobileNumberInvalid")"
+                                                               aria-invalid="false">
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                            <div id="description-for-CompanyMobileNumber" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field_verification-fieldset">
+                                            <div class="form-field form-field--text form-field_verification-input">
+                                                <label for="form-field-dxv8jj22n1" class="form-field__label">
+                                                    @Translate.Text("SS_UR_CompanyEmail")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-CompanyEmail" asp-for="@Model.CompanyEmail"
+                                                           name="CompanyEmail"
+                                                           value="@Model.CompanyEmail"
+                                                           type="email"
+                                                           maxlength="241"
+                                                           placeholder="@Translate.Text("SS_UR_CompanyEmail")"
+                                                           aria-describedby="description-for-CompanyEmail"
+                                                           required=""
+                                                           data-parsley-errors-container="#description-for-CompanyEmail"
+                                                           data-parsley-required-message="@Translate.Text("SS_UR_CompanyEmailRequired")"
+                                                           data-parsley-error-message="@Translate.Text("CR_NR_ErrorMsg_Emailaddress")"
+                                                           data-parsley-trigger="focusout" data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-CompanyEmail" class="form-field__messages">
+
+                                                </div>
+                                            </div>
+                                            @*<div class="form-field__button form-field_verification-button email-verify">
+                                                    <span class="button button--primary">@Translate.Text("SS_UR_Verify")</span>
+                                                </div>*@
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="fieldset onlyInd" style="margin-top:24px">
+                                        <div class="form-field form-field_contact-ext-fieldset eid-fieldset">
+                                            <div class="form-field form-field--text">
+                                                <label for="form-field-qxm453zkl" class="form-field__label">
+                                                    @Translate.Text("SS_UR_EmiratesID")
+                                                    <span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text _attachedTextChange"
+                                                           id="EmiratesID"
+                                                           name="EmiratesID"
+                                                           required=""
+                                                           type="number"
+                                                           onkeydown="return event.keyCode !== 69 && event.keyCode !== 190 && event.keyCode !== 189 && event.keyCode !== 187"
+                                                           data-parsley-maxlength="15"
+                                                           placeholder="@Translate.Text("SS_UR_EmiratesIDPlaceholder")"
+                                                           aria-describedby="description-for-EmiratesID"
+                                                           data-parsley-errors-container="#description-for-EmiratesID"
+                                                           data-parsley-required-message="@Translate.Text("SS_UR_EmiratesIDRequired")"
+                                                           data-parsley-emiratesid=""
+                                                           asp-for="@Model.EmiratesID"
+                                                           value="@Model.EmiratesID"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-emiratesid-message="@Translate.Text("SS_UR_EmiratesIDInValid")"
+                                                           data-attid="form-field-EIDAttachment">
+                                                </span>
+                                                <div id="description-for-EmiratesID" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div id="datepicker-container-IdExpiry" class="form-field form-field--text">
+                                                <label for="form-field-IdExpiry" class="form-field__label">
+                                                    @Translate.Text("MI_ExpiryDate")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                                                           id="form-field-IdExpiry" name="ExpiryDate" type="text"
+                                                           required=""
+                                                           placeholder="@Translate.Text("MI_ExpiryDate")"
+                                                           aria-describedby="description-for-IdExpiry"
+                                                           data-parsley-errors-container="#description-for-IdExpiry" data-el="datepicker-future"
+                                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 }' data-parsley-id="14" readonly="" aria-haspopup="true"
+                                                           aria-expanded="false" aria-readonly="false"
+                                                           data-parsley-required-message="@Translate.Text("required")"
+                                                           asp-for="@Model.ExpiryDate"
+                                                           value="@_expDate"
+                                                           aria-owns="form-field-IdExpiry_root" aria-invalid="false"><span data-clicker="#datepicker-container-IdExpiry"
+                                                                                                                           class="form-field__datepicker-icon-clicker"></span>
+                                                    <input type="hidden" name="text-date_submit">
+                                                </span>
+                                                <div id="description-for-IdExpiry" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-field form--single_line">
+                                            <div class="form-field__button">
+                                                <a class="button button--primary button--fullwidth-mobile _btnVerify">@Translate.Text("SS_UR_SearchAutoFill")</a>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="fieldset hidden mt24 onlyInd-2">
+                                        <legend class="fieldset_legend-title">@Translate.Text("SS_UR_DetailsOfIndividual")</legend>
+                                        <div class="form-field form-field_fieldset form-field_fieldset-fullname">
+                                            <div class="form-field form-field--text">
+                                                <label for="form-field-uj0dpkni55" class="form-field__label">
+                                                    @Translate.Text("SS_UR_FirstName")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+
+                                                    @Html.TextBoxFor(m => m.FirstName, new
+                                               {
+                                                   @placeholder = @Translate.Text("SS_UR_FirstNamePlaceholder"),
+                                                   @aria_describedby = "description-for-first_name",
+                                                   @data_parsley_errors_container = "#description-for-first_name",
+                                                   @required = "required",
+                                                   @maxlength = "40",
+                                                   @data_parsley_name = "",
+                                                   @data_parsley_trigger = "focusout",
+                                                   @data_parsley_required_message = Translate.Text("SS_UR_FirstNameRequired"),
+                                                   @class = "form-field__input form-field__input--text",
+                                               })
+                                                </span>
+                                                <div id="description-for-first_name" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text">
+                                                <label for="form-field-uj0dpkni56" class="form-field__label">
+                                                    @Translate.Text("SS_UR_LastName")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    @Html.TextBoxFor(m => m.LastName, new
+                                               {
+                                                   @placeholder = @Translate.Text("SS_UR_LastNamePlaceholder"),
+                                                   @aria_describedby = "description-for-LastName",
+                                                   @data_parsley_errors_container = "#description-for-LastName",
+                                                   @required = "",
+                                                   @maxlength = "40",
+                                                   @data_parsley_name = "",
+                                                   @data_parsley_trigger = "focusout",
+                                                   @data_parsley_required_message = Translate.Text("SS_UR_LastNameRequired"),
+                                                   @class = "form-field__input form-field__input--text",
+                                               })
+                                                </span>
+                                                <div id="description-for-LastName" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-field">
+                                            <div class="form-field_contact-ext-fieldset contact-country-code">
+                                                <div class="form-field form-field--select form-field--select-single form-field_select-code-col3">
+                                                    <label for="form-field-IndividualMobCode" class="form-field__label">
+                                                        @Translate.Text("SS_UR_Code")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                        @Html.DropDownListFor(model => model.MobileCode, Model.CompanyTelephoneCodeList, new
+                                                          {
+                                                          @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                          @id = "form-field-IndividualMobCode",
+                                                          @data_parsley_errors_container = "#description-for-IndividualMobCode",
+                                                          @aria_describedby = "description-for-IndividualMobCode",
+
+                                                          })
+                                                    </span>
+                                                </div>
+                                                <div class="form-field form-field--text form-field--text form-field_contact-number-col3">
+                                                    <label for="MobileNumber" class="form-field__label">
+                                                        @Translate.Text("SS_UR_MobileNumber")
+                                                        <span class="form-field__label-required aria-only">(required)</span>
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text"
+                                                               id="MobileNumber"
+                                                               name="MobileNumber"
+                                                               placeholder="@Translate.Text("SS_UR_MobileNumberPlaceholder")"
+                                                               aria-describedby="description-for-MobileNumber"
+                                                               data-parsley-errors-container="#description-for-MobileNumber"
+                                                               required
+                                                               type="tel"
+                                                               maxlength="9"
+                                                               data-parsley-required-message="@Translate.Text("SS_UR_MobileNumberRequired_Outside")"
+                                                               asp-for="@Model.MobileNumber"
+                                                               value="@Model.MobileNumber"
+                                                               data-parsley-type="number"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-pattern="/^(?:50|51|52|53|54|55|56|57|58|59|52|54|55|56)\d{7}$/"
+                                                               data-parsley-pattern-message="@Translate.Text("SS_UR_MobileNumberInvalid")"
+                                                               aria-invalid="false">
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                            <div id="description-for-MobileNumber" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field">
+                                            <div class="form-field_contact-ext-fieldset contact-country-code">
+                                                <div class="form-field form-field--select form-field--select-single form-field_select-code-col3">
+                                                    <label for="form-field-xd3qt0c4q" class="form-field__label">
+                                                        @Translate.Text("SS_UR_Code")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                        @Html.DropDownListFor(model => model.TelephoneCode, Model.CompanyTelephoneCodeList, new
+                                                               {
+                                                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                               @id = "form-field-IndividualTelCode",
+                                                               @data_parsley_errors_container = "#description-for-IndividualTelCode",
+                                                               @aria_describedby = "description-for-IndividualTelCode",
+
+                                                               })
+                                                    </span>
+                                                </div>
+                                                <div class="form-field form-field--text form-field--text form-field_contact-number-col3">
+                                                    <label for="form-field-xd4qt0c4q" class="form-field__label">
+                                                        @Translate.Text("SS_UR_CompanyTelephoneNumber")&nbsp;(@Translate.Text("optional"))
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text"
+                                                               id="form-field-xd4qt0c4q"
+                                                               asp-for="@Model.IndividualCompanyTelephone"
+                                                               type="tel"
+                                                               data-input-numbers
+                                                               name="IndividualCompanyTelephone"
+                                                               placeholder="@Translate.Text("SS_UR_CompanyTelephoneNumber")"
+                                                               aria-describedby="description-for-IndiCompanyTelephoneNumber"
+                                                               data-parsley-errors-container="#description-for-IndiCompanyTelephoneNumber"
+                                                               data-parsley-required-message="@Translate.Text("SS_UR_TelephoneNumberRequired")"
+                                                               data-parsley-type="number"
+                                                               maxlength="8"
+                                                               value="@Model.IndividualCompanyTelephone"
+                                                               data-parsley-mobile_number-message="@Translate.Text("SS_UR_CompanyTelephoneNumberRequired")"
+                                                               data-parsley-trigger="focusout" data-parsley-id="8"
+                                                               aria-invalid="false"
+                                                               data-parsley-pattern-message="@Translate.Text("SS_UR_TelephoneNumberInvalid")"
+                                                               data-parsley-telephonenumber="true"
+                                                               data-parsley-pattern="/^(?:2|3|4|6|7|9)\d{7}$/">
+
+                                                    </span>
+                                                </div>
+                                                <div class="form-field form-field--text form-field_ext-col3">
+                                                    <label for="form-field-uj0dpkni543" class="form-field__label">
+                                                        @Translate.Text("SS_UR_Extention")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text"
+                                                               id="form-field-uj0dpkni543" asp-for="@Model.IndividualCompanyTelephoneExtension"
+                                                               name="IndividualCompanyTelephoneExtension"
+                                                               value="@Model.IndividualCompanyTelephoneExtension"
+                                                               type="tel"
+                                                               data-input-numbers
+                                                               maxlength="10"
+                                                               aria-describedby="description-for-uj0dpkni543"
+                                                               data-parsley-errors-container="#description-for-uj0dpkni543"
+                                                               data-parsley-id="4">
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                            <div id="description-for-IndiCompanyTelephoneNumber" class="form-field__messages">
+
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field_verification-fieldset">
+                                            <div class="form-field form-field--text form-field_verification-input">
+                                                <label for="EmailAddress" class="form-field__label">
+                                                    @Translate.Text("SS_UR_EmailAddress")
+                                                    <span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    @Html.TextBoxFor(m => m.EmailAddress, new
+                                               {
+                                                   @placeholder = Translate.Text("SS_UR_EmailAddressPlaceholder"),
+                                                   @aria_describedby = "description-for-EmailAddress",
+                                                   @data_parsley_errors_container = "#description-for-EmailAddress",
+                                                   @required = "",
+                                                   @maxlength = "241",
+                                                   @data_parsley_trigger = "focusout",
+                                                   @data_parsley_required_message = Translate.Text("SS_UR_EmailAddressRequired"),
+                                                   @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_Emailaddress"),
+                                                   @class = "form-field__input form-field__input--text",
+                                               })
+                                                </span>
+                                                <div id="description-for-EmailAddress" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            @*<div class="form-field__button form-field_verification-button email-verify">
+                                                    <span class="button button--primary">@Translate.Text("SS_UR_Verify")</span>
+                                                </div>*@
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="fieldset mt24 onlyAddress">
+                                        <legend class="fieldset_legend-title">@Translate.Text("SS_UR_AddressDetailsCompany")</legend>
+
+
+                                        <div class="form-field form-field--text">
+                                            <label for="Street" class="form-field__label">
+                                                @Translate.Text("SS_UR_Street")&nbsp;(@Translate.Text("optional"))
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                @Html.TextBoxFor(m => m.Street, new
+                                           {
+                                               @placeholder = @Translate.Text("SS_UR_StreetPlaceholder"),
+                                               @aria_describedby = "description-for-Street",
+                                               @maxlength = "60",
+                                               @data_parsley_errors_container = "#description-for-Street",
+                                               @data_parsley_required_message = @Translate.Text("SS_UR_StreetRequired"),
+                                               @class = "form-field__input form-field__input--text",
+                                           })
+                                            </span>
+                                            <div id="description-for-Street" class="form-field__messages"></div>
+                                        </div>
+                                        <div class="form-field form-field--select form-field--select-single">
+                                            <label for="form-field-Countrykey" class="form-field__label">
+                                                @Translate.Text("SS_UR_Country")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                @Html.DropDownListFor(model => model.Countrykey, Model.CountryList, Translate.Text("defaultSelect"), new
+                                           {
+                                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                               @id = "form-field-Countrykey",
+                                               @required = "required",
+                                               @data_parsley_required_message = Translate.Text("SS_UR_CountryRequired"),
+                                               @data_parsley_errors_container = "#description-for-Countrykey",
+                                               @aria_describedby = "description-for-Countrykey",
+
+                                           })
+                                            </span>
+                                            <div id="description-for-Countrykey" class="form-field__messages">
+
+                                            </div>
+
+                                        </div>
+                                        <div class="form-field form-field--select form-field--select-single mb0  form-field--6 uae">
+                                            <label for="form-field-Region" class="form-field__label">
+                                                @Translate.Text("SS_UR_Emirate")&nbsp;(@Translate.Text("optional"))
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                @Html.DropDownListFor(model => model.City, Model.RegionList, new
+                                           {
+                                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                               @id = "form-field-Region",
+                                               @data_parsley_required_message = Translate.Text("SS_UR_RegionRequired"),
+                                               @data_parsley_errors_container = "#description-for-Region",
+                                               @aria_describedby = "description-for-Region",
+
+                                           })
+                                            </span>
+                                            <div id="description-for-Region" class="form-field__messages">
+
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text hidden _city">
+                                            <label for="ActualCity" class="form-field__label">
+                                                @Translate.Text("SS_UR_City")&nbsp;(@Translate.Text("optional"))
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text"
+                                                       id="ActualCity"
+                                                       name="ActualCity"
+                                                       type="text"
+                                                       maxlength="40"
+                                                       placeholder="@Translate.Text("SS_UR_City")"
+                                                       aria-describedby="description-for-ActualCity"
+                                                       data-parsley-errors-container="#description-for-ActualCity"
+                                                       asp-for="@Model.ActualCity"
+                                                       value="@Model.ActualCity"
+                                                       data-parsley-required-message="@Translate.Text("SS_UR_CityRequired")">
+                                            </span>
+                                            <div id="description-for-ActualCity" class="form-field__messages"></div>
+                                        </div>
+                                        <div class="form-field form-field--text form-field--6 mb0 poboxx">
+                                            <label for="POBox" class="form-field__label">
+                                                @Translate.Text("SS_UR_POBox")&nbsp;(@Translate.Text("optional"))
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text"
+                                                       id="POBox"
+                                                       name="POBox"
+                                                       type="tel"
+                                                       data-input-numbers
+                                                       maxlength="10"
+                                                       placeholder="@Translate.Text("SS_UR_POBoxPlaceholder")"
+                                                       aria-describedby="description-for-POBox"
+                                                       data-parsley-errors-container="#description-for-POBox"
+                                                       asp-for="@Model.POBox"
+                                                       value="@Model.POBox"
+                                                       data-parsley-required-message="@Translate.Text("SS_UR_POBoxRequired")">
+                                            </span>
+                                            <div id="description-for-POBox" class="form-field__messages"></div>
+                                        </div>
+                                        @*<div class="form-field form-field--select form-field--select-single uae">
+                                                <label for="form-field-z198vv0ad" class="form-field__label">
+                                                    @Translate.Text("SS_UR_Office Location Area")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                    @Html.DropDownListFor(model => model.Region, Model.AreaList, new
+                                               {
+                                                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                   @id = "form-field-Area",
+                                                   @required = "required",
+                                                   @data_parsley_required_message = Translate.Text("SS_UR_AreaRequired"),
+                                                   @data_parsley_errors_container = "#description-for-Area",
+                                                   @aria_describedby = "description-for-Area",
+
+                                               })
+                                                </span>
+                                                <div id="description-for-Area" class="form-field__messages">
+                                                </div>
+                                            </div>*@
+                                    </fieldset>
+                                    <fieldset class="fieldset mt24 onlyAddress _downloadDiv1">
+                                        <div id="showOnFile" class="hidden _downloadDiv">
+                                            <a id="setURL" href="#" target="_blank">
+                                                <div class="form-field--download_new">
+                                                    <div class="form-field__download-filetype">File</div>
+                                                    <div>
+                                                        <p class="form-field__download-filename">@Translate.Text("Masar.Download")</p>
+                                                    </div>
+                                                    <svg width="24" class="form-field__download-icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M4.125 21C3.42881 21 2.76113 20.7234 2.26884 20.2312C1.77656 19.7389 1.5 19.0712 1.5 18.375V14.625C1.5 14.3266 1.61853 14.0405 1.8295 13.8295C2.04048 13.6185 2.32663 13.5 2.625 13.5C2.92337 13.5 3.20952 13.6185 3.4205 13.8295C3.63147 14.0405 3.75 14.3266 3.75 14.625V18.375C3.75 18.582 3.918 18.75 4.125 18.75H19.875C19.9745 18.75 20.0698 18.7105 20.1402 18.6402C20.2105 18.5698 20.25 18.4745 20.25 18.375V14.625C20.25 14.3266 20.3685 14.0405 20.5795 13.8295C20.7905 13.6185 21.0766 13.5 21.375 13.5C21.6734 13.5 21.9595 13.6185 22.1705 13.8295C22.3815 14.0405 22.5 14.3266 22.5 14.625V18.375C22.5 19.0712 22.2234 19.7389 21.7312 20.2312C21.2389 20.7234 20.5712 21 19.875 21H4.125Z"></path>
+                                                        <path d="M10.8743 11.5335V3C10.8743 2.70163 10.9928 2.41548 11.2038 2.2045C11.4148 1.99353 11.7009 1.875 11.9993 1.875C12.2977 1.875 12.5838 1.99353 12.7948 2.2045C13.0058 2.41548 13.1243 2.70163 13.1243 3V11.5335L16.0793 8.58C16.1837 8.4756 16.3076 8.39278 16.444 8.33628C16.5805 8.27978 16.7267 8.2507 16.8743 8.2507C17.0219 8.2507 17.1681 8.27978 17.3046 8.33628C17.441 8.39278 17.5649 8.4756 17.6693 8.58C17.7737 8.6844 17.8565 8.80834 17.913 8.94475C17.9695 9.08116 17.9986 9.22736 17.9986 9.375C17.9986 9.52264 17.9695 9.66884 17.913 9.80525C17.8565 9.94166 17.7737 10.0656 17.6693 10.17L12.7943 15.045C12.69 15.1495 12.566 15.2324 12.4296 15.289C12.2932 15.3455 12.147 15.3746 11.9993 15.3746C11.8516 15.3746 11.7054 15.3455 11.569 15.289C11.4326 15.2324 11.3086 15.1495 11.2043 15.045L6.3293 10.17C6.2249 10.0656 6.14208 9.94166 6.08558 9.80525C6.02908 9.66884 6 9.52264 6 9.375C6 9.22736 6.02908 9.08116 6.08558 8.94475C6.14208 8.80834 6.2249 8.6844 6.3293 8.58C6.4337 8.4756 6.55764 8.39278 6.69405 8.33628C6.83046 8.27978 6.97665 8.2507 7.1243 8.2507C7.27194 8.2507 7.41814 8.27978 7.55455 8.33628C7.69096 8.39278 7.8149 8.4756 7.9193 8.58L10.8743 11.5335Z"></path>
+                                                    </svg>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <legend class="fieldset_legend-title">@Translate.Text("SS_UR_Attachments")</legend>
+                                        <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant onlyOrg oShowAttachments">
+                                            <div class="form-field__input-wrapper">
+                                                <div class="form-field__uploader-details">
+                                                    <label for="form-field-TradeLicense" class="form-field__label">
+                                                        @Translate.Text("SS_UR_TradeLicense")
+                                                    </label>
+                                                    <div>
+                                                        <label>
+                                                            <input class="form-field__input form-field__input--upload" id="form-field-TradeLicense" name="TradeLicenseAttachment"
+                                                                   type="file" aria-describedby="description-for-TradeLicense"
+                                                                   data-parsley-errors-container="#description-for-TradeLicense"
+                                                                   data-parsley-required-message="This field is required" data-uploader-field="TradeLicense"
+                                                                   accept="application/pdf, image/*"
+                                                                   required=""
+                                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="26">
+                                                            <span class="button button--upload--variant focus-enabled"
+                                                                  data-uploader-button="upload-choose"> @Translate.Text("SS_UR_Upload your File")</span>
+                                                            </label>
+                                                        </div>
+                                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">
+                                                            Upload format is not correct
+                                                        </p>
+                                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">
+                                                            Upload file size is too high
+                                                        </p>
+                                                        <div class="form-field--upload_new-details">
+                                                            <div class="form-field__input--upload-filetype" data-uploader-filetype="TradeLicense">
+
+                                                            </div>
+                                                            <div>
+                                                                <p class="form-field__input--upload-filename" data-uploader-filename="TradeLicense"></p>
+                                                                <div class="form-field__input--upload-filesize hidden" data-uploader-filesize="TradeLicense">
+                                                                    <span data-totalsize="TradeLicense"></span>@Translate.Text("SS_KB")
+                                                                </div>
+                                                            </div>
+                                                            <button class="button--upload_remove hidden" data-uploader-remove="TradeLicense">
+                                                                <span class="aria-only">@Translate.Text("Remove")</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="description-for-TradeLicense" class="form-field__messages">
+                                                    <p class="form-field__description">@Translate.Text("SS_FileUploaderNote_New")</p>
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant mt0 onlyInd iShowAttachments">
+                                                <div class="form-field__input-wrapper">
+                                                    <div class="form-field__uploader-details">
+                                                        <label for="form-field-EmiratesIDU" class="form-field__label">
+                                                            @Translate.Text("SS_UR_EmiratesID")
+                                                        </label>
+                                                        <div>
+                                                            <label>
+                                                                <input class="form-field__input form-field__input--upload" id="form-field-EmiratesIDU" name="EIDAttachment"
+                                                                       type="file" aria-describedby="description-for-EmiratesIDU"
+                                                                       data-parsley-errors-container="#description-for-EmiratesIDU"
+                                                                       data-parsley-required-message="This field is required" data-uploader-field="EmiratesIDU"
+                                                                       accept="application/pdf, image/*"
+                                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="26">
+                                                                <span class="button button--upload--variant focus-enabled"
+                                                                      data-uploader-button="upload-choose"> @Translate.Text("SS_UR_Upload your File")</span>
+                                                                </label>
+                                                            </div>
+                                                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">
+                                                                Upload format is not correct
+                                                            </p>
+                                                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">
+                                                                Upload file size is too high
+                                                            </p>
+                                                            <div class="form-field--upload_new-details">
+                                                                <div class="form-field__input--upload-filetype" data-uploader-filetype="EmiratesIDU">
+
+                                                                </div>
+                                                                <div>
+                                                                    <p class="form-field__input--upload-filename" data-uploader-filename="EmiratesIDU"></p>
+                                                                    <div class="form-field__input--upload-filesize hidden" data-uploader-filesize="EmiratesIDU">
+                                                                        <span data-totalsize="EmiratesIDU"></span>@Translate.Text("SS_KB")
+                                                                    </div>
+                                                                </div>
+                                                                <button class="button--upload_remove hidden" data-uploader-remove="EmiratesIDU">
+                                                                    <span class="aria-only">@Translate.Text("Remove")</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="description-for-EmiratesIDU" class="form-field__messages">
+                                                        <p class="form-field__description">@Translate.Text("SS_FileUploaderNote_New")</p>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="form-field__button onlyAddress">
+                                            @*<button type="submit" class="button button--primary button--fullwidth-mobile">Next</button>*@
+                                            <button id="btnConfirm" type="submit" class="button button--primary button--fullwidth-mobile hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                                            <div class="button button--primary button--fullwidth-mobile email-verify">@Translate.Text("Next")</div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- End Design-->
+
+
+                    }
+
+        </div>
+    </div>
+    <!--OTP verification Modal Popup-->
+    <div class="m39-modal m39-modal--profile m39-modal--nofocus" data-component="m39-modal" id="modal_true">
+        <button data-trigger="true" class="m39-modal__trigger optpopuptrigger hidden">OTP Trigger</button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+            <div class="m39-modal__dialog otp">
+                <div class="m39-modal__header">
+                    <button data-close="true" class="m39-modal__button--close" style="cursor:pointer">
+                        <span class="aria-only">@Translate.Text("Close")</span>
+                    </button>
+                    <a id="redirectBtn"></a>
+                </div>
+                <div class="m39-modal__content flex-center">
+                    <div class="otp--modalcontent">
+                        <div class="otp_inputdisplay_screen hidden">
+                            <img class="otp_chatcheck hidden" src="/images/chatcheck.png">
+                            <img class="otp_mailcheck hidden" src="/images/mailcheck.png">
+                            <div class="otp--modalcontent-title">
+                                <span class="otp-title"></span>
+                            </div>
+                            <div class="otp--modalcontent-details">
+                                <span class="otp_inputdisplay_screen_error red">
+                                </span>
+                            </div>
+                            <div class="otp--modalcontent-text hidden">
+                                @Html.Raw(Translate.Text("cust.care.info.note"))
+                            </div>
+                        </div>
+                        <div class="otpselectionoption hidden">
+                            <form class="form mt24 " data-form>
+                                <div class="form-field">
+                                    <span>@Translate.Text("refund.VerifyOtpSubtitle")</span>
+                                    <fieldset class="fieldset">
+                                        <legend class="form-field__label">
+                                            <span class="form-field__label-required aria-only">.</span>
+                                        </legend>
+                                        <div class=" grid__column grid__column--12  grid__column--form align_left mt24 mb24">
+                                            <p class="form-field__radio hidden displayEmail">
+                                                <label>
+                                                    <input class="form-field__input form-field__input--radio otp_diplay_input" id="otp_diplay_input_1" data-stype="e" name="otp_diplay_input" type="radio" aria-describedby="description-for-maskedvalue" data-parsley-errors-container="#description-for-maskedvalue" data-parsley-multiple="j113_radio" data-parsley-id="26">
+                                                    <span class="form-field__fakeradio focus-enabled emailSpan">
+
+                                                    </span>
+                                                    <br>
+                                                </label>
+                                            </p>
+                                            <p class="form-field__radio hidden displayMobile">
+                                                <label>
+                                                    <input class="form-field__input form-field__input--radio otp_diplay_input" id="otp_diplay_input_2" data-stype="m" name="otp_diplay_input" type="radio" aria-describedby="description-for-maskedvalue" data-parsley-errors-container="#description-for-maskedvalue" data-parsley-multiple="j113_radio" data-parsley-id="26">
+                                                    <span dir="ltr" class="form-field__fakeradio focus-enabled mobileSpan">
+
+                                                    </span>
+                                                    <br>
+                                                </label>
+                                            </p>
+                                        </div>
+                                        <div id="description-for-radio-maskedvalue" class="form-field__messages">
+                                        </div>
+                                    </fieldset>
+
+                                    <div class="form-field">
+                                        <a href="javascript:void(0)" class="button button--primary mt0 btn-SendOtp">@Translate.Text("cust.SendOTP")</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="otp_input_screen hidden">
+                            <img class="otp_chatcheck hidden" src="/images/chatcheck.png">
+                            <img class="otp_mailcheck hidden" src="/images/mailcheck.png">
+                            <div class="otp--modalcontent-title">
+                                <span class="otp-title"></span>
+                            </div>
+                            <div class="otp--modalcontent-details">
+                                <span class="otp-message"></span>
+                            </div>
+
+                            <form class="form mt24 input-otp-textbox" data-form>
+                                <div class="form-field form-field--otp centered">
+                                    <span class="form-field__input-wrapper_otp">
+                                        <input class="form-field__input form-field__input--otp"
+                                               id="form-field-otpnumber" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="1"
+                                               data-parsley-errors-container="#description-for-mobiotpnumber"
+                                               required="" autofocus=""
+                                               data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="6"
+                                               aria-invalid="false">
+                                    </span>
+                                    <span class="form-field__input-wrapper_otp">
+                                        <input class="form-field__input form-field__input--otp"
+                                               id="form-field-otpnumber" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="1"
+                                               data-parsley-errors-container="#description-for-otpnumber"
+                                               required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="8"
+                                               aria-invalid="false">
+                                    </span>
+                                    <span class="form-field__input-wrapper_otp">
+                                        <input class="form-field__input form-field__input--otp"
+                                               id="form-field-otpnumber" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="1"
+                                               data-parsley-errors-container="#description-for-otpnumber"
+                                               required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="10"
+                                               aria-invalid="false">
+                                    </span>
+                                    <span class="form-field__input-wrapper_otp">
+                                        <input class="form-field__input form-field__input--otp"
+                                               id="form-field-otpnumber" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="1"
+                                               data-parsley-errors-container="#description-for-otpnumber"
+                                               required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="12"
+                                               aria-invalid="false">
+                                    </span>
+                                    <span class="form-field__input-wrapper_otp">
+                                        <input class="form-field__input form-field__input--otp"
+                                               id="form-field-otpnumber" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="1"
+                                               data-parsley-errors-container="#description-for-otpnumber"
+                                               required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="14"
+                                               aria-invalid="false">
+                                    </span>
+                                    <span class="form-field__input-wrapper_otp">
+                                        <input class="form-field__input form-field__input--otp"
+                                               id="form-field-otpnumber" name="text" type="number"
+                                               aria-describedby="description-for-otpnumber"
+                                               data-parsley-maxnumber="1"
+                                               data-parsley-errors-container="#description-for-otpnumber"
+                                               required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                               data-parsley-trigger="focusout" data-parsley-id="16"
+                                               aria-invalid="false">
+                                    </span>
+                                    <input class="form-field__input form-field__input--otp_main"
+                                           id="form-field-otpnumbermain" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="6"
+                                           data-parsley-errors-container="#description-for-otpnumber"
+                                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="33">
+                                    <div id="description-for-otpnumber" class="form-field__messages"></div>
+                                </div>
+                                <div class="form-field mt0 otp_inputdisplay_screen_error red hidden">
+                                </div>
+                                <div class="form-field">
+                                    <div class="button button--timer timer-button--outline"
+                                         data-component="m78-timer" id="timerbutton"
+                                         timer-labels="{&quot;before&quot;:&quot;@Translate.Text("cust.resend.button.text")&quot;, &quot;after&quot;:&quot;@Translate.Text("cust.resend.button.text") (&quot;}"
+                                         timer-time="{&quot;seconds&quot;:180}">
+                                        <span class="m78-timer--button_text">@Translate.Text("cust.send.button.text")</span>
+                                        <span class="m78-timer--button_time"></span>
+                                    </div>
+                                </div>
+                                <div class="form-field"><span id="notmytext"></span> @Html.Raw(Translate.Text("Contact Customer Care Center"))</div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+    <!--OTP Modal Popup End-->
+    <script type="text/javascript">
+
+
+        ///////////////////OTP Verification Script Start//////////////////////////////
+         docReady(function () {
+             var $confirmBtn = jQuery(".email-verify");
+             var verifystep = null;
+             var emailAdd = '@Model.CompanyEmail'
+             var mobileN = '@Model.CompanyMobileNumber';
+             var _checkEIDA = true;
+             var _checkTL = true;
+             var _lastDate = '';
+             var _TLlastDate = '';
+             var myInterval = null;
+             var _useOnchange = false;
+             var _appNum = '@_appNo';
+             var _rt = '@_viewOnly';
+             var _whenToRun = '@Model.IsValidationPassed';
+
+             AddCustomForgeryToken = function (data, elementId) {
+                 data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                 return data;
+             };
+
+
+             if (_appNum != '' && _whenToRun == 'False') {
+
+                 $('.oShowAttachments').hide();
+                 $('.iShowAttachments').hide();
+                 $('.email-verify').hide();
+
+
+
+               /* $('#form-field-CompanyEmail').val(''); //apply check
+                $('#CompanyName').val('');
+                $('#CompanyMobileNumber').val('');
+                $('#form-field-xd3qt0c4q').val('');
+                $('#form-field-Extention').val('');
+                $('#TradelicenseNumber').val('');
+                $('#form-field-mzb2dv01mi').val('');
+                $('#form-field-mzb2dv01m').val('');
+                $('#form-field-IssuingAuthorityDescription').val('');
+                $('#form-field-TradeLicenseIssuedBy').val('');
+                $('#form-field-CompanyMobCode').val('');
+                $('#form-field-CompanyTelCode').val('');
+                $('#VatRegistrationNo').val('');
+
+                $('#form-field-radio_1_1').trigger('click');
+
+                $('#EmiratesID').val('');
+                $('#form-field-IdExpiry').val('');
+                $('#EmailAddress').val('');
+                $('#FirstName').val('');
+                $('#LastName').val('');
+                $('#MobileNumber').val('');
+                $('#form-field-xd4qt0c4q').val('');
+                $('#form-field-uj0dpkni543').val('');
+                $('#form-field-IndividualMobCode').val('');
+                $('#form-field-IndividualTelCode').val('');
+
+
+                $('#form-field-Countrykey').val('AE');
+                $('#form-field-Region').val(''); //apply check
+                $('#ActualCity').val(''); //apply check
+
+                $('#POBox').val('');
+                $('#Street').val('');
+                $('#CustomerType').val(''); */
+
+
+
+
+                 OtpForRead(_appNum);
+
+             }
+
+             function GetDataforViewApplication(_appN) {
+                 var requestData = {
+                     applicationnumber: _appN
+
+                 }
+
+                 return requestData;
+             }
+
+
+
+
+             function GetDataforAndSendOTPApplication(_appN) {
+                 var mobile = '';
+                 var email = '';
+                 var otp = '';
+                 var prtype = "NONB";
+                 var _eida = '';
+                 var _bpcat = '';
+
+                 var requestData = {
+                     mobile: mobile,
+                     email: email,
+                     option: '',
+                     Otp: otp,
+                     prtype: prtype,
+                     emiratesId: _eida,
+                     bpcategory: _bpcat,
+                     inputId: _appN,
+                     idType: 'R',
+                     mode: 'S'
+                 }
+
+                 //requestData.mode = "S";
+                 //if (verifystep != null)
+                   //  requestData.reqId = jQuery("#OtpRequestId").val();
+
+                 return requestData;
+             }
+
+             var doTriggerRedirect = false;
+
+             function OtpForRead(_aNum) {
+
+                 verifystep = null;
+                $("#OtpRequestId").val('');
+                $(".otp_inputdisplay_screen_error").html('');
+                $(".otp_inputdisplay_screen_error").hide();
+                $('input[name="otp_diplay_input"]').prop('checked', false);
+                $(".otp-title").html('');
+                $(".otp-message").html('');
+                $(".otp-message").removeClass("red");
+
+                 $('.m39-modal__button--close').bind("click", function () {
+                     if (doTriggerRedirect) {
+                         show_Load();
+                         window.location.href = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TRACKAPPLICATION)' + '?appno=' + _aNum;
+                     }
+                 });
+
+
+                 GetEmailNMobileTrack(GetDataforAndSendOTPApplication(_aNum), function (rdata) {
+
+                    var title = '@Html.Raw(Translate.Text("cust.both.otp.screen.title"))';
+                    var msg = '@Html.Raw(Translate.Text("cust.both.otp.screen.msg"))';
+                    $(".m66-preloader-fullpage").fadeOut();
+                    $(".otp_inputdisplay_screen").hide();
+                    //$(".otp--modalcontent-text").hide();
+                    $(".otp-title").html(title);
+                    $(".otp_mailcheck").show();
+                    $(".otp_chatcheck").hide();
+                    $("#notmytext").html('@Translate.Text("cust.not.my.both")');
+                     if (rdata.status) {
+                        doTriggerRedirect = true;
+                        verifystep = 3;
+                        $(".otp-message").html(msg.replace("{0}", rdata.data.maskedmobile).replace("{1}", rdata.data.maskedemail));
+                        $("#OtpRequestId").val(rdata.data.referencenumber);
+                        emailAdd = rdata.data.maskedemail;
+                        mobileN = rdata.data.maskedmobile;
+
+                        $(".otp_input_screen").show();
+                        $(".otp_inputdisplay_screen_error").hide();
+
+                        resetTimer();
+                        $(".optpopuptrigger").trigger('click');
+                    }
+                     else {
+                        $(".optpopuptrigger").trigger('click');
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        //$(".otp--modalcontent-text").show();
+                        $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                    }
+                });
+             }
+
+
+
+             $('#form-field-TradeLicenseIssuedBy').change(function () {
+                 var _selAuthority1 = $('#form-field-TradeLicenseIssuedBy').val();
+
+                 if (_selAuthority1 == 'OT') {
+                     $('.authDescription').show();
+                     $("#form-field-IssuingAuthorityDescription").attr("required", "");
+                     $('._tlverifydiv').hide();
+                 }
+                 else {
+                     $('.authDescription').hide();
+                     $("#form-field-IssuingAuthorityDescription").removeAttr("required");
+
+                     if (_selAuthority1 == 'DE') {
+                         $('._tlverifydiv').show();
+                         $('.onlyOrg-2').hide();
+                         $('.onlyAddress').hide();
+                     }
+                     else {
+                         $('._tlverifydiv').hide();
+                         $('.onlyOrg-2').show();
+                         $('.onlyAddress').show();
+                     }
+                 }
+
+             });
+
+
+             $("#MobileNumber").on("change", function () {
+                 if (_useOnchange) {
+                     _useOnchange = false;
+                     $('#MobileNumber').removeAttr("type");
+                     $('#MobileNumber').attr("type", "tel");
+                     $('#MobileNumber').attr("data-input-numbers");
+                     $('#MobileNumber').attr('data-parsley-pattern', '/^(?:50|51|52|53|54|55|56|57|58|59|52|54|55|56)\u005Cd{7}$/');
+                     $('#MobileNumber').attr("data-parsley-type", "number");
+                 }
+             });
+
+
+             $("#EmailAddress").on("change", function () {
+                 $('#MobileNumber').removeAttr("type");
+                 $('#EmailAddress').attr("type", "email");
+
+             });
+
+
+
+             $("#EmiratesID").on("change", function () {
+                 $('._btnVerify').removeAttr('disabled');
+                 _checkEIDA = true;
+                 $('.onlyAddress').hide();
+                 $('.onlyInd-2').hide();
+                 $('#EmailAddress').val('');
+                 $('#FirstName').val('');
+                 $('#LastName').val('');
+                 $('#MobileNumber').val('');
+
+             });
+
+             $("#form-field-IdExpiry").on("blur", function () {
+                 if (!_checkEIDA)
+                     myInterval = setInterval(icaTimer, 300);
+
+
+             });
+
+
+             function icaTimer() {
+                 if (_lastDate != $('#form-field-IdExpiry').val()) {
+                     $('._btnVerify').removeAttr('disabled');
+                     _checkEIDA = true;
+                     $('.onlyAddress').hide();
+                     $('.onlyInd-2').hide();
+                     $('#EmailAddress').val('');
+                     $('#FirstName').val('');
+                     $('#LastName').val('');
+                     $('#MobileNumber').val('');
+                     clearInterval(myInterval);
+                 }
+             }
+
+
+             $("#TradelicenseNumber").on("change", function () {
+                 $('._btnVerifyTL').removeAttr('disabled');
+                 _checkTL = true;
+                 $("#form-field-mzb2dv01mi").val('');
+                 if ($('#form-field-TradeLicenseIssuedBy').val() == 'DE') {
+                     $('._tlverifydiv').show();
+                     $('.onlyOrg-2').hide();
+                     $('.onlyAddress').hide();
+                 }
+                 else {
+                     $('._tlverifydiv').hide();
+                     $('.onlyOrg-2').show();
+                     $('.onlyAddress').show();
+                 }
+
+             });
+
+
+             $("#form-field-mzb2dv01m").on("blur", function () {
+                 if (!_checkTL)
+                     myInterval = setInterval(TLTimer, 300);
+
+
+             });
+
+             function TLTimer() {
+                 if (_TLlastDate != $('#form-field-mzb2dv01m').val()) {
+                     $('._btnVerifyTL').removeAttr('disabled');
+                     _checkTL = true;
+                     $("#form-field-mzb2dv01mi").val('');
+                     if ($('#form-field-TradeLicenseIssuedBy').val() == 'DE') {
+                         $('._tlverifydiv').show();
+                         $('.onlyOrg-2').hide();
+                         $('.onlyAddress').hide();
+                     }
+                     else {
+                         $('._tlverifydiv').hide();
+                         $('.onlyOrg-2').show();
+                         $('.onlyAddress').show();
+                     }
+
+                     clearInterval(myInterval);
+                 }
+             }
+
+
+
+             $('._btnVerifyTL').click(function () {
+
+                 $('.error-html').hide();
+                 if (_checkTL) {
+                     var error1 = 0;
+                     $('.onlyAddress').hide();
+                     $('.onlyOrg-2').hide();
+                     $("#ScrapSaleRegistrationFrom").find('.form-field__input').not(':hidden').each(function () {
+
+                         jQuery(this).parsley().validate();
+
+                         if (!jQuery(this).parsley().isValid()) {
+                             error1++;
+                         }
+                     });
+                     if (error1 == 0) {
+                         // $('#FirstName').val('');
+
+
+                         FetchTradeLicense(GetTradeLicenseData(), function (rdata) {
+                             $(".m66-preloader-fullpage").fadeOut();
+                             $('.onlyAddress').show();
+                             $('.onlyOrg-2').show();
+
+                             $('._btnVerifyTL').attr('disabled', 'disabled');
+                             _checkTL = false;
+
+                             $('.email-verifyDisabled').addClass('email-verify');
+                             $('.email-verify').removeClass('email-verifyDisabled');
+                             $('.email-verify').removeAttr('disabled');
+                             $('#form-field-mzb2dv01mi').removeAttr('tabindex');
+                             $('#form-field-mzb2dv01mi').css("pointer-events", "auto");
+                             $('#form-field-mzb2dv01mi').closest("#datepicker-container-mzb2dv01mi").css("pointer-events", "none");
+
+                             if (rdata.status) {
+                                 if (rdata.data.tradelicensedetails.issuedate != '') {
+
+                                     $('#form-field-mzb2dv01mi').val(rdata.data.tradelicensedetails.issuedate);
+
+                                 }
+
+
+                                 if (rdata.data.tradelicensedetails.issuedateflag == 'N') {
+                                     $('#form-field-mzb2dv01mi').css("pointer-events", "none");
+                                     $('#form-field-mzb2dv01mi').attr('tabindex', '-1');
+                                     $('#form-field-mzb2dv01mi').closest("#datepicker-container-mzb2dv01mi").css("pointer-events", "none");
+                                 }
+                                 else if (rdata.data.tradelicensedetails.issuedateflag == 'E') {
+                                     $('#form-field-mzb2dv01mi').removeAttr('tabindex');
+                                     $('#form-field-mzb2dv01mi').css("pointer-events", "auto");
+                                     $('#form-field-mzb2dv01mi').closest("#datepicker-container-mzb2dv01mi").css("pointer-events", "auto");
+                                 }
+
+
+                                 if (rdata.data.tradelicensedetails.attachmentflag == 'K') {
+                                     $('#form-field-TradeLicense').removeAttr('required');
+                                     $('#isTradeLicenseFetch').val('true');
+                                 }
+                                 else if (rdata.data.tradelicensedetails.attachmentflag == 'M') {
+                                     $('#form-field-TradeLicense').attr('required', 'true');
+                                     $('#isTradeLicenseFetch').val('false');
+                                 }
+
+                                 if (rdata.data.tradelicensedetails.expirydateflag == 'R') {
+                                     $('._err').show();
+                                 }
+                                 else {
+                                     $('._err').hide();
+                                 }
+
+
+                                 //jQuery('#ScrapSaleRegistrationFrom').parsley().validate();
+
+                             }
+                             else {
+
+                                 $('#form-field-TradeLicense').attr('required', 'true');
+                                 $('#form-field-mzb2dv01mi').removeAttr('readonly');
+                                 $('#_erDivMsg').html('');
+                                 $('.icon--error').show();
+                                 $('#_erDiv').hide();
+                             }
+
+
+                         });
+
+
+                     }
+
+                 }
+
+             });
+
+
+             $('._btnVerify').click(function () {
+
+                 $('.error-html').hide();
+
+                 if (_checkEIDA) {
+                     var error1 = 0;
+                     $('.onlyAddress').hide();
+                     $('.onlyInd-2').hide();
+                     $("#ScrapSaleRegistrationFrom").find('.form-field__input').each(function () {
+
+                         jQuery(this).parsley().validate();
+
+                         if (!jQuery(this).parsley().isValid()) {
+                             if ($(this).attr('id') == 'EmiratesID' || $(this).attr('id') == 'form-field-IdExpiry')
+                                 error1++;
+                         }
+                     });
+                     if (error1 == 0) {
+                         $('#FirstName').val('');
+                          $('#FirstName').val('');
+                          $('#LastName').val('');
+                          $('#MobileNumber').val('');
+                          $('#EmailAddress').val('');
+
+
+                         FetchEIDA(GetEIDAData(), function (rdata) {
+                             $(".m66-preloader-fullpage").fadeOut();
+                             $('.onlyAddress').show();
+                             $('.onlyInd-2').show();
+
+                            $('._btnVerify').attr('disabled', 'disabled');
+                             _checkEIDA = false;
+
+                             $('.email-verifyDisabled').addClass('email-verify');
+                             $('.email-verify').removeClass('email-verifyDisabled');
+                             $('.email-verify').removeAttr('disabled');
+
+
+
+
+                             if (rdata.status) {
+                                 if (rdata.data.fullnameen != null && rdata.data.fullnameen != '' && rdata.data.fullnameen != '') {
+                                     $('#isEIDAFetch').val('true');
+                                     $('#form-field-EmiratesIDU').removeAttr('required');
+                                 }
+                                 else {
+                                     $('#isEIDAFetch').val('false');
+                                     $('#form-field-EmiratesIDU').attr('required', "true");
+                                 }
+
+
+                                 $('#FirstName').val(rdata.data.fullnameen);
+                                 $('#LastName').val(rdata.data.lastname);
+
+
+                                 if (rdata.data.fullnameen != null && rdata.data.fullnameen != '' && rdata.data.fullnameen != '')
+                                       $('#FirstName').attr('readonly', 'readonly');
+                                   else
+                                       $('#FirstName').removeAttr('readonly');
+
+                                 if (rdata.data.lastname != null && rdata.data.lastname != '' && rdata.data.lastname != '')
+                                       $('#LastName').attr('readonly', 'readonly');
+                                   else
+                                       $('#LastName').removeAttr('readonly');
+
+
+                                 if (rdata.data.mobile != null && rdata.data.mobile != '' && rdata.data.mobile.indexOf('*') != -1) {
+                                     $('#MobileNumber').attr("type", "text");
+                                     $('#MobileNumber').removeAttr("data-parsley-type");
+                                     $('#MobileNumber').removeAttr("data-input-numbers");
+                                     $('#MobileNumber').removeAttr('data-parsley-mobilenumber');
+                                     $('#MobileNumber').removeAttr('data-parsley-pattern');
+                                     $('#MobileNumber').val(rdata.data.mobile);
+                                     $('#form-field-IndividualMobCode').val('AE');
+                                     _useOnchange = true;
+                                 }
+                                 else {
+
+                                     $('#MobileNumber').removeAttr("type");
+                                     $('#MobileNumber').attr("type", "tel");
+                                     $('#MobileNumber').attr("data-input-numbers");
+                                     $('#MobileNumber').attr("data-parsley-type", "number");
+                                     $('#MobileNumber').attr('data-parsley-pattern', '/^(?:50|51|52|53|54|55|56|57|58|59|52|54|55|56)\u005Cd{7}$/');
+                                     $('#MobileNumber').val('');
+                                     _useOnchange = false;
+
+                                 }
+
+
+
+                                 if (rdata.data.email != null && rdata.data.email != '' && rdata.data.email.indexOf('*') != -1) {
+                                     $('#EmailAddress').removeAttr("type");
+                                     $('#EmailAddress').attr("type", "text");
+                                     $('#EmailAddress').val(rdata.data.email);
+
+                                 }
+                                 else {
+                                     $('#EmailAddress').removeAttr("type");
+                                     $('#EmailAddress').attr("type", "email");
+                                     $('#EmailAddress').val('');
+
+
+                                 }
+
+
+                                // jQuery('#ScrapSaleRegistrationFrom').parsley().validate();
+
+                             }
+                             else {
+
+                                 $('#form-field-EmiratesIDU').attr('required', "true");
+
+                             }
+
+
+                             $("#ScrapSaleRegistrationFrom").find('.form-field__input').each(function () {
+
+                                 if ($(this).attr('id') != 'EmiratesID' && $(this).attr('id') != 'form-field-IdExpiry') {
+
+                                     jQuery(this).parsley().reset();
+
+                                 }
+                             });
+
+
+                         });
+
+
+                     }
+                 }
+
+
+             });
+
+             function GetEIDAData() {
+                 var eida = $('#EmiratesID').val(); //fetch eida
+                 var expiry = $('#form-field-IdExpiry').val(); //fetch expiry
+                 _lastDate = expiry;
+
+                 var requestData = {
+                     emiratesid: eida,
+                     emiratesexpirydate: expiry
+
+                 }
+
+                 return requestData;
+             }
+
+
+             function GetTradeLicenseData() {
+                 var tlnumber = $('#TradelicenseNumber').val(); //fetch trade license number
+                 var expiry = $('#form-field-mzb2dv01m').val(); //fetch expiry
+                 var issueauthority = $('#form-field-TradeLicenseIssuedBy').val();
+                 _TLlastDate = expiry;
+
+                 var requestData = {
+                     tradelicensenumber: tlnumber,
+                     tlexpirydate: expiry,
+                     issuingauthority: issueauthority,
+                     type: 'S',
+                     mode: 'C'
+                 }
+
+                 return requestData;
+             }
+
+
+
+             function GetValidationData() {
+                 var EmiratesID = $('#EmiratesID').val();
+                 var ExpiryDate = $('#form-field-IdExpiry').val();
+                 var UserType = '';
+
+                 if ($('#form-field-radio_1_1').is(':checked')) {
+                     UserType = 'O';
+                 }
+                 else {
+                     UserType = 'I';
+                 }
+
+                 var Countrykey = $('#form-field-Countrykey').val();
+                 var CompanyEmail = $('#form-field-CompanyEmail').val();
+                 var EmailAddress = $('#EmailAddress').val();
+                 var City = $('#form-field-Region').val();
+                 var ActualCity = $('#ActualCity').val();
+                 var FirstName = $('#FirstName').val();
+                 var CompanyName = $('#CompanyName').val();
+                 var LastName = $('#LastName').val();
+                 var CompanyMobileNumber = $('#CompanyMobileNumber').val();
+                 var MobileNumber = $('#MobileNumber').val();
+                 var POBox = $('#POBox').val();
+                 var Region = '';
+                 var Street = $('#Street').val();
+                 var CompanyTelephone = $('#form-field-xd3qt0c4q').val();
+                 var IndividualCompanyTelephone = $('#form-field-xd4qt0c4q').val();
+                 var CompanyTelephoneExtension = $('#form-field-Extention').val();
+                 var IndividualCompanyTelephoneExtension = $('#form-field-uj0dpkni543').val();
+                 var TradelicenseNumber = $('#TradelicenseNumber').val();
+                 var TradeLicenseIssueDate = $('#form-field-mzb2dv01mi').val();
+                 var TradeLicenseExpiryDate = $('#form-field-mzb2dv01m').val();
+                 var IssuingAuthorityDescription = $('#form-field-IssuingAuthorityDescription').val();
+                 var CustomerType = $('#CustomerType').val();
+                 var TradeLicenseIssuingAuthorityKey = $('#form-field-TradeLicenseIssuedBy').val();
+                 var customeraccountgroup = 'C';
+                 var CompanyMobileCode = $('#form-field-CompanyMobCode').val();
+                 var MobileCode = $('#form-field-IndividualMobCode').val();
+                 var CompanyTelephoneCode = $('#form-field-CompanyTelCode').val();
+                 var TelephoneCode = $('#form-field-IndividualTelCode').val();
+
+                 var requestData = {
+                     EmiratesID: EmiratesID,
+                     ExpiryDate: ExpiryDate,
+                     UserType: UserType,
+                     Countrykey: Countrykey,
+                     CompanyEmail: CompanyEmail,
+                     EmailAddress: EmailAddress,
+                     City: City,
+                     ActualCity: ActualCity,
+                     FirstName: FirstName,
+                     CompanyName: CompanyName,
+                     LastName: LastName,
+                     CompanyMobileNumber: CompanyMobileNumber,
+                     MobileNumber: MobileNumber,
+                     POBox: POBox,
+                     Region: Region,
+                     Street: Street,
+                     CompanyTelephone: CompanyTelephone,
+                     IndividualCompanyTelephone: IndividualCompanyTelephone,
+                     CompanyTelephoneExtension: CompanyTelephoneExtension,
+                     IndividualCompanyTelephoneExtension: IndividualCompanyTelephoneExtension,
+                     TradelicenseNumber: TradelicenseNumber,
+                     TradeLicenseIssueDate: TradeLicenseIssueDate,
+                     TradeLicenseExpiryDate: TradeLicenseExpiryDate,
+                     IssuingAuthorityDescription: IssuingAuthorityDescription,
+                     CustomerType: CustomerType,
+                     TradeLicenseIssuingAuthorityKey: TradeLicenseIssuingAuthorityKey,
+                     customeraccountgroup: customeraccountgroup,
+                     CompanyMobileCode: CompanyMobileCode,
+                     MobileCode: MobileCode,
+                     CompanyTelephoneCode: CompanyTelephoneCode,
+                     TelephoneCode: TelephoneCode
+
+                 }
+
+                 return requestData;
+             }
+
+
+
+             $(".rButton").change(function () {
+                 switch ($(this).val()) {
+                     case 'O':
+                         emailAdd = '@Model.CompanyEmail';
+                         mobileN = '@Model.CompanyMobileNumber';
+                         $('#form-field-Countrykey').removeAttr('disabled');
+                         break;
+                     case 'I':
+                         emailAdd = '@Model.EmailAddress';
+                         mobileN = '@Model.MobileNumber';
+                         $('#form-field-Countrykey').attr('disabled', 'disabled');
+                         break;
+                 }
+             });
+
+
+             $("#form-field-CompanyTelCode").change(function () {
+
+                 $('#form-field-xd3qt0c4q').val('');
+                 $('#form-field-Extention').val('');
+
+                 validateNums('#form-field-CompanyTelCode', '#form-field-xd3qt0c4q');
+
+
+             });
+
+
+             $("#form-field-IndividualTelCode").change(function () {
+
+                 $('#form-field-xd4qt0c4q').val('');
+                 $('#form-field-uj0dpkni543').val('');
+
+                 validateNums('#form-field-IndividualTelCode', '#form-field-xd4qt0c4q');
+
+
+             });
+
+
+             $("#form-field-CompanyMobCode").change(function () {
+
+                 $('#CompanyMobileNumber').val('');
+                 validateNums('#form-field-CompanyMobCode', '#CompanyMobileNumber');
+
+             });
+
+             $("#form-field-IndividualMobCode").change(function () {
+                 $('#MobileNumber').val('');
+                 validateNums('#form-field-IndividualMobCode', '#MobileNumber');
+
+             });
+
+             function truncateVal(target, len) {
+                 if (target.val().length >= len) {
+                     window.setTimeout(function () {
+                         target.val(target.val().substring(0, (len)));
+                     }, 5);
+                 }
+             }
+
+             function queuePasteEvent(el, type, param) {
+
+                 pasteQueue[type] = param || true;
+
+                 if (!pasteRunner) {
+                     pasteRunner = window.setTimeout(function () {
+                         var value = el.val();
+
+                         if (typeof pasteQueue.truncate === 'number') {
+                             value = truncatePaste(value, param);
+                         }
+
+                         el.val(value);
+
+                         resetPasteQueue();
+                     }, 20);
+                 }
+             }
+
+             function validateNums(_prefix,_finput) {
+                 var $prefix = jQuery(_prefix);
+                 var $finput = jQuery(_finput);
+                 if ($prefix.val() == 'AE') {
+
+                     if ($finput.attr('data-parsley-telephonenumber') == 'true') {
+
+                         $finput.attr('data-parsley-pattern', '/^(?:2|3|4|6|7|9)\u005Cd{7}$/');
+
+                         $finput.attr('maxlength', '8');
+
+                         $finput.off('keypress.int').on('keypress.int', function () {
+
+                             truncateVal($(this), 8)
+
+                         });
+
+                         $finput.off('paste.int').on('paste.int', function () {
+
+                             queuePasteEvent($(this), 'truncate', 8);
+
+                         });
+
+                     } else {
+
+                         $finput.attr('data-parsley-pattern', '/^(?:50|51|52|53|54|55|56|57|58|59|52|54|55|56)\u005Cd{7}$/');
+
+                         $finput.attr('maxlength', '9');
+
+                         $finput.off('keypress.int').on('keypress.int', function () {
+
+                             truncateVal($(this), 9)
+
+                         });
+
+                         $finput.off('paste.int').on('paste.int', function () {
+
+                             queuePasteEvent($(this), 'truncate', 9);
+
+                         });
+
+                     }
+
+                 } else {
+
+                     $finput.attr('data-parsley-pattern', '/\u005Cd/');
+
+                     $finput.attr('maxlength', '10');
+
+                     $finput.off('keypress.int');
+
+                     $finput.off('paste.int');
+
+                 };
+
+
+
+             }
+
+             function validateParsly(_inputFieldname) {
+                 $("#ScrapSaleRegistrationFrom").find('.form-field__input').not(':hidden').each(function () {
+
+                     if ($(this).attr('id') == _inputFieldname) {
+                         jQuery(this).parsley().validate();
+                     }
+                     //if (!jQuery(this).parsley().isValid()) {
+
+                     //}
+                 });
+             }
+
+
+             var isExternalMobileNumber = false;
+             function sendOTPs() {
+                 isExternalMobileNumber = false;
+
+                 if ($('#form-field-radio_1_1').is(':checked')) {
+
+                     emailAdd = $('#form-field-CompanyEmail').val();
+                     mobileN = $('#CompanyMobileNumber').val();
+
+                     if ($('#form-field-CompanyMobCode').val() != 'AE')
+                         isExternalMobileNumber = true;
+
+                 }
+                 else {
+                     emailAdd = $('#EmailAddress').val();
+                     mobileN = $('#MobileNumber').val();
+
+                     if ($('#form-field-IndividualMobCode').val() != 'AE')
+                         isExternalMobileNumber = true;
+
+                 }
+
+
+
+
+            verifystep = null;
+            $("#OtpRequestId").val('');
+            $(".otp_inputdisplay_screen_error").html('');
+            $(".otp_inputdisplay_screen_error").hide();
+            $('input[name="otp_diplay_input"]').prop('checked', false);
+            $(".otp-title").html('');
+            $(".otp-message").html('');
+            $(".otp-message").removeClass("red");
+            CrudOtp(GetReadRequestData(emailAdd,null), function (rdata) {
+
+                    var title = '@Html.Raw(Translate.Text("cust.email.otp.screen.title"))';
+                    var msg = '@Html.Raw(Translate.Text("cust.email.otp.screen.msg"))';
+
+                    $(".otp_inputdisplay_screen").hide();
+                    //$(".otp--modalcontent-text").hide();
+                    $(".otp-title").html(title);
+                    $(".otp_mailcheck").show();
+                    $(".otp_chatcheck").hide();
+                    $("#notmytext").html('@Translate.Text("cust.not.my.emailaddress")');
+                if (rdata.status) {
+                    //console.log(rdata);
+                    $(".otp-message").html(msg.replace("{0}", emailAdd));
+
+                    //timer-time="{&quot;seconds&quot;:180}
+                   // $('#timerbutton').attr('timer-time', '{&quot;seconds&quot;:' + rdata.data.emailvalidity + '}');
+
+                     $("#OtpRequestId").val(rdata.data.referencenumber);
+                        $(".otp_input_screen").show();
+                        $(".otp_inputdisplay_screen_error").hide();
+
+                        resetTimer();
+                        $(".optpopuptrigger").trigger('click');
+                    }
+                    else {
+                        $(".optpopuptrigger").trigger('click');
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        //$(".otp--modalcontent-text").show();
+                        $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                }
+                $(".m66-preloader-fullpage").fadeOut();
+
+                });
+        }
+
+    function GetReadRequestData(pEmail, pMobile) {
+        var mobile = pMobile;
+        var email = pEmail;
+        var otp = '';
+        var prtype = "NONB";
+        var _eida = '';
+        var _bpcat = '';
+
+        if ($('#form-field-radio_1_1').is(':checked')) {
+            _bpcat = 'O';
+        }
+        else {
+            _bpcat = 'I';
+            _eida = $('#EmiratesID').val();
+        }
+
+        if (email != null) {
+            $('.displayMobile').hide();
+            $('.displayEmail').show();
+            $('.emailSpan').html(email);
+            $('#otp_diplay_input_1').val(email);
+        }
+
+        if (mobile != null) {
+            $('.displayEmail').hide();
+            $('.displayMobile').show();
+            $('.mobileSpan').html(mobile);
+            $('#otp_diplay_input_2').val(mobile);
+        }
+
+
+        var requestData = {
+            mobile: mobile,
+            email: email,
+            option: '',
+            Otp: otp,
+            prtype: prtype,
+            emiratesId: _eida,
+            bpcategory: _bpcat
+        }
+            requestData.mode = "S";
+            if (verifystep != null)
+                requestData.reqId = jQuery("#OtpRequestId").val();
+            return requestData;
+        }
+             function fnVerifyOtpData(otp) {
+
+                 var requestData = GetReadRequestData();
+                 if (verifystep == null) {
+                     requestData.type = "e";
+                     requestData.email = emailAdd;
+                     requestData.mobile = '';
+                 }
+                 else if (verifystep == 1) {
+                     requestData.type = "m";
+                     requestData.email = '';
+                     requestData.mobile = mobileN;
+                 }
+                 else if (verifystep == 3)
+                 {
+                     requestData.email = emailAdd;
+                     requestData.mobile = mobileN;
+                     requestData.inputId = _appNum;
+                     requestData.idType = 'R';
+                 }
+
+                 //else {
+                 //    var selected = $("input[type='radio'][name='otp_diplay_input']:checked");
+                 //    requestData.type = $(selected).attr("data-stype");
+                 //}
+                 requestData.Otp = otp;
+                 requestData.mode = "V";
+                 requestData.reqId = jQuery("#OtpRequestId").val();
+                 return requestData;
+             }
+             function fnSendOtpRequestData() {
+                 //var otp = jQuery(".form-field__input--otp_main").val();
+                // var requestData = GetReadRequestData();
+                 var otp = '';
+                 var prtype = "NONB";
+                 var mob = null;
+                 var em = null;
+                 var _eida = '';
+                 var _bpcat = '';
+
+                 if ($('#form-field-radio_1_1').is(':checked')) {
+                     _bpcat = 'O';
+                 }
+                 else {
+                     _bpcat = 'I';
+                     _eida = $('#EmiratesID').val();
+                 }
+
+
+                 if (verifystep == null)
+                     em = emailAdd;
+                 else
+                     mob = mobileN;
+
+                 var requestData = {
+                     mobile: mob,
+                     email: em,
+                     option: '',
+                     Otp: otp,
+                     prtype: prtype,
+                     mode: "S",
+                     emiratesId: _eida,
+                     bpcategory: _bpcat
+                 }
+
+                 if (verifystep == null) { requestData.type = "e"; requestData.reqId = ""; }
+                 else {
+                     requestData.type = "m";
+                     requestData.reqId = jQuery("#OtpRequestId").val();
+                 }
+                 //}
+                 requestData.mode = "S";
+                 return requestData;
+             }
+
+
+
+             function ValidateUserRegistration(requestData, onSuccess) {
+
+                 var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/ValidateUserRegistration")';
+                 requestData = AddCustomForgeryToken(requestData, "#ScrapSaleRegistrationFrom");
+                 $.ajax({
+                     url: _postUrl,
+                     type: 'POST',
+                     data: requestData,
+                     beforeSend: function () {
+                         show_Load();
+                     },
+                     success: onSuccess,
+                     error: function (er) {
+                         //console.log(er);
+                         //$(".m66-preloader-fullpage").fadeOut();
+                     },
+                     complete: function (x) {
+                        // $(".m66-preloader-fullpage").fadeOut();
+                         // console.log(x);
+                     }
+                 });
+             }
+
+             function show_Load() {
+                 if (jQuery('.m66-preloader-fullpage').length > 1)
+                 {
+                     jQuery('.m66-preloader-fullpage').eq(1).show();
+                 }
+                 else
+                 {
+                     jQuery('.m66-preloader-fullpage').show();
+                 }
+             }
+
+             function FetchTradeLicense(requestData, onSuccess) {
+
+                 var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/FetchTradeLicense")';
+                 requestData = AddCustomForgeryToken(requestData, "#ScrapSaleRegistrationFrom");
+                 $.ajax({
+                     url: _postUrl,
+                     type: 'POST',
+                     data: requestData,
+                     beforeSend: function () {
+                       //  $(".m66-preloader-fullpage").show();
+                         show_Load();
+                         $('.onlyAddress').hide();
+                         $('.onlyInd-2').hide();
+                     },
+                     success: onSuccess,
+                     error: function (er) {
+                         //console.log(er);
+                         //$(".m66-preloader-fullpage").fadeOut();
+                     },
+                     complete: function (x) {
+                         $(".m66-preloader-fullpage").fadeOut();
+                         // console.log(x);
+                     }
+                 });
+             }
+
+
+             function FetchEIDA(requestData, onSuccess) {
+
+                 var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/FetchEIDA")';
+                 requestData = AddCustomForgeryToken(requestData, "#ScrapSaleRegistrationFrom");
+                 $.ajax({
+                     url: _postUrl,
+                     type: 'POST',
+                     data: requestData,
+                     beforeSend: function () {
+                         //$(".m66-preloader-fullpage").show();
+                         show_Load();
+                         $('.onlyAddress').hide();
+                         $('.onlyInd-2').hide();
+                     },
+                     success: onSuccess,
+                     error: function (er) {
+                        // console.log(er);
+                        // $(".m66-preloader-fullpage").fadeOut();
+                     },
+                     complete: function (x) {
+                         $(".m66-preloader-fullpage").fadeOut();
+                        // console.log(x);
+                     }
+                 });
+             }
+
+
+             function GetEmailNMobileTrack(requestData, onSuccess) {
+
+                        var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/GetEmailNMobileTrack")';
+                        requestData = AddCustomForgeryToken(requestData, "#ScrapSaleRegistrationFrom");
+                        $.ajax({
+                            url: _postUrl,
+                            type: 'POST',
+                            data: requestData,
+                            beforeSend: function () {
+                                //$(".m39-modal__button--close").trigger('click');
+                                show_Load();
+                                // $(".m66-preloader-fullpage").show();
+                                $(".otp_inputdisplay_screen").hide();
+                                $(".otp_input_screen").hide();
+                                $(".otp_inputdisplay_screen_error").hide();
+                                $(".otp_inputdisplay_screen_success").hide();
+                            },
+                            success: onSuccess,
+                            error: function (er) {
+                                //console.log(er);
+                            },
+                            complete: function (x) {
+                                //$(".m66-preloader-fullpage").fadeOut();
+                               // console.log(x);
+                            }
+                        });
+                    }
+
+            function FetchApplicationData(requestData, onSuccess) {
+
+                       var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/FetchApplicationData")';
+                       requestData = AddCustomForgeryToken(requestData, "#ScrapSaleRegistrationFrom");
+                       $.ajax({
+                           url: _postUrl,
+                           type: 'POST',
+                           data: requestData,
+                           beforeSend: function () {
+                               $(".m39-modal__button--close").trigger('click');
+                               show_Load();
+                               // $(".m66-preloader-fullpage").show();
+                               $(".otp_inputdisplay_screen").hide();
+                               $(".otp_input_screen").hide();
+                               $(".otp_inputdisplay_screen_error").hide();
+                               $(".otp_inputdisplay_screen_success").hide();
+                           },
+                           success: onSuccess,
+                           error: function (er) {
+                               //console.log(er);
+                           },
+                           complete: function (x) {
+                               //$(".m66-preloader-fullpage").fadeOut();
+                              // console.log(x);
+                           }
+                       });
+                   }
+
+
+
+          function CrudOtp(requestData, onSuccess) {
+
+            var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/CrudOtp")';
+            requestData = AddCustomForgeryToken(requestData, "#ScrapSaleRegistrationFrom");
+            $.ajax({
+                url: _postUrl,
+                type: 'POST',
+                data: requestData,
+                beforeSend: function () {
+
+                    $(".m39-modal__button--close").trigger('click');
+                    show_Load();
+                    // $(".m66-preloader-fullpage").show();
+                    $(".otp_inputdisplay_screen").hide();
+                    $(".otp_input_screen").hide();
+                    $(".otp_inputdisplay_screen_error").hide();
+                    $(".otp_inputdisplay_screen_success").hide();
+                },
+                success: onSuccess,
+                error: function (er) {
+                    //console.log(er);
+                },
+                complete: function (x) {
+                    //$(".m66-preloader-fullpage").fadeOut();
+                   // console.log(x);
+                }
+            });
+        }
+        //jQuery(".m39-modal__button--close").on("click", function () {
+        //    jQuery('#timerbutton').addClass('stopped');
+        //});
+        function resetTimer() {
+            $("#otpform").find('.form-field__input--otp').attr('disabled', false);
+            $("#otpform").find('.form-field--otp').removeClass('form-field-disabled');
+            setTimeout(function () {
+                jQuery('.form-field--otp').find('.form-field__input--otp')[0].focus()
+            }, 500);
+            setTimeout(function () {
+                jQuery('.button--timer').trigger('start.timer');
+            }, 500);
+             }
+
+
+
+    setTimeout(function () {
+           $(".form-field__input--otp").on('keyup blur', function () {
+            var otp = jQuery(".form-field__input--otp_main").val();
+            if (otp.length >= 6) {
+                $(".form-field__input--otp").val('');
+                doTriggerRedirect = false;
+                CrudOtp(fnVerifyOtpData(otp), function (rdata) {
+                   // $(".m66-preloader-fullpage").fadeOut();
+                    if (rdata.status) {
+                        $(".otp-message").removeClass("red");
+                        $(".otp_input_screen").hide();
+                        $(".m39-modal__button--close").trigger('click');
+                        if (verifystep == null && !isExternalMobileNumber) {
+                            verifystep = 1;
+                            CrudOtp(GetReadRequestData(null, mobileN), function (rsdata) {
+                                var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                                var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                                $(".m66-preloader-fullpage").fadeOut();
+                                $(".otp_inputdisplay_screen").hide();
+                                //$(".otp--modalcontent-text").hide();
+                                $(".otp-title").html(title);
+                                $("#notmytext").html('@Translate.Text("cust.not.my.mobilenumber")');
+                                if (rsdata.status) {
+                                    $(".otp_chatcheck").show();
+                                    $(".otp_mailcheck").hide();
+
+                                    $(".otp-message").html(msg.replace("{0}", mobileN));
+                                    $("#OtpRequestId").val(rsdata.data.referencenumber);
+                                    $(".otp_input_screen").show();
+                                    $(".otp_inputdisplay_screen_error").hide();
+                                    $(".otp_inputdisplay_screen_success").show();
+
+                                    resetTimer();
+                                    $(".optpopuptrigger").trigger('click');
+                                }
+                                else {
+                                    $(".optpopuptrigger").trigger('click');
+                                    $(".otp_input_screen").hide();
+                                    $(".otp_inputdisplay_screen").show();
+                                    $(".otp_inputdisplay_screen_error").show();
+                                    $(".otp_inputdisplay_screen_success").hide();
+                                    //$(".otp--modalcontent-text").show();
+                                    $(".otp_inputdisplay_screen_error").html(rsdata.desc);
+                                }
+                            });
+                        }
+                        else if (verifystep == 3) {
+                            $('.oShowAttachments').hide();
+                            $('.iShowAttachments').hide();
+                            doTriggerRedirect = false;
+                            $('.m39-modal__button--close').unbind('click');
+                            show_Load();
+                            FetchApplicationData(GetDataforViewApplication(_appNum), function (_resData) {
+
+
+                                if (_resData.status) {
+
+
+
+                                    var UserType = _resData.data.businesspartnercategory;
+
+
+
+                                    if (UserType == "2") {
+                                        $('#form-field-CompanyEmail').val(_resData.data.emailaddress); //apply check
+                                        $('#CompanyName').val(_resData.data.firstname); //apply check
+                                        $('#CompanyMobileNumber').val(_resData.data.mobile);  //apply check
+                                        $('#form-field-xd3qt0c4q').val(_resData.data.telephone); //apply check company telephone
+                                        $('#form-field-Extention').val(_resData.data.telephoneextension); //apply check CompanyTelephoneExtension
+                                        $('#TradelicenseNumber').val(_resData.data.tradelicensenumber); //apply check
+                                        $('#form-field-mzb2dv01mi').val(_resData.data.tradelicensevalidfrom); //apply check TradeLicenseIssueDate
+                                        $('#form-field-mzb2dv01m').val(_resData.data.tradelicensevalidto); //apply check TradeLicenseExpiryDate
+                                        $('#form-field-IssuingAuthorityDescription').val(_resData.data.issueauthoritytext); //apply check
+                                        $('#form-field-TradeLicenseIssuedBy').val(_resData.data.issueauthority); //apply check
+                                        $('#form-field-CompanyMobCode').val(_resData.data.mobiledialcode); //apply check
+
+                                        if (_resData.data.telephoneedialcode == null || _resData.data.telephoneedialcode == '')
+                                            $('#form-field-CompanyTelCode').val('AE');
+                                        else
+                                            $('#form-field-CompanyTelCode').val(_resData.data.telephoneedialcode);
+
+                                        $('#VatRegistrationNo').val(_resData.data.vatregistrationnumber);
+
+                                        $('#form-field-radio_1_1').trigger('click');
+
+                                        setTimeout(function () {
+                                            _checkTL = false;
+                                            _TLlastDate = $('#form-field-mzb2dv01m').val();
+
+                                            if (_resData.docAvailable == false) {
+                                                $('._downloadDiv').hide();
+
+                                                if (_rt == "1")
+                                                    $('._downloadDiv1').hide();
+
+                                            }
+                                            else {
+                                                $('._downloadDiv').show();
+                                                $('._downloadDiv1').show();
+                                            }
+
+                                        }, 300);
+
+
+                                    }
+                                    else if (UserType == "1") {
+                                        $('#EmiratesID').val(_resData.data.emiratesid); //apply check
+                                        $('#form-field-IdExpiry').val(_resData.data.emiratesidvalidto); //apply check
+                                        $('#EmailAddress').val(_resData.data.emailaddress); //apply check
+                                        $('#FirstName').val(_resData.data.firstname); //apply check
+                                        $('#LastName').val(_resData.data.lastname);  //apply check
+                                        $('#MobileNumber').val(_resData.data.mobile);  //apply check
+                                        $('#form-field-xd4qt0c4q').val(_resData.data.telephone); //apply check IndividualCompanyTelephone
+                                        $('#form-field-uj0dpkni543').val(_resData.data.telephoneextension); //apply check IndividualCompanyTelephoneExtension
+                                        $('#form-field-IndividualMobCode').val(_resData.data.mobiledialcode); //apply check
+
+
+                                        if (_resData.data.telephoneedialcode == null || _resData.data.telephoneedialcode == '')
+                                            $('#form-field-IndividualTelCode').val('AE');
+                                        else
+                                            $('#form-field-IndividualTelCode').val(_resData.data.telephoneedialcode);
+
+
+
+
+
+                                        $('#form-field-radio_1_2').trigger('click');
+
+                                       // $('.onlyAddress').show();
+                                        //  $('.onlyInd-2').show();
+
+                                        setTimeout(function () {
+                                            $('.onlyAddress').show();
+                                            $('.onlyInd-2').show();
+                                            $('._btnVerify').attr('disabled', 'disabled');
+                                            _checkEIDA = false;
+
+                                            _lastDate = $('#form-field-IdExpiry').val();
+
+
+                                            if (_rt == '1') {
+                                                $('.oShowAttachments').hide();
+                                                $('.iShowAttachments').hide();
+                                            }
+
+                                            if (_resData.docAvailable == false)
+                                             {
+                                                 $('._downloadDiv').hide();
+
+                                                 if(_rt == "1")
+                                                  $('._downloadDiv1').hide();
+
+                                             }
+                                             else
+                                             {
+                                                    $('._downloadDiv').show();
+                                                    $('._downloadDiv1').show();
+                                             }
+
+
+                                        }, 300);
+
+                                    }
+
+
+
+                                    $('#form-field-Countrykey').val(_resData.data.country);
+
+                                    if (_resData.data.country == "AE")
+                                        $('#form-field-Region').val(_resData.data.city); //apply check
+                                    else
+                                        $('#ActualCity').val(_resData.data.city); //apply check
+
+                                    $('#POBox').val(_resData.data.postbox);
+                                    $('#Street').val(_resData.data.street);
+                                    $('#CustomerType').val(_resData.data.customertype);
+                                }
+
+                                 if (_rt == '2') {
+
+                                         if ($('#form-field-radio_1_1').is(':checked')) {
+                                             $('.oShowAttachments').show();
+
+                                             if (_resData.docAvailable == true)
+                                                 $('#form-field-TradeLicense').removeAttr('required');
+                                             else
+                                                 $('#form-field-TradeLicense').attr('required', 'required');
+
+                                             $('#form-field-radio_1_2').attr('disabled', 'disabled');
+                                         }
+                                         else {
+                                             $('.iShowAttachments').show();
+
+                                             if (_resData.docAvailable == true)
+                                                 $('#form-field-EmiratesIDU').removeAttr('required');
+										     else
+											    $('#form-field-EmiratesIDU').attr('required', 'required');
+
+                                             $('#form-field-radio_1_1').attr('disabled', 'disabled');
+                                         }
+
+                                        $('#setURL').attr('href', '@Url.Action("DownloadAttachmentForTrackEnrollment", "ScrapSale")?requestnumber=' + _appNum);
+                                        if (_resData.docAvailable == true)
+                                            $('._downloadDiv').show();
+
+                                         $('.email-verify').show();
+                                     }
+                                     else if (_rt == '1') {
+
+                                         $('#setURL').attr('href', '@Url.Action("DownloadAttachmentForTrackEnrollment", "ScrapSale")?requestnumber=' + _appNum);
+
+                                          if (_resData.docAvailable == true)
+                                            $('._downloadDiv').show();
+
+                                        $('#form-field-CompanyEmail').attr('disabled','disabled');
+                                        $('#CompanyName').attr('disabled','disabled');
+                                        $('#CompanyMobileNumber').attr('disabled','disabled');
+                                        $('#form-field-xd3qt0c4q').attr('disabled','disabled');
+                                        $('#form-field-Extention').attr('disabled','disabled');
+                                        $('#TradelicenseNumber').attr('disabled','disabled');
+                                        $('#form-field-mzb2dv01mi').attr('disabled','disabled');
+                                        $('#form-field-mzb2dv01m').attr('disabled','disabled');
+                                        $('#form-field-IssuingAuthorityDescription').attr('disabled','disabled');
+                                        $('#form-field-TradeLicenseIssuedBy').attr('disabled','disabled');
+                                        $('#form-field-CompanyMobCode').attr('disabled','disabled');
+                                        $('#form-field-CompanyTelCode').attr('disabled','disabled');
+
+                                        $('#form-field-radio_1_1').attr('disabled','disabled');
+
+                                        $('#EmiratesID').attr('disabled','disabled');
+                                        $('#form-field-IdExpiry').attr('disabled','disabled');
+                                        $('#EmailAddress').attr('disabled','disabled');
+                                        $('#FirstName').attr('disabled','disabled');
+                                        $('#LastName').attr('disabled','disabled');
+                                        $('#MobileNumber').attr('disabled','disabled');
+                                        $('#form-field-xd4qt0c4q').attr('disabled','disabled');
+                                        $('#form-field-uj0dpkni543').attr('disabled','disabled');
+                                        $('#form-field-IndividualMobCode').attr('disabled','disabled');
+                                        $('#form-field-IndividualTelCode').attr('disabled','disabled');
+                                        $('#form-field-radio_1_2').attr('disabled','disabled');
+                                        $('#form-field-Countrykey').attr('disabled','disabled');
+                                        $('#form-field-Region').attr('disabled','disabled');
+                                        $('#ActualCity').attr('disabled','disabled');
+                                        $('#POBox').attr('disabled','disabled');
+                                        $('#Street').attr('disabled','disabled');
+                                        $('#CustomerType').attr('disabled','disabled');
+                                        $('#VatRegistrationNo').attr('disabled','disabled');
+
+
+                                     }
+
+
+                            });
+
+                        }
+                        else {
+
+                            jQuery('#ScrapSaleRegistrationFrom').submit();
+                            $("#btnConfirm").html('@Translate.Text("Submitting")...');
+                            $("#btnConfirm").attr('disabled', true);
+                            $('.email-verify').hide();
+                            $("#btnConfirm").show();
+                            // $(".m66-preloader-fullpage").show();
+                            show_Load();
+
+                        }
+                    }
+                    else {
+                        doTriggerRedirect = true;
+                        $(".optpopuptrigger").trigger('click');
+                        //$(".otp-message").addClass("red");
+                        $(".otp_input_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        $(".otp_inputdisplay_screen_success").hide();
+                        //$(".otp--modalcontent-text").show();
+                        $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                    }
+
+
+                if(verifystep == 3)
+                {
+                    setTimeout(function() {
+                        $(".m66-preloader-fullpage").fadeOut();
+                        }, 2000);
+                }
+                else
+                {
+                    $(".m66-preloader-fullpage").fadeOut();
+                }
+
+
+                });
+            }
+        });
+        }, 500);
+
+
+
+
+        jQuery("#timerbutton").on("click", function () {
+            if (!jQuery("#timerbutton").hasClass("timer-button--outline")) {
+
+                if (verifystep == 3) {
+                    $(".m66-preloader-fullpage").fadeOut();
+                    $(".otp_inputdisplay_screen").hide();
+                    OtpForRead(_appNum);
+                }
+                else {
+
+                    CrudOtp(fnSendOtpRequestData(), function (rdata) {
+                        $(".m66-preloader-fullpage").fadeOut();
+                        $(".otp_inputdisplay_screen").hide();
+
+                        if (verifystep == null) {
+                            var title = '@Html.Raw(Translate.Text("cust.email.otp.screen.title"))';
+                            var msg = '@Html.Raw(Translate.Text("cust.email.otp.screen.msg"))';
+                            $(".otp_mailcheck").show();
+                            $(".otp_chatcheck").hide();
+                            $(".otp-message").html(msg.replace("{0}", emailAdd));
+                            $(".otp-title").html(title);
+                        }
+                        else {
+                            var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                            var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                            $(".otp-message").html(msg.replace("{0}", mobileN));
+                            $(".otp-title").html(title);
+                            $(".otp_mailcheck").hide();
+                            $(".otp_chatcheck").show();
+                        }
+
+                        if (rdata.status) {
+                            $("#OtpRequestId").val(rdata.data.referencenumber);
+                            $(".otp-message").removeClass("red");
+                            $(".input-otp-textbox").show();
+                            $(".otp_input_screen").show();
+
+                            resetTimer();
+                            $(".optpopuptrigger").trigger('click');
+                        } else {
+                            $(".optpopuptrigger").trigger('click');
+                            $(".otp_input_screen").hide();
+                            $(".otp_inputdisplay_screen").show();
+                            $(".otp_inputdisplay_screen_error").show();
+                            $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                        }
+                    });
+
+                }
+            }
+        });
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+             $('.onlyInd').css('display', 'none');
+             $(".rButton").change(function () {
+                 switch ($(this).val()) {
+                     case 'O':
+                         //$('.onlyOrg').css('display', 'flex');
+                         $('.onlyOrg').show();
+                         $('.onlyAddress').show();
+                         $('.onlyInd').hide(); //css('display', 'none');
+                         $('.onlyInd-2').hide();
+                         $('#form-field-mzb2dv01m').attr("required", "");
+                         $('#form-field-mzb2dv01mi').attr("required", "");
+                         $('._err').hide();
+
+                         var _selAuthority1 = $('#form-field-TradeLicenseIssuedBy').val();
+
+                         if (_selAuthority1 == 'OT') {
+                             $('.authDescription').show();
+                             $("#form-field-IssuingAuthorityDescription").attr("required", "");
+                             $('._tlverifydiv').hide();
+                             $('.onlyOrg-2').show();
+                             $('.onlyAddress').show();
+                         }
+                         else {
+                             $('.authDescription').hide();
+                             $("#form-field-IssuingAuthorityDescription").removeAttr("required");
+
+                             if (_selAuthority1 == 'DE') {
+                                 $('._tlverifydiv').show();
+                                 $('.onlyOrg-2').hide();
+                                 $('.onlyAddress').hide();
+                                 $('._btnVerifyTL').removeAttr('disabled');
+                                 _checkTL = true;
+                             }
+                             else {
+                                 $('._tlverifydiv').hide();
+                                 $('.onlyOrg-2').show();
+                                 $('.onlyAddress').show();
+                             }
+                         }
+
+
+                         break;
+                     case 'I':
+                         //$('.onlyOrg').css('display', 'none');
+                         $('.onlyOrg').hide();
+                         $('.onlyAddress').hide();
+                         $('.onlyInd-2').hide();
+                         $('.onlyOrg-2').hide();
+                         $('.onlyInd').show(); //css('display', 'block');
+                         $('#form-field-mzb2dv01m').removeAttr("required");
+                         $('#form-field-mzb2dv01mi').removeAttr("required");
+                         $('#form-field-Countrykey').val('AE');
+                         $('._btnVerify').removeAttr('disabled');
+                         _checkEIDA = true;
+                         break;
+                 }
+             });
+
+             if ($('#form-field-radio_1_1').is(':checked')) {
+
+                 $('.onlyOrg').show();
+                 $('.onlyInd').hide(); //css('display', 'none');
+                 $('.onlyAddress').show();
+                  $('.onlyInd').hide();
+                 $('#form-field-mzb2dv01m').attr("required", "");
+                 $('#form-field-mzb2dv01mi').attr("required", "");
+                 $('#form-field-Countrykey').removeAttr('disabled');
+                 validateNums('#form-field-CompanyTelCode', '#form-field-xd3qt0c4q');
+                 validateNums('#form-field-CompanyMobCode', '#CompanyMobileNumber');
+
+
+                 var _selAuthority = $('#form-field-TradeLicenseIssuedBy').val();
+
+                 if (_selAuthority == 'OT') {
+                     $('.authDescription').show();
+                     $("#form-field-IssuingAuthorityDescription").attr("required", "");
+                     $('._tlverifydiv').hide();
+                 }
+                 else {
+                     $('.authDescription').hide();
+                     $("#form-field-IssuingAuthorityDescription").removeAttr("required");
+
+                     if (_selAuthority == 'DE') {
+                         $('._tlverifydiv').show();
+                         $('.onlyOrg-2').hide();
+                     }
+                     else {
+                         $('._tlverifydiv').hide();
+                         $('.onlyOrg-2').show();
+                     }
+                 }
+
+
+             }
+             else {
+
+                 $('.onlyOrg').hide();
+                 $('.onlyOrg-2').hide();
+                 $('.onlyInd').show(); //css('display', 'block');
+                // $('.onlyAddress').hide();
+                  $('.onlyInd-2').show();
+                 $('#form-field-mzb2dv01m').removeAttr("required");
+                 $('#form-field-mzb2dv01mi').removeAttr("required");
+                 $('#form-field-Countrykey').val('AE');
+                 $('#form-field-Countrykey').attr('disabled', 'disabled');
+                 validateNums('#form-field-IndividualTelCode', '#form-field-xd4qt0c4q');
+                 validateNums('#form-field-IndividualMobCode', '#MobileNumber');
+             }
+
+
+
+             $(document).on('click', '.email-verify', function (e) {
+                 //code here ....
+                 submitFRM();
+
+
+             });
+
+             var _valPass = false;
+             function submitFRM() {
+                 var error = 0;
+
+                 $("#ScrapSaleRegistrationFrom").find('.form-field__input').not(':hidden').each(function () {
+
+                     ////////enable this after popup is fixed////////////
+                     jQuery(this).parsley().validate();
+
+                     if (!jQuery(this).parsley().isValid()) {
+                         error++;
+                     }
+                 });
+                 if (error == 0) {
+
+                     if (_valPass) {
+                         $('#TestFlag').val('');
+                         sendOTPs();
+                     }
+                     else {
+
+                         ValidateUserRegistration(GetValidationData(), function (rdata) {
+
+
+
+                             if (rdata.status) {
+                                 _valPass = true;
+                                 $('#_erDivMsg').html('');
+                                 $('#_erDiv').hide();
+                                 sendOTPs();
+
+                             }
+                             else {
+                                 $(".m66-preloader-fullpage").fadeOut();
+                                 _valPass = false;
+                                 $('#_erDivMsg').html(rdata.desc);
+                                 $('#_erDiv').show();
+                                 $('#form-field-radio_1_1').focus();
+
+                             }
+
+                         });
+
+                     }
+                 }
+
+             }
+
+
+
+
+
+
+
+             $(document).on('click', '.sms-verify', function () {
+                 //code here ....
+                 // alert('');
+                 $(".smsDivT .m39-modal__trigger").click();
+             });
+
+
+    });
+
+
+
+
+
+
+        function SetTitleCtrl(_title) {
+
+
+            if (_title == "0001") {
+                $('.company').show();
+                $(".company").find("input").attr("required", true);
+                $('.non-company').hide();
+                $(".non-company").find("input").attr("required", false);
+            } else {
+                $('.company').hide();
+                $(".company").find("input").attr("required", false);
+                $('.non-company').show();
+                $(".non-company").find("input").attr("required", true);
+            }
+        }
+
+
+        function OnChangeCountry(cntryKey) {
+            $("._city").hide();
+            $(".uae").show();
+            //form-field--6 poboxx
+            $('.poboxx').addClass('form-field--6');
+
+
+          //  $(".non-uae").find("input").attr("required", false);
+            if (cntryKey != "AE") {
+                //  $(".non-uae").show();
+                //$(".non-uae").find("input").attr("required", true);
+                $(".uae").hide();
+                $("._city").show();
+                $('.poboxx').removeClass('form-field--6');
+
+            }
+            else { $('#ActualCity').val(''); }
+        }
+        setTimeout(function () {
+            SetTitleCtrl($("#Scrap_Title").val());
+
+            OnChangeCountry($("#form-field-Countrykey").val());
+            $("#Scrap_Title").on("change", function () {
+                SetTitleCtrl($(this).val());
+            });
+
+
+            $("._attachedTextChange").on("change", function () {
+                var _uploader = $(this).data("attid");
+                if ($(this).val() != "") {
+                    $("#" + _uploader).attr("required", "");
+
+                } else {
+                    $("#" + _uploader).removeAttr("required");
+                }
+            });
+
+            $("#form-field-Countrykey").on("change", function () {
+
+                var cntryKey = $(this).val();
+
+                OnChangeCountry(cntryKey);
+                var ev = AddForgeryToken({
+                    ckey: cntryKey
+                },"ScrapSaleRegistrationFrom");
+                $.ajax({
+                    url: '@Url.Action("GetRegionByCKey")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: ev,
+                    cache: false,
+                    success: function (r) {
+                        if (r != null) {
+                            var el = $("#form-field-Region");
+                            $(el).html("");
+                            $.each(r.data, function (index, d) {
+                                $(el).append('<option value="' + d.Value + '">' + d.Text + '</option>');
+                            });
+                        }
+                    }
+                });
+            });
+
+        }, 500)
+
+
+
+
+
+
+    </script>
+}
+<script type="text/javascript">
+    if (!jQuery(".scrapsalemargin").hasClass("mt56")) {
+        jQuery(".scrapsalemargin").addClass("mt56");
+    }
+</script>

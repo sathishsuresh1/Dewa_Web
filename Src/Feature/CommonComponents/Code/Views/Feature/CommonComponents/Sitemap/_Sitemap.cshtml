@@ -1,0 +1,303 @@
+﻿@using DEWAXP.Foundation.ORM.Models
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models.Common
+@using DEWAXP.Foundation.Content.Repositories
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using Sitecore.Data
+@using Sitecore.Data.Items
+@using DEWAXP.Feature.CommonComponents.Utils
+@using _scTemplate = DEWAXP.Foundation.Content.ScTemplate
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@model GlassBase
+@{ 
+    
+}
+@functions{
+    //IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(new RequestContext(new SitecoreService(Sitecore.Context.Database)));
+    IContextRepository _contextRepository = new ContextRepository(new RequestContext(new SitecoreService(Sitecore.Context.Database)));
+    readonly Guid subLandingFolder = new Guid("{3F4E3AAF-8E72-419A-92B6-666F716BE928}"); //sublanding folder
+    readonly Guid t3Page = new Guid("{78B5FC36-A966-4B30-B9E5-E5B3301A4948}");
+    readonly Guid loginPage = new Guid(SitecoreItemIdentifiers.J7_LOGIN_PAGE);
+    readonly Guid myAccount = new Guid(SitecoreItemIdentifiers.MY_ACCOUNT);
+
+    public bool IsExcludeTemplateType(PageBase page)
+    {
+        if (page == null || page.Id == Guid.Empty || page.TemplateId == new Guid(Folder.TemplateIdString))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool IsExcludebelowLevel1(PageBase page)
+    {
+        if (page == null || page.Id == Guid.Empty || page.HideFromSitemapPage)
+        {
+            return true;
+        }
+
+        //|| page.TemplateId == subLandingFolder  // as per obesrvations
+        return false;
+    }
+
+    public string GetPageName(PageBase item)
+    {
+        string title = item.MenuLabel;
+
+        if (string.IsNullOrEmpty(title) && item.Item != null && !ID.IsNullOrEmpty(item.Item.ID))
+        {
+            if (!string.IsNullOrWhiteSpace(item.Name))
+            {
+                title = item.Name;
+            }
+            else if (item.Item.Fields["Browser Title"] != null && !string.IsNullOrEmpty(item.Item.Fields["Browser Title"].Value))
+            {
+                title = item.Item.Fields["Browser Title"].Value;
+            }
+        }
+
+        return title;
+    }
+    /// <summary>
+    /// Page Url after validating the template Type
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    public string GetPageUrl(PageBase item)
+    {
+        string url = "#";
+        if (item == null || item.TemplateId == new Guid(Folder.TemplateIdString) || item.TemplateId == new Guid(_scTemplate.Section_FolderPgTmpId) || item.TemplateId == new Guid(_scTemplate.Common_FolderPgTmpId))
+        {
+            return url;
+        }
+        return UtilSitecore.GetMenuURL(item);
+    }
+
+}
+<div class="grid__row--tight">
+    <div class="grid__column grid__column--12">
+        <div class="sitemap">
+            @if (global::Sitecore.Context.Site != null)
+            {
+                var home = _contextRepository.GetHomeItem<Item>();
+                foreach (Item landing in home.Children)
+                {
+                    var _landigPage = _contentRepository.GetItem<PageBase>(new GetItemByItemOptions(landing));// landing.GlassCast<PageBase>();
+                    if (!IsExcludeTemplateType(_landigPage)) //not a folder
+                    {
+                        @RenderSiteMapLevelOneAndTwo(_landigPage, true, 0);
+                    }
+                }
+
+            }
+        </div>
+    </div>
+    <script type="text/javascript">
+        docReady(function () {
+
+            setTimeout(function () {
+
+                jQuery(jQuery(".sitemap").find(".m37-expander__trigger")[0]).click();
+            }, 300)
+
+        })
+    </script>
+</div>
+
+
+@helper RenderSiteMapLevelOneAndTwo(PageBase item, bool isMainLanding = false, int i = 0)
+{
+    var liClass = string.Empty;
+    var linkClass = string.Empty;
+    var ulClass = string.Empty;
+
+    if (item == null || item.Id == Guid.Empty || item.HideFromSitemapPage)
+    {
+        return;
+    }
+
+    var url = GetPageUrl(item);
+
+    bool ItemHasChildren = item.Item.HasChildren;
+    string btnId = (Convert.ToString(item.Id) + i);
+    string btnContentId = (Convert.ToString(item.Id));
+
+    if (item.Id == myAccount)
+    {
+        var loginItem = _contentRepository.GetItem<GlassBase>(new GetItemByIdOptions(loginPage));
+        if (loginItem != null && loginItem.Id != Guid.Empty)
+        {
+            url = loginItem.Url;
+        }
+    }
+
+    <div class="sitemap_item">
+        @if (ItemHasChildren)
+        {
+            <div class="m37-expander " data-component="m37-expander">
+                <h2 class="sitemap_item--title"><a href="@url" data-tid="@(item.TemplateName +""+item.TemplateId)" class="link">@GetPageName(item)</a></h2>
+                <button data-toggle="true" class="m37-expander__trigger m37-expander__trigger" id="@(btnId)" aria-controls="@(btnContentId)">@GetPageName(item).Replace(" ", "")</button>
+                <div data-content="true" class="m37-expander__content m37-expander__content" role="region" aria-expanded="false" id="@(btnContentId)" aria-labelledby="@(btnId)">
+                    @{
+                        //only common folder & has children & not null after casting to PageBase
+                        var CommonFolderItem = item.Item.Children.Where(x => !IsExcludebelowLevel1(_contentRepository.GetItem<PageBase>(new GetItemByItemOptions(x))) && x.Children.Count > 0 && x.TemplateID.Guid == Guid.Parse(_scTemplate.Common_FolderPgTmpId)).ToList();
+                        //only persona folder & has children & not null after casting to PageBase
+                        var SectionFolderItem = item.Item.Children.Where(x => !IsExcludebelowLevel1(_contentRepository.GetItem<PageBase>(new GetItemByItemOptions(x))) && x.Children.Count > 0 && x.TemplateID.Guid == Guid.Parse(_scTemplate.Section_FolderPgTmpId)).ToList();
+                        //Other than common and persona folder & has children & not null after casting to PageBase
+                        var OtherItem = item.Item.Children.Where(x => !IsExcludebelowLevel1(_contentRepository.GetItem<PageBase>(new GetItemByItemOptions(x))) && x.Children.Count > 0 && x.TemplateID.Guid != Guid.Parse(_scTemplate.Section_FolderPgTmpId) && x.TemplateID.Guid != Guid.Parse(_scTemplate.Common_FolderPgTmpId)).ToList();
+
+
+                        List<Item> SectionAndOtherItem = new List<Item>();
+                        if (SectionFolderItem != null && SectionFolderItem.Count() > 0)
+                        {
+                            SectionAndOtherItem.AddRange(SectionFolderItem);
+                        }
+                        if (OtherItem != null && OtherItem.Count() > 0)
+                        {
+                            SectionAndOtherItem.AddRange(OtherItem);
+                        }
+                    }
+
+
+                    @if (CommonFolderItem != null && CommonFolderItem.Count() > 0)
+                            {
+                                int cfiCount = 0;
+                                foreach (Item pageItem in CommonFolderItem)
+                                {
+                                    string _html = "";
+                                    var childContent = _contentRepository.GetItem<PageBase>(new GetItemByItemOptions(pageItem)); //.GlassCast<PageBase>();
+
+                                    if (cfiCount == 0)
+                                    {
+                                        _html = "<div class='sitemap_secondaryitem--wrapper'>";
+                                    }
+                                    if (cfiCount != 0 && cfiCount % 4 == 0)
+                                    {
+                                        _html = "</div><div class='sitemap_secondaryitem--wrapper'>";
+                                    }
+                                    if (childContent != null)
+                                    {
+
+                                        @Html.Raw(_html)
+                                        <div class="sitemap_secondaryitem">
+                                    <h3 class="sitemap_secondaryitem--title">
+                                        @GetPageName(childContent)
+                                    </h3>
+                                    @RenderLevelThirdandFourth(childContent, false, 0)
+                                </div>
+                            }
+                    _html = "";
+                            cfiCount++;
+                            if (cfiCount == CommonFolderItem.Count())
+                            {
+                                @Html.Raw("</div>")
+                            }
+                        }
+
+                    }
+
+
+
+                    @if (SectionAndOtherItem != null && SectionAndOtherItem.Count() > 0)
+                    {
+                        int saoCount = 0;
+                        foreach (Item pageItem in SectionAndOtherItem)
+                        {
+                            var childContent = _contentRepository.GetItem<PageBase>(new GetItemByItemOptions(pageItem));// pageItem.GlassCast<PageBase>();
+                            string _html = "";
+                            if (saoCount == 0)
+                            {
+                                _html = "<div class='sitemap_secondaryitem--wrapper'>";
+                            }
+                            if (saoCount != 0 && saoCount % 4 == 0)
+                            {
+                                _html = "</div><div class='sitemap_secondaryitem--wrapper'>";
+                            }
+                            if (childContent != null)
+                            {
+                                @Html.Raw(_html)
+                                <div class="sitemap_secondaryitem">
+                                    <h3 class="sitemap_secondaryitem--title">
+                                        @GetPageName(childContent)
+                                    </h3>
+                                    @RenderLevelThirdandFourth(childContent, false, 0)
+                                </div>
+                            }
+                            _html = "";
+                            saoCount++;
+                            if (saoCount == SectionAndOtherItem.Count())
+                            {
+                                @Html.Raw("</div>")
+                            }
+
+                        }
+
+
+                    }
+                </div>
+            </div>
+
+        }
+        else
+        {
+            <h2 class="sitemap_item--title"><a href="@url" class="link">@GetPageName(item)</a></h2>
+        }
+
+    </div>
+
+}
+
+
+
+
+
+@helper RenderLevelThirdandFourth(PageBase item, bool isMainLanding = false, int i = 0)
+{
+    /**/
+    int tempCount = i;
+    var liClass = string.Empty;
+    var linkClass = i == 0 ? "sitemap_secondaryitem--item" : "sitemap_secondarysubitem";
+    var ulClass = string.Empty;
+
+
+    if (IsExcludebelowLevel1(item) || tempCount > 1)
+    {
+        return;
+    }
+
+    var url = GetPageUrl(item);
+    bool ItemHasChildren = item.Item.HasChildren;
+    if (ItemHasChildren)
+    {
+        <ul>
+            @foreach (Item subitem in item.Item.Children)
+{
+    var childContent = _contentRepository.GetItem<PageBase>(new GetItemByItemOptions(subitem)); //.GlassCast<PageBase>();
+    if (!IsExcludebelowLevel1(childContent) && childContent.TemplateId != new Guid(Folder.TemplateIdString))
+    {
+        i++;
+                    <li class="@linkClass">
+                        <a href="@GetPageUrl(childContent)" data-tid="@(childContent.TemplateId+"|"+childContent.TemplateName)" class="">@GetPageName(childContent)</a>
+
+                        @if (childContent.Item.Children.Count > 0 && i <= 0)
+                    {
+
+                        @RenderLevelThirdandFourth(childContent, false, i);
+                    }
+                    </li>
+                }
+
+                i = tempCount;
+
+
+            }
+        </ul>
+
+
+    }
+
+}

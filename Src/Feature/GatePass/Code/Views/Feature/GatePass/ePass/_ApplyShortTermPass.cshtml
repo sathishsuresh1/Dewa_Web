@@ -1,0 +1,189 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.ePass.PermanentPass
+
+
+
+<div>
+    <div class="j113-epass" data-journey="j113-epass">
+        <div class="j113-epass">
+            <div class="m66-preloader j113-epass--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12" id="main-skip">
+                    <div class="m26-page-title title_message">
+                        <div class="m26-page-title__links">
+                            <p class="m26-page-title__backlink j113-epass--main_controls">
+                                @if (Model.eFolderId == null)
+                                {
+                                    <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SERVICES)">
+                                        @Translate.Text("Epass.Back")
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS)">
+                                        @Translate.Text("Epass.Back")
+                                    </a>
+                                }
+                            </p>
+                        </div>
+                        <h2 class="text__page-title">@Translate.Text("Epass.Applyshortpass")</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <div id="tracker">
+                        @Html.Sitecore().Placeholder("steptracker")
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row" id="fullpolistwithform">
+                <div class="grid__column grid__column--12 grid__column--form">
+
+                    <div id="PartialViewDiv"></div>
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "ePassForm", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                        <div class="j113-epass--main_controls">
+                            @Html.Sitecore().Placeholder("POListSelector")
+                        </div>
+                        <input type="hidden" name="PONumber" id="PONumber" />
+                        <input type="hidden" name="POName" id="POName" />
+                        <input type="hidden" name="CompanyName" id="CompanyName" />
+
+                        <div class="form-field mt24 j113-epass--permPass__mode">
+
+                            <fieldset class="fieldset">
+                                <legend class="legend-color">.</legend>
+                                <p class="form-field__radio grid__column--6 grid__column @(@Model.eFolderId == null ? "" : "hidden")">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_singlePP" name="PassSubmitType" type="radio" value="single" aria-describedby="description-for-oq14ux7v4" data-parsley-errors-container="#description-for-oq14ux7v4" checked="" data-parsley-multiple="j113_radio" data-parsley-id="26">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Epass.Singleperpass")
+                                        </span>
+                                        <br>
+                                        <span class="form-field__description align-radio-desc--6">@Translate.Text("Epass.Singleperaccess")</span>
+                                    </label>
+                                </p>
+                                @if (Model.eFolderId == null)
+                                {
+                                    <p class="form-field__radio grid__column--6 grid__column">
+                                        <label>
+                                            <input class="form-field__input form-field__input--radio" id="form-field-radio_multiplePP" name="PassSubmitType" type="radio" value="multiple" aria-describedby="description-for-oq14ux7v4" data-parsley-errors-container="#description-for-oq14ux7v4" data-parsley-multiple="j113_radio">
+                                            <span class="form-field__fakeradio focus-enabled">
+
+                                                @Translate.Text("Epass.Groupperpass")
+
+                                            </span>
+                                            <br>
+                                            <span class="form-field__description align-radio-desc--6">@Translate.Text("Epass.Bulkpass")</span>
+                                        </label>
+                                    </p>
+                                }
+
+                                <div id="description-for-oq14ux7v4" class="form-field__messages">
+                                </div>
+
+                            </fieldset>
+                        </div>
+                        <!--Single Permanent Pass Form-->
+                        @Html.Partial("~/Views/Feature/GatePass/ePass/Module/_SingleShortTermPass.cshtml", Model)
+
+                        <!--Group Permanent Pass Form-->
+                        @Html.Partial("~/Views/Feature/GatePass/ePass/Module/_GroupShortTermPass.cshtml")
+                    }
+                </div>
+            </div>
+
+            <div class="grid__row hidden" id="nopolist">
+                <div class="grid__column grid__column--12" id="main-skip">
+                    <div class="m14-richtext centered">
+                        <h3 class="">@Translate.Text("Epass.Nodataavailable")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+@*<script src="~/Scripts/custom/epass.js"></script>*@
+@Scripts.Render("~/bundles/epassscript")
+<script type="text/javascript">
+    var $emiratesid = jQuery("#form-field-EmiratesID");
+    var $emiratesidexpirydate = jQuery("#form-field-EmiratesIDExpiry");
+    var $fullname = jQuery("#form-field-fullname");
+    var $profession = jQuery("#form-field-profession");
+    var $companyname = jQuery("#CompanyName");
+    var $visa = jQuery("#form-field-visa");
+    var $visaexpiry = jQuery("#form-field-visaexpiry");
+    var $passport = jQuery("#form-field-Passportnumber");
+    var $passportexpiry = jQuery("#form-field-Passportexpiry");
+    var $nationality = jQuery("#form-field-nationality");
+    var $eidattachment = jQuery("#eiddocumentdiv");
+    var $passportattachment = jQuery("#passportdocumentdiv");
+    var $visaattachment = jQuery("#visadocumentdiv");
+    var $dlattachment = jQuery("#drivinglicensedocumentdiv");
+    var $vhattachment = jQuery("#vehicleregistrationdocumentdiv");
+    var $platenumberid = jQuery("#form-field-PlateNumber");
+    var $platecodeid = jQuery("#form-field-PlateCode");
+    var $platecategoryid = jQuery("#form-field-categorycode");
+    var $plateemiratesid = jQuery("#form-field-emirates");
+    var $vehregis = jQuery("#form-field-vehregis");
+    docReady(function () {
+        LoadSinglePassValidation();
+        var efId = '@Model.eFolderId';
+        jQuery('.m43-accountsel__selected').on('DOMSubtreeModified', function () {
+            jQuery('#PONumber').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_number]').html());
+            jQuery('#POName').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_namedesc]').html());
+            //jQuery('#CompanyName').val(jQuery('#supplierid').val());
+
+        });
+        setTimeout(function () {
+            jQuery('.m43-accountsel__accounts-list').find('.form-field__radio--accselector:first-child').find('.form-field__fakeradio').click();
+            if (efId == null || efId == '') {
+                jQuery('.button[data-accountupdate="true"]').click();
+            }
+
+        }, 1000);
+        if (efId != null && efId != "") {
+                jQuery('#PONumber').val('@Model.PONumber');
+                jQuery('#POName').val('@Model.POName');
+                jQuery('#CompanyName').val('@Model.CompanyName');
+                jQuery("#selectedAccName").html('@Model.POName');
+                jQuery("#selectedAccNumber").html('@Model.PONumber');
+            }
+        //$(".j113-epass--loader").hide();
+        //$('body').removeClass('unscrollable');
+        $(".ePassForm").submit(function () {
+            if (jQuery(".ePassForm").parsley().validate()) {
+                //alert();
+                $(".j113-epass--loader").css('top', $(window).scrollTop().toString() + 'px');
+                $(".j113-epass--loader").show();
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+                return true;
+            }
+        });
+    });
+    jQuery('.j113-epass--select_input').on('change', function () {
+        jQuery('#SubContractorID').val(jQuery(this).val());
+    });
+
+</script>

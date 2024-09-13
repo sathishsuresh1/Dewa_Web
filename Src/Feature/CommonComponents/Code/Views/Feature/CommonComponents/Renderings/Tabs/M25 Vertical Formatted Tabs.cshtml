@@ -1,0 +1,146 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using System
+
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.FormattedTabs
+
+@{
+
+    var TabId = Convert.ToString(TempData["TabId"]);
+}
+
+@if (Model.Children != null && Model.Children.Count() > 0)
+{
+    <div class="m25-tabs m25-tabs--variant" data-component="m25-tabs" data-selected-tab-id="@(!string.IsNullOrEmpty(TabId)?TabId:"m25-tab-0")" data-helper="toggle-menu" data-toggle-breakpoint='m'>
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--3">
+                    @Html.Sitecore().Placeholder("main/content/tab-top")
+                    <div class="m25-tabs__menu" data-m25-tabs-menu="true">
+                        <ul aria-role="tablist">
+                            @foreach (var tab in Model.Children)
+                            {
+                                var index = Model.Children.ToList().IndexOf(tab);
+
+                                var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                                //var tabSecondTargetUrl = tab.SecondTarget != null ? LinkManager.GetItemUrl(tab.SecondTarget) : null;
+                                //var active = Convert.ToBoolean(tab.ActivePageList != null && tab.ActivePageList.Where(x => x.Url.Equals(pageUrl)).Count() > 0) ? true : pageUrl.Equals(tabTargetUrl) || pageUrl.Equals(tabSecondTargetUrl) || (Model.InModal && index == 0);
+                                //var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+                                <li>
+                                    <a href="@(string.Format("#m25-panel-"+index))" aria-controls="m25-panel-@index" class="m25-tabs__tab" data-m25-tabs-tab="true" id="m25-tab-@index">@tab.Title</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="m25-tabs__body grid__column grid__column--9">
+                    <div class="m15-tabs--mobile">
+                        <div class="m25-tabs--title-mobile">
+                            About DEWA
+                        </div>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-m25verformattedtab" class="form-field__label"><span class="aria-only">select</span></label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select m25-tabs--select-mobile--wrapper">
+                                <select id="form-field-m25verformattedtab" class="m25-tabs--select-mobile form-field__input form-field__input--select"></select>
+                            </span>
+                        </div>
+                    </div>
+                    @foreach (var tab in Model.Children)
+                    {
+                        var index = Model.Children.ToList().IndexOf(tab);
+
+                        var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                        //var tabSecondTargetUrl = tab.SecondTarget != null ? LinkManager.GetItemUrl(tab.SecondTarget) : null;
+                        //var active = Convert.ToBoolean(tab.ActivePageList != null && tab.ActivePageList.Where(x => x.Url.Equals(pageUrl)).Count() > 0) ? true : pageUrl.Equals(tabTargetUrl) || pageUrl.Equals(tabSecondTargetUrl) || (Model.InModal && index == 0);
+                        //var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+
+                        <div class="toggle-menu__item">
+                            <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                <h2 class="m25-tabs__title toggle-menu__title icon-share">@tab.Title</h2>
+                            </div>
+                            <div aria-labelledby="m25-tab-@index" aria-role="tabpanel" id="m25-panel-@index" class="m25-tabs__content toggle-menu__content" data-m25-tabs-content="true" data-toggle-content="true">
+                                @{
+                                    if (!string.IsNullOrWhiteSpace(tab.ModulePlaceholder))
+                                    {
+                                        string[] ModulePalceHolders = tab.ModulePlaceholder.Split(',');
+
+                                        foreach (var modulePalceHolder in ModulePalceHolders)
+                                        {
+                                            <!--@modulePalceHolder-->
+                                            @Html.Sitecore().Placeholder(modulePalceHolder)
+                                            <!--@modulePalceHolder-->
+                                        }
+
+                                    }
+                                    else if (tab.InterlinkTab != null && tab.InterlinkTab.Count() > 0)
+                                    {
+                                        <div class="m14-richtext">
+                                            @Html.Raw(tab.InterlinkTab.FirstOrDefault().Body)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="m14-richtext">
+                                            @Html.Raw(tab.Body)
+                                        </div>
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var tabId = "m25-tab-0";
+        var _timeoutStart = null;
+
+        function SetTab(_id) {
+            if (_id != null) {
+               jQuery(".m25-tabs--variant").attr('data-selected-tab-id', _id);
+               //alert();
+                //if (_timeoutStart == null) {
+                //    _timeoutStart = setTimeout(function () {
+                //        jQuery("#" + _id).click();
+                //        jQuery("." + _id).prop("selected", true);
+
+                //        clearTimeout(_timeoutStart);
+                //        _timeoutStart = null;
+                //    }, 50);
+                //}
+                jQuery("#" + _id).click();
+                jQuery("." + _id).prop("selected", true);
+
+            }
+        }
+        docReady(function () {
+            SetTab(readCookie("m25_tab_Id"));
+            eraseCookie("m25_tab_Id");
+
+            jQuery(".m25-tabs__tab").click(function () {
+                tabId = jQuery(this).prop("id");
+            })
+
+            jQuery(".m25-tabs--select-mobile").change(function () {
+                tabId = $(this).children("option:selected").prop("class");
+            })
+
+            $(".toggle-menu__item form").submit(function () {
+                createCookie("m25_tab_Id", tabId, 0.1);
+                return true;
+            });
+
+            jQuery(window).resize(function () {
+                //SetTab(tabId);
+            })
+
+
+            //jQuery(".m25-tab-1").prop("selected", true)
+        });
+    </script>
+}
+

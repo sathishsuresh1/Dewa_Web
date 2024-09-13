@@ -1,0 +1,85 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Data.Items
+@using Sitecore.Globalization
+@using System.Web.Mvc.Html
+@using DEWAXP.Foundation.Content.Models.HappinessIndicator
+@using DEWAXP.Feature.HappinessIndicator.Models.HappinessIndicator
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+
+@{
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    var currentitem = _contextRepository.GetCurrentItem<Item>();
+    //Get Transactional Happiness Indicator field :To know if it is a transactional query
+    var transactionhappinessField = currentitem.Fields["Transactional Happiness Indicator"];
+    var showHappinessIndicatortransaction = transactionhappinessField != null && transactionhappinessField.Value == "1";
+    // Get Show Happiness Indicator : To know if to show happiness indicatior on page
+    var happinessField = currentitem.Fields["Show Happiness Indicator"];
+    var showHappinessIndicator = happinessField != null && happinessField.Value == "1";
+
+    if (showHappinessIndicator)
+    {
+        if (!string.IsNullOrEmpty(Request.QueryString.Get("t")) && Request.QueryString.Get("epf") == "X")
+        {
+            @Html.Action("Render", "HappinessIndicator", new
+                   {
+                       type = IndicatorType.Transaction,
+                       transactionId = Request.QueryString.Get("t"),
+                       serviceCode = Request.QueryString.Get("epf"),
+                       islocal = false,
+                       ServiceDescription = ""
+                   })
+        }
+        else if (!string.IsNullOrEmpty(Request.QueryString.Get("t")))
+        {
+            //This is post payment block when the transactionid & type is been sent via query string
+            @Html.Action("Render", "HappinessIndicator", new
+       {
+           type = IndicatorType.Transaction,
+           transactionId = Request.QueryString.Get("t"),
+           serviceCode = Request.QueryString.Get("ptype"),
+           islocal = false,
+           ServiceDescription = ""
+       })
+        }
+        else if (showHappinessIndicatortransaction)
+        {
+            // Get Service code for the selected Transaction Type
+            Sitecore.Data.Items.Item item = ((Sitecore.Data.Fields.LookupField)currentitem.Fields["Transaction Type"]).TargetItem;
+
+            if (item != null)
+            {
+                var servicecode = item.Fields["Value"].Value;
+                var ServiceDescription = item.Fields["Text"].Value;
+
+                //Generate Unique id for the transaction
+                var transactionid = Guid.NewGuid();
+
+                @Html.Action("Render", "HappinessIndicator", new
+           {
+               type = IndicatorType.Transaction,
+               transactionId = transactionid,
+               serviceCode = servicecode,
+               islocal = true,
+               ServiceDescription = ServiceDescription
+           })
+            }
+            else
+            {
+                //This renders basic happiness indicator
+                @Html.Action("Render", "HappinessIndicator")
+            }
+        }
+        else
+        {
+            //This renders basic happiness indicator
+            @Html.Action("Render", "HappinessIndicator")
+        }
+    }
+
+}

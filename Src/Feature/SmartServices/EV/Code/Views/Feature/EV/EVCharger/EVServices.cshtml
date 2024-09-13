@@ -1,0 +1,121 @@
+﻿@using DEWAXP.Feature.EV.Models.EVCharger
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Feature.EV.Models.EVCharger.Services
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("j9/m26-page-title")
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-EVService" class="form-field__label">@Translate.Text("EV.Choose Service") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.Service, (IEnumerable<SelectListItem>)ViewBag.EVServices,
+                 Sitecore.Globalization.Translate.Text("EV.Select"),
+                 new
+                 {
+                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                     @id = "form-field-EVService",
+                     @name = "select_EVService",
+                     @aria_describedby = "description-for-EVService",
+                     @required = "",
+                     @data_parsley_error_message = @Translate.Text("EV.ServiceErrorMessage"),
+                     @data_parsley_errors_container = "#description-for-EVService",
+                     @data_parsley_id = "15"
+                 })
+                    </span>
+                    <div id="description-for-businesspartner" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Service, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                if (!(bool)ViewBag.IsLoggedInUser)
+                {
+                <fieldset class="fieldset" id="divApplyEVcard" style="display:none;">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field">
+
+                        <p class="form-field__radio">
+                            <label>
+                                @Html.RadioButtonFor(m => m.SelectedMethod, UserType.DewaCustomer, new
+                       {
+                           @class = "form-field__input form-field__input--radio",
+                           @aria_describedby = "description-for-radio_1_1",
+                           @checked = true,
+                       })
+                                <span class="form-field__fakeradio focus-enabled">
+                                    <span class="verification--key">@Translate.Text("EV.Dewa Online Account")</span>
+                                </span>
+                            </label>
+                        </p>
+
+                        <p class="form-field__radio">
+                            <label>
+                                @Html.RadioButtonFor(m => m.SelectedMethod, UserType.NoDewaAccount, new
+                       {
+                           @class = "form-field__input form-field__input--radio",
+                           @aria_describedby = "description-for-radio_1_2"
+                       })
+                                <span class="form-field__fakeradio focus-enabled">
+                                    <span class="verification--key">@Translate.Text("EV.No Dewa Online Account")</span>
+                                </span>
+                            </label>
+                        </p>
+
+                        <p class="form-field__radio">
+                            <label>
+                                @Html.RadioButtonFor(m => m.SelectedMethod, UserType.NoDewaCustomer, new
+                       {
+                           @class = "form-field__input form-field__input--radio",
+                           @aria_describedby = "description-for-radio_1_2"
+                       })
+                                <span class="form-field__fakeradio focus-enabled">
+                                    <span class="verification--key">@Translate.Text("EV.No Dewa Customer")</span>
+                                </span>
+                            </label>
+                        </p>
+
+                        <div id="description-for-pwl28lhdv" class="form-field__messages"></div>
+                    </div>
+                </fieldset>
+                }
+                <div class="form-field__button">
+                    <button type="submit" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Continue")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+        
+        if ($('#form-field-EVService').val() == "1")
+        {
+            $("#divApplyEVcard").show();
+        }
+        else
+        {
+            $("#divApplyEVcard").hide();
+        }
+
+        $('#form-field-EVService').change(function () {
+            if ($(this).val() == "1")
+            {
+                $("#divApplyEVcard").show();
+            }
+            else {
+                $("#divApplyEVcard").hide();
+            }
+        });
+    });
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

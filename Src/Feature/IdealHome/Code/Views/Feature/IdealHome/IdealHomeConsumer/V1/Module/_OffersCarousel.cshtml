@@ -1,0 +1,148 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.DewaStore.OfferConfig
+
+<form id="dstore-ideal-form" action="#" class="form" method="POST" novalidate="novalidate" form-skipvalidation="true">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id, new { id = "ihrenderingid" })
+    @Html.HiddenFor(m => m.account_number, new { id = "ihaccontnumber" })
+    @Html.HiddenFor(m => m.IsDewastoreAllowed, new { id = "ihisdewastoreallowed" })
+</form>
+<div id="m85-dstore-items" data-component="m85-dstore-carousel" class="m85-dstore-items relative">
+
+</div>
+
+<script type="text/javascript">
+    docReady(function () {
+        window.attachSpinner = function (el, options) {
+            var defaults = {
+                zIndex: 0,
+                minHeight: 300,
+                bgColor: 'transparent',
+                bgPosition: 'center center',
+                opacity: 1
+            };
+
+            var opts = jQuery.extend(defaults, options);
+
+            if (typeof el === 'string') {
+                el = jQuery(el);
+            }
+
+            jQuery(el).animate({ minHeight: opts.minHeight }, {
+                duration: 0, // iPad Mini cannot handle the CPU intesiveness of animation. Disabling for the time-being.
+                complete: function () {
+                    var $el = jQuery(this);
+
+                    var $overlay = jQuery(document.createElement('div'))
+                        .addClass('ajax-loader-overlay')
+                        .css({
+                            padding: $el.css('padding'),
+                            width: $el.width(),
+                            height: $el.height(),
+                            minWidth: $el.css('min-width'),
+                            minHeight: $el.css('min-height'),
+                            zIndex: opts.zIndex,
+                            backgroundColor: opts.bgColor,
+                            backgroundPosition: opts.bgPosition
+                        })
+                        .fadeTo(0, opts.opacity);
+
+                    $el.append($overlay);
+                }
+            });
+        };
+
+        window.detachSpinner = function (el) {
+            if (typeof el === 'string') {
+                el = document.getElementById(el.replace('#', ''));
+            }
+
+            jQuery(el).animate({ minHeight: 0 }, {
+                duration: 0 // iPad Mini cannot handle the CPU intesiveness of animation. Disabling for the time-being.
+            }).find('.ajax-loader-overlay').remove();
+        }
+
+
+        var xhrPool = []; // no need to use **var**
+        var gaguageLoadSettting =
+            [
+                { name: "_dewaoffers", enabled: false, isComplete: null },
+            ];
+        var _accountNumber = jQuery("#ihaccontnumber").val();
+        var _renderingid = jQuery("#ihrenderingid").val();
+        var _isdewastoreallowed = jQuery("#ihisdewastoreallowed").val();
+
+        var form = $('#dstore-ideal-form');
+        var token = $('input[name="__RequestVerificationToken"]', form).val();
+
+        if (_accountNumber != null && _accountNumber != "" && _isdewastoreallowed == "True") {
+            var url = "/api/sitecore/DewaStore/GetWebOffers";
+            jQuery.ajax({
+                type: 'POST',
+                url: url,
+                async: true,
+                datatype: 'application/json',
+                traditional: true,
+                data: {
+                    __RequestVerificationToken: token,
+                    account: _accountNumber,
+                    renderingid: _renderingid
+                },
+                beforeSend: function (jqXHR) {
+                    xhrPool.push(jqXHR);
+                    jQuery('#m85-dstore-items').empty();
+                    window.attachSpinner('#m85-dstore-items', { bgColor: '#fff', opacity: 0.6, minHeight: 600 });
+                },
+                complete: function () {
+                    window.initComponents('m85-dstore-items');
+                    jQuery(window).trigger('resize');
+                    getGaguageLoadSettting("_dewaoffers").isComplete = 1;
+                    window.detachSpinner('#m85-dstore-items');
+                },
+                success: function (result) {
+
+                    if (result != null && result != "") {
+                        //jQuery('.m85-dstore-carousel').show();
+                        jQuery('#m85-dstore-items').append(result);
+                    }
+                    else {
+                        //jQuery('.m85-dstore-carousel').hide();
+                    }
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                }
+            });
+        }
+
+        function getGaguageLoadSettting(name, enabled, isComplete) {
+            var d = null;
+            for (var i = 0; i < gaguageLoadSettting.length; i++) {
+                if (gaguageLoadSettting[i].name == name) {
+                    d = gaguageLoadSettting[i];
+                    break;
+                }
+            }
+            return d;
+        }
+    })
+</script>

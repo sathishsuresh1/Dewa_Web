@@ -1,0 +1,97 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Foundation.Content.Models.Bills.ViewFriendsBillsModel
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+@Html.Sitecore().Placeholder("j15/m26-page-title")
+
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid__row">
+    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form" }))
+    {
+        @Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()
+
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j15/m38-step-tracker")
+
+        <p class="journey-intro__subtitle">
+            @Translate.Text("multiple accounts found for premise number", @Model.Bills.Count(), @Model.SearchCriteria)
+        </p>
+
+        <div class="m42-keyvalue">
+            <dl>
+                @foreach (var bill in Model.Bills)
+                {
+                    var index = Model.Bills.IndexOf(bill);
+
+                    @Html.HiddenFor(m => m.SearchCriteria)
+                    @Html.HiddenFor(m => m.Bills[index].AccountNumber)
+                    @Html.HiddenFor(m => m.Bills[index].PremiseNumber)
+                    @Html.HiddenFor(m => m.Bills[index].CustomerPremiseNumber)
+                    @Html.HiddenFor(m => m.Bills[index].Balance)
+                    @Html.HiddenFor(m => m.Bills[index].Active)
+                    @Html.HiddenFor(m => m.Bills[index].BillingClass)
+                    @Html.HiddenFor(m => m.Bills[index].ElectricityBill)
+                    @Html.HiddenFor(m => m.Bills[index].WaterBill)
+                    @Html.HiddenFor(m => m.Bills[index].Category)
+                    @Html.HiddenFor(m => m.Bills[index].CoolingCharges)
+                    @Html.HiddenFor(m => m.Bills[index].HoldingFees)
+                    @Html.HiddenFor(m => m.Bills[index].HousingFees)
+                    @Html.HiddenFor(m => m.Bills[index].SewerageFees)
+                    @Html.HiddenFor(m => m.Bills[index].ElectedPaymentAmount)
+
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text("Account") @bill.AccountNumber:</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@bill.ElectedPaymentAmount</dd>
+                }
+            </dl>
+        </div>
+
+        <div class="m42-keyvalue">
+            <dl>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt m42-keyvalue--summary">@Translate.Text("Total selected"):</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd m42-keyvalue--summary" data-acc-detail="">
+                    <span data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Total</span>
+                </dd>
+            </dl>
+        </div>
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <p class="form-field__button">
+                <a id="pay-button-popup" class="button button--primary">
+                    @Translate.Text("Pay"):
+                    <span class="amount_label" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Total</span>
+                </a>
+            </p>
+        }
+        else
+        {
+            <p class="form-field__button">
+                <a href="@ViewBag.LoginRedirect" class="button button--primary">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Login.LoginToMakePayment)</a>
+            </p>
+            @Html.Sitecore().Placeholder("j15/m37-expander")
+        }
+
+        @* Payment Type Popup module *@
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+    </div>
+    }
+</div>
+<script type="text/javascript">
+    // Open Payment method popup.
+    jQuery('#pay-button-popup').on('click', function () {
+        var value = jQuery('#pay-button-popup .amount_label').text();
+        if (value != "") {
+            jQuery("#continue-button").html(value);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(value)).format('0,0.00'));
+            //jQuery("#continue-button-popup").html(numeral(parseFloat(value)).format('0,0.00') + " " + currency);
+        }
+        jQuery('.btnmodaltrigger').trigger('click');
+    });
+</script>

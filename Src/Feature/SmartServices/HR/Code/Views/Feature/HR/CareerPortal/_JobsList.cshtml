@@ -1,0 +1,98 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@model DEWAXP.Feature.HR.Models.CareerPortal.SearchJobModel
+@using DEWAXP.Foundation.Content
+<table class="m23-table__content-table m23-table-position-list">
+    <thead class="m23-table__content-table-header">
+        <tr class="m23-table__content-table-row">
+            <th class="m23-table__content-table-cell--header nowrap"></th>
+            <th class="m23-table__content-table-cell--header nowrap">@Translate.Text("job posting title")</th>
+            <th class="m23-table__content-table-cell--header nowrap">@Translate.Text("functional areas title")</th>
+            <th class="m23-table__content-table-cell--header nowrap">@Translate.Text("employment enddate")</th>
+            @*<th class="m23-table__content-table-cell--header nowrap">@Translate.Text("published on title")</th>*@
+        </tr>
+    </thead>
+    <tbody class="m23-table__content-table-body">
+        @if (Model != null && Model.Joblist != null && Model.Joblist.Count > 0)
+        {
+            foreach (var item in Model.Joblist)
+            {
+                <tr class="m23-table__content-table-row">
+                    <td class="m23-table__content-table-cell" data-id="@item.Jobid" data-guid="@item.JobPostingKey" data-label=""></td>
+                    <td class="m23-table__content-table-cell">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_JOBDETAILS)?q=@item.Jobid">@item.Jobdescription</a>
+                    </td>
+                    <td class="m23-table__content-table-cell">
+                        @item.functionalArea
+                    </td>
+                    <td class="m23-table__content-table-cell">
+                        @item.EmploymentEndDate
+                    </td>
+                    @*<td class="m23-table__content-table-cell">
+                            @item.Publishdate
+                        </td>*@
+                </tr>
+            }
+
+        }
+        else
+        {
+            <tr class="m23-table__content-table-row">
+                <td class="m23-table__content-table-cell" colspan="5">@Html.Raw(Translate.Text("no records message"))</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (Model.Joblist.Count > 0)
+{
+    <div class="tile_links">
+        <a href="#" class="tile_link" id="lnkApplyJob" onclick="selectJob()">@Translate.Text("apply job label")</a> <a class="tile_link" href="#" onclick="applyJob()">@Translate.Text("tell friend")</a>
+    </div>
+}
+@if (Model.pagination)
+{
+
+    <div class="grid__column grid__column--12 pagination-list" id="pagination-list">
+        <div class="m34-pagination">
+            <div class="m34-pagination__content">
+                @if (Model.page > 1)
+                {
+                    <a onclick="PagerClick(@(1));" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                        <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                        <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+                    </a>
+                    <a onclick="PagerClick(@(Model.page-1));" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+                }
+                <ul class="m34-pagination__page-list">
+                    @if (Model.pagenumbers != null && Model.pagenumbers.Count() > 0)
+                    {
+                        foreach (int pagenumber in Model.pagenumbers)
+                        {
+                            if (Model.page.Equals(pagenumber))
+                            {
+                                <li data-index="@pagenumber" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                                    <a onclick="PagerClick(@(pagenumber));" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pagenumber</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li data-index="@pagenumber" class="m34-pagination__page-list-item">
+                                    <a onclick="PagerClick(@(pagenumber));" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pagenumber</a>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+
+                @if (Model.page < Model.totalpage)
+                {
+                    <a onclick="PagerClick(@(Model.page + 1));" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+                    <a onclick="PagerClick(@(Model.totalpage));" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                        <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                        <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}

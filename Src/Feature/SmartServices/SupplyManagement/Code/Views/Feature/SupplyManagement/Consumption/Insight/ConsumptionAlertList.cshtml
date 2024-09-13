@@ -1,0 +1,50 @@
+﻿
+@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint;
+@using Sitecore.Globalization;
+@model ConsumptionInsightData
+@using Sitecore.Mvc
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using smConfig = DEWAXP.Foundation.Content.ConsumptionComplaintResponseCofig;
+@using System.Linq
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        @if (Model.AlarmListSetting != null)
+        {
+
+            <div class="smart-response-bottom-component component-border mt0 set-height">
+                <div class="m89-donut-chart__title">
+                    @_commonHelper.GetSMTranslation(Model.AlarmListSetting.Btntitle)
+                </div>
+                <div class="j120-alert-items">
+                    @if (Model.Alarms != null && Model.Alarms.Count > 0)
+                    {
+                        foreach (var item in Model.Alarms)
+                        {   string _formatedDate = Convert.ToDateTime(item.date).ToString("yyyy-MM-dd");
+                            string day = @_commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(_formatedDate, "yyyy-MM-dd", "dddd"));
+                            string date = @_commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(_formatedDate, "yyyy-MM-dd", "dd"));
+                            string month = @_commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(_formatedDate, "yyyy-MM-dd", "MMM"));
+                            string year = @_commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(_formatedDate, "yyyy-MM-dd", "yyyy"));
+                            string _date = string.Format("{0} {1} {2} {3}", day, date, month, year);
+                            string _time = @_commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(_formatedDate, "yyyy-MM-dd", "hh:mm tt")).ToLower()
+                                            .Replace("am", _commonHelper.GetSMTranslation("am"))
+                                             .Replace("pm", _commonHelper.GetSMTranslation("pm"));
+                            <div class="j120-alert-item">
+                                <div class="j120-alert-item-title"><span class="icon icon-bell"></span>@_commonHelper.GetSMTranslation(item.type)</div>
+                                <div class="j120-alert-item-content clearfix">
+                                    <div class="j120-alert-item-date">@string.Format("{0} {1} {2}", _date, _commonHelper.GetSMTranslation("at"), _time)</div>
+                                    <div class="j120-alert-item-sent">@string.Format("{0} {1}", _commonHelper.GetSMTranslation("Sent to"), item.mobile)</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else {
+                        <p>@_commonHelper.GetSMTranslation("No alarms communicated to this account.")</p>
+                    }
+
+                </div>
+            </div>
+        }
+    </div>
+    
+</div>

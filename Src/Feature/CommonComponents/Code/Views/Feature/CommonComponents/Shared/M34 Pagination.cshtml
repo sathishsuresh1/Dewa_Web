@@ -1,0 +1,58 @@
+﻿@using Sitecore.Globalization
+@model DEWAXP.Foundation.Content.Models.Base.PaginationModel
+
+@if (Model.TotalPages > 1)
+{
+	<div class="m34-pagination" data-component="m34-pagination">
+		<div class="m34-pagination__content">
+			@if (Model.CurrentPage > 1)
+			{
+				<a href="@Url.Action(Model.Action, Model.Controller, new {term = Model.QueryString, page = Model.CurrentPage - 1,filter=Model.filter})" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev">@Translate.Text("Previous")</a>
+			}
+
+			<ul class="m34-pagination__page-list">
+				@foreach (var pageNumber in GetPaginationRange(Model.CurrentPage, Model.TotalPages))
+				{
+					var additionalCssClasses = pageNumber == Model.CurrentPage ? "m34-pagination__page-list-item--active" : string.Empty;
+
+					<li data-index="@pageNumber" class="m34-pagination__page-list-item @additionalCssClasses">
+						<a href="@Url.Action(Model.Action, Model.Controller, new {term = Model.QueryString, page = pageNumber,filter=Model.filter})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pageNumber</a>
+					</li>
+				}
+			</ul>
+
+			@if (Model.CurrentPage < Model.TotalPages)
+			{
+				<a href="@Url.Action(Model.Action, Model.Controller, new {term = Model.QueryString, page = Model.CurrentPage + 1,filter=Model.filter})" role="button" aria-label="@Translate.Text("Next")" class="button button--text button--next m34-pagination__button--next">@Translate.Text("Next")</a>
+			}
+		</div>
+	</div>
+}
+
+@functions
+{
+
+	private IEnumerable<int> GetPaginationRange(int currentPage, int totalPages)
+	{
+		const int desiredCount = 5;
+		var @return = new List<int>();
+
+		var start = currentPage - 1;
+		var projectedEnd = start + desiredCount;
+        if (projectedEnd > totalPages)
+		{
+			start = start - (projectedEnd - totalPages);
+			projectedEnd = totalPages;
+		}
+
+		int p = start;
+		while (p++ < projectedEnd)
+		{
+			if (p > 0)
+			{
+				@return.Add(p);
+			}
+		}
+		return @return;
+	}
+}

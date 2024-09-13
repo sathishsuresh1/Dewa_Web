@@ -1,0 +1,231 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Feature.GatePass.Models.ePass.SubPasses
+@model DEWAXP.Feature.GatePass.Models.ePass.SubPasses.BaseSubPass
+@{ var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(2);
+    var disable = string.Empty;
+    if (Model.PassType.Equals(SubPassType.Holiday))
+    {
+        disable = "1,2,3,4,5";
+    }
+    List<SelectListItem> FromToTime = null;
+    if (Model.PassType.Equals(SubPassType.Holiday))
+    {
+        FromToTime = EpassHelper.GetFromToTime("05:30", "17:30");
+    }
+    if (Model.PassType.Equals(SubPassType.Night))
+    {
+        FromToTime = EpassHelper.GetFromToTime("17:30", "05:30", true);
+    }
+    var CurrentFromToTime = EpassHelper.GetCurrentFromToTime();
+    DateTime nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddDays(30);
+
+}
+
+<div>
+    <div class="j113-epass" data-journey="j113-epass">
+        <div class="j113-epass">
+            <div class="m66-preloader j113-epass--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid">
+            @Html.Sitecore().Placeholder("pagetitle")
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "ePassForm", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled", @id = "eForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    <div class="j113-epass--permPass__form-page">
+                        @Html.HiddenFor(m => m.PassType)
+
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-passnumber" class="form-field__label">
+                                @Translate.Text("Epass.Passnumber")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input maxlength="20"
+                                       data-parsley-maxlength="20"
+                                       value="@Model.PassNumber"
+                                       class="form-field__input form-field__input--text"
+                                       id="form-field-passnumber"
+                                       name="PassNumber"
+                                       required="required"
+                                       data-parsley-required-message="@Translate.Text("Epass.holidaypassnumbererror")"
+                                       type="text"
+                                       placeholder="@Translate.Text("Epass.Passnumber")"
+                                       aria-describedby="description-for-passnumber"
+                                       data-parsley-errors-container="#description-for-passnumber"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="29">
+                            </span>
+                            <div id="description-for-passnumber" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div id="datepicker-container-StartDate" class="form-field form-field--text  relative">
+                            <label for="form-field-StartDate" class="form-field__label">
+                                @Translate.Text("Epass.Startdate")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input value="@Model.StartDate"
+                                       class="form-field__input form-field__input--text form-field__input--datepicker-binded  form-field__input--datepicker"
+                                       id="form-field-StartDate"
+                                       name="StartDate"
+                                       type="text"
+                                       placeholder="@Translate.Text("Epass.Startdate")"
+                                       aria-describedby="description-for-StartDate"
+                                       data-parsley-errors-container="#description-for-StartDate"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("Epass.holiday.startdateerror")"
+                                       data-el="datepicker-future"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="46"
+                                       data-bindingID="passbinding"
+                                       aria-haspopup="true"
+                                       aria-expanded="false"
+                                       aria-readonly="false"
+                                       data-el-to=".enddate"
+                                       data-el-to_min="0"
+                                       data-el-to_max="365"
+                                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day],&quot;disable&quot;:[@disable] }' />
+                            </span>
+                            <div id="description-for-StartDate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div id="datepicker-container-EndDate" class="form-field form-field--text  relative">
+                            <label for="form-field-EndDate" class="form-field__label">
+                                @Translate.Text("Epass.Enddate")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input value="@Model.EndDate"
+                                       class="form-field__input form-field__input--text enddate  form-field__input--datepicker"
+                                       id="form-field-EndDate"
+                                       name="EndDate"
+                                       type="text"
+                                       placeholder="@Translate.Text("Epass.Enddate")"
+                                       aria-describedby="description-for-EndDate"
+                                       data-parsley-errors-container="#description-for-EndDate"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("Epass.holiday.enddateerror")"
+                                       data-el="datepicker-future"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="46"
+                                       readonly=""
+                                       data-bindingID="passbinding"
+                                       aria-haspopup="true"
+                                       aria-expanded="false"
+                                       aria-readonly="false"
+                                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day],&quot;disable&quot;:[@disable]  }' />
+                            </span>
+                            <div id="description-for-EndDate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-FromTime" class="form-field__label">
+                                @Translate.Text("Epass.Fromtime")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-FromTime" name="FromTime" aria-describedby="description-for-FromTime" data-parsley-errors-container="#description-for-FromTime" required="required" data-parsley-required-message="@Translate.Text("Epass.Chooseanoption")">
+                                    <option value="" selected="">@Translate.Text("Epass.Chooseanoption")</option>
+                                    @{
+                                        foreach (var item in FromToTime)
+                                        {
+                                            if (!string.IsNullOrWhiteSpace(Model.FromTime) && item.Value == Model.FromTime)
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-ToTime" class="form-field__label">
+                                @Translate.Text("Epass.Totime")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-ToTime" name="ToTime" aria-describedby="description-for-ToTime" data-parsley-errors-container="#description-for-ToTime" required="required" data-parsley-required-message="@Translate.Text("Epass.Chooseanoption")">
+                                    <option value="" selected="">@Translate.Text("Epass.Chooseanoption")</option>
+                                    @{
+                                        foreach (var item in FromToTime)
+                                        {
+                                            if (!string.IsNullOrWhiteSpace(Model.ToTime) && item.Value == Model.ToTime)
+                                            {
+                                                <option value="@item.Value" selected>@item.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-ToTime" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field__button">
+                            <button id="btsubmit" class="button button--primary" data-submission-text="@Translate.Text("Submitting")..." type="submit">@Translate.Text("Epass.Submit")</button>
+                        </div>
+
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    var des_el_id = "#description-for-ToTime";
+    docReady(function () {
+        var f_sel = "#form-field-FromTime", t_sel = "select#form-field-ToTime";
+        jQuery(f_sel).on("change", function () {
+            var vals = $('select' + f_sel + ' > option').map(function () { if (this.value) return this.value; }).get();
+            var sval = jQuery(this).children("option:selected").val();
+            var idx = vals.findIndex(x => x === sval);
+            var newvals = jQuery.grep(vals, function (n, i) { return (i > idx); });
+            $(t_sel + ' > option').each(function () { $(this).attr("disabled", "disabled"); });
+            $.each(newvals, function (i, v) { var d = $(t_sel + ' option[value="' + v + '"]'); if (d) { $(d).prop("disabled", false); } });
+        });
+        @*jQuery("#btsubmit").on("click", function (e) {
+            e.preventDefault();
+                var res = moment(jQuery('input[name="EndDate_submit"]').val() + ' ' + jQuery('select[name="ToTime"]').val()).isAfter(moment(jQuery('input[name="StartDate_submit"]').val() + ' ' + jQuery('select[name="FromTime"]').val()));
+            if (res === false) {
+                //e.preventDefault();
+                jQuery(des_el_id).empty().append('<ul class="parsley-errors-list filled"><li>' + '@Translate.Text("Epass.ToDateInValid")' + "</li></ul>");
+                return false;
+            } else {
+                jQuery(des_el_id).empty();
+                jQuery(".ePassForm").submit();
+                return true;
+            }
+        });*@
+    });
+</script>

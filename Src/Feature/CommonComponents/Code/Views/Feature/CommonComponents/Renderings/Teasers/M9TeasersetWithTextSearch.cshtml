@@ -1,0 +1,87 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using System.Globalization
+@using Sitecore.Data.Items
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Mvc
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M9TeaserSetWithSearchTextModel
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m35-filter m35-filter--left">
+            <div class="m35-filter__column--combination input-only">
+                <label for="form-field-searchtxt" class="form-field__label">
+                    <span class="aria-only">@Translate.Text("searchtxt")</span>
+                </label>
+                <div class="form-field form-field--text mt0">
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text actionElement" id="form-field-searchtxt" name="text-optional"
+                               type="text" placeholder="@Translate.Text("PP_SearchPlaceholder")"  data-parsley-trigger="focusout" data-parsley-id="6"
+                               value="@(Model.SearchText)" maxlength="20">
+                    </span>
+                </div>
+                <button type="button" name="btnType" value="search" onclick="FilterByText()" class="icon-search actionElement">
+                    <span class="aria-only">@Translate.Text("searchtxt")</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid__row grid__row--tight">
+    <div class="j143_media--mscroll j134-media-presspack" data-datasrcid="@Model.DatasourceId">
+        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Teasers/M9TeaserSetLoadedSection.cshtml", Model)
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var apiUrl ='@Url.Action("M9TeasersetWithTextSearch", "Renderings")';
+    function LoadMore() {
+        var pageno = $(".loadmore-container").data("pageno");
+        RenderAndFilterData(pageno, ".data-appender-container");
+    }
+
+    function FilterByText() {
+        RenderAndFilterData(1, ".j134-media-presspack");
+    }
+
+    function RenderAndFilterData(pageno, container_element) {
+        var datasrcid = $(".j134-media-presspack").data("datasrcid");
+        var searchTxt = $("#form-field-searchtxt").val();
+
+        jQuery.ajax({
+            type: "GET",
+            url: apiUrl + '?i=' + datasrcid + "&s=" + searchTxt + "&p=" + pageno + "&m=true",
+            beforeSend: function () {
+                $(".m66-preloader-fullpage").show();
+            },
+            success: function (response) {
+                $(".loadmore-container").remove();
+                if (pageno == 1) {
+                    $(container_element).html(response);
+                } else {
+                    $(container_element).append(response);
+                }
+            },
+            complete: function () {
+                $(".m66-preloader-fullpage").fadeOut();
+                window.initComponents('rs_area');
+                jQuery(window).trigger('reinit_tooltip');
+            }
+
+        });
+    }
+
+    docReady(function () {
+
+        $('.actionElement').on('keypress', function (e) {
+            if (e.keyCode == 13) {
+                FilterByText();
+            }
+        });
+
+    })
+
+</script>

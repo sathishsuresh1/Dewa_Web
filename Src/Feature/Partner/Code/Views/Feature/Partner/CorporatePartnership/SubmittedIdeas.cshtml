@@ -1,0 +1,198 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Feature.Partner.Models.CorporatePartnership
+@model List<CP_MSG_IDS_ISS>
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecorex = Sitecore
+<div class="grid">
+    @Html.Sitecore().Placeholder("placeholder-back")
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="m66-preloader j1-CP--loader hidden">
+            <div class="grid">
+
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m18-teaser" data-component="m18-teaser">
+                    <div class="m18-teaser--heading_wrapper">
+                        <span class="m18-teaser--title">@Translate.Text("cpportal.Submitted Ideas")</span>
+                        <span class="m18-teaser--count" dir="ltr"><span class="m18-teaser--count_catch"></span> @Translate.Text("cpportal.Total")</span>
+                    </div>
+                    @foreach (CP_MSG_IDS_ISS req in Model)
+                    {
+                        <div class="m18-teaser--item submitted-idea">
+                            <div class="m18-teaser--detail_wrapper">
+                                <div class="m18-teaser--detail_heading mt24">
+                                    <div class="m18-teaser--detail_type idea-detail"
+                                         data-event-efolderid="@req.Efolderid"
+                                         data-event-subject="@req.Subject"
+                                         data-event-requestername="@req.RequesterName"
+                                         data-event-requestemail="@req.fromemail"
+                                         data-event-ideas="@req.Ideas"
+                                         data-event-updatecommentscount="@req.updatedMessages.Count"
+                                         data-event-updatecomments="@req.strupdatedMessages"
+                                         data-event-updatecommentsdate="@req.strupdateddates"
+                                         data-event-cancelledrequest="@req.CancelledRequest">@req.Subject</div>
+                                    </div>
+                                </div>
+
+                                <div class="m18-teaser--buttons">
+                                    @if (!req.CancelledRequest)
+                                    {
+                                        <div class="button button--primary edit-submitted-idea">@Translate.Text("cpportal.Edit Details")</div>
+                                        <div class="button cancel-submitted-idea">@Translate.Text("cpportal.cancel")</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="button button--primary edit-submitted-idea">@Translate.Text("cpportal.View Details")</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal m39-modal--new m5-quick-services--event_modal" data-component="m39-modal" id="idearequest">
+            <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="idearequest_trigger" aria-controls="idearequest_content"></button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="idearequest_content" aria-labelledby="idearequest_trigger">
+                <div class="m39-modal__dialog">
+                    @Html.Partial("~/Views/Feature/Partner/CorporatePartnership/_UpdateIdeas.cshtml", false)
+                </div>
+            </div>
+            <div class="m39-modal__overlay"> </div>
+        </div>
+        <div class="m39-modal m39-modal--new m5-quick-services--event_modal m5-quick-services--mail_success" data-component="m39-modal" id="cancelidea">
+            <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="cancelidea_trigger" aria-controls="cancelidea_content"></button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="cancelidea_content" aria-labelledby="cancelidea_trigger">
+                <div class="m39-modal__dialog">
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title">@Translate.Text("cpportal.Submitted Idea")</div>
+                    </div>
+                    <div class="m39-modal__content" style="top: 31px;">
+                        <div class="grid__row cancelcontent">
+                            @Translate.Text("cpportal.Do you really need to cancel this submitted Idea?")
+                        </div>
+                        <div class="grid__row">
+                            <input type="hidden" name="cancelfolderid" id="cancelfolderid" value="" />
+                            <div class="button m39-m12-no">@Translate.Text("cpportal.NO")</div>
+                            <div class="button button--primary m39-m12-cancelidea">@Translate.Text("cpportal.YES")</div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="m39-modal m39-modal--new m5-quick-services--mail_success" data-component="m39-modal" id="successmodal">
+            <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="successmodal_trigger" aria-controls="successmodal_content">fdytdsyrstrstr</button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="successmodal_content" aria-labelledby="successmodal_trigger">
+                <div class="m39-modal__dialog">
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="m39-modal__header">
+                            <div class="m39-modal__title" id="successtitlemessage"></div>
+                            <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="success_content"></a>
+                        </div>
+                        <div class="m39-modal__content" id="success_content">
+                            <div class="grid__row">
+                                <span id="successtextmessage"></span>
+                            </div>
+                        </div>
+                        <div class="m39-modal__footer">
+                            <div class="button button--primary m5-quick-services--mail_success-close">Ok</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="m39-modal__overlay"> </div>
+        </div>
+
+        <script>
+            docReady(function () {
+                jQuery(".edit-submitted-idea").on('click', function (event) {
+                    var $bParent = $(this).closest('.submitted-idea'),
+                        loop = parseInt($bParent.find('.idea-detail').attr('data-event-updatecommentscount')),
+                        $area = jQuery('#message_ideas_updates_div');
+
+                    $area.html('');
+                    jQuery('.cancalleddiv').show();
+                    var updatecommentsarray = $bParent.find('.idea-detail').data('event-updatecomments').toString().split('||');
+                    var updatecommentsdatearray = $bParent.find('.idea-detail').data('event-updatecommentsdate').toString().split('||');
+                    $efolderid = $bParent.find('.idea-detail').data('event-efolderid').toString();
+                    $subject = $bParent.find('.idea-detail').data('event-subject').toString();
+                    $requestername = $bParent.find('.idea-detail').data('event-requestername').toString();
+                    $requestemail = $bParent.find('.idea-detail').data('event-requestemail').toString();
+                    $cancelledrequest = $bParent.find('.idea-detail').data('event-cancelledrequest');
+                    $ideas = $bParent.find('.idea-detail').data('event-ideas');
+                    jQuery('#idearequest').find('input[name=requestid]').val($efolderid.trim());
+                    jQuery('#idearequest').find('input[name=requestername_ideas]').val($requestername.trim());
+                    jQuery('#idearequest').find('input[name=Emailaddress_ideas]').val($requestemail.trim());
+                    jQuery('#idearequest').find('input[name=subject_ideas]').val($subject.trim());
+                    jQuery('#idearequest').find('#form-field-message_ideas_update').html($ideas.trim());
+
+                    if ($cancelledrequest == "True") {
+                        jQuery('.cancalleddiv').hide();
+                    }
+
+                    for (var i = 0; i < loop; i++) {
+                        $area.append('<div class="form-field form-field--text form-field--textarea"><label for="form-field-message_ideas" class="form-field__label form-field__label--readonly"> @Translate.Text("cpportal.Ideas")'+(i+1)+' </label><p><strong id="form-field-message_ideas">'+updatecommentsdatearray[i]+': '+updatecommentsarray[i]+'</strong></p><div id="description-for-message_ideas" class="form-field__messages"></div></div>')
+                    }
+                    jQuery('#idearequest').find('.m39-modal__trigger').trigger('click');
+                });
+                jQuery("#idearequestcancel,.m39-m12-no").on('click', function (event) {
+                    jQuery('#idearequest').find('.m39-modal__button--close').trigger('click');
+                });
+                jQuery(".cancel-submitted-idea").on('click', function (event) {
+                    var $bParent = $(this).closest('.submitted-idea');
+                    var efolderid = $bParent.find('.idea-detail').data('event-efolderid').toString();
+                    jQuery('#cancelidea').find('input[name=cancelfolderid]').val(efolderid.trim());
+                    jQuery('#cancelidea').find('.m39-modal__trigger').trigger('click');
+                });
+                jQuery(".m39-m12-cancelidea").on('click', function (event) {
+                    var url = "/api/sitecore/CorporatePartnership/CancelIdeas";
+                    jQuery.ajax({
+                        url: url,
+                        traditional: true,
+                        data:
+                            AddForgeryToken({
+                                requestid: $('#cancelfolderid').val()
+                            }, "form-idearequest"),
+                        beforeSend: function () {
+                            jQuery('.j1-CP--loader').show();
+                            jQuery('.j1-CP--loader').css('top', $(window).scrollTop());
+                        },
+                        complete: function () {
+                            jQuery('.j1-CP--loader').hide();
+                        },
+                        dataType: 'json',
+                        type: 'POST',
+                    }).done(function (response) {
+                        window.location.reload();
+                    });
+                });
+            });
+        </script>
+    }
+    else
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <p class="centered">
+                    @Translate.Text("cpportal.There is no Submitted Ideas")
+                </p>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,1600 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel
+@{
+    var Nationalities = DEWAXP.Foundation.Helpers.Extensions.FormExtensions.GetNationalities(null, false);
+
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j153-villa-exemption" data-journey="j153-villa-exemption">
+    <div class="grid">
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m26-page-title title_message">
+                    <div class="m26-page-title__links">
+                        <p class="m26-page-title__backlink">
+                            <a href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_DASHBOARD)" class="button button--text button--back">@Translate.Text("VE_Back")</a>
+                        </p>
+                    </div>
+                    <h1 class="text__page-title">@Translate.Text("VE_New_Application_Heading")</h1>
+                    @*<p class="text-page__intro">Space for sub-description here</p>*@
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="3" data-current-step="1" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="true">
+                    <div class="m38-steptracker__info-wrapper"></div>
+                    <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext=""></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "veform", @class = "form", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    @Html.HiddenFor(x => x.OwnersJson)
+                    @Html.HiddenFor(x => x.Stage)
+                    <label id="lblBPError" class="form-field__error hidden">@Translate.Text("VE_Non-UAE_BP")</label>
+                    <label id="lblESNoError" class="form-field__error hidden">@Translate.Text("VE_ALREADY_EXIST_ESTIMATENO")</label>
+                    <fieldset class="fieldset grid__column--content-form">
+                        <legend class="legend">@Translate.Text("VE_GI")</legend>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-user_bp" class="form-field__label">
+                                @Translate.Text("VE_BP")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.BusinessPartner, Model.BPList, Sitecore.Globalization.Translate.Text("VE_Select_BP"),
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--select form-field__input--select-full form-field__input--select2",
+                                    @id = "form-field-user_bp",
+                                    @aria_describedby = "description-for-user_bp",
+                                    @data_parsley_error_message = Translate.Text("VE_Select_BP"),
+                                    @data_parsley_errors_container = "#description-for-user_bp",
+                                    @data_parsley_id = "6",
+                                    @required = "required",
+                                    @data_placeholder = Translate.Text("VE_Select_BP")
+                                })
+
+                            </span>
+                            <div id="description-for-user_bp" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.BusinessPartner, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-user_an" class="form-field__label">
+                                @Translate.Text("VE_AN")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                                <select class="form-field__input form-field__input--select form-field__input--select-full " id="form-field-user_an" name="ApplicationNumber" aria-describedby="description-for-user_an" data-parsley-errors-container="#description-for-user_an" required="" data-parsley-required-message="@Translate.Text("VE_Select_AN")" data-parsley-trigger="change" data-parsley-id="7">
+                                    <option value="" selected="">@Translate.Text("VE_Select_AN")</option>
+
+                                </select>
+
+                            </span>
+                            <div id="description-for-user_an" class="form-field__messages">
+
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-user_en" class="form-field__label">
+                                @Translate.Text("VE_EN")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text" id="form-field-user_en" type="text" readonly="readonly" name="EstimateNumber" aria-describedby="description-for-user_en" data-parsley-errors-container="#description-for-user_en" required="" data-parsley-required-message="@Translate.Text("VE_Enter_Estimate")" data-parsley-id="8">
+                            </span>
+                            @*<span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full " id="form-field-user_en" name="EstimateNumber" aria-describedby="description-for-user_en" data-parsley-errors-container="#description-for-user_en" required="" data-parsley-required-message="@Translate.Text("VE Select Estimate")" data-parsley-trigger="change" data-parsley-id="8">
+                                        <option value="" selected="">@Translate.Text("VE Select Estimate")</option>
+
+                                    </select>
+                                </span>*@
+                            <div id="description-for-user_en" class="form-field__messages">
+
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-ot" class="form-field__label">
+                                @Translate.Text("VE_OT")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.OwnerType, Model.PropertyOwnerTypeList,
+                                Sitecore.Globalization.Translate.Text("VE_Select_OT"), new
+                                {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-ot",
+                                @aria_describedby = "description-for-ot",
+                                @data_parsley_error_message = Translate.Text("VE_Select_OT"),
+                                @data_parsley_errors_container = "#description-for-ot",
+                                @data_parsley_id = "9",
+                                @required = "required"
+                                })
+                            </span>
+                            <div id="description-for-ot" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.OwnerType, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="fieldset">
+                        <div class="fieldset-title">
+                            <legend class="legend">@Translate.Text("VE_Personal_Information_Owners")</legend>
+                            <span class="fieldset-title-link"><button class="button button--primary button--very_small add-owner-trigger" type="button" style="display:none;" id="btAddO">@Translate.Text("VE_Add_Owner")</button></span>
+                        </div>
+                        <div class="m23-table" data-component="m23-table">
+                            <table class="m23-table__content-table" id="tblowners">
+                                <thead class="m23-table__content-table-header">
+                                    <tr class="m23-table__content-table-row" tabindex="0">
+                                        <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Name")</th>
+                                        <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Emirates_ID_or_Passport_Number")</th>
+                                        <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Email")</th>
+                                        <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Mobile")</th>
+                                        @*<th class="m23-table__content-table-cell--header">@Translate.Text("VE_Expiry_Date")</th>*@
+                                        <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Action")</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="m23-table__content-table-body">
+                                    @foreach (var r in Model.Owners)
+                                    {
+
+                                        <tr class="m23-table__content-table-row" tabindex="0">
+                                            <td class="m23-table__content-table-cell" data-label="Name">
+                                                @r.Name
+                                                <div class="m23-table__content-table-th-mobile">@r.Name</div>
+                                            </td>
+                                            <td class="m23-table__content-table-cell" data-label="Passport Number">
+                                                @(string.IsNullOrEmpty(r.EmiratesID) ? r.PassportNumber : r.EmiratesID)
+                                                <div class="m23-table__content-table-th-mobile">@(string.IsNullOrEmpty(r.EmiratesID) ? r.PassportNumber : r.EmiratesID)</div>
+                                            </td>
+                                            <td class="m23-table__content-table-cell" data-label="Email">
+                                                @r.Email
+                                                <div class="m23-table__content-table-th-mobile">@r.Email</div>
+                                            </td>
+                                            <td class="m23-table__content-table-cell" data-label="Mobile1">
+                                                @r.Mobile1
+                                                <div class="m23-table__content-table-th-mobile">@r.Mobile1</div>
+                                            </td>
+                                            @*<td class="m23-table__content-table-cell" data-label="Passport Expiry Date">
+                                                    @r.PassportExpiry
+                                                    <div class="m23-table__content-table-th-mobile">@r.PassportExpiry</div>
+                                                </td>*@
+                                            <td class="m23-table__content-table-cell initialized" data-label="Action">
+                                                @if (Model.Status != null && Model.Status.Equals("SUBMITTED"))
+                                                {
+                                                    <button class="button button--primary button--very_small ownertype" type="button" data-action="view" data-ownerid="@r.OwnerID" data-eid="@r.EmiratesID" data-itemno="@r.Itemnumber" data-pp="@r.PassportNumber">@Translate.Text("VE_View_Details")</button>
+
+                                                }
+                                                else
+                                                {
+                                                    <button class="button button--primary button--very_small ownertype" type="button" data-action="edit" data-ownerid="@r.OwnerID" data-eid="@r.EmiratesID" data-itemno="@r.Itemnumber" data-pp="@r.PassportNumber">@Translate.Text("VE_Edit_Details")</button>
+
+                                                    <button class="button button--primary button--very_small ownertype" type="button" data-ownerid="@r.OwnerID" data-action="delete" data-eid="@r.EmiratesID" data-itemno="@r.Itemnumber" data-pp="@r.PassportNumber">@Translate.Text("VE_Delete")</button>
+
+                                                }
+
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-field__button">
+                        <button type="submit" id="btnSaveNext" class="button button--primary button--next" data-submission-text="@Translate.Text("VE_Saving")...">@Translate.Text("VE_SaveNext")</button>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+    <div class="m39-modal m39-modal--new j153-villa-exemption_modal-add" data-component="m39-modal" id="mdlAddOwner">
+        <button data-trigger="true" class="m39-modal__trigger" id="_vl45qz455_trigger" type="button" aria-controls="_vl45qz455_content"></button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_vl45qz455_content" aria-labelledby="_vl45qz455_trigger">
+            <div class="m39-modal__dialog m39-modal__dialog--slim">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title">@Translate.Text("VE_Add_Owner")</div>
+                    <a data-close="true" class="m39-modal__button--close" id="_vl45qz455_close" aria-controls="_vl45qz455_content">@Translate.Text("VE_Close")</a>
+                    <div class="m39-modal__subtitle">@Translate.Text("VE_Personal_Details")</div>
+                </div>
+                <div class="m39-modal__content">
+                    <form method="post" class="form form-add-owner" id="formAddOwner" name="form22" data-form="true" action="">
+                        <label id="lblerror" class="form-field__error hidden">@Translate.Text("VE_Please_Enter_Valid ")</label>
+                        <input type="hidden" id="marsoom" />
+                        <div class="form-field form-field__radio--toggle">
+                            <fieldset class="fieldset">
+                                <legend class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Do_You_Have_Emirates_ID")
+                                    @*<span class="form-field__label-optional">@Translate.Text("VE_Optional")</span>*@
+                                </legend>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_1_1" name="radios_group1" type="radio" data-val="01" value="1" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-pvovcgmlr" data-parsley-multiple="radios_group1" data-parsley-id="35" checked="" toggle-target="#yeseid" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Yes")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_1_2" name="radios_group1" type="radio" data-val="02" value="2" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-pvovcgmlr" toggle-target="#noeid" data-parsley-multiple="radios_group1" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_No")
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-pvovcgmlr" class="form-field__messages">
+                                </div>
+                            </fieldset>
+                        </div>
+                        <fieldset class="fieldset eid" id="yeseid">
+                            <div class="form-field form-field--text">
+                                <label for="eid" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_EmiratesID_Number")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text" id="eid" name="eid" type="number" pattern="\d*" placeholder="@Translate.Text("VE_Enter_EmiarteId")" aria-describedby="description-for-ktutekus3" data-parsley-errors-container="#description-for-ktutekus3" required="" data-parsley-required-message="@Translate.Text("VE_EmirateIdValidation")" data-parsley-emiratesid="" data-parsley-emiratesid-message="@Translate.Text("VE_EmirateIdValidation")" data-parsley-trigger="focusout" data-parsley-id="2">
+                                </span>
+                                <div id="description-for-ktutekus3" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-eid-dob" class="form-field form-field--text">
+                                <label for="eid_dob" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_DateofBirth")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input" id="eid_dob" name="eid_dob" type="text" placeholder="@Translate.Text("VE_Select_Date")" aria-describedby="description-for-eid-dob" data-parsley-errors-container="#description-for-eid-dob" data-parsley-required-message="@Translate.Text("VE_Select_Date")" data-el="datepicker-past" data-picker-options='{ "selectYears": 120,"selectMonths": true}' readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false" aria-owns="form-field-q3q4iyc63_root" required=""><span data-clicker="#datepicker-container-eid-dob" class="form-field__datepicker-icon-clicker"></span>
+                                </span>
+                                <div id="description-for-eid-dob" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div id="radio-container-eid-gender" class="form-field form-field--text">
+                                <label for="radios_group_eid" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Gender")
+                                </label>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_eid_1" name="radios_group_eid" type="radio" data-val="01" value="1" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-eid-gender" data-parsley-multiple="radios_group_eid" data-parsley-id="35" checked="">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Male")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_eid_2" name="radios_group_eid" type="radio" data-val="02" value="2" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-eid-gender" data-parsley-multiple="radios_group_eid" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Female")
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-eid-gender" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="hidden" id="eidDetails">
+                                <div class="form-field form-field--text">
+                                    <label for="owner1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Name")
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="owner1" name="owner1" type="text" placeholder="@Translate.Text("VE_Name_Placeholder")" data-parsley-required-message="@Translate.Text("VE_Name_Placeholder")" value="" aria-describedby="description-for-vbqji1dh6" data-parsley-errors-container="#description-for-vbqji1dh6" data-parsley-trigger="focusout" data-parsley-id="3">
+                                    </div>
+                                    <div id="description-for-vbqji1dh6" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="email1" class="form-field__label">
+                                        @Translate.Text("VE_EmailID")
+                                        <span id="eidMaskedEmail" class="form-field__label-required"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="email1" name="email1" type="email" placeholder="@Translate.Text("VE_Email_Placeholder")" aria-describedby="description-for-email1" data-parsley-errors-container="#description-for-email1" required="" data-parsley-required-message="@Translate.Text("VE_Email_Required")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </span>
+                                    <div id="description-for-email1" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text ">
+                                    <label for="Mobile1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_MobileNo1")
+                                        <span id="eidMaskedMobile" class="form-field__label-required"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input type="tel" id="Mobile1" name="Mobile1" value="" aria-describedby="description-for-mobilenumber" required="" placeholder="@Translate.Text("VE_Mobile_PlaceHolder")" data-parsley-error-message="@Translate.Text("VE_Mobile_PlaceHolder")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                    </span>
+                                    <div id="description-for-mobilenumber" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text ">
+                                    <label for="Mobile2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_MobileNo2")
+                                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input type="tel" id="Mobile2" name="Mobile2" value="" aria-describedby="description-for-mobilenumber2" placeholder="@Translate.Text("VE_Mobile_PlaceHolder")" data-parsley-error-message="@Translate.Text("VE_Mobile_PlaceHolder")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber2" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                    </span>
+                                    <div id="description-for-mobilenumber2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="relation1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Relationship_Applicant")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="relation1" name="relation1" placeholder="@Translate.Text("VE_Relationship_Placeholder")" type="text" aria-describedby="description-for-ya6q8msea" data-parsley-errors-container="#description-for-ya6q8msea" required="" data-parsley-required-message="@Translate.Text("VE_Relationship_Placeholder")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </span>
+                                    <div id="description-for-ya6q8msea" class="form-field__messages">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset  passport" id="noeid">
+                            <div class="form-field form-field--text">
+                                <label for="ppno" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Passport_Number")
+                                    <span class="form-field__label-required aria-only">(required)</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text" id="ppno" name="ppno" type="text" placeholder="@Translate.Text("VE_Passport_Placeholder")" maxlength="15" aria-describedby="description-for-ppno" data-parsley-errors-container="#description-for-ppno" required="" data-parsley-pattern="/^[a-zA-Z0-9 ]+$/" data-parsley-error-message="@Translate.Text("VE_EnterValidPassport")" data-parsley-required-message="@Translate.Text("VE_Passport_Placeholder")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                </span>
+                                <div id="description-for-ppno" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-pp_dob" class="form-field form-field--text">
+                                <label for="dob" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_DateofBirth")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input" id="pp_dob" name="pp_dob" type="text" placeholder="@Translate.Text("VE_Select_Date")" aria-describedby="description-for-pp-dob" data-parsley-required-message="@Translate.Text("VE_Select_Date")" data-parsley-errors-container="#description-for-pp-dob" data-el="datepicker-past" data-picker-options='{ "selectYears": 120,"selectMonths": true}' readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false" aria-owns="form-field-q3q4iyc63_root" required=""><span data-clicker="#datepicker-container-pp-dob" class="form-field__datepicker-icon-clicker"></span>
+                                </span>
+                                <div id="description-for-pp-dob" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="divnationality" class="form-field form-field--select form-field--select-single">
+                                <label for="nationality" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Nationality")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                            id="nationality"
+                                            name="nationality"
+                                            aria-describedby="description-for-nationality"
+                                            data-parsley-errors-container="#description-for-nationality"
+                                            required=""
+                                            data-parsley-required-message="@Translate.Text("VE_Nationality_Validatio_Message")"
+                                            data-parsley-trigger="change"
+                                            tabindex="1"
+                                            data-parsley-id="18">
+                                        <option value="" selected=""> @Translate.Text("VE_Select")</option>
+                                        @{
+                                            if (Model.Countrylists != null)
+                                            {
+                                                foreach (var item in Model.Countrylists)
+                                                {
+                                                    <option value="@item.countryid">@item.countrydescription</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </span>
+                                <div id="description-for-nationality" class="form-field__messages parsley-errors-list filled">
+
+                                </div>
+                            </div>
+                            <div id="radio-container-pp-gender" class="form-field form-field--text">
+                                <label for="radios_group_eid" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Gender")
+                                </label>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_pp_1" name="radios_group_pp" type="radio" data-val="01" value="1" aria-describedby="description-for-pp-gender" data-parsley-errors-container="#description-for-pp-gender" data-parsley-multiple="radios_group_pp" data-parsley-id="35" checked="">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Male")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_pp_2" name="radios_group_pp" type="radio" data-val="02" value="2" aria-describedby="description-for-pp-gender" data-parsley-errors-container="#description-for-pp-gender" data-parsley-multiple="radios_group_pp" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Female")
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-pp-gender" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="hidden" id="ppDetails">
+                                <div class="form-field form-field--text">
+                                    <label for="owner2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Name")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="owner2" name="owner2" placeholder="@Translate.Text("VE_Name_Placeholder")" type="text" aria-describedby="description-for-owner2" data-parsley-errors-container="#description-for-owner2" required="" data-parsley-required-message="@Translate.Text("VE_Name_Placeholder")" data-parsley-error-message="@Translate.Text("VE_Name_Placeholder")" data-parsley-pattern="/^[أ-يa-zA-Z ]*$/" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </div>
+                                    <div id="description-for-owner2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--select form-field--select-single">
+                                    <label for="ia" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Issuing_Authority")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                        <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                                id="ia"
+                                                name="IssuingAuthority"
+                                                aria-describedby="description-for-user_ia"
+                                                data-parsley-errors-container="#description-for-user_ia"
+                                                required=""
+                                                data-parsley-required-message="@Translate.Text("VE_IA_validation_message")"
+                                                data-parsley-trigger="change" data-parsley-id="6">
+                                            <option value="" selected=""> @Translate.Text("VE_Select")</option>
+                                            @{
+                                                foreach (var item in Nationalities)
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+
+                                        </select>
+                                    </span>
+                                    <div id="description-for-user_ia" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div id="datepicker-container-pep" class="form-field form-field--text">
+                                    <label for="ppexpiry" class="form-field__label">
+                                        @Translate.Text("VE_Passport_Expiry_Date")
+                                    </label>
+                                    <div class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                        <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input" id="ppexpiry" name="ppexpiry" type="text" placeholder="@Translate.Text("VE_Select_Date")" data-parsley-required-message="@Translate.Text("VE_Select_Date")" aria-describedby="description-for-pep" data-parsley-errors-container="#description-for-pep" data-el="datepicker-future" data-picker-options="{}" readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false" aria-owns="form-field-pep_root" required=""><span data-clicker="#datepicker-container-pep" class="form-field__datepicker-icon-clicker"></span>
+
+                                    </div>
+                                    <div id="description-for-pep" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="email2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_EmailID")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="email2" name="email2" type="email" placeholder="@Translate.Text("VE_Email_Placeholder")" aria-describedby="description-for-email2" data-parsley-errors-container="#description-for-email2" required="" data-parsley-required-message="@Translate.Text("VE_Email_Required")" maxlength="70" data-parsley-error-message="@Translate.Text("VE_Email_Required")" data-parsley-trigger="focusout" data-parsley-id="8">
+                                    </div>
+                                    <div id="description-for-email2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="mobile3" class="form-field__label">
+                                        @Translate.Text("VE_MobileNo1")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input class="form-field__input form-field__input--text form-field__input--prefixed" id="mobile3" name="mobile3" type="tel" placeholder="@Translate.Text("VE_Mobile_PlaceHolder")" aria-describedby="description-for-vjhc0fkvh3" data-parsley-errors-container="#description-for-vjhc0fkvh3" required="" data-parsley-required-message="@Translate.Text("VE_Mobile_PlaceHolder")" data-parsley-mobile_number="" data-parsley-mobile_number-message="@Translate.Text("VE_Mobile_Error")" data-parsley-trigger="focusout" data-parsley-id="10">
+                                    </span>
+                                    <div id="description-for-vjhc0fkvh3" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="relation2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Relationship_Applicant")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="relation2" name="relation2" type="text" placeholder="@Translate.Text("VE_Relationship_Placeholder")" aria-describedby="description-for-relation2" data-parsley-errors-container="#description-for-relation2" required="" data-parsley-required-message="@Translate.Text("VE_Relationship_Placeholder")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </div>
+                                    <div id="description-for-relation2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div id="fpPassportCopy" class="form-field form-field--upload hidden">
+                                    <div class="form-field__input-wrapper">
+                                        <div class="form-field__preview-wrapper">
+                                            <img id="pp_form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" data-uploader-image="PassportCopy">
+                                        </div>
+                                        <div class="form-field__uploader-details">
+                                            <label for="form-field-PassportCopy" class="form-field__label">
+                                                @Translate.Text("VE_PassportCopy")
+                                                <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                            </label>
+                                            <div>
+                                                <label>
+                                                    <input class="form-field__input form-field__input--upload"
+                                                           id="form-field-PassportCopy"
+                                                           name="form-field-PassportCopy"
+                                                           type="file"
+                                                           aria-describedby="description-for-PassportCopy"
+                                                           data-parsley-errors-container="#description-for-PassportCopy"
+                                                           data-parsley-required-message="@Translate.Text("VE_Passport_RequiredField")"
+                                                           data-uploader-field="PassportCopy"
+                                                           accept=""
+                                                           data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                           data-size="15048000"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="16">
+
+                                                    <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                </label>
+                                            </div>
+                                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                            <p class="form-field__input--upload-filename" data-uploader-filename="PassportCopy"></p>
+                                            <p><button id="btnRemoveFile" class="button button--text button--remove hidden" data-removedoc="" data-uploader-remove="PassportCopy">@Translate.Text("VE_Remove")</button></p>
+                                            <input type="hidden" id="flagremove" />
+                                        </div>
+                                    </div>
+                                    <div id="description-for-PassportCopy" class="form-field__messages">
+                                        <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div id="updateProfileLink" class="m14-richtext hidden">
+                            <p>@Html.Raw(Translate.Text("VE_UpdateProfileLink"))</p>
+                            <ul class="mt0">
+                                <li>
+                                    @Html.Raw(Translate.Text("VE_UpdateEmiratesID"))
+                                </li>
+                                <li>
+                                    @Html.Raw(Translate.Text("VE_UpdateMobileEmail"))
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="form-field__button">
+                            <button class="button button--primary" id="btnICADetail" name="btnICADetail" type="button">@Translate.Text("VE_Submit")</button>
+                            <button class="button button--primary hidden" id="btAddOwner" name="btAddOwner" type="button">@Translate.Text("VE_Save")</button>
+                            <button class="button button--primary hidden" id="btUpdateOwner" name="btUpdateOwner" type="button">@Translate.Text("VE_Update")</button>
+                        </div>
+                        @*<div class="form-field__button">
+                                <button class="button button--primary" id="btAddOwner" name="btAddOwner" type="button">Add</button>
+                                <button class="button button--primary" style="display:none;" id="btSaveOwner" name="btSaveOwner" type="button">Save</button>
+                                <button class="button button--primary" style="display:none;" id="btClose" name="btClose" type="button">Close</button>
+                            </div>*@
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+    <div class="m39-modal m39-modal--confirm m87-gauge-alerts-modalBell m39-modal--nofocus" id="mdldeleteOwner" data-component="m39-modal">
+        <div data-trigger="true" class="m39-modal__trigger deleteOwnerModal hidden" id="deleteOwner">Delete</div>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+            <div class="m39-modal__dialog ">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title">@Translate.Text("VE_Delete")</div>
+                    <button data-close="true" class="m39-modal__button--close"></button>
+                </div>
+                <div class="m39-modal__content">
+                    @Translate.Text("VE_Delete_Owner_Confirm")
+                    <div class="mt24">
+                        <button class="button button--primary yes" id="btnYesDeleteOwner" data-itemno="" data-eid="" data-pp="" data-close="true">@Translate.Text("VE_Yes")</button>
+                        <button class="button button--senary no" id="btnNoDeleteOwner" data-itemno="" data-eid="" data-pp="" data-close="true">@Translate.Text("VE_No")</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+    <script type="text/javascript">
+        var appjson = JSON.parse('@Html.Raw(DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel.ToJson(Model.Applications))');
+        var estimatejson = JSON.parse('@Html.Raw(DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel.ToJson(Model.Estimates))');
+        var owner = { itemnumber: "", idType: "", marsoom: "", eid: "", ownerName: "", email: "", maskedemail: "", mobile1: "", maskedmobile: "", mobile2: "", relation: "", passportNumber: "", passportExpiry: "", passportExpiryDisplay: "", issuingAuthority: "", dob: "", dobDisplay: "", nationlaity: "", PassportCopy: "", isOwner: false, isPassportAttach: false };
+        var owners = [], cssClass = "", bpdetails = @Html.Raw(Model.BPDetails != null ? Model.BPDetails : "[]");
+
+        //var html = '<tr class="m23-table__content-table-row" tabindex="0"><td class="m23-table__content-table-cell m23-table__content-table-cell--center initialized" style="min-height: 23px;">{0}<div class="m23-table__content-table-th-mobile">{0}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{1}<div class="m23-table__content-table-th-mobile">{1}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{2}<div class="m23-table__content-table-th-mobile">{2}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{3}<div class="m23-table__content-table-th-mobile">{3}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{4}</td></tr>';
+        var html = '<tr class="m23-table__content-table-row" tabindex="0"><td class="m23-table__content-table-cell m23-table__content-table-cell--center">{0}</td><td class="m23-table__content-table-cell">{1}</td><td class="m23-table__content-table-cell">{2}</td><td class="m23-table__content-table-cell">{3}</td><td class="m23-table__content-table-cell">{4}</td></tr>';
+        var buttons_viewOnly = '<button class="button button--primary button--very_small ownertype" type="button" data-action="view" data-eid="{0}" data-pp="{1}" data-itemno="{2}">@Translate.Text("VE_View_Details")</button>';
+        var buttons_editOnly = '<button class="button button--primary button--very_small ownertype" type="button" data-action="edit" data-eid="{0}" data-pp="{1}" data-itemno="{2}">@Translate.Text("VE_Edit_Details")</button>';
+        var buttons_deleteOnly = '<button class="button button--primary button--very_small ownertype" type="button" data-action="delete" data-eid="{0}" data-pp="{1}" data-itemno="{2}">@Translate.Text("VE_Delete")</button>'
+        var ids = { modal: "#mdlAddOwner", bAO: "#btAddOwner", bSO: "#btUpdateOwner", sIT: "#idType", tEID: "#eid", tOwner: "#owner1", tEmail1: "#email1", tMob1: "#Mobile1", tMob2: "#Mobile2", tRel1: "#relation1", tPPN: "#ppno", tIA: "#ia", tOwner2: "#owner2", tPE: 'input[name="ppexpiry_submit"]', tPEDisplay: 'input[name="ppexpiry"]', tNat: "#nationality", tEmail2: "#email2", tMob3: "#mobile3", tRel2: "#relation2", tDoB: 'input[name="dob_submit"]', tDoBDisplay: 'input[name="dob"]', tPassportCopy: '#form-field-PassportCopy' }
+
+        jQuery(document).ready(function () {
+            setTimeout(function () {
+                steptrackerwithinpage(3, 1, "@Translate.Text("VE_Step1_Title")", "true");
+            }, 500);
+            jQuery('#btnSaveNext').on('click', function (e) {
+				e.preventDefault();
+                if (jQuery("#veform").parsley().validate()) {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                    $("#veform").submit();
+                    return true;
+                }
+                return false;
+            });
+            $('select[name="OwnerType"]').on("change", function (e) {
+                var selectedVal = $(this).val().toString();
+                if (selectedVal.length === 0) {
+                    $("#btAddO").hide(); return true;
+                }
+                switch (selectedVal) {
+                    case "":
+                    case "01":
+                        $("#btAddO").hide();
+                        break;
+                    default:
+                        $("#btAddO").show();
+                }
+            });
+            $('.add-owner-trigger').on('click', function (e) {
+                var url = "/api/sitecore/VillaCostExemption/IsSessionExpired";
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    cache: false,
+                    datatype: 'json',
+                    traditional: true,
+                    data: AddForgeryToken({}, "veform"),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', jQuery(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                    },
+                }).done(function (response) {
+                    if (response == true) {
+                        clearFields();
+                        $('#mdlAddOwner .m39-modal__trigger').trigger('click');
+                        $(ids.modal).find(".m39-modal__button--close").attr("data-action", "add");
+                    }
+                    else {
+                        window.location = '@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_LOGIN_PAGE)';
+                    }
+                });
+
+            });
+
+            jQuery('.button--remove').each(function () {
+                jQuery(this).off('click.remove').on('click.remove', function () {
+                    var $this = jQuery(this);
+                    var $doc = $this.attr('data-removedoc');
+                    jQuery("#form-field-PassportCopy").attr('required', true);
+                });
+            });
+
+            jQuery('#form-field-user_bp').change(function () {
+                $("#lblBPError").hide();
+                var selectedVal = $(this).val().toString();
+                //console.log(selectedVal);
+                var childSelect = $('#form-field-user_an');
+                if (selectedVal.trim() === '') return;
+
+                var r = appjson.find(x => x.Id === selectedVal);
+                //console.log(JSON.stringify(r));
+                var o = JSON.parse(JSON.stringify(owner));
+                var bp = $.grep(bpdetails, function (j) { return j.Number === selectedVal });
+                if (r && bp != null && bp[0].Email != null && bp[0].Mobile != null) {
+                    $("#btnSaveNext").removeAttr("disabled");
+                    if (r && bp != null && bp[0].Valid == "Y") {
+                        childSelect.empty();
+                        childSelect.append($('<option/>', {
+                            value: null,
+                            text: "@Translate.Text("VE_Select_AN")"
+                        }));
+                        $.each(r.Values, function (i, itm) {
+                            childSelect.append($('<option/>', {
+                                value: itm,
+                                text: itm
+                            }));
+                        });
+
+                        $('#form-field-user_en').val('');
+
+                        /*[{"RN":"E-949523","EID":"","EN":"0200000504","Name":"SAEED RASHED AL FALASI","Number":"0010002759","Version":null,"Email":null,"Mobile":"0526367937","Telephone":"042679949"}]*/
+
+
+                        o.idType = "01";
+                        if (bp[0]) {
+                            //console.log(JSON.stringify(bp[0]));
+
+                            o.itemnumber = "0010", o.eid = bp[0].EID, o.ownerName = bp[0].Name, o.email = bp[0].Email, o.mobile1 = bp[0].Mobile, o.relation = bp[0].Relationship, o.isOwner = true;
+
+                            var btns = buttons_viewOnly.replace("{0}", o.eid).replace("{1}", "").replace("{2}", o.itemnumber);
+                            console.log(o);
+                            $("#tblowners tbody").empty().append(html.replace("{0}", o.ownerName).replace("{1}", o.eid).replace("{2}", o.email).replace("{3}", o.mobile1).replace("{4}", btns));
+
+                            var newArr = owners.filter(function (o) { return o.isOwner === false });
+                            newArr.push(o);
+                            owners = JSON.parse(JSON.stringify(newArr));
+                            jQuery('input[name="OwnersJson"]').val(JSON.stringify(owners));
+                        }
+                    }
+                    else {
+                        $("#lblBPError").show();
+                    }
+                }
+                else {
+                    $("#btnSaveNext").attr("disabled", "disabled");
+                }
+				jQuery(window).trigger('reinit_m23');
+            });
+
+            $('#form-field-user_an').change(function () {
+                var selectedVal = $(this).val();
+                //console.log(selectedVal);
+                var childSelect = $('#form-field-user_en');
+                childSelect.val('');
+                if (selectedVal.trim() === '') return;
+                var r1 = estimatejson.find(o => o.Id === selectedVal);
+                //console.log(JSON.stringify(r1));
+
+                if (r1 != null) {
+                    childSelect.val('');
+
+                    //childSelect.append($('<option/>', {
+                    //    value: null,
+                    //    text: "Select Estimate"
+                    //}));
+                    //$.each(r1.Values, function (index, itm) {
+                    //    childSelect.append($('<option/>', {
+                    //        value: itm,
+                    //        text: itm
+                    //    }));
+                    //});
+                    if (r1.IsSubmittedApp) {
+                        $("#btnSaveNext").attr("disabled", "disabled");
+
+                        $("#lblESNoError").show();
+                    }
+                    else {
+                        $("#btnSaveNext").removeAttr("disabled");
+                        $("#lblESNoError").hide();
+                    }
+                    $.each(r1.Values, function (index, itm) {
+                        childSelect.val(itm);
+                        childSelect.focusout();
+                        childSelect.attr('readonly', true);
+                    });
+                }
+
+            });
+
+            $('#btnICADetail').on('click', function (e) {
+                var isvalid = jQuery("#formAddOwner").parsley().validate();
+                if (isvalid === false) { console.log('Form is no valid'); return; }
+                var isOwnerAdded = null;
+                if (jQuery('[name="radios_group1"]:checked').data("val") == "01") {
+                    isOwnerAdded = owners.filter(function (i) { return i.eid == $(ids.tEID).val() });
+                }
+                else if (jQuery('[name="radios_group1"]:checked').data("val") == "02") {
+                    isOwnerAdded = owners.filter(function (i) { return i.passportNumber == $(ids.tPPN).val() });
+                }
+                if (isOwnerAdded != null && isOwnerAdded.length > 0) {
+                    $("#lblerror").show();
+                    $("#lblerror").html('@Translate.Text("VE_AlreadyAddedOwner")');
+                    return false;
+                }
+                else {
+                    $("#lblerror").hide();
+                    $("#lblerror").html('');
+                }
+                var idtype = jQuery('[name="radios_group1"]:checked').data("val");
+                var idnumber = '';
+                var dob = '';
+                var gender = '';
+                var nationality = '';
+                var documentnumber = '';
+                if (idtype) {
+                    if (idtype === '01') {
+                        dob = $("#eid_dob").val();
+                        gender = $('[name="radios_group_eid"]:checked').data("val");
+                        idnumber = $("#eid").val();
+                    }
+                    else {
+                        dob = $("#pp_dob").val();
+                        gender = $('[name="radios_group_pp"]:checked').data("val");
+                        nationality = $("#nationality").val();
+                        documentnumber = $("#ppno").val();
+                    }
+                }
+
+                var url = "/api/sitecore/VillaCostExemption/GetICADetails";
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    cache: false,
+                    datatype: 'json',
+                    traditional: true,
+                    data: AddForgeryToken({
+                        idType: idtype,
+                        dateofbirth: dob,
+                        gender: gender,
+                        idnumber: idnumber,
+                        documentnumber: documentnumber,
+                        nationality: nationality
+                    }, "veform"),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', jQuery(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                    },
+                }).done(function (response) {
+                    if (response != null && response.Success == true) {
+                        jQuery('.j105-drrg--loader').hide();
+                        if ($('select[name="OwnerType"]').val() === '02' && response.Name == null) {
+                            $("#lblerror").show();
+                            if (idtype === '01') {
+                                $("#lblerror").html('@Translate.Text("VE_GDRFA_Error")');
+                            } else {
+                                $("#lblerror").html('@Translate.Text("VE_GDRFA_Error")');
+                            }
+                            jQuery("#ppDetails").hide();
+                            jQuery("#eidDetails").hide();
+                            jQuery("#btnICADetail").show();
+                            jQuery("#btAddOwner").hide();
+                        }
+                        else {
+                            if ($('select[name="OwnerType"]').val() === '03' && response.Name == null && idtype === '01') {
+                                $("#lblerror").show();
+                                $("#lblerror").html('@Translate.Text("VE_GDRFA_Error")');
+                            }
+                            else {
+                                $("#lblerror").hide();
+                                $("#lblerror").html('');
+                                if (idtype === '01') {
+                                    jQuery("#eidDetails").show();
+                                    jQuery("#ppDetails").hide();
+                                }
+                                else {
+                                    jQuery("#ppDetails").show();
+                                    jQuery("#eidDetails").hide();
+                                }
+                                jQuery("#btnICADetail").hide();
+                                jQuery("#btAddOwner").show();
+                                fillICADetails(response);
+                            }
+                        }
+                    }
+                    else {
+                        $("#lblerror").show();
+                        if (idtype === '01') {
+                            $("#lblerror").html('@Translate.Text("VE_GDRFA_Error")');
+                        } else {
+                            $("#lblerror").html('@Translate.Text("VE_GDRFA_Error")');
+                        }
+                    }
+                });
+            });
+
+            $(document).on("click", ids.bAO, function (e) {
+                e.preventDefault();
+                //saveOwner();
+                var isOwnerAdded = null;
+                if (jQuery('[name="radios_group1"]:checked').data("val") == "01") {
+                    isOwnerAdded = owners.filter(function (i) { return i.eid == $(ids.tEID).val() });
+                }
+                else if (jQuery('[name="radios_group1"]:checked').data("val") == "02") {
+                    isOwnerAdded = owners.filter(function (i) { return i.passportNumber == $(ids.tPPN).val() });
+                }
+
+
+                if (isOwnerAdded != null && isOwnerAdded.length > 0) {
+                    $("#lblerror").show();
+                    $("#lblerror").html('@Translate.Text("VE_AlreadyAddedOwner")');
+                }
+                else {
+                    $("#lblerror").hide();
+                    $("#lblerror").html('');
+                    saveOwner();
+                }
+            });
+
+            $("#btUpdateOwner").on("click", function (e) {
+                e.preventDefault();
+                if (jQuery("#formAddOwner").parsley().validate()) {
+                    saveOwner();
+                    $(this).hide();
+                    $(ids.bAO).show();
+                    $(ids.modal).find(".form-field__input").each(function (i) { jQuery(this).prop("disabled", false) });
+                    return true;
+                }
+                return false;
+            });
+
+            $(document).on("click", ".ownertype", function (e) {
+                try {
+                    //console.log($(this).data("history"));
+                    var _case = $(this).data("action").toString();
+                    switch (_case) {
+                        case "edit":
+                            var itemNumber = $(this).data("itemno").toString();
+                            var eid = $(this).data("eid").toString();
+                            eid = eid.trim();
+                            var pp = $(this).data("pp").toString();
+                            pp = pp.trim();
+                            var o = {};
+                            if (eid.length > 0) {
+                                var o1 = $.grep(owners, function (v) { return v.eid === eid });
+                                o = o1.length > 0 ? o1[0] : {};
+                                o.idType = "01";
+                                jQuery('#form-field-radio_1_1').click();
+                                jQuery('#form-field-radio_1_1').prop('checked', true);
+                            }
+                            else if (pp.length > 0) {
+                                o2 = $.grep(owners, function (v) { return v.passportNumber === pp });
+                                o = o2.length > 0 ? o2[0] : {};
+                                o.idType = "02";
+                                jQuery('#form-field-radio_1_2').click();
+                                jQuery('#form-field-radio_1_2').prop('checked', true);
+                            } else {
+                                console.log("Emirtes ID or Passport is blank");
+                                return;
+                            }
+
+                            fillEidFields(o);
+                            if (itemNumber != null && itemNumber === "0010") {
+                                $("#updateProfileLink").show();
+                            }
+                            else {
+                                $("#updateProfileLink").hide();
+                            }
+                            $("#datepicker-container-eid-dob").hide();
+                            $("#radio-container-eid-gender").hide();
+                            $("#datepicker-container-pp_dob").hide();
+                            $("#radio-container-pp-gender").hide();
+                            $("#divnationality").hide();
+                            $(ids.modal).find('input[name="radios_group1"]').prop("disabled", true);
+                            //datepicker-container-eid-dob radio-container-eid-gender
+                            $(ids.modal).find(ids.bAO).hide();
+                            $(ids.modal).find(ids.bSO).show();
+                            $(ids.modal).find(".m39-modal__button--close").attr("data-action", "edit");
+                            $('#mdlAddOwner .m39-modal__trigger').trigger('click');
+                            break;
+                        case "view":
+                            var itemNumber = $(this).data("itemno").toString();
+                            var eid = $(this).data("eid").toString();
+                            eid = eid.trim();
+                            var pp = $(this).data("pp").toString();
+                            pp = pp.trim();
+                            var o = {};
+                            if (eid.length > 0) {
+                                var o1 = $.grep(owners, function (v) { return v.eid === eid });
+                                o = o1.length > 0 ? o1[0] : {};
+                                o.idType = "01";
+                                jQuery('#form-field-radio_1_1').click();
+                                jQuery('#form-field-radio_1_1').prop('checked', true);
+                            }
+                            else if (pp.length > 0) {
+                                o2 = $.grep(owners, function (v) { return v.passportNumber === pp });
+                                o = o2.length > 0 ? o2[0] : {};
+                                o.idType = "02";
+                                jQuery('#form-field-radio_1_2').click();
+                                jQuery('#form-field-radio_1_2').prop('checked', true);
+                            } else {
+                                console.log("Emirtes ID or Passport is blank");
+                                return;
+                            }
+                            if (itemNumber != null && itemNumber === "0010") {
+                                $("#updateProfileLink").show();
+                                if (o.eid == "" || o.eid == null) {
+                                    jQuery("#formAddOwner").parsley().validate();
+                                }
+                            }
+                            else {
+                                $("#updateProfileLink").hide();
+                            }
+                            //console.log(JSON.stringify(o));
+                            fillEidFields(o);
+
+                            $(ids.modal).find(ids.bAO).hide();
+                            var disabled = false;
+                            if (_case === "view") {
+                                $(ids.modal).find(".form-field__input").each(function (i) { jQuery(this).prop("disabled", true) });
+                                $(ids.modal).find(ids.bSO).hide();
+                                $(ids.modal).find(".m39-modal__button--close").attr("data-action", "view");
+                            }
+                            else {
+                                $(ids.modal).find(ids.bAO).hide();
+                                $(ids.modal).find(ids.bSO).show();
+                                $(ids.modal).find(".m39-modal__button--close").attr("data-action", "edit");
+                            }
+
+                            $('#mdlAddOwner .m39-modal__trigger').trigger('click');
+                            break;
+                        case "delete":
+                            jQuery(".deleteOwnerModal").trigger("click");
+                            jQuery("#mdldeleteOwner").find("button.yes").attr("data-eid", $(this).data("eid").toString());
+                            jQuery("#mdldeleteOwner").find("button.yes").attr("data-pp", $(this).data("pp").toString());
+                            jQuery("#mdldeleteOwner").find("button.yes").attr("data-itemno", $(this).data("itemno").toString());
+                            break;
+                        default:
+                            console.log($(this).data("action"));
+                            break;
+                    }
+                } catch (e) { console.log(e); }
+            });
+            jQuery("#mdldeleteOwner").find("button.yes").on("click", function (e) {
+                var eid = $(this).attr("data-eid").toString();
+                eid = eid.trim();
+                var pp = $(this).attr("data-pp").toString();
+                pp = pp.trim();
+                var itemno = $(this).attr("data-itemno").toString();
+                itemno = itemno.trim();
+                if (eid.length > 0) {
+                    owners = $.grep(owners, function (v) { return v.eid != eid });
+                }
+                else if (pp.length > 0) {
+                    owners = $.grep(owners, function (v) { return v.passportNumber != pp });
+                }
+                else if (itemno.length > 0) {
+                    owners = $.grep(owners, function (v) { return v.itemnumber != itemno });
+                }
+                else {
+                    console.log("Emirtes ID or Passport is blank");
+                    return;
+                }
+                jQuery('input[name="OwnersJson"]').val(JSON.stringify(owners));
+                $tbl = $("#tblowners tbody");
+                $tbl.empty();
+                $.each(owners, function (i, v) {
+                    if (v.itemnumber == "0010") {
+                        var btns = buttons_viewOnly.replace("{0}", v.eid).replace("{1}", "").replace("{2}", v.itemnumber);
+                        $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid).replace("{2}", v.email).replace("{3}",v.mobile1).replace("{4}", btns));
+                    }
+                    else {
+                        var btns1 = buttons_editOnly.replace("{0}", v.eid).replace("{1}", v.passportNumber).replace("{2}", v.itemnumber);
+                        var btns2 = buttons_deleteOnly.replace("{0}", v.eid).replace("{1}", v.passportNumber).replace("{2}", v.itemnumber);
+                        if (v.eid.length > 0) {
+                            $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns1 + "</br> " + btns2));
+                        }
+                        else if (v.passportNumber.length > 0) {
+                            var expDate = v.passportExpiry != "" ? v.passportExpiry : "N/A";
+                            $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.passportNumber).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns1 + "</br> " + btns2));
+                        }
+                        else if (v.itemnumber.length > 0) {
+                            $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid + v.passportNumber).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns1 + "</br> " + btns2));
+                        }
+                    }
+                });
+                jQuery("#mdldeleteOwner").find("button.yes").attr("data-eid", "");
+                jQuery("#mdldeleteOwner").find("button.yes").attr("data-pp", "");
+                jQuery("#mdldeleteOwner").find("button.yes").attr("data-itemno", "");
+				jQuery(window).trigger('reinit_m23');
+            });
+            jQuery("#mdldeleteOwner").find("button.no").on("click", function (e) {
+                jQuery("#mdldeleteOwner").find("button.yes").attr("data-eid", "");
+                jQuery("#mdldeleteOwner").find("button.yes").attr("data-pp", "");
+                jQuery("#mdldeleteOwner").find("button.yes").attr("data-itemno", "");
+            });
+            $("#btClose").on("click", function (e) {
+                closeModal();
+                clearFields();
+                $(this).hide();
+                $(ids.bAO).show();
+                $(ids.modal).find(".form-field__input").each(function (i) { jQuery(this).prop("disabled", false); jQuery(this).removeAttr("disabled"); jQuery(this).removeClass("disabled"); });
+            });
+
+            $("#btSaveOwner").on("click", function (e) {
+                saveOwner();
+                $(this).hide();
+                $(ids.bAO).show();
+                $(ids.modal).find(".form-field__input").each(function (i) { jQuery(this).prop("disabled", false); jQuery(this).removeAttr("disabled"); jQuery(this).removeClass("disabled"); });
+            });
+            $('.m39-modal__button--close').on('click', function (e) {
+                //closeModal();
+                clearFields();
+            });
+            $("#form-field-radio_1_2").on("click", function (e) {
+                enabledFields();
+                jQuery("#eidDetails").hide();
+
+            });
+            $("#form-field-radio_1_1").on("click", function (e) {
+                enabledFields();
+                jQuery("#ppDetails").hide();
+            });
+        });
+        function fillICADetails(o) {
+            $(ids.modal).find('#marsoom').val(o.Marsoom);
+            if (o.IdType === "01") {
+                //$(ids.modal).find('input[name="eid"]').val(o.EmiratesID);
+                $(ids.modal).find('input[name="owner1"]').val(o.Name);
+                $(ids.modal).find('input[name="email1"]').val(o.MaskedEmail);
+                $(ids.modal).find('input[name="Mobile1"]').val(o.MaskedMobile);
+                /*$('#eidMaskedEmail').html(o.MaskedEmail);
+                $('#eidMaskedMobile').html(o.MaskedMobile);
+                if (o.MaskedEmail != '' && o.MaskedEmail != undefined)
+                    $(ids.modal).find('input[name="email1"]').attr('required', false);*/
+                if (o.MaskedMobile != '' && o.MaskedMobile != undefined) {
+                    $(ids.modal).find('input[name="Mobile1"]').attr('data-parsley-excluded', true);
+                    $(ids.modal).find('input[name="Mobile2"]').attr('required', false);
+                }
+                $(ids.modal).find('input[name="relation1"]').val(o.Relation);
+            } else {
+
+                //$(ids.modal).find('input[name="ppno"]').val(o.PassportNumber);
+                $(ids.modal).find('input[name="IssuingAuthority"]').val(o.IssuingAuthority);
+                $(ids.modal).find('input[name="owner2"]').val(o.Name);
+                $(ids.modal).find('input[name="ppexpiry"]').val(o.PassportExpiry);
+                $(ids.modal).find('input[name="ppexpiry_submit"]').val(o.PassportExpiry);
+                $(ids.modal).find('input[name="pp_dob"]').val(o.DateOfBirth);
+                //$(ids.modal).find('input[name="dob_submit"]').val(o.DateOfBirth);
+                $(ids.modal).find('input[name="nationality"]').val(o.nationlaity);
+                $(ids.modal).find('input[name="email2"]').val(o.MaskedEmail);
+                $(ids.modal).find('input[name="mobile3"]').val(o.MaskedMobile);
+                //$('#ppMaskedEmail').html(o.MaskedEmail);
+                //$('#ppMaskedMobile').html(o.MaskedMobile);
+                /*if (o.MaskedEmail != '' && o.MaskedEmail != undefined)
+                    $(ids.modal).find('input[name="email2"]').attr('required', false);*/
+                if (o.MaskedMobile != '' && o.MaskedMobile != undefined)
+                    $(ids.modal).find('input[name="mobile3"]').attr('data-parsley-excluded', true);
+
+                $(ids.modal).find('input[name="relation2"]').val(o.Relation);
+
+                if ($('select[name="OwnerType"]').val() === "03" && !o.Name) {
+                    $("#fpPassportCopy").show();
+                    jQuery("#form-field-PassportCopy").attr('required', true);
+                }
+            }
+            disabledFields();
+            if (o.IssuingAuthority == "UN-DEFINED")
+                $('#ia').prop("disabled", false);
+            if (o.IdType === "01" && !o.Name) {
+                $('#owner1').prop("disabled", false);
+            }
+            if (o.IdType === "02" && !o.Name && $('select[name="OwnerType"]').val() === "03") {
+                $('#owner2').prop("disabled", false);
+            }
+            if (o.IdType === "02" && !o.Name && $('select[name="OwnerType"]').val() === "03") {
+                $('#ia').prop("disabled", false);
+            }
+            if (o.IdType === "02" && !o.Name && $('select[name="OwnerType"]').val() === "03") {
+                $('#ppexpiry').prop("disabled", false);
+            }
+        }
+        function fillEidFields(o) {
+            $(ids.modal).find('#marsoom').val(o.marsoom);
+            //{"idType":"eid","eid":"445678765432154","ownerName":"AZAZ SHAIK","email":"445678765432154","mobile1":"0502227960","mobile2":"","relation":"Self","passportNumber":"","passportExpiry":"","issuingAuthority":"","dob":"","nationlaity":""}
+            if (o.idType === "01") {
+                $(ids.modal).find('input[name="eid"]').val(o.eid);
+                $(ids.modal).find('input[name="owner1"]').val(o.ownerName);
+                $(ids.modal).find('input[name="email1"]').val(o.email);
+                $(ids.modal).find('input[name="Mobile1"]').val(o.mobile1);
+                $(ids.modal).find('input[name="Mobile2"]').val(o.mobile2);
+                $(ids.modal).find('input[name="relation1"]').val(o.relation);
+                if (o.mobile1 != '' && o.mobile1 != undefined)
+                    $(ids.modal).find('input[name="Mobile1"]').attr('data-parsley-excluded', true);
+                $('#eidDetails').show();
+            } else {
+
+                $(ids.modal).find('input[name="ppno"]').val(o.passportNumber);
+                $(ids.modal).find('#ia').val(o.issuingAuthority);
+                $(ids.modal).find('input[name="owner2"]').val(o.ownerName);
+                $(ids.modal).find('input[name="ppexpiry"]').val(o.passportExpiry);
+                $(ids.modal).find('input[name="ppexpiry_submit"]').val(o.passportExpiry);
+                //$(ids.modal).find('input[name="pp_dob"]').val(o.dobDisplay);
+                //$(ids.modal).find('input[name="dob_submit"]').val(o.dob);
+                //$(ids.modal).find('input[name="nationality"]').val(o.nationlaity);
+                $(ids.modal).find('input[name="email2"]').val(o.email);
+                $(ids.modal).find('input[name="mobile3"]').val(o.mobile1);
+                $(ids.modal).find('input[name="relation2"]').val(o.relation);
+                //if ($('select[name="OwnerType"]').val() === "03" && o.passportNumber) {
+                $('#ppDetails').show();
+                if ($('select[name="OwnerType"]').val() === "03" && o.passportNumber && (o.itemnumber == null || o.itemnumber == '')) {
+                    $("#fpPassportCopy").show();
+                    jQuery("#form-field-PassportCopy").attr('required', true);
+                    getOwnerAttachment(o.passportNumber);
+
+                }
+                if (o.mobile1 != '' && o.mobile1 != undefined)
+                    $(ids.modal).find('input[name="mobile3"]').attr('data-parsley-excluded', true);
+            }
+            $('#btnICADetail').hide();
+            disabledFields();
+            if ($('select[name="OwnerType"]').val() === "03" && o.passportNumber) {
+                $(ids.modal).find('#pp_dob').prop("disabled", false);
+                $(ids.modal).find('input[name="ppexpiry"]').prop("disabled", false);
+                $(ids.modal).find('input[name="owner2"]').prop("disabled", false);
+                $(ids.modal).find('#ia').prop("disabled", false);
+            }
+        }
+        function uploadFile(passNo, file) {
+            var multipassform = jQuery('#veform');
+            var token = jQuery('input[name="__RequestVerificationToken"]', multipassform).val();
+            var data1 = new FormData();
+            data1.append("__RequestVerificationToken", token);
+            data1.append("PassportCopy", file);
+            data1.append("PassportNumber", passNo);
+            var url = "/api/Sitecore/VillaCostExemption/uploadOwnerAttachment";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'json',
+                traditional: true,
+                data: data1,
+                cache: false,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    jQuery('.j113-drrg--loader').show();
+                    jQuery('.j113-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j113-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                success: function (response) {
+
+                },
+                error: function (response) {
+                    //console.log(response);
+                }
+            });
+        }
+        function saveOwner11() {
+            var isvalid = jQuery("#formAddOwner").parsley().validate();
+            if (isvalid === false) { console.log('Form is no valid'); return; }
+
+            var idtype = jQuery('[name="radios_group1"]:checked').data("val");  ///$(ids.sIT).find(":selected").data("val");
+            if (idtype) {
+                var o = JSON.parse(JSON.stringify(owner));
+                o.idType = idtype;
+                if (idtype === 'eid') {
+                    o.eid = $(ids.tEID).val(); o.ownerName = $(ids.tOwner).val(); o.email = $(ids.tEmail1).val(); o.mobile1 = $(ids.tMob1).val();
+                    o.mobile2 = $(ids.tMob2).val(); o.relation = $(ids.tRel1).val();
+
+                    var newArr = owners.filter(function (i) { return i.eid !== o.eid });
+                    newArr.push(o);
+                    owners = JSON.parse(JSON.stringify(newArr));
+                } else {
+                    o.passportNumber = $(ids.tPPN).val(); o.issuingAuthority = $(ids.tIA).val(); o.ownerName = $(ids.tOwner2).val(); o.passportExpiry = $(ids.tPE).val();
+                    o.passportExpiryDisplay = $(ids.tPEDisplay).val(); o.dob = $(ids.tDoB).val(); o.dobDisplay = $(ids.tDoBDisplay).val(); o.nationlaity = $(ids.tNat).val(); o.email = $(ids.tEmail2).val(); o.mobile1 = $(ids.tMob3).val(); o.relation = $(ids.tRel2).val();
+
+                    var newArr1 = owners.filter(function (i) { return i.passportNumber !== o.passportNumber });
+                    newArr1.push(o);
+                    owners = JSON.parse(JSON.stringify(newArr1));
+                }
+
+                jQuery('input[name="OwnersJson"]').val(JSON.stringify(owners));
+
+                $tbl = $("#tblowners tbody");
+                $tbl.empty();
+                $.each(owners, function (i, v) {
+                    if (v.isOwner === true) {
+                        var btns = buttons_viewOnly.replace("{0}", v.eid).replace("{1}", "").replace("{2}", v.itemnumber);
+                        $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid).replace("{2}", "").replace("{3}", btns));
+                    }
+                    else {
+                        var btns1 = buttons_editOnly.replace("{0}", v.eid).replace("{1}", v.passportNumber);
+                         $tbl.append(html.replace("{0}", v.ownerName).replace("{1}",v.eid+ v.passportNumber).replace("{2}", v.passportExpiry).replace("{3}", btns1));
+                    }
+                });
+
+                clearFields();
+            }
+                 //console.log(JSON.stringify(owners));
+                 //return false;
+        }
+        function saveOwner() {
+            var isvalid = jQuery("#formAddOwner").parsley().validate();
+            if (isvalid === false) { console.log('Form is no valid'); return; }
+
+            var idtype = jQuery('[name="radios_group1"]:checked').data("val");  ///$(ids.sIT).find(":selected").data("val");
+            if (idtype) {
+                var o = JSON.parse(JSON.stringify(owner));
+                o.idType = idtype;
+                o.marsoom = $(ids.modal).find('#marsoom').val();
+                if (idtype === '01') {
+                    o.eid = $(ids.tEID).val(); o.ownerName = $(ids.tOwner).val(); o.email = $(ids.tEmail1).val(); o.mobile1 = $(ids.tMob1).val();
+                    o.mobile2 = $(ids.tMob2).val(); o.relation = $(ids.tRel1).val();
+                    var newArr = owners.filter(function (i) { return i.eid !== o.eid });
+                    var newArr3 = owners.filter(function (i) { return i.eid == o.eid });
+                    if (newArr3 != null && newArr3.length > 0)
+                        o.itemnumber = newArr3[0].itemnumber;
+                    newArr.push(o);
+                    owners = JSON.parse(JSON.stringify(newArr));
+                } else {
+                    o.passportNumber = $(ids.tPPN).val(); o.issuingAuthority = $(ids.tIA).val(); o.ownerName = $(ids.tOwner2).val(); o.passportExpiry = $(ids.tPE).val();
+                    o.passportExpiryDisplay = $(ids.tPEDisplay).val(); o.dob = $(ids.tDoB).val(); o.dobDisplay = $(ids.tDoBDisplay).val(); o.nationlaity = $(ids.tNat).val(); o.email = $(ids.tEmail2).val(); o.mobile1 = $(ids.tMob3).val(); o.relation = $(ids.tRel2).val();
+                    if ($('select[name="OwnerType"]').val() === "03" && o.passportNumber) {
+                        var file = document.getElementById("form-field-PassportCopy").files[0];
+                        o.isPassportAttach = true;
+                        if (file != undefined)
+                            uploadFile(o.passportNumber, file);
+                        uploadFile(o.passportNumber, file);
+                    }
+                    var newArr1 = owners.filter(function (i) { return i.passportNumber !== o.passportNumber });
+                    var newArr2 = owners.filter(function (i) { return i.passportNumber == o.passportNumber });
+                    if (newArr2 != null && newArr2.length > 0)
+                        o.itemnumber = newArr2[0].itemnumber;
+                    newArr1.push(o);
+                    owners = JSON.parse(JSON.stringify(newArr1));
+                }
+
+                jQuery('input[name="OwnersJson"]').val(JSON.stringify(owners));
+
+                $tbl = $("#tblowners tbody");
+                $tbl.empty();
+                $.each(owners, function (i, v) {
+                    if (v.itemnumber == "0010") {
+                        var btns = buttons_viewOnly.replace("{0}", v.eid).replace("{1}", "").replace("{2}", v.itemnumber);
+                        $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns));
+                    }
+                    else {
+                        var btns1 = buttons_editOnly.replace("{0}", v.eid).replace("{1}", v.passportNumber).replace("{2}", v.itemnumber);
+                        var btns2 = buttons_deleteOnly.replace("{0}", v.eid).replace("{1}", v.passportNumber).replace("{2}", v.itemnumber);
+                        // $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid + v.passportNumber).replace("{2}", v.passportExpiry).replace("{3}", btns1 + "</br> " + btns2));
+                        if (v.eid.length > 0) {
+                            $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns1 + btns2));
+                        }
+                        else if (v.passportNumber.length > 0) {
+                            $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.passportNumber).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns1 + btns2));
+                        }
+                        else if (v.itemnumber.length > 0) {
+                            $tbl.append(html.replace("{0}", v.ownerName).replace("{1}", v.eid + v.passportNumber).replace("{2}", v.email).replace("{3}", v.mobile1).replace("{4}", btns1 + btns2));
+                        }
+                    }
+                });
+				jQuery(window).trigger('reinit_m23');
+                clearFields();
+                closeModal();
+            }
+            //console.log(JSON.stringify(owners));
+            //return false;
+        }
+        function getOwnerAttachment(passNo) {
+            var multipassform = jQuery('#veform');
+            var token = jQuery('input[name="__RequestVerificationToken"]', multipassform).val();
+            var data1 = new FormData();
+            data1.append("__RequestVerificationToken", token);
+            data1.append("PassportNumber", passNo);
+            var url = "/api/Sitecore/VillaCostExemption/getOwnerAttachment";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'json',
+                traditional: true,
+                data: data1,
+                cache: false,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    jQuery('.j113-drrg--loader').show();
+                    jQuery('.j113-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j113-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                success: function (response) {
+                    if (response != null && response.status == true) {
+                        $("#lblerror").hide();
+                        $("#lblerror").html('');
+                        //console.log(response.content);
+                        var binary = '';
+                        if (response.content != null) {
+                            var bytes = new Uint8Array(response.content);
+                            var len = bytes.byteLength;
+                            for (var i = 0; i < len; i++) {
+                                binary += String.fromCharCode(bytes[i]);
+                            }
+                            $('#pp_form-field__preview').attr('src', "data:image;base64," + window.btoa(binary));
+                            $('#btnRemoveFile').attr("style", "display:block !important");
+                            $('#btnRemoveFile').attr("data-removedoc", passNo);
+                            jQuery("#form-field-PassportCopy").attr('required', false);
+                        }
+                    }
+                    else {
+                        $("#lblerror").show();
+                        $("#lblerror").html(response.Message);
+                        $('#btnRemoveFile').attr("style", "");
+                    }
+                },
+                error: function (response) {
+                    //console.log(response);
+                }
+            });
+        }
+        //removeOwnerAttachment
+        function removeOwnerAttachment(passNo) {
+            var multipassform = jQuery('#veform');
+            var token = jQuery('input[name="__RequestVerificationToken"]', multipassform).val();
+            var data1 = new FormData();
+            data1.append("__RequestVerificationToken", token);
+            data1.append("PassportNumber", passNo);
+            var url = "/api/Sitecore/VillaCostExemption/removeOwnerAttachment";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'json',
+                traditional: true,
+                data: data1,
+                cache: false,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    jQuery('.j113-drrg--loader').show();
+                    jQuery('.j113-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j113-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                success: function (response) {
+                    if (response != null && response.status == true) {
+                        $("#lblerror").hide();
+                        $("#lblerror").html('');
+                    }
+                    else {
+                        $("#lblerror").show();
+                        $("#lblerror").html(response.Message);
+                    }
+                },
+                error: function (response) {
+                    //console.log(response);
+                }
+            });
+        }
+        function clearFields() {
+            $(ids.modal).find('input[name="eid"]').val('');
+            $(ids.modal).find('input[name="owner1"]').val('');
+            $(ids.modal).find('input[name="email1"]').val('');
+            $(ids.modal).find('input[name="Mobile1"]').val('');
+            $(ids.modal).find('input[name="Mobile2"]').val('');
+            $(ids.modal).find('input[name="relation1"]').val('');
+            $(ids.modal).find('input[name="ppno"]').val('');
+            // $(ids.modal).find('input[name="IssuingAuthority"]').val('');
+            $('#ia option').removeAttr('selected').eq(0).attr('selected', 'selected');
+            $(ids.modal).find('input[name="owner2"]').val('');
+            $(ids.modal).find('input[name="ppexpiry"]').val('');
+            $(ids.modal).find('input[name="eid_dob"]').val('');
+            $(ids.modal).find('input[name="pp_dob"]').val('');
+            //$(ids.modal).find('input[name="nationality"]').val('');
+            $('#nationality option').removeAttr('selected').eq(0).attr('selected', 'selected');
+            $(ids.modal).find('input[name="email2"]').val('');
+            $(ids.modal).find('input[name="mobile3"]').val('');
+            $(ids.modal).find('input[name="relation2"]').val('');
+            jQuery("#mdldeleteOwner").find("button.yes").data("eid");
+            jQuery("#mdldeleteOwner").find("button.yes").data("pp");
+            $("#datepicker-container-eid-dob").show();
+            $("#radio-container-eid-gender").show();
+            $("#datepicker-container-pp_dob").show();
+            $("#radio-container-pp-gender").show();
+            $("#divnationality").show();
+            $("#lblerror").html('');
+            $("#lblerror").hide();
+            jQuery("#eidDetails").hide();
+            jQuery("#ppDetails").hide();
+            jQuery("#btnICADetail").show();
+            jQuery("#btAddOwner").hide();
+            jQuery("#btUpdateOwner").hide();
+            $("#updateProfileLink").hide();
+            require(['pickerdate'], function () {
+                jQuery('#eid_dob').pickadate('picker').set('select', new Date());
+            });
+            require(['pickerdate'], function () {
+                jQuery('#pp_dob').pickadate('picker').set('select', new Date());
+            });
+            jQuery('#mdlAddOwner').find('input, select').each(function () {
+                jQuery(this).parsley().reset();
+                jQuery(this).closest('.form-field__input-wrapper').removeClass('form-field__input-wrapper--error');
+                jQuery(this).closest('.form-field__input-wrapper').removeClass('form-field__input-wrapper--validated');
+                jQuery(this).removeClass('form-field__input--error');
+            });
+            jQuery('#form-field-radio_1_1').click();
+            jQuery('#form-field-radio_pp_1').prop('checked', true);
+            jQuery('#form-field-PassportCopy').val('');
+            $("#fpPassportCopy").hide();
+            jQuery("#form-field-PassportCopy").attr('required', false);
+            $('#pp_form-field__preview').attr('src', "/images/preview_pdf@2x.png");
+            $(".form-field__input--upload-filename").html('');
+            $('#btnRemoveFile').removeAttr("style");
+            $('#btnRemoveFile').attr("data-removedoc", "");
+            enabledFields();
+        }
+        function disabledFields() {
+            $(ids.modal).find('input[name="eid"]').prop("disabled", true);
+            $(ids.modal).find('input[name="ppno"]').prop("disabled", true);
+            $(ids.modal).find('#pp_dob').prop("disabled", true);
+            $(ids.modal).find('#eid_dob').prop("disabled", true);
+            $(ids.modal).find('input[name="ppexpiry"]').prop("disabled", true);
+            $(ids.modal).find('input[name="owner1"]').prop("disabled", true);
+			$(ids.modal).find('input[name="owner2"]').prop("disabled", true);
+            $(ids.modal).find('#nationality').prop("disabled", true);
+            $(ids.modal).find('#ia').prop("disabled", true);
+            $(ids.modal).find('input[name="radios_group_pp"]').attr('disabled', 'disabled');
+            $(ids.modal).find('input[name="radios_group_eid"]').attr('disabled', 'disabled');
+
+            $(ids.modal).find('input[name="eid"]').addClass("disabled");
+            $(ids.modal).find('input[name="ppno"]').addClass("disabled");
+            $(ids.modal).find('#pp_dob').addClass("disabled");
+            $(ids.modal).find('#eid_dob').addClass("disabled");
+            $(ids.modal).find('input[name="ppexpiry"]').addClass("disabled");
+            //$(ids.modal).find('input[name="owner1"]').addClass("disabled");
+            //$(ids.modal).find('input[name="owner2"]').addClass("disabled");
+            $(ids.modal).find('#nationality').addClass("disabled");
+            if ($("#ia").val() != '')
+                $(ids.modal).find('#ia').addClass("disabled");
+            $(ids.modal).find('input[name="radios_group_pp"]').addClass("disabled");
+            $(ids.modal).find('input[name="radios_group_eid"]').addClass("disabled");
+            $(ids.modal).find('input[name="radios_group1"]').addClass("disabled");
+            if ($("#owner1").val() != '')
+                $(ids.modal).find('input[name="owner1"]').addClass("disabled");
+            if ($("#owner2").val() != '')
+                $(ids.modal).find('input[name="owner2"]').addClass("disabled");
+        }
+        function enabledFields() {
+
+            $("#datepicker-container-eid-dob").show();
+            $("#radio-container-eid-gender").show();
+
+            $(ids.modal).find('input[name="eid"]').prop("disabled", false);
+            $(ids.modal).find('input[name="ppno"]').prop("disabled", false);
+            $(ids.modal).find('#pp_dob').prop("disabled", false);
+            $(ids.modal).find('#eid_dob').prop("disabled", false);
+            $(ids.modal).find('input[name="ppexpiry"]').prop("disabled", false);
+            $(ids.modal).find('input[name="owner1"]').prop("disabled", false);
+            $(ids.modal).find('input[name="owner2"]').prop("disabled", false);
+            $(ids.modal).find('input[name="relation1"]').prop("disabled", false);
+            $(ids.modal).find('input[name="relation2"]').prop("disabled", false);
+            $(ids.modal).find('#nationality').prop("disabled", false);
+            $(ids.modal).find('#ia').prop("disabled", false);
+            $(ids.modal).find('input[name="radios_group_pp"]').prop("disabled", false);
+            $(ids.modal).find('input[name="radios_group_eid"]').prop("disabled", false);
+            $(ids.modal).find('input[name="radios_group1"]').prop("disabled", false);
+
+            $(ids.modal).find('input[name="eid"]').removeClass("disabled");
+            $(ids.modal).find('input[name="ppno"]').removeClass("disabled");
+            $(ids.modal).find('#pp_dob').removeClass("disabled");
+            $(ids.modal).find('#eid_dob').removeClass("disabled");
+            $(ids.modal).find('input[name="ppexpiry"]').removeClass("disabled");
+            $(ids.modal).find('input[name="owner1"]').removeClass("disabled");
+            $(ids.modal).find('input[name="owner2"]').removeClass("disabled");
+            $(ids.modal).find('#nationality').removeClass("disabled");
+            $(ids.modal).find('#ia').removeClass("disabled");
+            $(ids.modal).find('input[name="radios_group_pp"]').removeClass("disabled");
+            $(ids.modal).find('input[name="radios_group_eid"]').removeClass("disabled");
+            $(ids.modal).find('input[name="radios_group1"]').removeClass("disabled");
+        }
+        function closeModal() {
+            jQuery('.m39-modal__container--active .m39-modal__button--close').trigger('click');
+        }
+
+    </script>
+</div>

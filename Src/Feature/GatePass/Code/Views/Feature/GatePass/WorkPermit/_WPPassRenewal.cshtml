@@ -1,0 +1,223 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Foundation.Content
+@model List<DEWAXP.Feature.GatePass.Models.WorkPermit.WorkPermitPass>
+
+
+@{
+    /**/
+
+    /**/
+
+    var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(30);
+    var FromToTime = EpassHelper.WPGetFromToTime();
+    DateTime nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddYears(1);
+}
+
+@if (ViewBag.failed != null && (bool)ViewBag.failed)
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12" id="main-skip">
+            <div class="m26-page-title title_message">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a class="button button--text button--back" href="@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS))">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">@Translate.Text("ePass Details")</h2>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:60px;">
+        @{
+            ModelState ms;
+            var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+        }
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.TryGetValue(ViewData.TemplateInfo.HtmlFieldPrefix, out ms))
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40--status-message">
+                        <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                        <div class="m40-status-message__text" dir="@direction">@Html.ValidationSummary(true)</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (ViewBag.success != null && !string.IsNullOrWhiteSpace((string)ViewBag.success))
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12" id="main-skip">
+            <div class="m26-page-title title_message">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a class="button button--text button--back" href="@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS))">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">@Translate.Text("ePass Details")</h2>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:60px;">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                    <div class="m40-status-message__text">
+                        @((string)ViewBag.success)<br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    if (Model != null && Model.Count > 0)
+    {
+        var mainpass = Model.FirstOrDefault();
+        <div class="j113-epass">
+            <div class="m66-preloader j113-epass--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12" id="main-skip">
+                    <div class="m26-page-title title_message">
+                        <div class="m26-page-title__links">
+                            <p class="m26-page-title__backlink">
+                                <a class="button button--text button--back" href="@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)+"?passNumber="+mainpass.GroupPassid)">@Translate.Text("Back")</a>
+                            </p>
+                        </div>
+                        <h2 class="text__page-title">@Translate.Text("ePass Details")</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row" id="fullpolistwithform">
+                <div class="grid__column grid__column--12 grid__column--form">
+
+                    <div id="PartialViewDiv"></div>
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "ePassForm", @id = "workpermitform", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                        <div class="j113-epass--main_controls">
+                            @Html.Sitecore().Placeholder("POListSelector")
+                        </div>
+                        <input type="hidden" name="PONumber" id="PONumber" />
+                        <input type="hidden" name="POName" id="POName" />
+                        <input type="hidden" name="GroupPassid" value="@mainpass.GroupPassid" id="GroupPassid" />
+                        <input type="hidden" name="PassNumber" value="@mainpass.PassNumber" id="PassNumber" />
+                        <input type="hidden" name="CompanyName" id="CompanyName" />
+                        if (!string.IsNullOrWhiteSpace(mainpass.GroupPassid) && mainpass.GroupPassid.ToLower().StartsWith("gp"))
+                        {
+                            @Html.Partial("~/Views/Feature/GatePass/WorkPermit/_GroupWorkPermitRenewal.cshtml", mainpass)
+                        }
+                        else
+                        {
+                            @Html.Partial("~/Views/Feature/GatePass/WorkPermit/_SingleWorkPermitRenewal.cshtml", mainpass)
+                        }
+
+                    }
+                </div>
+            </div>
+
+            <div class="grid__row hidden" id="nopolist">
+                <div class="grid__column grid__column--12" id="main-skip">
+                    <div class="m14-richtext centered">
+                        <h3 class="">@Translate.Text("Epass.Nodataavailable")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<script src="~/Scripts/custom/epass.js"></script>*@
+        @Scripts.Render("~/bundles/epassscript")
+        <script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+        <script type="text/javascript">
+            docReady(function () {
+                setTimeout(function () {
+                    jQuery("#select2-form-field-nationality-container").attr("style", "padding:5px 12px 8px;");
+                    jQuery("#form-field-locations").closest('.form-field--select').find("ul.select2-selection__rendered").attr("style", "padding:5px 12px 8px;");
+                }, 250);
+
+                jQuery('.m43-accountsel__selected').on('DOMSubtreeModified', function () {
+                    jQuery('#PONumber').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_number]').html());
+                    jQuery('#POName').val(jQuery('.m43-accountsel__selected').find('span[data-acc-detail=acc_namedesc]').html());
+                    jQuery('#CompanyName').val(jQuery('#supplierid').val());
+                });
+                setTimeout(function () {
+                    jQuery('.m43-accountsel__accounts-list').find('.form-field__radio--accselector:first-child').find('.form-field__fakeradio').click();
+                    jQuery('.button[data-accountupdate="true"]').click();
+                }, 1000);
+                $(".ePassForm").submit(function () {
+                    if (jQuery(".ePassForm").parsley().validate()) {
+                        $(".j113-epass--loader").css('top', $(window).scrollTop().toString() + 'px');
+                        $(".j113-epass--loader").show();
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                        return true;
+                    }
+                });
+                Date.prototype.addDays = function (days) {
+                    var date = new Date(this.valueOf());
+                    date.setDate(date.getDate() + days);
+                    return date;
+                };
+                require(['picker'], function () {
+                    var today = new Date()
+
+                    var from_$input = jQuery('#form-field-PassIssue').pickadate(),
+                        from_picker = from_$input.pickadate('picker')
+
+                    var to_$input = jQuery('#form-field-PassExpiry').pickadate(),
+                        to_picker = to_$input.pickadate('picker')
+                    if (typeof from_picker !== "undefined" && from_picker.get('value')) {
+                        to_picker.set('min', from_picker.get('select').obj.addDays(0))
+                    }
+                    if (typeof from_picker !== "undefined") {
+                        from_picker.on('set', function (event) {
+                            if (event.select) {
+                                if (typeof to_picker !== "undefined" && to_picker.get('select') !== null) {
+                                    if (from_picker.get('select').obj > to_picker.get('select').obj.addDays(0)) {
+                                        to_picker.clear();
+                                    };
+                                }
+                                to_picker.set('min', from_picker.get('select').obj.addDays(0));
+                                to_picker.set('max', from_picker.get('select').obj.addDays(180));
+                            } else if ('clear' in event) {
+                                to_picker.set('min', today.addDays(0))
+                                to_picker.set('max', today.addDays(180))
+                            }
+                        });
+                    };
+                    if (typeof to_picker !== "undefined") {
+                        to_picker.on('set', function (event) {
+                            if (event.select) {
+                                //from_picker.set('max', to_picker.get('select').obj.addDays(15))
+                                if (typeof from_picker !== "undefined" && from_picker.get('select') !== null) {
+                                    if (to_picker.get('select').obj < from_picker.get('select').obj.addDays(0)) {
+                                        from_picker.clear();
+                                    };
+                                }
+                            } else if ('clear' in event) {
+                            }
+                        });
+                    }
+                });
+            })
+        </script>
+    }
+}

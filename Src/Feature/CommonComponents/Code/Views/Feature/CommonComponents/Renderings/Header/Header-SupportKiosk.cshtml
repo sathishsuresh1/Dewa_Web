@@ -1,0 +1,57 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers;
+@using SitecoreX = Sitecore;
+@using Glass.Mapper.Sc;
+@using Sitecore.Data.Items;
+@using Sitecore.Links;
+@using Glass.Mapper.Sc.Web.Mvc
+@using Glass.Mapper.Sc.Web;
+@using DEWAXP.Foundation.Content
+@using System.Linq
+@using DEWAXP.Foundation.Content.Repositories
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    // Sitecore gives both value in minute
+    var qs = QueryString.Parse(Request.RawUrl);
+    var currentItem = _contextRepository.GetCurrentItem<Item>();
+    var homeitem = _contentRepository.GetItem<Item>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.Kiosk_HomePage)));
+    var configItem = _contentRepository.GetItem<Item>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.Kiosk_Configuration)));
+    var currentLanguage = SitecoreX.Context.Language;
+    var otherLanguage = Sitecore.Context.Database.Languages.FirstOrDefault(l => l.Name != currentLanguage.Name);
+    var hasOtherLanguage = _contentRepository.GetItem<Item>(new GetItemByIdOptions(currentItem.ID.Guid) { Language = otherLanguage }) != null;
+
+    var options =new Sitecore.Links.UrlBuilders.ItemUrlBuilderOptions();
+    options.Language = otherLanguage;
+    var langauge = otherLanguage.Name == "ar-AE" ? "العربية" : "English";
+    var altUrl = qs.CopyTo(SitecoreX.Links.LinkManager.GetItemUrl(currentItem, options));
+    var timer = configItem != null && configItem.Fields["Timer"] != null ? configItem.Fields["Timer"].Value : "";
+}
+<header class="m12-masthead theme--a scene_element scene_element--fadeindown" data-labels='{"timer":"@timer"}' data-component="m12-masthead" data-theme="a" data-labels='{"menu":"Menu","close":"Close"}'>
+    <div class="m12-bar nav-down" data-m12-bar="true">
+
+        <div class="m12-bar__wrapper">
+
+            <div class="m12-bar__content" data-m12-bar-content="true">
+
+                <!-- start section navs (we need all for mobile view) -->
+                <div class="m12-home--button-wrapper">
+                    <a href="@LinkManager.GetItemUrl(homeitem)" class="m12-home--button"><img width="36" alt="" src="~/images/home_white_future.png"></a>
+
+                </div>
+                <!-- end section navs -->
+                <!-- start my account -->
+                <div class="m12-language--button-wrapper">
+                    <a href="@altUrl" class="m12-language--button button">@langauge</a>
+                </div>
+                <!-- end my account -->
+
+            </div>
+        </div>
+
+    </div>
+</header>

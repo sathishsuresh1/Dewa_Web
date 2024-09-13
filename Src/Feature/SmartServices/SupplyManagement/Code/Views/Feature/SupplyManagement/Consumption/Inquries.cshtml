@@ -1,0 +1,347 @@
+﻿@using DEWAXP.Feature.SupplyManagement.Models.Renderings
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint
+@using Sitecore.Mvc.Configuration
+@model SurveyInfoDetail
+@{
+    ModelState ms;
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    string _alreadySubmitedMsg = Translate.Text("AlreadySubmitedMessage");
+}
+<div class="grid j122-calls-inquiries" data-journey="j122-calls-inquiries">
+
+    @if (Model.ShowError)
+    {
+        bool isInfo = _alreadySubmitedMsg != Model.ErrorMessage;
+        string msgContainerClass = isInfo ? "m40v2-status-message m40v2-status-message--error icon icon-caution" : "m40v2-status-message m40v2-status-message--success icon icon-new-success-message";
+        <div style="margin-top:60px;">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <div class="@Html.Raw(msgContainerClass)" data-component="m40v2-status-message">
+                        <div class="m40v2-status-message__title">@Sitecore.Globalization.Translate.Text(isInfo ? DictionaryKeys.Global.SubmissionError : "Thank you")</div>
+                        <div class="m40v2-status-message__text" dir="@direction">
+                            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                            {
+                                @Html.Raw(Model.ErrorMessage)
+                            }
+                            else
+                            {
+                                @Translate.Text("j120 Invalid Survey Context")
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        if (Model != null && Model.FinalQuestionList != null && Model.FinalQuestionList.Count() > 0)
+        {
+            var qCounter = 0;
+            <div class="grid__row survey-form">
+                <div class="grid__column grid__column--12">
+                    <div>
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(model => model.SurveyType, new { @id = "surveryType" })
+                        @Html.HiddenFor(model => model.SurveyNo, new { @id = "notificationId" })
+                        <div class="survey_wrapper pt50">
+                            <div class="grid__row">
+                                @foreach (QuestionAndAnsItem question in Model.FinalQuestionList)
+                                {
+                                    if (question != null && question.AnsList != null && question.AnsList.Count > 0)
+                                    {
+                                        if (question.AnsList.Count == 2)
+                                        {
+                                            <div class="survey_block @((qCounter + 1).Equals(1) ? "survey_block_active" : string.Empty)" data-ranger-block="@(qCounter + 1)">
+                                                <h3 class="survey_q cqus" data-qid="@question.Id">
+                                                    @Html.Raw(question.Question)
+                                                </h3>
+                                                <div class="survey-button-wrapper">
+                                                    @foreach (var option in question.AnsList)
+                                                    {
+                                                        <input class="form-field__input form-field__input--radio"
+                                                               data-radio="q@(qCounter)a@(option.ValueId)"
+                                                               id="form-field-radio_" @(qCounter)
+                                                               name="enquiryInputs[@(qCounter)].choosen_value"
+                                                               type="radio"
+                                                               value="@option.ValueId"
+                                                               data-aid="@(option.Id)"
+                                                               data-value="@(option.ValueId)">
+                                                        <a href="#"
+                                                           data-radio-trigger="q@(qCounter)a@(option.ValueId)"
+                                                           class="button button--survey button--quaternary">
+                                                            @option.Question
+                                                        </a>
+                                                    }
+                                                </div>
+                                                <div class="survey_warning-message" style="display:none;">@Translate.Text("ccsuvey.Selectvalue")</div>
+                                            </div>
+                                        }
+                                        if (question.AnsList.Count != 2)
+                                        {
+                                            var answerlist = question.AnsList;
+                                            <div class="survey_block @((qCounter + 1).Equals(1) ? "survey_block_active" : string.Empty)" data-ranger-block="@(qCounter + 1)">
+                                                <h3 class="survey_q cqus" data-qid="@question.Id">
+                                                    @Html.Raw(question.Question)
+                                                    @Html.Hidden("enquiryInputs[" + qCounter + "].question", qCounter + 1)
+                                                </h3>
+                                                <div class="m76-range-slider"
+                                                     data-component="m76-range-slider">
+                                                    <div class="range-container">
+                                                        <div class="range-container-bg">
+                                                            <input id="rangeslider"
+                                                                   name="enquiryInputs[@(qCounter)].choosen_value"
+                                                                   data-range-slider=""
+                                                                   class="range blue slider"
+                                                                   type="range"
+                                                                   data-snap='@(Enumerable.Range(0, answerlist.Count+1).Select(x => x.ToString()).Aggregate((i, j) => i + "," + j))'
+                                                                   min="0"
+                                                                   value="0"
+                                                                   max="@(answerlist.Count)"
+                                                                   step="0" list="ticks">
+                                                        </div>
+                                                    </div>
+                                                    <div class="ticks-container" data-range-ticks="">
+                                                        <div class="sliderticks">
+                                                            @{
+                                                                int answercount = 1;
+                                                            }
+
+                                                            <span data-option="0" class="ticks ticks-active">
+                                                                <span class="ticks-inner-text"></span>
+                                                                <span class="rangeslider_click"></span>
+                                                            </span>
+                                                            @foreach (var option in answerlist)
+                                                            {
+                                                                <span data-option="@answercount" data-svalueid="@option.ValueId" data-aid="@(option.Id)" data-value="@(option.ValueId)" class="ticks">
+                                                                    <span class="ticks-inner-text">@Html.Raw(option.Question)</span>
+                                                                    <span class="rangeslider_click"></span>
+                                                                </span>
+                                                                { answercount++; }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        {
+                                            qCounter++;
+                                        }
+                                    }
+                                }
+                            </div>
+
+
+                            <div class="grid__row">
+                                <div class="grid__column grid__column--12 grid__column--centered survey_button">
+                                    <a role="button" data-m51-next="" aria-label="Next" class="survey-btn button button--primary button--back">@Translate.Text("ccsurvey.Previous")</a>
+                                    <a role="button" disabled="disabled" data-m51-next="" aria-label="Next" class="survey-btn button button--primary button--next disabled">@Translate.Text("ccsurvey.Next")</a>
+                                    <button type="submit" disabled="disabled" class="button button--primary button--submit disabled btnSurveySubmit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("ccsurvey.Submit")</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+            <div style="margin-top:60px;display:none;" class="success-section">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--content">
+                        <div class="m40v2-status-message m40v2-status-message--success icon icon-new-success-message" data-component="m40v2-status-message">
+                            <div class="m40v2-status-message__title icon--success">@Translate.Text("Thank you")</div>
+                            <div class="m40v2-status-message__text successMsgtext">
+                                @(Model.ErrorMessage)<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:60px;display:none;" class="warning-section">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--content">
+                        <div class="m40v2-status-message m40v2-status-message--error icon icon-caution" data-component="m40v2-status-message">
+                            <div class="m40v2-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                            <div class="m40v2-status-message__text erromsgtext" dir="@direction">
+                                @Translate.Text("j120 Invalid Survey Context")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid__row survey_footer">
+                <div class="grid__column grid__column--12 grid__column--centered">
+                    <p style="line-height:22px">@Translate.Text("cc.survey.successnote")</p>
+                </div>
+            </div>
+        }
+    }
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    var _alreadyMsg = '@(_alreadySubmitedMsg)';
+        /*get*/
+        function getSurveyData() {
+
+            var surveyData = [];
+            jQuery.each(jQuery(".survey_block"), function (i, obj) {
+
+                var qusContainer = $(obj);
+
+                //console.log($(obj).html());
+
+                var qusId = "";
+                var ansId = "";
+                var range_ansId = "";
+                var ansValue = "";
+                var ansText = "";
+
+                var qus = $(qusContainer).find(".cqus");
+
+                if (qus != null && qus.length > 0) {
+
+                    qusId = qus.data("qid");
+
+                    //checking range
+                    var isRangeCtrl = $(qusContainer).find(".range-container").length > 0;
+
+                    if (isRangeCtrl) {
+
+                        var emoAns = $(qusContainer).find(".ticks-active");
+
+                        if (emoAns != null && emoAns) {
+
+                            ansId = $(emoAns).data("aid");
+                            ansValue = $(emoAns).data("value");
+                            range_ansId = $(emoAns).data("option");
+                        }
+                        var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                        //console.log(dRangeAns)
+                        surveyData.push(dRangeAns);
+                    }
+
+                    //Radio Buttion Qus and Ans
+                    var isRadioCtrl = $(qusContainer).find(".survey-button-wrapper").length > 0;
+
+                    if (isRadioCtrl) {
+                        var radioAns = $(qusContainer).find("input[type='radio']:checked");
+
+                        if (radioAns != null && radioAns.length>0) {
+
+                            ansId = $(radioAns).data("aid")
+                            ansValue = $(radioAns).data("value")
+                        }
+                        var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                        //console.log(dRangeAns)
+                        surveyData.push(dRangeAns);
+                    }
+                }
+
+                //additional comment ctextqus
+                var isComment = $(qusContainer).find(".ctextqus").length > 0;
+                if (isComment) {
+                    qusId = $(qusContainer).find(".ctextqus").data("qid");
+                    var textAnsAns = $(qusContainer).find(".textComment");
+                    if (textAnsAns) {
+
+                        ansText = $(textAnsAns).val();
+                        ansId = $(textAnsAns).data("aid")
+                        ansValue = $(textAnsAns).data("value")
+                    }
+
+                    if (isRangeCtrl && (range_ansId == "1" || range_ansId == "2" || range_ansId == "3")) {
+
+                        var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                        //console.log(dRangeAns)
+                        surveyData.push(dRangeAns);
+                    }
+                }
+
+
+                //bottom text question: cbtextqus
+                var isbottomComment = $(qusContainer).find(".cbtextqus").length > 0;
+                if (isbottomComment) {
+                    qusId = $(qusContainer).find(".cbtextqus").data("qid");
+                    var textAnsAns = $(qusContainer).find(".textComment");
+                    if (textAnsAns) {
+
+                        ansText = $(textAnsAns).val();
+                        ansId = $(textAnsAns).data("aid")
+                        ansValue = $(textAnsAns).data("value")
+                    }
+
+                    var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                    //console.log(dRangeAns)
+                    surveyData.push(dRangeAns);
+                }
+
+
+                var isEmotion = $(qusContainer).find(".j132-happinex--emoticon_wrapper").length > 0;
+                if (isEmotion) {
+                    qusId = $(qusContainer).find(".cqus").data("qid");
+                    var emotionDiv = $(qusContainer).find(".j132-happinex--emoticon_active");
+                    if (emotionDiv != null && emotionDiv.length>0) {
+
+                        ansId = $(emotionDiv).data("aid");
+                        ansValue = $(emotionDiv).data("value");
+                    }
+                    var dRangeAns = { "questionId": qusId, "answerId": ansId, "valueId": ansValue, "surveyText": ansText };
+                    //console.log(dRangeAns)
+                    surveyData.push(dRangeAns);
+                }
+
+            });
+            return surveyData;
+        }
+
+
+        docReady(function () {
+            /*sumit logic*/
+            jQuery(".btnSurveySubmit").on("click", function () {
+
+                var postData = {
+                    __RequestVerificationToken: jQuery("input[name='__RequestVerificationToken']").val(),
+                    s : jQuery("#surveryType").val(),
+                    n : jQuery("#notificationId").val(),
+                    SurveyDatas : getSurveyData()
+                }
+
+                jQuery.ajax({
+
+                    type: "POST",
+                    url: "@Url.Action("Inquries")",
+                    data: postData,
+                    success: function (response) {
+                        $(".survey-form").hide();
+                        $(".survey_footer").hide();
+
+                        if ((response != null && response.IsError) && _alreadyMsg == response.ErrorMessage) {
+                            $(".successMsgtext").html(response.ErrorMessage);
+                            $(".success-section").show();
+                            return;
+                        }
+                        if (response == null || (response != null && response.IsError)) {
+                            $(".erromsgtext").html(response.ErrorMessage);
+                            $(".warning-section").show();
+
+                        } else if (response != null) {
+                            $(".successMsgtext").html(response.ErrorMessage);
+                            $(".success-section").show();
+                        }
+
+
+                    }
+                });
+            });
+        });
+
+
+</script>

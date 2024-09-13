@@ -1,0 +1,170 @@
+﻿@using X.PagedList.Mvc
+@using X.PagedList.Mvc.Common
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.EV.Models.EVDashboard
+@model EVSDPaymentViewModel
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var isempty = Model.PagedAccounts.Count > 0 ? false : true;
+}
+
+<div id="m44-account-list">
+    @Html.HiddenFor(m => m.accounts)
+    @foreach (VehiclelistModel listmodel in Model.PagedAccounts)
+    {
+        var index = Model.Vehiclelists.IndexOf(listmodel);
+        <div class="m44-bill-selector__partner">
+            <div class="m44-bill-selector__accounts-list">
+                <div class="m44-bill-selector__checkbox-wrapper">
+                    <div class="form-field form-field--toggles">
+                        <div class="form-field__checkbox form-field__checkbox--billselector ">
+                            <label>
+                                <input data-account-number="@listmodel.Platenumber"
+                                       data-index="@index"
+                                       data-active="true" data-balance="@listmodel.Totalamount"
+                                       data-business-partner-number="@Model.Businesspartnernumber"
+                                       class="form-field__input form-field__input--checkbox"
+                                       id=""
+                                       name=""
+                                       type="checkbox" value="true"
+                                       data-input="checkbox" />
+                                <span class="form-field__fakecheckbox form-field__fakecheckbox--right focus-enabled">
+                                    <span class="m44-bill-selector__account m44-bill-selector__account--select" data-acc-detail="wrapper" data-bill-amount="@listmodel.Sdamount">
+                                        <span class="m44-bill-selector__header">
+                                            <span class="m44-bill-selector__name" data-acc-detail="acc_name">
+                                                <span class="inline-block" dir="ltr">
+                                                    @if (!string.IsNullOrWhiteSpace(Model.Carregistrationregion) && Model.Carregistrationregion.Equals("DXB"))
+                                                    {
+                                                        if (Sitecore.Context.Culture.TextInfo.IsRightToLeft)
+                                                        {
+                                                            @((listmodel.Platecode + " " + listmodel.Platenumber) + " " + Translate.Text("Vehicle Number"))
+                                                        }
+                                                        else
+                                                        {
+                                                            @(Translate.Text("Vehicle Number") + " " + (listmodel.Platecode + " " + @listmodel.Platenumber))
+                                                        }
+
+                                                    }
+                                                    else
+                                                    {
+                                                        if (Sitecore.Context.Culture.TextInfo.IsRightToLeft)
+                                                        {
+                                                            @((listmodel.Platecode) + " " + Translate.Text("Vehicle Number"))
+                                                        }
+                                                        else
+                                                        {
+                                                            @(Translate.Text("Vehicle Number") + " " + (listmodel.Platecode))
+                                                        }
+
+                                                    }
+
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <strong class="m44-bill-selector__details green">
+                                            @listmodel.Totalamount @Translate.Text("AED")
+                                        </strong>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                        <div id="description-for-checkboxes_group1_multi" class="form-field__messages"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (Model.PagedAccounts.PageCount > 1)
+    {
+        <div id="myPagerBill" class="centerpage">
+            @Html.PagedListPager(
+            Model.PagedAccounts,
+            page => Url.Action(
+                "EVSDPaymentPagingation",
+                new
+                {
+                    page = page,
+                }
+            ),
+            new PagedListRenderOptions
+            {
+                 LinkToFirstPageFormat = "|<",
+            LinkToPreviousPageFormat = "<",
+            LinkToNextPageFormat = ">",
+            LinkToLastPageFormat = ">|",
+            MaximumPageNumbersToDisplay = 3,
+            DisplayEllipsesWhenNotShowingAllPageNumbers = false
+            }
+        )
+        </div>
+    }
+    <div class="m49-no-matches">
+        @Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)
+    </div>
+    <div class="m44-bill-selector__total">
+        <!-- m42-key-value--start -->
+        <div class="m42-keyvalue">
+            <dl>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt m44-bill-selector--total-accounts-EN">
+                    @Translate.Text("Total")
+                    (<span class="m44-account-count">0</span><span> of @Model.Vehiclelists.Count()</span> <span class="m44-account-plural" data-plural="@Translate.Text(DictionaryKeys.AccountSelector.Accounts)" data-single="@Translate.Text(DictionaryKeys.AccountSelector.Account)">@Translate.Text(DictionaryKeys.AccountSelector.Accounts)</span> @Translate.Text(DictionaryKeys.AccountSelector.selected))
+                </dt>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt m44-bill-selector--total-accounts-AR">
+                    @Translate.Text("Total amount Due") (@Translate.Text(DictionaryKeys.AccountSelector.selected) <span class="m44-account-count">0</span> @Translate.Text("m44.of") @Model.Vehiclelists.Count() @Translate.Text(DictionaryKeys.AccountSelector.Accounts))
+                </dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail="">
+                    <span class="m42-keyvalue__value--currency--amount" data-numeric-format="0,0.00">0.00</span>
+                    <span class="m42-keyvalue__value--currency--suffix">@Translate.Text("AED")</span>
+                </dd>
+
+            </dl>
+        </div>
+        <!-- m42-key-value--end -->
+    </div>
+</div>
+
+
+<script>
+    var accounts = JSON.parse('@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Vehiclelists.Select((x, index) => new { index, x.Platenumber, x.Totalamount,Model.Businesspartnernumber })))');
+    docReady(function () {
+        dewaGlobal.billAccountsList = accounts; // this variable is used in static.js under /src/sublayouts/m44-bill-selector/m44-bill-selector control
+
+        jQuery('#myPagerBill').on('click', 'a', function () {
+            if (this.href != '' && this.href != null) {
+                jQuery.ajax(this.href, {
+                    beforeSend: function () {
+                        window.attachSpinner('.m44-bill-selector-list-placeholder', { bgColor: '#fff', opacity: 0.6 });
+                    },
+                    complete: function () {
+                        window.detachSpinner('.m44-bill-selector-list-placeholder');
+                    },
+                    method: 'GET',
+                    cache: false,
+                    success:function(result) {
+                        $('#m44-bill-selector-list').html(result);
+                        $('.pager_update').click();
+                    }
+                });
+            }
+            return false;
+        });
+
+        if ('@isempty' == 'True') {
+            jQuery('.m49-no-matches').show();
+        }
+    });
+
+</script>
+
+<script type="text/javascript">
+    docReady(function () {
+        jQuery('.m44-bill-selector__accounts-list')
+            .find('.form-field__checkbox--billselector:gt(0)')
+            .css({
+                paddingTop: '18px'
+            });
+
+    });
+</script>

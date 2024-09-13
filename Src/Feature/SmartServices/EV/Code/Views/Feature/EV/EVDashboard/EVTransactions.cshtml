@@ -1,0 +1,338 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Feature.EV.Models.EVDashboard
+@model EVTransactionModel
+
+@{
+    bool dashboard = Model.eVTransactionsConfig.Dashboard;
+}
+<div class="evtransactions" data-dashboardpage="@dashboard">
+    <div class="grid__row mb32">
+        <div class="grid__column grid__column--12" id="evtransactions">
+            <div class="j69-dashboard--card">
+                <div class="j69-dashboard--card_header">
+                    <div class="flex-center">
+                        <div class="j69-dashboard--card_title">
+                            @Translate.Text("EV_Transactions_Charging_Transactions")
+                        </div>
+                        <div class="j69-dashboard--card_filter">
+                            <label for="form-field-EVTransactionYearFilter" class="form-field__label aria-only">
+                                @Translate.Text("Select")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-EVTransactionYearFilter"
+                                        name="select"
+                                        aria-describedby="description-for-EVTransactionYearFilter"
+                                        data-parsley-errors-container="#description-for-EVTransactionYearFilter">
+                                    @foreach (SelectListItem selectListItem in Model.MonthList)
+                                    {
+                                        <option value="@selectListItem.Value" @(!string.IsNullOrWhiteSpace(Model.Selectedmonth) && Model.Selectedmonth.Equals(selectListItem.Value) ? "selected" : (selectListItem.Selected ? "selected" : string.Empty))>
+                                            @selectListItem.Text
+                                        </option>
+                                    }
+                                </select>
+                            </span>
+                        </div>
+                        <div id="selectevtransactionscardsdiv" data-selectedcardid="@(!string.IsNullOrWhiteSpace(Model.Selectedcardid)?Model.Selectedcardid:string.Empty)" class="j69-dashboard--card_filter"></div>
+
+                        <div class="j69-dashboard--card_filter">
+                            <label for="form-field-transactionssortby" class="form-field__label">
+                                @Translate.Text("Sort by")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-transactionssortby"
+                                        name="select"
+                                        aria-describedby="description-for-transactionssortby"
+                                        data-parsley-errors-container="#description-for-transactionssortby">
+                                    <option value="date" @(!string.IsNullOrWhiteSpace(Model.Selectedsortby) && Model.Selectedsortby.Equals("date") ? "selected" : (string.IsNullOrWhiteSpace(Model.Selectedsortby) ? "selected" : string.Empty))>
+                                        @Translate.Text("Date")
+                                    </option>
+                                    <option value="duration" @(!string.IsNullOrWhiteSpace(Model.Selectedsortby) && Model.Selectedsortby.Equals("duration") ? "selected" : string.Empty)>
+                                        @Translate.Text("Duration")
+                                    </option>
+                                </select>
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div id="EVtransactionsPlaceholder">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script id="evcardsintransaction-error-template" type="text/x-handlebars-template">
+    <div id="evcardsintransactionserror">
+        {{this}}
+    </div>
+</script>
+<script id="evcardsintransaction-select-template" type="text/x-handlebars-template">
+    <label for="form-field-evtransactionlistcards" class="form-field__label aria-only">
+        @Translate.Text("EV_Dashboard_Card_Number")
+    </label>
+    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+        <select class="form-field__input form-field__input--select form-field__input--select-full"
+                id="form-field-evtransactionlistcards"
+                name="select"
+                aria-describedby="description-for-evtransactionlistcards"
+                data-parsley-errors-container="#description-for-evtransactionlistcards">
+            {{#ifselectedcardEquals selectedcard}}
+            <option value="">@Translate.Text("EV_allcard")</option>
+            {{#each context}}
+            <option value="{{cardnumber}}" {{toSelectedCard cardnumber ../selectedcard}}> {{serialnumber}}</option>
+            {{/each}}
+            {{else}}
+            <option value="" selected="selected">@Translate.Text("EV_allcard")</option>
+            {{#each context}}
+            <option value="{{cardnumber}}"> {{serialnumber}}</option>
+            {{/each}}
+            {{/ifselectedcardEquals}}
+
+        </select>
+    </span>
+</script>
+<script id="evtransactions-item-template" type="text/x-handlebars-template">
+
+    <div class="m23-table m23-table--variant" data-component="m23-table">
+        <table class="m23-table__content-table">
+            <thead class="m23-table__content-table-header">
+                <tr class="m23-table__content-table-row" tabindex="0">
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("EV_Datetime")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Transaction_ID")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Location")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("Duration")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Consumption")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("Cost")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Card_Number")</th>
+                    <th class="m23-table__content-table-cell--header">@Translate.Text("EV_Dashboard_EV_Plate")</th>
+                </tr>
+            </thead>
+            <tbody class="m23-table__content-table-body">
+                {{#transactionDetails}}
+                <tr class="m23-table__content-table-row" tabindex="0">
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("EV_Datetime")" style="min-height: 23px;">
+                        <div class="font-regular">{{transactiondate}}</div>
+                        <div>{{transactiontime}}</div>
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("EV_Datetime")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("EV_Dashboard_Transaction_ID")" style="min-height: 23px;">
+                        {{transactionid}}
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("EV_Dashboard_Transaction_ID")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("EV_Dashboard_Location")" style="min-height: 23px;">
+                        <span class="font-regular">{{locationname}}</span>
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("EV_Dashboard_Location")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("Duration")" style="min-height: 23px;">
+                        {{duration}}
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("Duration")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("EV_Dashboard_Consumption")" style="min-height: 23px;">
+                        <strong>{{converttoconsumptionformat consumption}} @Translate.Text("m29 KWH")</strong>
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("EV_Dashboard_Consumption")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("Cost")" style="min-height: 23px;">
+                        <strong class="darkgrey">
+                            {{#discountedamount amount discount}}
+                            <s>{{amount}}</s>
+                            {{else}}
+                            {{amount}}
+                            {{/discountedamount}}
+                            @Translate.Text("AED")
+                        </strong>
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("Cost")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("EV_Dashboard_Card_Number")" style="min-height: 23px;">
+                        <span class="font-regular">{{cardnumber}}</span>
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("EV_Dashboard_Card_Number")</div>
+                    </td>
+                    <td class="m23-table__content-table-cell initialized" data-label="@Translate.Text("EV_Dashboard_EV_Plate")" style="min-height: 23px;">
+                        <span class="border-1 radius-3 padding p-l-5 p-r-5">{{platenumber}}</span>
+                        <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("EV_Dashboard_EV_Plate")</div>
+                    </td>
+                </tr>
+                {{/transactionDetails}}
+            </tbody>
+        </table>
+        <table class="m23-table--mobile">
+            <thead>
+                <tr class="m23-table--mobile-header">
+                    <td class="m23-table--mobile-headercell">
+                        @Translate.Text("EV_Datetime")
+                    </td>
+                    <td class="m23-table--mobile-headercell">
+                        @Translate.Text("EV_Dashboard_Transaction_ID")
+                    </td>
+                    <td class="m23-table--mobile-headercell">
+                        @Translate.Text("Cost")
+                    </td>
+                    <td class="m23-table--mobile-headercell">
+                        @Translate.Text("EV_Dashboard_EV_Plate")
+                    </td>
+                </tr>
+            </thead>
+            {{#transactionDetails}}
+            <tbody class="m23-table--mobile-row">
+                <tr class="m23-table--mobile-row_head">
+                    <td class="m23-table--mobile-headercell">
+                        <div class="font-regular">{{transactiondate}}</div>
+                        <div>{{transactiontime}}</div>
+                    </td>
+                    <td class="m23-table--mobile-headercell">
+                        {{transactionid}}
+                    </td>
+                    <td class="m23-table--mobile-headercell">
+                        <strong class="darkgrey">
+                            {{#discountedamount amount discount}}
+                            <s>{{amount}}</s>
+                            {{else}}
+                            {{amount}}
+                            {{/discountedamount}}
+                            @Translate.Text("AED")
+                        </strong>
+                    </td>
+                    <td class="m23-table--mobile-headercell">
+                        <span class="border-1 radius-3 padding p-l-5 p-r-5">{{platenumber}}</span>
+                        <div class="icon-open m23-table--mobile-open"></div>
+                    </td>
+                </tr>
+                <tr class="m23-table--mobile-row_body">
+                    <td colspan="4">
+                        <div class="m23-table--mobile-row_cellwrapper">
+                            <div class="m23-table--mobile-row_cell">
+                                <span class="m23-table--mobile-row_cellkey">@Translate.Text("EV_Datetime"):</span>
+                                <span class="m23-table--mobile-row_cellvalue">
+                                    {{transactiondate}} - {{transactiontime}}
+                                </span>
+                            </div>
+                            <div class="m23-table--mobile-row_cell">
+                                <span class="m23-table--mobile-row_cellkey">@Translate.Text("EV_Dashboard_Transaction_ID"):</span>
+                                <span class="m23-table--mobile-row_cellvalue">
+                                    {{transactionid}}
+                                </span>
+                            </div>
+                            <div class="m23-table--mobile-row_cell">
+                                <span class="m23-table--mobile-row_cellkey">@Translate.Text("EV_Dashboard_Location"):</span>
+                                <span class="m23-table--mobile-row_cellvalue">
+                                    {{locationname}}
+                                </span>
+                            </div>
+                            <div class="m23-table--mobile-row_cell">
+                                <span class="m23-table--mobile-row_cellkey">@Translate.Text("Duration"):</span>
+                                <span class="m23-table--mobile-row_cellvalue">
+                                    {{duration}}
+                                </span>
+                            </div>
+                            <div class="m23-table--mobile-row_cell">
+                                <span class="m23-table--mobile-row_cellkey">@Translate.Text("EV_Dashboard_Consumption"):</span>
+                                <span class="m23-table--mobile-row_cellvalue">
+                                    {{converttoconsumptionformat consumption}} @Translate.Text("m29 KWH")
+                                </span>
+                            </div>
+                            <div class="icon-close m23-table--mobile-close"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            {{/transactionDetails}}
+        </table>
+    </div>
+    <div id="pagination-list">
+    </div>
+
+    <div class="j69-dashboardEV--footer_flex">
+        <div class="flex-center mb24 mt24">
+            <div class="j69-dashboardEV--total">
+                <div class="j69-dashboardEV--total_text">@Translate.Text("EV_Dashboard_Total_Consumption")</div>
+                <div class="j69-dashboardEV--total_numeral"><span>{{converttoconsumptionformat totalconsumption}}</span> @Translate.Text("m29 KWH")</div>
+            </div>
+            <div class="j69-dashboardEV--total">
+                <div class="j69-dashboardEV--total_text">@Translate.Text("EV_Dashboard_Total_Cost")</div>
+                <div class="j69-dashboardEV--total_numeral green"><span>{{totalcost}}</span> @Translate.Text("AED")</div>
+            </div>
+            {{#HidezeroValue discountamount}}
+            <div class="j69-dashboardEV--total">
+                <div class="j69-dashboardEV--total_text"></div>
+                <div class="j69-dashboardEV--total_numeral darkgrey"><span><s>{{discountamount}}</s></span> @Translate.Text("AED")</div>
+            </div>
+            {{/HidezeroValue}}
+        </div>
+        @if (dashboard)
+        {
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_TransactionListPage)" class="button button--primary button--fullwidth-mobile">@Translate.Text("EV_Dashboard_View_All_Transactions")</a>
+        }
+    </div>
+
+</script>
+<script id="evtransaction-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination">
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="evtransactionsselection({{firstpagenumber}})" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+            </a>
+            {{/if}}
+            {{#if previouspage}}
+            <a onclick="evtransactionsselection({{previouspagenumber}})" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+            {{/if}}
+            <ul class="m34-pagination__page-list">
+                {{#pagenumbers}}
+                {{#ifCondPage ../page this}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                    <a onclick="evtransactionsselection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{else}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                    <a onclick="evtransactionsselection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{/ifCondPage}}
+                {{/pagenumbers}}
+            </ul>
+            {{#if nextpage}}
+            <a onclick="evtransactionsselection({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="evtransactionsselection({{lastpagenumber}})" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    var dvtransactionsEV = "#evtransactions";
+	var xhrPool = [];
+    docReady(function () {
+
+        Handlebars.registerHelper('ifCondPage', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('HidezeroValue', function (v1, options) {
+            if (v1 == 0) {
+                return options.inverse(this);
+            }
+            return options.fn(this);
+
+        });
+if ('@dashboard' == 'False') {
+            setTimeout(function() {
+    jQuery("#form-account-selector").submit(_evtransactionsHandler);
+	jQuery("#form-account-selector").submit();
+}, 1000);
+    }
+    });
+
+</script>
+@Scripts.Render("~/bundles/evtransactions")

@@ -1,0 +1,267 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Feature.ScrapSale.Models.ScrapSale
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@model UserRegistrationModel
+@{
+    /**/
+
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var _clarRequired = !string.IsNullOrEmpty(Model.Status) && Model.Status.ToUpper() == "CLAR" ? "m70-status-tracker--orange" : string.Empty;
+}
+
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("j7/m26-page-title")
+        </div>
+    </div>
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="j171-masar">
+                <div class="form-field form-field--text" id="byrequestnumber">
+                    <span class="form-field__input-wrapper j171-masar--search">
+                        <input class="form-field__input form-field__input--text" id="form-field-tdzemk8e2" placeholder="@Translate.Text("SS_UR_ApplicationNumber")"
+                               required="" name="text" type="number" value="@Model.ApplicationNO"
+                               aria-describedby="description-for-tdzemk8e2" data-parsley-errors-container="#description-for-tdzemk8e2"
+                               required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+
+                        <a href="javascript:void(0)" class="button button--primary btSearchh" role="button">@Translate.Text("Search")</a>
+
+                    </span>
+                    <div id="description-for-tdzemk8e2" class="form-field__messages red">
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Status))
+                {
+                    <div class="masar-sectiontitle">@Translate.Text("Masar.Requests")</div>
+                    <div class="m70-status-cs--sectiontrack progress">
+                        <div class="m70-status-cs--sectiontrack-heading">
+                            <div class="m70-status-cs--sectiontrack-icon icon-b-receipt">
+                            </div>
+                            <div class="m70-status-cs--sectiontrack-headingdetails">
+                                <div class="m70-status-cs--sectiontrack-headingtitle">
+                                    @Translate.Text("SS_T_EnrollmentRequest")
+                                </div>
+                                <div class="m70-status-cs--sectiontrack-headingsubtitle">
+                                    @Translate.Text("SS_T_BuilderServices")
+                                </div>
+                                <div class="m70-status-cs--sectiontrack-headingid">
+                                    @Model.ApplicationNO
+                                </div>
+                            </div>
+                            @if (Model.Status.ToUpper() == "INPR")
+                            {
+                                <div class="m70-status-cs--sectiontrack-headingstatus">
+                                    @Translate.Text("SS_T_InProgress")
+                                </div>
+                            }
+                            else if (Model.Status.ToUpper() == "APR")
+                            {
+                                <div class="m70-status-cs--sectiontrack-headingstatus closed">
+                                    @Translate.Text("SS_T_Approved")
+                                </div>
+                            }
+                            else if (Model.Status.ToUpper() == "REJ")
+                            {
+                                <div class="m70-status-cs--sectiontrack-headingstatus rejected">
+                                    @Translate.Text("SS_T_Rejected")
+                                </div>
+                            }
+                            else if (Model.Status.ToUpper() == "CLAR")
+                            {
+                                <div class="m70-status-cs--sectiontrack-headingstatus returned">
+                                    @Translate.Text("SS_T_Clar")
+                                </div>
+                            }
+                        </div>
+                        <div class="m70-status-tracker m70-status-tracker-verticalnew">
+                            <div class="m70-status-tracker--item @_clarRequired">
+                                <div class="m70-status-tracker--item_inner">
+                                    <div class="m70-status-tracker--item_title">
+                                        <div class="m70-status-tracker--item_icon icon-tick"></div>
+                                        @Translate.Text("SS_T_RequestSubmitted")
+                                    </div>
+                                    <div class="m70-status-tracker--item_desc">
+                                        @Model.AppSubmittedDate.ToString("dd MMM yyyy, hh:mm tt")
+                                    </div>
+                                </div>
+                            </div>
+                            @if (Model.Status.ToUpper() == "INPR")
+                            {
+                                <div class="m70-status-tracker--item">
+                                    <div class="m70-status-tracker--item_inner">
+                                        <div class="m70-status-tracker--item_title green">
+                                            <div class="m70-status-tracker--item_icon icon-tick"></div>
+                                            @Translate.Text("SS_T_InProgress")
+                                        </div>
+                                        <div class="m70-status-tracker--item_desc green">
+                                            @Model.CurrentWorkflowDate.ToString("dd MMM yyyy, hh:mm tt")
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.Status.ToUpper() == "APR")
+                            {
+                                <div class="m70-status-tracker--item">
+                                    <div class="m70-status-tracker--item_inner">
+                                        <div class="m70-status-tracker--item_title green">
+                                            <div class="m70-status-tracker--item_icon icon-tick"></div>
+                                            @Translate.Text("SS_T_RequestApproved")
+                                        </div>
+                                        <div class="m70-status-tracker--item_desc green">
+                                            @Model.CurrentWorkflowDate.ToString("dd MMM yyyy, hh:mm tt")
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                            else if (Model.Status.ToUpper() == "REJ")
+                            {
+                                <div class="m70-status-tracker--item">
+                                    <div class="m70-status-tracker--item_inner">
+                                        <div class="m70-status-tracker--item_title red">
+                                            <div class="m70-status-tracker--item_icon m70-status-tracker--item_rejected icon-cancel"></div>
+                                            @Translate.Text("SS_T_RequestRejected")
+                                        </div>
+                                        <div class="m70-status-tracker--item_desc red">
+                                            @Model.CurrentWorkflowDate.ToString("dd MMM yyyy, hh:mm tt")
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                            else if (Model.Status.ToUpper() == "CLAR")
+                            {
+                                <div class="m70-status-tracker--item">
+                                    <div class="m70-status-tracker--item_inner">
+                                        <div class="m70-status-tracker--item_title warning">
+                                            <div class="m70-status-tracker--item_icon m70-status-tracker--item_warn icon-warn"></div>
+                                            @Translate.Text("SS_T_RequestReturned")
+                                        </div>
+                                        <div class="m70-status-tracker--item_desc orange">
+                                            @Model.CurrentWorkflowDate.ToString("dd MMM yyyy, hh:mm tt")
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                        @if (Model.Status.ToUpper() == "REJ" && !string.IsNullOrEmpty(Model.RejectionReason))
+                        {
+                            <div class="m70-status-cs--sectiontrack-footnote">
+                                <div class="m70-status-cs--sectiontrack-footnote-icon">
+                                    <svg fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M9 0C4.03636 0 0 4.03636 0 9C0 13.9636 4.03636 18 9 18C13.9636 18 18 13.9636 18 9C18 4.03636 13.9636 0 9 0ZM9.00014 3.81839C8.40014 3.81839 7.90923 4.30929 7.90923 4.90929C7.90923 5.50929 8.40014 6.0002 9.00014 6.0002C9.60014 6.0002 10.0911 5.50929 10.0911 4.90929C10.0911 4.30929 9.60014 3.81839 9.00014 3.81839ZM8.18115 8.4549C8.18115 8.0049 8.54933 7.63672 8.99933 7.63672C9.44934 7.63672 9.81752 8.0049 9.81752 8.4549V13.364C9.81752 13.814 9.44934 14.1822 8.99933 14.1822C8.54933 14.1822 8.18115 13.814 8.18115 13.364V8.4549Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="m70-status-cs--sectiontrack-footnotetext">
+                                    @Model.RejectionReason
+                                    <p class="form-field__helplink">
+                                        <a href="@Model.EncryptedLink">@Translate.Text("SS_ViewApplication")</a>
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Status.ToUpper() == "APR")
+                        {
+                            <div class="m70-status-cs--sectiontrack-footnote">
+                                <div class="m70-status-cs--sectiontrack-footnote-icon">
+                                    <svg fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M9 0C4.03636 0 0 4.03636 0 9C0 13.9636 4.03636 18 9 18C13.9636 18 18 13.9636 18 9C18 4.03636 13.9636 0 9 0ZM9.00014 3.81839C8.40014 3.81839 7.90923 4.30929 7.90923 4.90929C7.90923 5.50929 8.40014 6.0002 9.00014 6.0002C9.60014 6.0002 10.0911 5.50929 10.0911 4.90929C10.0911 4.30929 9.60014 3.81839 9.00014 3.81839ZM8.18115 8.4549C8.18115 8.0049 8.54933 7.63672 8.99933 7.63672C9.44934 7.63672 9.81752 8.0049 9.81752 8.4549V13.364C9.81752 13.814 9.44934 14.1822 8.99933 14.1822C8.54933 14.1822 8.18115 13.814 8.18115 13.364V8.4549Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="m70-status-cs--sectiontrack-footnotetext">
+                                    <p class="form-field__helplink">
+                                        <a href="@Model.EncryptedLink">@Translate.Text("SS_ViewApplication")</a>
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Status.ToUpper() != "APR" && Model.Status.ToUpper() != "REJ" && Model.Status.ToUpper() != "CLAR")
+                        {
+                            <div class="m70-status-cs--sectiontrack-footnote">
+                                <div class="m70-status-cs--sectiontrack-footnote-icon">
+                                    <svg fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M9 0C4.03636 0 0 4.03636 0 9C0 13.9636 4.03636 18 9 18C13.9636 18 18 13.9636 18 9C18 4.03636 13.9636 0 9 0ZM9.00014 3.81839C8.40014 3.81839 7.90923 4.30929 7.90923 4.90929C7.90923 5.50929 8.40014 6.0002 9.00014 6.0002C9.60014 6.0002 10.0911 5.50929 10.0911 4.90929C10.0911 4.30929 9.60014 3.81839 9.00014 3.81839ZM8.18115 8.4549C8.18115 8.0049 8.54933 7.63672 8.99933 7.63672C9.44934 7.63672 9.81752 8.0049 9.81752 8.4549V13.364C9.81752 13.814 9.44934 14.1822 8.99933 14.1822C8.54933 14.1822 8.18115 13.814 8.18115 13.364V8.4549Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="m70-status-cs--sectiontrack-footnotetext">
+                                    @Translate.Text("SS_InProgressMsg").Replace("{0}", Model.WorkingDays)
+                                    <br />
+                                    @Translate.Text("SS_EstimatedDateMsg").Replace("{0}", !string.IsNullOrEmpty(Model.EstimatedServiceCompletionDate) ? DateTime.ParseExact(Model.EstimatedServiceCompletionDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMM yyyy") : string.Empty)
+                                    <p class="form-field__helplink">
+                                        <a class="link" href="@Model.EncryptedLink">@Translate.Text("SS_ViewApplication")</a>
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.Status.ToUpper() == "CLAR")
+                        {
+                            <div class="m70-status-cs--sectiontrack-footnote">
+                                <div class="m70-status-cs--sectiontrack-footnote-icon">
+                                    <svg fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M9 0C4.03636 0 0 4.03636 0 9C0 13.9636 4.03636 18 9 18C13.9636 18 18 13.9636 18 9C18 4.03636 13.9636 0 9 0ZM9.00014 3.81839C8.40014 3.81839 7.90923 4.30929 7.90923 4.90929C7.90923 5.50929 8.40014 6.0002 9.00014 6.0002C9.60014 6.0002 10.0911 5.50929 10.0911 4.90929C10.0911 4.30929 9.60014 3.81839 9.00014 3.81839ZM8.18115 8.4549C8.18115 8.0049 8.54933 7.63672 8.99933 7.63672C9.44934 7.63672 9.81752 8.0049 9.81752 8.4549V13.364C9.81752 13.814 9.44934 14.1822 8.99933 14.1822C8.54933 14.1822 8.18115 13.814 8.18115 13.364V8.4549Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="m70-status-cs--sectiontrack-footnotetext">
+                                    @Model.RejectionReason
+                                    <p class="form-field__helplink">
+                                        <a class="link" href="@Model.EncryptedLink">@Translate.Text("SS_ResubmitApplication")</a>
+                                    </p>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).on('click', '.btSearchh', function (e) {
+
+		if($('#form-field-tdzemk8e2').val() != '')
+		{
+              $('#description-for-tdzemk8e2').html('');
+
+	  var href = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TRACKAPPLICATION)';
+        href += '?appno=' + $('#form-field-tdzemk8e2').val();
+
+		$(this).attr('href', href);
+	   window.location.href = href;
+			}
+            else
+            {
+                $('#description-for-tdzemk8e2').html('@Translate.Text("SS_RequestNumber_Required")');
+
+                $('.m70-status-cs--sectiontrack').hide();
+            }
+
+    });
+
+
+    $(document).ready(function() {
+
+            $('#form-field-tdzemk8e2').keypress(function (e) {
+                        if (e.which == 13) {
+                            $('.btSearchh').click();
+                        }
+            });
+
+
+
+});
+
+
+
+
+
+</script>

@@ -1,0 +1,136 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore
+@using Sitecore.Mvc
+@using Sitecore.Links
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.JourneyMap
+<!-- M101 Journey Map Start-->
+@{
+    string param = Html.Sitecore().CurrentRendering.Parameters["param"] != null ? Html.Sitecore().CurrentRendering.Parameters["param"] : "journeymap_placeholder_highlight";
+
+}
+<div class="m101-journey-map2">
+    @if (!string.IsNullOrWhiteSpace(Model.Title))
+    {
+        <div class="m101-journey-map--title">
+            @Html.Glass().Editable(x => x.Title)
+        </div>
+    }
+
+    @if (Model != null && Model.Personas != null && Model.Personas.Any())
+    {
+        <div class="m101-journey-map--box__row">
+            @foreach (var persona in Model.Personas)
+            {
+                string bgsrc = persona.BackgroudImage != null ? "background-image:url('" + persona.BackgroudImage.Src + "')" : "";
+                var colorClass = persona.ColorClass != null && !string.IsNullOrEmpty(persona.ColorClass.ColorClass) ? persona.ColorClass.ColorClass : "";
+                var answer = from tileSet in Model.TileSets
+                             from tileGroup in tileSet.TileGroups
+                             from tile in tileGroup.Tiles
+                             where tile.Persona != null && tile.Persona.Name == persona.Name
+                             select tile;
+                <div class="m101-journey-map--box m101-journey-map--@colorClass">
+
+                    <div class="m101-journey-map--box__img" style="@bgsrc"></div>
+                    <div>
+                        <div class="m101-journey-map--box__title">
+                            @Html.Glass().Editable(persona, v => v.Title)
+                        </div>
+                        @*@if(answer!=null && answer.Count() > 0)
+                            {
+                                <div class="m101-journey-map--box__steps">
+                                    @answer.Count()  @Html.Glass().Editable(persona, v => v.SubTitle)
+                                </div>
+                            }*@
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @Html.Sitecore().Placeholder(param)
+
+    @if (Model != null && Model.TileSets != null && Model.TileSets.Any())
+    {
+        foreach (var tileSet in Model.TileSets)
+        {
+            <div class="m101-journey-map--title">
+                @Html.Glass().Editable(tileSet, s => s.Title)
+            </div>
+
+            if (tileSet != null && tileSet.TileGroups != null && tileSet.TileGroups.Any())
+            {
+                foreach (var tileGroup in tileSet.TileGroups)
+                {
+                    var journeyGroupTitle = (tileGroup.JourneyGroupingSet != null && !string.IsNullOrWhiteSpace(tileGroup.JourneyGroupingSet.Title));
+                    <div class="m101-journey-map--item_group">
+                        <div class="m101-journey-map--item_order">
+                            @Html.Glass().Editable(tileGroup, g => g.OrderNo)
+                        </div>
+                        <div class="m101-journey-map--item_grouptitle">
+                            @Html.Glass().Editable(tileGroup, g => g.Title)
+                        </div>
+                        @if (tileGroup != null && tileGroup.Tiles != null && tileGroup.Tiles.Any())
+                        {
+                            <div class="m101-journey-map--item_outer @(journeyGroupTitle?"m101-journey-map--item-separation":string.Empty)">
+                                @foreach (var tile in tileGroup.Tiles)
+                                {
+                                    var tileColorClass = tile.ColorClass != null && !string.IsNullOrEmpty(tile.ColorClass.ColorClass) ? tile.ColorClass.ColorClass : "";
+                                    var tileIconlass = tile.IconClass != null && !string.IsNullOrEmpty(tile.IconClass.IconClass) ? tile.IconClass.IconClass : "";
+                                    <div class="m101-journey-map--item m101-journey-map--@tileColorClass">
+                                        @*<div class="m101-journey-map--item_order">
+                                                @Html.Glass().Editable(tile, t => t.OrderNo)
+                                            </div>*@
+                                        @if (tile.Persona != null && tile.Persona.BackgroudImage != null)
+                                        {
+                                            string bgSrcTile = tile.Persona.BackgroudImage != null ? "background-image:url('" + tile.Persona.BackgroudImage.Src + "')" : "";
+                                            <div class="m101-journey-map--item_thumbnail">
+                                                <div class="m101-journey-map--item_thumbnailimg" style="@bgSrcTile"></div>
+                                                <div class="m101-journey-map--item_thumbnailtxt">
+                                                    @Html.Glass().Editable(tile, t => t.Persona.Title)
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(tileIconlass))
+                                        {
+                                            <div class="m101-journey-map--item_thumbnail">
+                                                <div class="m101-journey-map--item_icon @tileIconlass">
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div class="m101-journey-map--item_content">
+                                            @if (!string.IsNullOrWhiteSpace(tile.Title))
+                                            {
+                                                <div class="m101-journey-map--item_title">
+                                                    @Html.Glass().Editable(tile, t => t.Title)
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(tile.Step))
+                                            {
+                                                <div class="m101-journey-map--item_steps">
+                                                    @Html.Raw(Html.Glass().Editable(tile, t => t.Step))
+                                                </div>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(tile.Note))
+                                            {
+                                                <div class="m101-journey-map--item_note">
+                                                    @Html.Raw(Html.Glass().Editable(tile, t => t.Note))
+                                                </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                    if (journeyGroupTitle)
+                                    {
+                                        <div class="m101-journey-map--item-separation-span">@Html.Raw(Html.Glass().Editable(tileGroup, t => t.JourneyGroupingSet.Title))</div>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        }
+    }
+</div>
+<!-- M101 Journey Map End-->

@@ -1,0 +1,73 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models
+@model DEWAXP.Feature.Bills.Models.ConnectionEnquiries.ConnectionEnquirySucceeded
+
+<div class="grid">
+    @Html.Sitecore().Placeholder("j100/m26-page-title")
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                <div class="m40-status-message__title icon--success">@Translate.Text("Submission Successful")</div>
+                <div class="m40-status-message__text">
+                    @Translate.Text("Billing Enquiries")<br>@Translate.Text("Notification number"): @(Model.Reference ?? Translate.Text("NA"))
+                </div>
+                <p>
+                    <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SelectedAccount.cshtml", new SelectedAccountViewModel(Model.Account))
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m42-keyvalue success-page">
+                <dl>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text(DictionaryKeys.Global.MobileNumber):</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.MobileNumber.AddMobileNumberZeroPrefix()</dd>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.FurtherComments))
+                    {
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text(DictionaryKeys.MoveOut.FurtherComments):</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.FurtherComments</dd>
+                    }
+
+                    @if (Model.Documentation != null)
+                    {
+
+                        <dt class="m42-keyvalue__key--stacked ">@Translate.Text("Attachments"):</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">
+                            @if (Model.AttachmentType.Equals("jpg", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <img src="@string.Format("data:image/jpeg;base64,{0}", Convert.ToBase64String(Model.Documentation))" width="100" alt="@Translate.Text("Attachment screenshot")" />
+                            }
+                            else
+                            {
+                                <span>@Model.FileName</span>
+                            }
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content grid__column--centered">
+            <h2 class="text__section-title">@Translate.Text("What's next?")</h2>
+            <div class="form-field__button">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" class="button button--primary button--next">@Translate.Text("Dashboard")</a>
+            </div>
+        </div>
+    </div>
+</div>

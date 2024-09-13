@@ -1,0 +1,92 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.Header
+@using Sitecore.Data.Items
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Globalization
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    // Sitecore gives both value in minute
+    var notificationData = _contentRepository.GetItem<NotificationModel>(new GetItemByIdOptions(Guid.Parse(_scPageItemId.NotificationId)));
+    var TimePeriodinSecond = notificationData != null && !string.IsNullOrEmpty(notificationData.TimePeriod) ? (Convert.ToDouble(notificationData.TimePeriod) * 60).ToString() : "10";
+    var RecurringTimeInMinute = notificationData != null && !string.IsNullOrEmpty(notificationData.RecurringTime) ? notificationData.RecurringTime : "30";
+    var notificationLink = notificationData.NotificationLink != null ? notificationData.NotificationLink.Url : "#";
+    var notificationtype = notificationData.NotificationType != null ? notificationData.NotificationType : string.Empty;
+    var notificationtitle = notificationData.Title != null ? notificationData.Title : string.Empty;
+    var showClosebutton = notificationData.ShowCloseButton;
+    var showPermenant = notificationData.ShowPermenant;
+    var icon = notificationData.Icon != null ? notificationData.Icon.Value : string.Empty;
+
+    var currentitem = _contextRepository.GetCurrentItem<Item>();
+    var pageNotification = currentitem.Fields["Show Notification"];
+    bool notificationStatus = false;
+    if (notificationData != null && notificationData.Enabled)
+    {
+        notificationStatus = true;
+    }
+    else
+    {
+        if (pageNotification != null && pageNotification.Value == "1")
+        {
+            notificationStatus = true;
+        }
+    }
+    if (notificationStatus && notificationData != null)
+    {
+        if (showPermenant || (!showPermenant && notificationData.StartTime != null && notificationData.EndTime != null && DateTime.Now >= notificationData.StartTime && DateTime.Now <= notificationData.EndTime))
+        {
+
+            //data-timeout - We need to enter value in Second , data-time-repeat - We need to enter value in Minute
+            <div data-target="notification" data-timeout="@TimePeriodinSecond" data-time-repeat="@RecurringTimeInMinute" data-show-permanent=@showPermenant.ToString().ToLower() data-marquee-duration="@TimePeriodinSecond" data-component="m20-notification" class="@notificationtype ">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="m20-notification-2">
+                            <p class="teaser__copy">
+                                @if (string.IsNullOrWhiteSpace(icon))
+                                {
+                                    <span class="notification_title">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+                                            <path d="M22.7498 9.75047C22.7494 10.8808 22.4542 11.9914 21.8935 12.9728C21.3327 13.9542 20.5257 14.7724 19.5522 15.3466C18.5786 15.9209 17.4721 16.2313 16.3419 16.2474C15.2118 16.2634 14.0969 15.9844 13.1075 15.438L7.4139 22.0395C6.95598 22.4974 6.33492 22.7547 5.68733 22.7547C5.03975 22.7547 4.41868 22.4974 3.96077 22.0395C3.50286 21.5816 3.24561 20.9606 3.24561 20.313C3.24561 19.6654 3.50286 19.0443 3.96077 18.5864L10.5623 12.8928C9.91281 11.7174 9.64332 10.3696 9.79089 9.0348C9.93847 7.69999 10.4959 6.44364 11.3865 5.43849C12.2771 4.43333 13.4572 3.7287 14.7645 3.42147C16.0718 3.11424 17.4422 3.21948 18.6873 3.72274L14.6248 8.12547L15.1997 10.8006L17.8748 11.3755L22.2776 7.31297C22.5906 8.08744 22.751 8.91513 22.7498 9.75047Z" fill="#222222"></path>
+                                            <path d="M23.0302 7.00737C22.9809 6.88555 22.9028 6.77751 22.8026 6.6925C22.7024 6.60749 22.5831 6.54806 22.4549 6.5193C22.3266 6.49054 22.1934 6.49331 22.0664 6.52737C21.9395 6.56143 21.8228 6.62577 21.7262 6.71487L17.6332 10.492L15.8833 10.1162L15.5075 8.36627L19.2846 4.2733C19.3737 4.17671 19.438 4.05995 19.4721 3.93303C19.5062 3.80611 19.5089 3.67283 19.4802 3.5446C19.4514 3.41638 19.392 3.29705 19.307 3.19684C19.222 3.09662 19.1139 3.01853 18.9921 2.96924C17.882 2.52017 16.6785 2.35061 15.4875 2.47546C14.2965 2.60032 13.1544 3.01577 12.1615 3.68531C11.1686 4.35485 10.3554 5.25799 9.79322 6.31537C9.23106 7.37275 8.93719 8.55202 8.93742 9.74956C8.93611 10.7608 9.14356 11.7614 9.5468 12.6888L3.43172 17.9761C3.41648 17.9883 3.40227 18.0025 3.38805 18.0157C2.77848 18.6253 2.43604 19.452 2.43604 20.3141C2.43604 20.7409 2.52011 21.1636 2.68345 21.558C2.8468 21.9523 3.08622 22.3106 3.38805 22.6124C3.68987 22.9143 4.04819 23.1537 4.44254 23.317C4.8369 23.4804 5.25956 23.5645 5.68641 23.5645C6.54846 23.5645 7.3752 23.222 7.98477 22.6124C7.99797 22.5992 8.01219 22.584 8.02437 22.5698L13.3107 16.4527C14.4243 16.9415 15.6422 17.1449 16.8541 17.0444C18.0661 16.9439 19.2339 16.5427 20.2517 15.8772C21.2696 15.2117 22.1054 14.3028 22.6835 13.2329C23.2615 12.1629 23.5636 10.9657 23.5624 9.74956C23.564 8.80968 23.3833 7.87842 23.0302 7.00737ZM16.2499 15.4371C15.2882 15.4357 14.3424 15.1912 13.5006 14.7261C13.3375 14.636 13.1484 14.6047 12.965 14.6374C12.7816 14.6702 12.615 14.7649 12.4931 14.9059L6.81578 21.481C6.50855 21.7729 6.09946 21.9332 5.67572 21.9278C5.25199 21.9224 4.84713 21.7517 4.54748 21.452C4.24783 21.1523 4.07709 20.7475 4.07166 20.3238C4.06624 19.9 4.22656 19.4909 4.51844 19.1837L11.0885 13.5074C11.2297 13.3854 11.3246 13.2187 11.3574 13.035C11.3901 12.8514 11.3586 12.662 11.2683 12.4989C10.7503 11.5621 10.5073 10.4982 10.567 9.42941C10.6268 8.36066 10.9869 7.33046 11.606 6.45726C12.2252 5.58405 13.0781 4.90329 14.0669 4.49324C15.0557 4.08318 16.1401 3.96048 17.1955 4.13924L14.0267 7.57307C13.9386 7.66871 13.8746 7.78413 13.8404 7.90961C13.8061 8.03509 13.8024 8.16697 13.8297 8.29416L14.4045 10.9683C14.4374 11.1213 14.5137 11.2615 14.6244 11.3721C14.735 11.4827 14.8752 11.559 15.0281 11.5919L17.7043 12.1667C17.8315 12.194 17.9634 12.1904 18.0888 12.1561C18.2143 12.1218 18.3297 12.0579 18.4254 11.9697L21.8592 8.80096C21.9961 9.61652 21.9537 10.4521 21.7349 11.2496C21.5162 12.0471 21.1263 12.7874 20.5925 13.419C20.0586 14.0505 19.3936 14.5582 18.6437 14.9067C17.8937 15.2553 17.0769 15.4362 16.2499 15.4371Z" fill="#222222"></path>
+                                        </svg>
+                                    </span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(notificationtitle))
+                                {
+                                    <span class="notification_title uppercase iconfont_item_icon @icon">
+                                        <span class="uppercase">@notificationtitle</span>
+                                    </span>
+                                }
+                                <span class="notification_copy">
+                                    @Html.Raw(notificationData.Description)
+
+                                </span>
+                                @if (!notificationLink.Equals("#"))
+                                {
+                                    <a class="m20-newstyle-readmore button button--very_small" href="@notificationLink">@Translate.Text("Notif_Read_Updates")</a>
+                                }
+
+                            </p>
+                            @if (showClosebutton)
+                            {
+                                <div class="teaser__cta">
+                                    @*<a class="button button--very_small button--primary">
+                                        @Translate.Text("Notif_Close")
+                                    </a>*@
+                                    <button class="button button--very_small button--quaternary" m20-close="true">
+                                        @Translate.Text("Notif_Close")
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}

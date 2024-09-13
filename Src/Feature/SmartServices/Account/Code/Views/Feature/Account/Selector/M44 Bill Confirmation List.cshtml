@@ -1,0 +1,38 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.BillSelector
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="m44-bill-selector__partner">
+    <div class="m44-bill-selector__accounts-list">
+        @foreach (var account in Model)
+        {
+            var indicatorClass = account.Active ? "active" : "inactive";
+            var displayName = string.IsNullOrWhiteSpace(account.NickName) ? account.Name : account.NickName;
+
+            <div class="m44-bill-selector__account_confirmation--detail">
+                <span class="m44-bill-selector__account m44-bill-selector__account--confirm" data-acc-detail="wrapper">
+                    @if (account.HasPhoto)
+                    {
+                        <img src="/images/ajax-loader_50x50.gif" data-src="/account_thumbs.ashx?id=@(account.AccountNumber)&aty=@((int)account.BillingClassification)" class="m43-accountsel__image" alt="@displayName" role="presentation" data-acc-detail="acc_image">
+                    }
+                    <span class="m44-bill-selector__header">
+                        <span class="m44-bill-selector__name" data-acc-detail="acc_name">
+                            <span class="inline-block" dir="ltr">@displayName</span>
+                            <span dir="@dir" class="m44-bill-selector__status m44-bill-selector__status--@indicatorClass"></span>
+                        </span>
+
+                        <span class="m44-bill-selector__details">
+                            <abbr title="@Translate.Text("Account")">@Translate.Text("Acc")</abbr>: <span dir="@dir" data-acc-detail="acc_number">@account.AccountNumber</span><span class="aria-only"> | </span>
+                        </span>
+
+                    </span>
+                </span>
+                <div class="m44-bill-selector__confirmation-details">
+                    @account.Balance @Translate.Text("AED")
+                </div>
+            </div>
+        }
+    </div>
+</div>

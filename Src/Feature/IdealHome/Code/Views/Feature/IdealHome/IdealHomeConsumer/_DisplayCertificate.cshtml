@@ -1,0 +1,216 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@{
+
+    var btntext = Translate.Text("J106.SendtoMail");
+
+    if (Request.QueryString["emailsent"] != null)
+    {
+        btntext = Translate.Text("J106.EmailSent");
+    }
+    else
+    {
+        btntext = Translate.Text("J106.SendtoMail");
+    }
+}
+<style>
+    .j106-ideal-home_appreciation {
+        font-family: sans-serif;
+    }
+</style>
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        @Html.Sitecore().Placeholder("ideal-home-score")
+    </div>
+</div>
+
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { returnUrl = "" }, FormMethod.Post, new { @data_parsley_focus = "true", @id = "idealhomedisplay", @data_form = "true", @class = "form", @data_submit_validate = "enabled", @novalidate = true, @autocomplete = "off" }))
+{
+    @Html.Sitecore().FormHandler("IdealHomeConsumer", "DownloadPDF")
+    @Html.AntiForgeryToken()
+
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    <div class="box box--6">
+
+        <div class="grid">
+
+            @*<div id="certificateimage">
+                     @Html.Raw(ViewBag.HtmlTemplate)
+                </div>*@
+            <div id="certificate" class="grid__column grid__column--12 grid__column--centered">
+                <div class="certificate" style="background-image:url('@Html.Raw(ViewBag.HtmlTemplate)')">
+                    <div class="certificate_name">
+                        <span class="certificate_name_align" style="font-weight:bold">@Model.FullName</span>
+                    </div>
+                </div>
+            </div>
+
+            @*<div id="certificate" class="grid__column grid__column--12 grid__column--centered">
+                    <div class="certificate-1">
+                        <img src="@ViewBag.HtmlTemplate" height="100%" width="100%" />
+                        <div class="certificate_name">
+                            <div class="certificate_name_align">@Model.FullName</div>
+                        </div>
+                    </div>
+                </div>*@
+
+        </div>
+    </div>
+    @*<input type="hidden" id="FullName" name="fileName" value="@Model.FullName" />
+        <input type="hidden" id="ImagePath" name="ImagePath" value='@ViewBag.HtmlTemplate' )" />*@
+
+    @*<div class="grid__row" id="certificate">
+            <br />
+            <br />
+            <div class="grid__column grid__column--12 grid__column--content">
+
+                <div class="j106-ideal-home__congratulations">Congratulations!</div>
+                <div class="j106-ideal-home__appreciation j106-ideal-home_appreciation">Appreciation Certificate;</div>
+
+                <div class="j106-ideal-home__certificate">
+                    <div class="j106-ideal-home__certificate--logo-wrapper">
+                        <img class="j106-ideal-home__certificate--logo" src="~/images/IdealHome/dewa_logo_circ.png">
+                        <img class="j106-ideal-home__certificate--ribbon" src="~/images/IdealHome/ribbon-icon.png" />
+                    </div>
+
+                    <div class="j106-ideal-home__certificate--text">
+                        <div class="j106-ideal-home__certificate--text-text">APPRECIATION FOR</div>
+                        <div class="j106-ideal-home__certificate--text-title">IDEAL HOME</div>
+                        <div class="j106-ideal-home__certificate--text-text j106-ideal-home_appreciation">This certificate is presented to</div>
+                        <div class="j106-ideal-home__certificate--text-name">@Model.FullName.ToUpper()</div>
+                        <div class="j106-ideal-home__certificate--text-text">In appreciation for your outstanding contribution towards the knowledge exam of the Ideal Home workshop.</div>
+                        <div class="j106-ideal-home__certificate--text-text2">We truly appreciate the hours of dedication you gave to our service.</div>
+                        <div class="j106-ideal-home__certificate--text-text">Thank you for the difference you made!</div>
+                    </div>
+
+                    <div class="j106-ideal-home__certificate--footer">
+                        <div class="j106-ideal-home__certificate--footer-date"></div>
+                        <div class="j106-ideal-home__certificate--footer-MD">
+                            <div class="j106-ideal-home__certificate--footer-MD-name">HE Saeed Mohammed Al Tayer,</div>
+                            <div class="j106-ideal-home__certificate--footer-MD-title">MD & CEO of DEWA.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>*@
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_DISPLAY_RESULT_PAGE)" class="link j106-ideal-home__certificate--link">@Translate.Text("J106.ShowResults")</a>
+        </div>
+        <div class="grid__column grid__column--12 grid__column--centered">
+            @*<a class="button button--primary button-long" id="printpdf" href="#">@Translate.Text("J106.ExportPDF")</a>*@
+
+            @*<button type="submit" class="button button--primary button-long">@Translate.Text("J106.ExportPDF")</button>*@
+            <a href="javascript:void(0)" data-filename="@Model.FullName" class="button button--primary button-long DisplayPDF">@Translate.Text("J106.ExportPDF")</a>
+
+            @*@Html.ActionLink(btntext, "EmailPDF", new { ImgPath = ViewBag.HtmlTemplate, UserName = Model.FullName, to= Model.EmailAddress, cc=Model.EmailAddress, bcc=Model.EmailAddress, subject= "Ideal Home Certificate", body=  "Dear Customer, \n\n Please find attached Ideal Home Certificate of Recognition. \n\n Thanks", filename=Model.FullName }, new { @class= "button button--quaternary button-long" })*@
+
+            @Html.ActionLink(btntext, "EmailPDF", new { }, new { @class = "button button--quaternary button-long" })
+
+
+
+            @*<a class="button button--quaternary button-long" id="emailpdf">@Translate.Text("J106.SendtoMail")</a>*@
+        </div>
+
+        @*<div class="form-field__button">
+                <button type="submit" class="button button--primary button--fullwidth-mobile">download</button>
+            </div>*@
+
+    </div>
+
+}
+<form action="/api/sitecore/IdealHomeConsumer/DownloadPDF" method="post" id="DisplayPFDFrom">
+    <input type="hidden" name="test" />
+</form>
+<script type="text/javascript">
+    docReady(function () {
+        $(".DisplayPDF").on("click", function () {
+            $('#DisplayPFDFrom').html("");
+            //$('#DisplayPFDFrom').append('<input type="hidden" name="fileName" value="' + $(this).data("filename") + '"/>');
+            $('#DisplayPFDFrom').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('#idealhomedisplay input[name=__RequestVerificationToken]').val() + '">');
+            $('#DisplayPFDFrom').submit();
+            $('#DisplayPFDFrom').html('<input type="hidden" name="test" />');
+            return false;
+        })
+    });
+</script>
+@*<script type="text/javascript" src="~/Scripts/jspdf/html2canvas.js"></script>
+    <script type="text/javascript" src="~/Scripts/jspdf/jspdf.min.js"></script>
+    <script type="text/javascript">
+
+        var CallApi = function (callback, base64string) {
+
+            var url = "/api/IdealHomeConsumerAPI/Exportemail";
+            var jsonData = JSON.stringify({
+                //"UserName": '@Model.FullName-@DateTime.Now.Ticks' + '.pdf',
+                "UserName": '@Model.FullName',
+                "to": '@Model.EmailAddress',
+                "cc": '@Model.EmailAddress',
+                "bcc": '@Model.EmailAddress',
+                "subject": 'Ideal Home Certificate',
+                "body": 'Dear Customer, <br/><br/> Please find attached Ideal Home Certificate of Recognition. <br/> <br/> Thanks.',
+                "base64string": base64string,
+                "ImgPath": '@ViewBag.HtmlTemplate'
+
+            });
+
+
+
+            jQuery.ajax(url, {
+                dataType: 'json',
+                method: 'POST',
+                data: jsonData,
+                accepts: "application/json; charset=utf-8",
+                contentType: "application/json; charset=utf-8",
+            }).success(function (data) {
+                if (data.message == "Success") {
+                    $('#emailpdf').text('@Translate.Text("J106.EmailSent")');
+                }
+            });
+        };
+
+
+
+        $("#printpdf").click(function () {
+
+            // document.getElementById('certificatehidden').style.display = 'block';
+
+            var pdf = new jsPDF('p', 'mm', 'letter');
+
+
+
+            pdf.addHTML(document.getElementById('certificate'), function () {
+                //pdf.internal.scaleFactor = 3.75;
+                pdf.save('@Model.FullName-@DateTime.Now.Ticks' + '.pdf');
+
+                //   document.getElementById('certificatehidden').style.display = 'none';
+            });
+        });
+
+        $("#emailpdf").click(function () {
+
+            //document.getElementById('certificatehidden').style.display = 'block';
+
+            //var pdf = new jsPDF('l', 'pt', 'letter');
+
+            //pdf.addHTML(document.getElementById('certificate'), function () {
+            //  pdf.internal.scaleFactor = 3.75;
+
+            //var fileBytes = btoa(pdf.output());
+
+            //  document.getElementById('certificatehidden').style.display = 'none';
+
+            setTimeout(CallApi(null, null), 9000);
+
+        });
+        //});
+
+    </script>*@

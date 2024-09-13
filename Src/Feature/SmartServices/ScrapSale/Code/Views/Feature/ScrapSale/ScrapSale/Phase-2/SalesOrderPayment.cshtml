@@ -1,0 +1,221 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.ScrapSale.SalesOrderPaymentModel
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        <!-- m26-page-title-start -->
+        <div class="m26-page-title ">
+            <div class="m26-page-title__links">
+                <p class="m26-page-title__backlink">
+                    <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_SALESORDER_DASHBOARD)">@Translate.Text("SS_BD_Dashboard")</a>
+                </p>
+            </div>
+        </div>
+        <!-- m26-page-title-end -->
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+        @if (Model != null)
+        {
+            if (Model.IsOnline)
+            {
+                <p style="display:none;">
+                    Tender No: @(Model.salesDocumentNo) <br />
+                    Epay No: @(Model.Epnumber)<br />
+                    Ept ype: @(Model.Eptype)<br />
+                    Refrence No: @(Model.ReferenceNo)<br />
+                    Deg TransactionId: @(Model.DegTransactionId)<br />
+                    Dewa TransactionId: @(Model.DewaTransactionId)<br />
+                    Receipt: @(Model.ReceiptIdentifiers)<br />
+                </p>
+            }
+        }
+    </div>
+</div>
+@if (Model != null && !Model.IsError)
+{
+    <div class="m66-preloader">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle"> @Translate.Text("RedirectingToPayment")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @id = "ScrapeSaleForm", @style = "position:static;", @data_parsley_focus = "true", @data_form = "true", @class = "form mt12", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+    {
+        @Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.salesDocumentNo)
+        @Html.HiddenFor(m => m.SalesTenderNo)
+        <div class="m39-modal m39-modal--new j131-scrap-sales_modal" data-component="m39-modal" id="modal_true">
+            <button data-trigger="true" class="m39-modal__trigger paymentBtn" id="_vl45qzjg1_trigger" type="button" aria-controls="_vl45qzjg1_content"></button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_vl45qzjg1_content" aria-labelledby="_vl45qzjg1_trigger">
+                <div class="m39-modal__dialog">
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title">@Translate.Text("SS_BD_Pay_PurchaseTender"): @Model.salesDocumentNo</div>
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_SALESORDER_DASHBOARD)" class="m39-modal__button--close" id="_vl45qz455_close" aria-controls="_vl45qz455_content">@Translate.Text("TH.Close")</a>
+                        <span class="aria-only" data-close></span>
+                        <div class="m39-modal__subtitle">@Translate.Text("SS_BD_Pay_PurchaseSubtitle")</div>
+                    </div>
+
+                    <div class="m39-modal__content  padding p-t-5">
+                        <div class="form-field" style="margin-top:1px">
+                            <fieldset class="fieldset">
+                                <legend class="legend-color">.</legend>
+                                <div class="form-field">
+                                    <fieldset class="fieldset form-field form-field__radio--toggle">
+                                        <legend class="legend-color">.</legend>
+                                        <p class="form-field__radio ">
+                                            <label>
+                                                <input toggle-target=".form-field--modalamount" class="form-field__input form-field__input--radio" id="form-field-radio_tp_1_1" aria-label="form-field-radio_tp_1_1" name="IsOnline" type="radio" value="true" checked="checked" aria-describedby="description-for-qiwuv2ro1" data-parsley-errors-container="#description-for-qiwuv2ro1" data-parsley-multiple="radios_group1" data-parsley-id="7">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    <strong>@Translate.Text("SS_BD_P_PayOnline")</strong>
+                                                </span>
+                                                <br>
+                                                <span class="form-field__description align-radio-desc">
+                                                    @Html.Raw(Translate.Text("SS_BD_P_PayOnlineDescription"))
+                                                </span>
+                                            </label>
+
+                                            <div class="form-field form-field--text form-field--modalamount mb0">
+                                                <label for="form-field-salespaymentamt" class="form-field__label">
+                                                    @Translate.Text("SOS_EditAmount")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--currency">
+                                                    @Html.TextBoxFor(m => m.SalesPaymentAmt,
+              new
+              {
+                  @class = "form-field__input form-field__input--text form-field__input--prefixed salespaymentamt",
+                  @id = "form-field-salespaymentamt",
+                  @name = "SalesPaymentAmt",
+                  @type = "number",
+                  @value = Model.SalesPaymentAmt,
+                  @placeholder = @Translate.Text("Enter a amount"),
+                  @aria_describedby = "description-for-salespaymentamt",
+                  @data_parsley_errors_container = "#description-for-salespaymentamt",
+                  @min = "0.01",
+                  @max = @PaymentConstants.MaximumAllowedPaymentAmount,
+                  @step = "any",
+                  @data_parsley_currency = "",
+                  @data_input_truncate = "9",
+                  @data_parsley_min = "0",
+                  @data_parsley_max = PaymentConstants.MaximumAllowedPaymentAmount,
+                  @data_parsley_required_message = Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue),
+                  @data_parsley_currency_message = @Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue),
+                  @data_parsley_min_message = Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue),
+                  @data_parsley_range_message = "",
+                  @lang = "en",
+                  @required = "",
+                  @data_parsley_trigger = "focusout",
+                  @data_parsley_id = "18",
+                  @data_parsley_max_message = @Translate.Text("Easy.payment amount", PaymentConstants.EasyMaximumAllowedPaymentAmount.ToString("0,0.00"))
+              })
+
+                                                </span>
+                                                <div id="description-for-salespaymentamt" class="form-field__messages">
+                                                    @Html.ValidationMessageFor(m => m.SalesPaymentAmt, "", new { @class = "parsley-errors-list" })
+                                                </div>
+                                            </div>
+                                        </p>
+                                        <p class="form-field__radio mt24">
+                                            <label>
+                                                <input toggle-target="" class="form-field__input form-field__input--radio" id="form-field-radio_tp_1_2" name="IsOnline" type="radio" value="false" aria-describedby="description-for-qiwuv2ro1" data-parsley-errors-container="#description-for-qiwuv2ro1" data-parsley-multiple="radios_group1">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    <strong>@Translate.Text("SS_BD_P_PayOffline")</strong>
+                                                </span>
+                                                <br>
+                                                <span class="form-field__description align-radio-desc">
+                                                    @Html.Raw(Translate.Text("SS_BD_P_PayOfflineDescription"))
+                                                </span>
+                                            </label>
+                                        </p>
+                                        <div id="description-for-qiwuv2ro1"></div>
+                                    </fieldset>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div class="m39-modal__footer">
+                        <button id="actualsubmit" type="submit" class="aria-only">@Translate.Text("Continue")</button>
+                        <div id="submit1" class="button button--primary button--next">@Translate.Text("Continue")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="m39-modal__overlay"></div>
+        </div>
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+    }
+<script>
+        docReady(function () {
+            setTimeout(function () {
+                try {
+                    jQuery(".paymentBtn").click();
+                } catch (e) {
+                    jQuery(".paymentBtn").click();
+                }
+
+            }, 200)
+
+            // Unit price disabled enter key
+            setTimeout(function () {
+                jQuery('.salespaymentamt').each(function () {
+                    jQuery(this).off('keydown.submit').on('keydown.submit', function (event) {
+                        if (event.keyCode == 13 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                    })
+                });
+            }, 250)
+
+            jQuery('.m39-model__payment-option-list.first').prepend('<div class="button button--text button--back" id="backtofirstmodal">@Translate.Text("Back")</div>')
+
+            jQuery('#submit1').on('click', function () {
+                if (jQuery('#form-field-radio_tp_1_1').prop('checked')) {
+                    var currency = '@Translate.Text("AED")';
+                    jQuery("#continue-button").html(numeral(parseFloat(jQuery("#form-field-salespaymentamt").val())).format('0,0.00') + " " + currency);
+                    jQuery(this).closest('.m39-modal').find('[data-close]').click();
+                    setTimeout(function () {
+                        var total = parseFloat(jQuery("#form-field-salespaymentamt").val());  //numeral(parseFloat(jQuery("#form-field-salespaymentamt").val()));
+
+                        jQuery('#divPaymentAmountVal').attr('data-value', total);
+                        jQuery('#divPaymentAmountVal').data('value', total);
+
+                        if (numeral(total) > 0) {
+                            //Set payment method based on paid amount
+                            setPaymentMethod(total);
+                            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                            jQuery('.btnmodaltrigger').trigger('click');
+                        }
+                    }, 400);
+                } else {
+                    jQuery('#actualsubmit').click();
+                }
+            });
+
+            jQuery('#backtofirstmodal').on('click', function () {
+                jQuery(this).closest('.m39-modal').find('[data-close]').off('click.custom');
+                jQuery(this).closest('.m39-modal').find('[data-close]').click();
+                setTimeout(function () {
+                    jQuery('.paymentBtn').click();
+                    jQuery('.btnmodaltrigger').closest('.m39-modal').find('[data-close]').off('click.custom').on('click.custom', function () {
+                        window.location.href = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_PORTAL_DASHBOARD)';
+                    });
+                }, 400);
+            });
+
+            jQuery('.btnmodaltrigger').closest('.m39-modal').find('[data-close]').off('click.custom').on('click.custom', function () {
+                window.location.href = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_PORTAL_DASHBOARD)';
+            });
+
+            jQuery('.btnmodaltrigger').closest('.m39-modal').addClass('m39-modal--nofocus');
+
+        })
+</script>
+}

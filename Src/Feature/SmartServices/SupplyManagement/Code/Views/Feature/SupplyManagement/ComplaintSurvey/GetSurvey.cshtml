@@ -1,0 +1,195 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.SmartResponse.SmartResponseHelper;
+@model DEWAXP.Feature.SupplyManagement.Models.ComplaintSurvey.Survey
+
+@{
+
+    string dirClass = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "j120-smart-response--rtl" : "j120-smart-response--ltr";
+}
+
+<div class="j120-smart-response @dirClass" data-journey="j120-smart-response">
+    <div class="box box--7">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <div class="j120-smart-response--window">
+                        <button class="j120-smart-response--survey_back j120-smart-response--back j120-smart-response--button hidden">@_commonHelper.GetSMTranslation("Back")</button>
+                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @data_parsley_focus = "none" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("n", Request.QueryString["n"])
+                            <div class="j120-smart-response--content j120-smart-response--survey">
+
+                                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                                @if (Model != null && Model.questions != null && Model.questions.Count > 0)
+                                {
+                                    int count = Model.questions.OrderBy(x => Convert.ToDouble(x.SrNo)).Where(x => x.subquestionnumber == "").ToArray().Length; //.Where(x => x.subquestionnumber == "").OrderBy(x => x.SrNo).;
+                                    var qusList = Model.questions.OrderBy(x => Convert.ToDouble(x.SrNo)).Where(x => x.subquestionnumber == "");
+                                    var subQusList = Model.questions.OrderBy(x => Convert.ToDouble(x.SrNo)).Where(x => !string.IsNullOrEmpty(x.subquestionnumber) && !string.IsNullOrEmpty(x.questionnumber));
+
+                                    if (ViewData.ModelState.IsValid)
+                                    {
+
+                                        int i = 1;
+
+                                        foreach (var qus in qusList)
+                                        {
+
+                                            <div data-page="@i" class="j120-smart-response--survey__wrapper">
+                                                @if (i == 1)
+                                                {
+                                                    <p class="j120-smart-response--text" style="font-weight:initial">@_commonHelper.GetSMTranslation("Hi") <span style="font-weight:500">@_commonHelper.GetSMTranslation("User")</span><br/> @_commonHelper.GetSMTranslation("Please share your agreement level with the following!")</p><br/>
+                                                }
+
+                                                <p class="j120-smart-response--text">@(qus.questionnumber + ". " + qus.questionname)</p>
+                                                @if (qus.questiontype == "RB")
+                                                {
+
+                                                    <div class="j120-smart-response--survey_star--wrapper">
+                                                        <div class="j120-smart-response--survey_star">
+                                                            <div star-index="0" class="j120-smart-response--survey_star--item"></div>
+                                                        </div>
+                                                        <div class="j120-smart-response--survey_star">
+                                                            <div star-index="1" class="j120-smart-response--survey_star--item"></div>
+                                                        </div>
+                                                        <div class="j120-smart-response--survey_star">
+                                                            <div star-index="2" class="j120-smart-response--survey_star--item"></div>
+                                                        </div>
+                                                        <div class="j120-smart-response--survey_star">
+                                                            <div star-index="3" class="j120-smart-response--survey_star--item"></div>
+                                                        </div>
+                                                        <div class="j120-smart-response--survey_star">
+                                                            <div star-index="4" class="j120-smart-response--survey_star--item"></div>
+                                                        </div>
+                                                        <input type="hidden" class="j120-smart-response--survey_starTotal" id="@qus.questiontype-@qus.SrNo" name="Q-@qus.questiontype-@qus.SrNo">
+                                                    </div>
+
+                                                    <div class="j120-smart-response--survey-desc">
+                                                      @{ 
+                                                          var firsto =qus.options.FirstOrDefault();
+                                                          var lasto = qus.options.LastOrDefault();
+                                                      }
+                                                        <div class="j120-smart-response--survey-desc-d">@firsto.optiontext</div>
+                                                        <div class="j120-smart-response--survey-desc-a">@lasto.optiontext</div>
+                                                    </div>
+
+                                                }
+                                                else if (qus.questiontype == "TB")
+                                                {
+                                                    <div class="form-field form-field--text form-field--textarea j120-smart-response--survey_textarea">
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea" data-textarea="@qus.SrNo" id="@qus.questiontype-@qus.SrNo" name="Q-@qus.questiontype-@qus.SrNo" type="textarea" placeholder="@_commonHelper.GetSMTranslation("Add your own comments")" aria-describedby="description-for-l66b3tzao" data-parsley-errors-container="#description-for-@qus.SrNo" data-parsley-required-message="This field is required" data-parsley-id="22"></textarea>
+                                                        </span>
+                                                        <div id="description-for-@qus.SrNo" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else if (qus.questiontype == "CB")
+                                                {
+
+                                                    <div class="j120-smart-response--survey_improve--suggest j120-smart-response--survey_textarea">
+                                                        @qus.questionname
+                                                        @Html.CheckBox("Q-" + qus.questiontype + "-" + qus.SrNo, new { @class = "hidden j120-smart-response--survey_improveBox", Name = "Q-" + qus.questiontype + "-" + qus.SrNo })
+                                                    </div>
+                                                }
+                                                <div class="j120-smart-response--survey_improve">
+                                                    @{
+
+                                                        var filterSubQus = subQusList.Where(x => x != null && x.questionnumber == qus.questionnumber);
+                                                    }
+                                                    @foreach (var subQitem in filterSubQus.Where(x => x != null))
+                                                    {
+                                                        if (subQitem.questiontype != "CB")
+                                                        {
+                                                            <p class="j120-smart-response--text">
+                                                                @subQitem.questionname
+                                                            </p>
+                                                        }
+                                                        if (subQitem.questiontype == "RB")
+                                                        {
+
+                                                            <div class="j120-smart-response--survey_star--wrapper">
+                                                                <div class="j120-smart-response--survey_star">
+                                                                    <div star-index="0" class="j120-smart-response--survey_star--item"></div>
+                                                                </div>
+                                                                <div class="j120-smart-response--survey_star">
+                                                                    <div star-index="1" class="j120-smart-response--survey_star--item"></div>
+                                                                </div>
+                                                                <div class="j120-smart-response--survey_star">
+                                                                    <div star-index="2" class="j120-smart-response--survey_star--item"></div>
+                                                                </div>
+                                                                <div class="j120-smart-response--survey_star">
+                                                                    <div star-index="3" class="j120-smart-response--survey_star--item"></div>
+                                                                </div>
+                                                                <div class="j120-smart-response--survey_star">
+                                                                    <div star-index="4" class="j120-smart-response--survey_star--item"></div>
+                                                                </div>
+                                                                <input type="hidden" class="j120-smart-response--survey_starTotal" id="@subQitem.questiontype-@subQitem.SrNo" name="SQ-@subQitem.questiontype-@subQitem.SrNo">
+                                                            </div>
+
+                                                            <div class="j120-smart-response--survey-desc">
+                                                                @{
+                                                                    var firsto = subQitem.options.FirstOrDefault();
+                                                                    var lasto = subQitem.options.LastOrDefault();
+                                                                }
+                                                                <div class="j120-smart-response--survey-desc-d">@firsto.optiontext</div>
+                                                                <div class="j120-smart-response--survey-desc-a">@lasto.optiontext</div>
+                                                            </div>
+                                                                    }
+                                                                    else if (subQitem.questiontype == "TB")
+                                                                    {
+
+                                                            <div class="form-field form-field--text form-field--textarea">
+                                                                <span class="form-field__input-wrapper">
+                                                                    <textarea class="form-field__input form-field__input--text form-field__input--textarea" data-textarea="@subQitem.SrNo" id="@subQitem.questiontype-@subQitem.SrNo" type="textarea" name="SQ-@subQitem.questiontype-@subQitem.SrNo" placeholder="@_commonHelper.GetSMTranslation("Add your own comments")" aria-describedby="description-for-l66b3tzao" data-parsley-errors-container="#description-for-@subQitem.SrNo" data-parsley-required-message="This field is required" data-parsley-id="22"></textarea>
+                                                                </span>
+                                                                <div id="description-for-@subQitem.SrNo" class="form-field__messages">
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else if (subQitem.questiontype == "CB")
+                                                        {
+
+                                                            <div class="j120-smart-response--survey_improve--suggest">
+                                                                @subQitem.questionname
+                                                                @Html.CheckBox("SQ-" + subQitem.questiontype + "-" + subQitem.SrNo, new { @class = "hidden j120-smart-response--survey_improveBox", Name = "SQ-" + subQitem.questiontype + "-" + subQitem.SrNo })
+                                                            </div>
+                                                        }
+                                                    }
+
+
+                                                    @if (i != (count))
+                                                    {
+                                                        <a href="" class="button button--primary button--next">@_commonHelper.GetSMTranslation("NEXT")</a>
+                                                    }
+                                                </div>
+                                                <div class="form-field__button @(i != (count)?"hidden":"") mb12">
+                                                    <button type="submit" class="button button--primary button--next" data-submission-text="@_commonHelper.GetSMTranslation("Submitting")...">@_commonHelper.GetSMTranslation("Submit")</button>
+                                                </div>
+                                            </div>
+                                                                    i = i + 1;
+                                                                }
+                                                            }
+
+                                                        }
+
+                            </div>
+                                                        }
+                    </div>
+                    <div class="j120-smart-response--survey_page">
+                        <span class="j120-smart-response--survey_Cpage"></span>/<span class="j120-smart-response--survey_Tpage"></span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</div>

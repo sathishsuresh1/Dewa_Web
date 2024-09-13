@@ -1,0 +1,669 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using System.Linq
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Feature.GatePass.Models.ePass.SubPasses
+@using DEWAXP.Foundation.Content
+@using Roles = DEWAXP.Foundation.Content.Roles
+@model List<DEWAXP.Feature.GatePass.Models.ePass.SecurityPassViewModel>
+
+@if (Model != null && Model.Count > 0)
+{
+    var mainpass = Model.Where(y => !y.Subpass).FirstOrDefault();
+    <div class="j113-epass">
+        <div class="m66-preloader j113-epass--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    if (mainpass != null)
+    {
+        <div class="j113-epass" data-journey="j113-epass">
+            <div class="grid">
+                @Html.Sitecore().Placeholder("pagetitle")
+                <div class="grid__row mb12">
+                    <div class="grid__column grid__column--12  grid__column--form">
+                        <div class="grid__column grid__column--12 ">
+                            <div class="m10-avatar">
+                                <div class="m10-avatar__content">
+                                    <form class="hidden" action="#" method="POST" form-skipvalidation="true">
+                                        @Html.AntiForgeryToken()
+                                    </form>
+                                    <div class="j113-epass--status @mainpass.strclass.ToLower()">@(!string.IsNullOrWhiteSpace(mainpass.strstatus) ? mainpass.strstatus : " N/A")</div>
+                                    <div>
+                                        @if ((string)ViewBag.role == Roles.DewaSupplier)
+                                        {
+                                            if (mainpass.wppass && (mainpass.status == SecurityPassStatus.Active || mainpass.status == SecurityPassStatus.SoontoExpire) && mainpass.enablerenewbutton)
+                                            {
+                                                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.WP_PASSRENEWAL)?passNumber=@mainpass.grouppassid" class="button button--primary  button--next" id="Renewal">@Translate.Text("Renewal")</a>
+                                            }
+                                            if (mainpass.status == SecurityPassStatus.UnderApprovalinWorkPermit || mainpass.status == SecurityPassStatus.PendingApprovalwithCoordinator || mainpass.status == SecurityPassStatus.PendingApprovalwithSecurity)
+                                            {
+                                                <a href="#" class="button button--primary j113-epass--records_remove icon-cancel"
+                                                   id="Cancel" data-type="@(mainpass.wppass ? "workpermit" : "")"
+                                                   data-groupid="@mainpass.grouppassid"
+                                                   data-id="@mainpass.passNumber">@Translate.Text("Epass.Cancel")</a>
+                                            }
+
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            @Html.Partial("~/Views/Feature/GatePass/ePass/Module/_CancelPasses.cshtml")
+                        </div>
+                    </div>
+                </div>
+                <div class="box box--3">
+                    <div class="grid">
+                        <div class="grid__row">
+                            <div class="grid__colum grid__column--12">
+                                <div class="j113-epass--pass_detail_title">
+                                    @Translate.Text("Epass.Passdetails")
+                                </div>
+                                <div class="j113-epass--pass_detail_card">
+                                    <div class="grid__column grid__column--6">
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-grouppassnumber">
+                                                @Translate.Text("Request Number")
+                                            </label>
+                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                <input name="segment" class="form-field__input form-field__input--readonly"
+                                                       id="form-field-grouppassnumber" aria-describedby="description-for-grouppassnumber"
+                                                       type="text" readonly=""
+                                                       value="@(!string.IsNullOrWhiteSpace(mainpass.grouppassid) ? mainpass.grouppassid : " N/A")"
+                                                       data-parsley-errors-container="#description-for-grouppassnumber"
+                                                       data-parsley-trigger="focusout">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-passIssueDate">@Translate.Text("Epass.From")</label>
+                                            @if (mainpass.passIssueDate != null)
+                                            {
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    @Html.TextBoxFor(x => mainpass.passIssueDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-passIssueDate", @name = "segment", @type = "text" })
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-passIssueDate" name="passIssueDate" type="text" value=" N/A">
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f2">@Translate.Text("Epass.Timing")</label>
+                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-wsd1kg28f2" aria-describedby="description-for-wsd1kg28f2" type="text" readonly="" value="@mainpass.fromTime - @mainpass.toTime" data-parsley-errors-container="#description-for-wsd1kg28f2" data-parsley-trigger="focusout">
+                                            </div>
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(mainpass.Purpose))
+                                        {
+                                            <div class="form-field form-field--readonly">
+                                                <label class="form-field__label form-field__label--readonly" for="form-field-purpose">@Translate.Text("wp.Purpose of the visit")</label>
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-purpose" aria-describedby="description-for-purpose"
+                                                           type="text" readonly="" value="@mainpass.Purpose" data-parsley-errors-container="#description-for-purpose" data-parsley-trigger="focusout">
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(mainpass.RejectRemarks))
+                                        {
+                                            <div class="form-field form-field--readonly">
+                                                <label class="form-field__label form-field__label--readonly" for="form-field-RejectRemarks">@Translate.Text("Reject Remarks")</label>
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-RejectRemarks" aria-describedby="description-for-RejectRemarks"
+                                                           type="text" readonly="" value="@mainpass.RejectRemarks" data-parsley-errors-container="#description-for-RejectRemarks" data-parsley-trigger="focusout">
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="grid__column grid__column--6">
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-passtype">
+                                                @Translate.Text("Epass.PassType")
+                                            </label>
+                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-passtype" aria-describedby="description-for-passtype" type="text" readonly="" value="@(mainpass.passType != null ? mainpass.passType : " N/A")" data-parsley-errors-container="#description-for-wsd1kg28f4" data-parsley-trigger="focusout">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-passExpiryDate">@Translate.Text("Epass.TO")</label>
+                                            @if (mainpass.passExpiryDate != null)
+                                            {
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    @Html.TextBoxFor(m => mainpass.passExpiryDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-passExpiryDate", @name = "segment", @type = "text" })
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-passExpiryDate" name="passExpiryDate" type="text" value=" N/A">
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-Subcontractor">@Translate.Text("Epass.Subcontractor")</label>
+                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-Subcontractor" aria-describedby="description-for-Subcontractor" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.Subcontractor) ? mainpass.Subcontractor : " N/A")" data-parsley-errors-container="#description-for-Subcontractor" data-parsley-trigger="focusout">
+                                            </div>
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(mainpass.Remarks))
+                                        {
+                                            <div class="form-field form-field--readonly">
+                                                <label class="form-field__label form-field__label--readonly" for="form-field-Remarks">@Translate.Text("Remarks")</label>
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-Remarks" aria-describedby="description-for-Remarks"
+                                                           type="text" readonly="" value="@mainpass.Remarks" data-parsley-errors-container="#description-for-Remarks" data-parsley-trigger="focusout">
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="j113-epass--pass_detail_title">
+                                    @Translate.Text("Epass.Locations")
+                                </div>
+                                <div class="j113-epass--pass_detail_card">
+                                    <div class="grid__column grid__column--8">
+                                        @if (mainpass.wppass && (mainpass.status == SecurityPassStatus.Active || mainpass.status == SecurityPassStatus.SoontoExpire))
+                                        {
+                                            <button class="button button--primary button--edit button--very_small btneditlocation2" id="btneditlocation2" type="button">@Translate.Text("Add / Remove Location")</button>
+                                        }
+                                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form mt12", @id = "form-pendingrequest", data_form = "true", enctype = "multipart/form-data" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <div class="form-field form-field--select form-field--select-single hidden form-loc">
+                                                <label for="form-field-selectedlocations" class="form-field__label">
+                                                    @Translate.Text("Epass.Location")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--select2">
+                                                    <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2"
+                                                            id="form-field-selectedlocations"
+                                                            name="SelectedLocation"
+                                                            multiple="multiple"
+                                                            required=""
+                                                            aria-describedby="description-for-ma7826si2"
+                                                            data-parsley-errors-container="#description-for-ma7826si2"
+                                                            data-placeholder="@Translate.Text("Epass.SelectLocation")"
+                                                            data-parsley-required-message="@Translate.Text("Epass.SelectLocation")">
+                                                        @if (ViewBag.LocationList != null)
+                                                        {
+                                                            foreach (var item in (IEnumerable<SelectListItem>)ViewBag.LocationList)
+                                                            {
+                                                                <option value="@item.Value" @(mainpass.SeletecedLocation != null && mainpass.SeletecedLocation.Contains(item.Value) ? "selected" : string.Empty)>@item.Text</option>
+
+                                                            }
+                                                        }
+                                                    </select>
+                                                </span>
+                                                <div id="description-for-ma7826si2" class="form-field__messages">
+                                                </div>
+                                                <div>
+                                                    <div class="button button--primary button--locHide button--very_small" id="btnConfirmEditLocation">
+                                                        @Translate.Text("Confirm")
+                                                    </div>
+                                                    <div class="button button--locHide button--very_small">
+                                                        @Translate.Text("Close")
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div class="form-field form-field--readonly mt12">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-locations">
+                                                @*@Translate.Text("Epass.Locations")*@
+                                                <span>
+                                                    @*@if (mainpass.wppass && (mainpass.status == SecurityPassStatus.Active || mainpass.status == SecurityPassStatus.SoontoExpire))
+                                                        {
+                                                            <button class="button button--primary button--edit button--very_small btneditlocation" id="btneditlocation" type="button">@Translate.Text("Add / Remove Location")</button>
+                                                        }*@
+                                                </span>
+                                            </label>
+
+
+
+                                            @if (mainpass.Location.Count > 0 && mainpass.WpLocation != null)
+                                            {
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <div class="m23-table m23-table--asymetric-40" data-component="m23-table">
+                                                        <h3 class="m23-table__title "></h3>
+                                                        <table class="m23-table__content-table">
+                                                            <thead class="m23-table__content-table-header">
+                                                                <tr class="m23-table__content-table-row">
+                                                                    <th class="m23-table__content-table-cell--header no-wrap ">@Translate.Text("Epass.Locations")</th>
+                                                                    <th class="m23-table__content-table-cell--header">@Translate.Text("Epass.Status")</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody class="m23-table__content-table-body">
+                                                                @foreach (DEWAXP.Foundation.Integration.Responses.SmartVendor.WorkPermit.Grouppasslocationlistres loc in mainpass.WpLocation)
+                                                                {
+                                                                    <tr class="m23-table__content-table-row">
+                                                                        <td class="m23-table__content-table-cell">@loc.Location</td>
+                                                                        <td class="m23-table__content-table-cell">
+                                                                            @EpassHelper.getWPLocationStatus(loc.Status, mainpass.status)
+                                                                        </td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-locations" aria-describedby="description-for-locations" type="text" readonly="" value="N/A" data-parsley-errors-container="#description-for-locations" data-parsley-trigger="focusout">
+                                                </div>
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="j113-epass--pass_detail_title">
+                                    @Translate.Text("Epass.Projectdetails")
+                                </div>
+                                <div class="j113-epass--pass_detail_card">
+                                    <div class="grid__column grid__column--6">
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-projectname">@Translate.Text("Epass.IndProjectName")</label>
+                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-projectname" aria-describedby="description-for-projectname" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.projectName) ? mainpass.projectName : " N/A")" data-parsley-errors-container="#description-for-name" data-parsley-trigger="focusout">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            @if (mainpass.wppass)
+                                            {
+                                                <label class="form-field__label form-field__label--readonly"
+                                                       for="form-field-projectcordinatorname">@Translate.Text("wp.ProjectCoordinatorName")</label>
+                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                        <input name="segment" class="form-field__input form-field__input--readonly"
+                                                               id="form-field-projectcordinatorname"
+                                                               aria-describedby="description-for-projectcordinatorname"
+                                                               type="text" readonly=""
+                                                               value="@(!string.IsNullOrWhiteSpace(mainpass.wpprojectcoordinatorname) ? mainpass.wpprojectcoordinatorname : " N/A")"
+                                                               data-parsley-errors-container="#description-for-projectcordinatorname" data-parsley-trigger="focusout">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <label class="form-field__label form-field__label--readonly" for="form-field-projectStartDate">@Translate.Text("Epass.Startdate")</label>
+                                                    if (mainpass.projectStartDate != null)
+                                                    {
+                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                            @Html.TextBoxFor(m => mainpass.projectStartDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-projectStartDate", @name = "segment", @type = "text" })
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-projectStartDate" name="projectStartDate" type="text" value=" N/A">
+                                                        </div>
+                                                    }
+                                                }
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            <label class="form-field__label form-field__label--readonly" for="form-field-companyName">@Translate.Text("Epass.Companyname")</label>
+                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-companyName" aria-describedby="description-for-companyName" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.companyName) ? mainpass.companyName : " N/A")" data-parsley-errors-container="#description-for-companyname" data-parsley-trigger="focusout">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid__column grid__column--6">
+                                        <div class="form-field form-field--readonly">
+                                            @if (mainpass.wppass)
+                                            {
+                                                <label class="form-field__label form-field__label--readonly"
+                                                       for="form-field-projectstatus">@Translate.Text("Epass.Project")</label>
+                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                        <input name="segment" class="form-field__input form-field__input--readonly"
+                                                               id="form-field-projectstatus"
+                                                               aria-describedby="description-for-projectstatus"
+                                                               type="text" readonly=""
+                                                               value="@(!string.IsNullOrWhiteSpace(mainpass.projectId) ? mainpass.projectId : " N/A")"
+                                                               data-parsley-errors-container="#description-for-projectstatus" data-parsley-trigger="focusout">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <label class="form-field__label form-field__label--readonly" for="form-field-projectstatus">@Translate.Text("Epass.Status")</label>
+                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-projectstatus" aria-describedby="description-for-projectstatus" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.projectStatus) ? mainpass.projectStatus : " N/A")" data-parsley-errors-container="#description-for-projectstatus" data-parsley-trigger="focusout">
+                                                    </div>
+                                                }
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            @if (mainpass.wppass)
+                                            {
+                                                <label class="form-field__label form-field__label--readonly"
+                                                       for="form-field-projectcordinatoremail">@Translate.Text("wp.ProjectCoordinatorEmail")</label>
+                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                        <input name="segment" class="form-field__input form-field__input--readonly"
+                                                               id="form-field-projectcordinatoremail"
+                                                               aria-describedby="description-for-projectcordinatoremail"
+                                                               type="text" readonly=""
+                                                               value="@(!string.IsNullOrWhiteSpace(mainpass.wpprojectcoordinatoremail) ? mainpass.wpprojectcoordinatoremail : " N/A")"
+                                                               data-parsley-errors-container="#description-for-projectcordinatoremail" data-parsley-trigger="focusout">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <label class="form-field__label form-field__label--readonly" for="form-field-projectEndDate">@Translate.Text("Epass.Enddate")</label>
+                                                    if (mainpass.projectEndDate != null)
+                                                    {
+                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                            @Html.TextBoxFor(m => mainpass.projectEndDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-projectEndDate", @name = "segment", @type = "text" })
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-projectEndDate" name="projectEndDate" type="text" value=" N/A">
+                                                        </div>
+                                                    }
+                                                }
+                                        </div>
+                                        <div class="form-field form-field--readonly">
+                                            @if (mainpass.wppass)
+                                            {
+                                                <label class="form-field__label form-field__label--readonly"
+                                                       for="form-field-projectcordinatormobile">@Translate.Text("wp.ProjectCoordinatorMobileNumber")</label>
+                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                        <input name="segment" class="form-field__input form-field__input--readonly"
+                                                               id="form-field-projectcordinatormobile"
+                                                               aria-describedby="description-for-projectcordinatormobile"
+                                                               type="text" readonly=""
+                                                               value="@(!string.IsNullOrWhiteSpace(mainpass.wpprojectcoordinatormobile) ? mainpass.wpprojectcoordinatormobile : " N/A")"
+                                                               data-parsley-errors-container="#description-for-projectcordinatormobile" data-parsley-trigger="focusout">
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <label class="form-field__label form-field__label--readonly" for="form-field-departmentName">@Translate.Text("Epass.Departmentname")</label>
+                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-departmentName" aria-describedby="description-for-departmentName" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.departmentName) ? mainpass.departmentName : " N/A")" data-parsley-errors-container="#description-for-departmentname" data-parsley-trigger="focusout">
+                                                    </div>
+                                                }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="j113-epass--pass_detail_title">
+                                    @Translate.Text("Pass List")
+                                </div>
+                                <table class="j113-epass--table">
+                                    <thead class="j113-epass--table_header">
+                                        <tr>
+                                            <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                                            <th class="j113-epass--table_cell j113-epass--table_cell--name">@Translate.Text("Epass.IndName")</th>
+                                            <th class="j113-epass--table_cell">@Translate.Text("Epass.Expirydate")</th>
+                                            <th class="j113-epass--table_cell">@Translate.Text("Epass.PassType")</th>
+                                            <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                                            @if ((string)ViewBag.role == Roles.DewaSupplier)
+                                            {
+                                                <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr class="j113-epass--table_row">
+                                                <td class="j113-epass--table_cell">
+                                                    <a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?passNumber=@item.mainpassNumber">@item.passNumber</a>
+                                                </td>
+                                                <td class="j113-epass--table_cell">
+                                                    @item.name
+                                                </td>
+                                                <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                                                    @Html.DisplayFor(model => item.strpassExpiryDate)
+                                                </td>
+                                                <td class="j113-epass--table_cell">
+                                                    @item.passType
+                                                </td>
+                                                <td class="j113-epass--table_cell">
+                                                    <div class="j113-epass--status @item.strclass.ToLower()">@(item.strstatus)</div>
+                                                </td>
+                                                @if ((string)ViewBag.role == Roles.DewaSupplier)
+                                                {
+                                                    <td class="j113-epass--table_cell">
+                                                        @*<a href="#" class="link j113-epass--records_remove icon-cancel" data-type="@(item.wppass?"workpermit":"")" data-groupid="@item.grouppassid" data-id="@item.passNumber">@Translate.Text("Epass.Cancel")</a>*@
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+
+
+                                    </tbody>
+                                </table>
+                                <div class="j113-epass--keypair">
+                                    @foreach (var item in Model)
+                                    {
+                                        <div class="m42-keyvalue">
+                                            <dl>
+                                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?passNumber=@item.passNumber"> @item.passNumber</a></dd>
+                                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.IndName")</dt>
+                                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.name</dd>
+                                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Expirydate")</dt>
+                                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                    @Html.DisplayFor(model => item.strpassExpiryDate)
+                                                </dd>
+                                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.PassType")</dt>
+                                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.passType</dd>
+                                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                    <div class="j113-epass--status @item.strclass.ToLower()">
+                                                        @(item.strstatus)
+                                                    </div>
+                                                </dd>
+                                                @if ((string)ViewBag.role == Roles.DewaSupplier)
+                                                {
+                                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                        @* <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@item.passNumber">@Translate.Text("Epass.Cancel")</a>*@
+                                                    </dd>
+                                                }
+                                            </dl>
+                                        </div>
+                                    }
+
+                                </div>
+                                @*<div id="my_idmodal">
+                                        <div class="m39-modal m39-modal--new" data-component="m39-modal" id="editlocation_modal_true" data-labels='{"approve":"Approve"}'>
+                                            <button data-trigger="true" class="m39-modal__trigger" type="button" id="_8gguopjrg_trigger" aria-controls="_8gguopjrg_content"></button>
+                                            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_8gguopjrg_content" aria-labelledby="_8gguopjrg_trigger">
+                                                <div class="m39-modal__dialog" id="ApproverForm">
+
+                                                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-pendingrequest", data_form = "true", enctype = "multipart/form-data" }))
+                                                    {
+                                                        @Html.AntiForgeryToken()
+                                                        <div class="m39-modal__header">
+                                                            <div class="m39-modal__title">
+                                                                @Translate.Text("Edit location")
+                                                            </div>
+                                                            <a data-close="true" id="btnclose" class="m39-modal__button--close">
+                                                                @Translate.Text("Epass.Close")
+                                                            </a>
+                                                        </div>
+                                                        <div class="m39-modal__content">
+                                                            <div class="grid__row mb0">
+                                                                <div class="grid__column grid__column--12 mb24">
+                                                                    <div id="description-for-success" class="form-field__messages clear_both red">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="grid__column grid__column--12 mb24">
+                                                                    <div class="form-field form-field--select form-field--select-single">
+                                                                        <label for="form-field-selectedlocations" class="form-field__label">
+                                                                            @Translate.Text("Epass.Location")
+                                                                        </label>
+                                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--select2">
+                                                                            <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2"
+                                                                                    id="form-field-selectedlocations"
+                                                                                    name="SelectedLocation"
+                                                                                    multiple="multiple"
+                                                                                    required=""
+                                                                                    aria-describedby="description-for-ma7826si2"
+                                                                                    data-parsley-errors-container="#description-for-ma7826si2"
+                                                                                    data-placeholder="@Translate.Text("Epass.SelectLocation")"
+                                                                                    data-parsley-required-message="@Translate.Text("Epass.SelectLocation")">
+                                                                                @if (ViewBag.LocationList != null)
+                                                                                {
+                                                                                    foreach (var item in (IEnumerable<SelectListItem>)ViewBag.LocationList)
+                                                                                    {
+                                                                                        <option value="@item.Value" @(mainpass.SeletecedLocation != null && mainpass.SeletecedLocation.Contains(item.Value) ? "selected" : string.Empty)>@item.Text</option>
+
+                                                                                    }
+                                                                                }
+                                                                            </select>
+                                                                        </span>
+                                                                        <div id="description-for-ma7826si2" class="form-field__messages">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="m39-modal__footer">
+                                                            <button class="button button--primary" id="btnConfirmEditLocation" data-accountupdate="true" type="button" data-modal-confirm="true">@Translate.Text("Epass.Confirm")</button>
+                                                        </div>
+                                                    }
+
+                                                </div>
+                                            </div>
+                                            <div class="m39-modal__overlay"> </div>
+                                        </div>
+                                    </div>*@
+                                <div class="m39-modal j113-epass_modal--confirm" data-component="m39-modal" id="editlocationmodal">
+                                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="editlocationmodal_trigger" aria-controls="editlocationmodal_content"></button>
+                                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="editlocationmodal_content" aria-labelledby="editlocationmodal_trigger">
+                                        <div class="m39-modal__dialog">
+                                            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                                            {
+                                                @*@Html.AntiForgeryToken()*@
+                                                <div class="m39-modal__header">
+                                                    <div class="m39-modal__title">
+                                                        @Translate.Text("Epass.SuccessMess")
+                                                    </div>
+                                                    <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="success_content"></a>
+                                                </div>
+                                                <div class="m39-modal__content">
+                                                    <div class="grid__row">
+                                                        <span id="responseMessage">@Translate.Text("Location has been edited successfully")</span>
+                                                    </div>
+                                                </div>
+                                                <div class="m39-modal__footer">
+                                                    <div id="editsuccessfulbutton" class="button button--primary m39-m12-no">
+                                                        @Translate.Text("Epass.Ok")
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="m39-modal__overlay"> </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <style type="text/css">
+            .tblspass {
+                width: 100%;
+            }
+
+                .tblspass thead tr th {
+                    padding: 2px 0 2px 2px;
+                    font-weight: bold;
+                    border: 2px solid #818080;
+                }
+
+                .tblspass tbody tr td {
+                    padding: 2px;
+                    border: 1px solid #cac9c9;
+                }
+        </style>
+        <script type="text/javascript">
+        docReady(function () {
+            setTimeout(function () {
+                jQuery("#form-field-selectedlocations").closest('.form-field--select').find("ul.select2-selection__rendered").attr("style", "padding:5px 12px 8px;");
+            }, 250);
+            $('.btneditlocation').off('click.edit').on('click.edit', function () {
+                $('#editlocation_modal_true').find('.m39-modal__trigger').click();
+            });
+            $("#btnConfirmEditLocation").click(function () {
+                event.preventDefault();
+                event.stopPropagation();
+                jQuery("#form-field-selectedlocations").parsley().validate();
+                if (jQuery("#form-field-selectedlocations").parsley().isValid()) {
+                    var tolistlocations = [];
+                    $('#form-field-selectedlocations option:selected').each(function () {
+                        tolistlocations.push($(this).val());
+                    });
+                    //var $tolist = tolistlocations.join("; ");
+                    var data = AddForgeryToken({
+                        grouppassid: '@mainpass.grouppassid',
+                        locations: tolistlocations,
+                    }, "form-pendingrequest");
+                    Approvebuttonconfirm(data);
+                }
+            });
+            $(".btneditlocation2").off("click.loc").on("click.loc", function () {
+                $(".form-loc").show();
+            });
+            $(".button--locHide").each(function () {
+                $(this).off("click.loc").on("click.loc", function () {
+                    $(".form-loc").hide();
+                });
+            });
+            function Approvebuttonconfirm(data) {
+                var url = "/api/sitecore/WorkPermit/EditLocation";
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    data: data,
+                    beforeSend: function () {
+                        jQuery('.j113-epass--loader').show();
+                        jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                    },
+                    complete: function () {
+                        jQuery('.j113-epass--loader').hide();
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                   success: function(response) {
+                        if (response.status) {
+                            jQuery('#responseMessage').html(response.Message);
+                            jQuery("#ApproverForm").find("a[data-close='true']").click();
+                            jQuery('#editlocationmodal').find('.m39-modal__trigger').trigger('click');
+                        }
+                        else {
+                            var msg= '@mainpass.passNumber';
+                            //jQuery(".m39-modal__title").html(msg);
+                            jQuery("#responseMessage").html(response.Message);
+                            jQuery("#ApproverForm").find("a[data-close='true']").click();
+                            jQuery('#editlocationmodal').find('.m39-modal__trigger').trigger('click');
+                       }
+                    }
+                });
+        }
+            jQuery("#editsuccessfulbutton").on('click', function (event) {
+                window.location.reload();
+            });
+        });
+
+        </script>
+    }
+}

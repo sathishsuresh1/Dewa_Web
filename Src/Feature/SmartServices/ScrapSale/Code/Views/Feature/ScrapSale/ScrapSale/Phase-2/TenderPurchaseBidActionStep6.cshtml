@@ -1,0 +1,203 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.ScrapSale.Models.ScrapSale.TenderBidingStep6Model
+
+@{
+    var src1 = Model.TenderForm_AttachmentFileBinary1 != null ? "data:image;base64," + Convert.ToBase64String(Model.TenderForm_AttachmentFileBinary1) : "/images/preview@2x.png";
+    var srctxt1 = !string.IsNullOrWhiteSpace(Model.TenderForm_AttachmentFileName1) ? Model.TenderForm_AttachmentFileName1 : "";
+    var src2 = Model.TenderForm_AttachmentFileBinary2 != null ? "data:image;base64," + Convert.ToBase64String(Model.TenderForm_AttachmentFileBinary2) : "/images/preview@2x.png";
+    var srctxt2 = !string.IsNullOrWhiteSpace(Model.TenderForm_AttachmentFileName2) ? Model.TenderForm_AttachmentFileName2 : "";
+}
+<div class="grid">
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP5)" class="button button--text button--back">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">
+                    @Translate.Text("SS_BD_Header") @Model.TenderNumber
+                </h2>
+                <p class="text-page__intro">
+                    @if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft)
+                    {
+                        @Model.TenderARDescription
+                    }
+                    else
+                    {
+                        @Model.TenderEndDescription
+                    }
+                </p>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="7" data-current-step="6" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="false">
+                <div class="m38-steptracker__info-wrapper">@Translate.Text("SS_BD_Step6")</div>
+                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @*<h3 class="text__section-title">Tender Bond/EMD Receipts</h3>*@
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+         FormMethod.Post, new
+         {
+             @class = "form",
+             @id = "IdTenderbidActionStep6",
+             data_form = "true",
+             data_parsley_focus = "none",
+             @data_submit_validate = "enabled",
+             enctype = "multipart/form-data",
+             @autocomplete = "off"
+         }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+                <fieldset class="fieldset">
+                    <legend class="legend">@Translate.Text("SS_BD_FormAttach")</legend>
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+
+                                <img src="@src1"
+                                     data-src="/images/preview@2x.png"
+                                     data-success="/images/preview@2x.png"
+                                     class="form-field__preview"
+                                     aria-hidden="true"
+                                     role="presentation"
+                                     alt="@srctxt1"
+                                     data-uploader-image="TenderForm_AttachedDocument1">
+
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label for="form-field-TenderForm_AttachedDocument1" class="form-field__label">
+                                    <strong class="form-field__label-description"></strong>
+                                </label>
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               id="form-field-TenderForm_AttachedDocument1"
+                                               name="TenderForm_AttachedDocument1"
+                                               type="file"
+                                               @((src1 == null || src1 == "/images/preview@2x.png") ? "required=\"=\"" : "")
+                                               aria-describedby="description-for-TenderForm_AttachedDocument1"
+                                               data-parsley-errors-container="#description-for-TenderForm_AttachedDocument1"
+                                               data-parsley-required-message="@Translate.Text("SS_BD_FormAttachReq")"
+                                               data-uploader-field="TenderForm_AttachedDocument1"
+                                               accept="image/x-png,,image/jpg,,image/jpeg,,image/bmp,,application/pdf" data-accepts='"jpg", "bmp","png","jpeg","pdf"' data-size="10048000">
+
+                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                <p class="form-field__input--upload-filename" data-uploader-filename="TenderForm_AttachedDocument1" @(!string.IsNullOrWhiteSpace(srctxt1) ? "style=display:block !important" : "")>@srctxt1</p>
+                                <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="TenderForm_AttachedDocument1" @(!string.IsNullOrWhiteSpace(srctxt1) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button></p>
+                                @Html.HiddenFor(m => m.TenderForm_AttachmentRemove1, new { id = "flagremove1" })
+                            </div>
+
+                        </div>
+
+                        <div id="description-for-TenderForm_AttachedDocument1" class="form-field__messages">
+                            <p class="form-field__description">@Translate.Text("SS_BD_FileUploaderNote")</p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="fieldset">
+                    <legend class="legend">@Translate.Text("SS_BD_CoverAttach")</legend>
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+
+                                <img src="@src2"
+                                     data-src="/images/preview@2x.png"
+                                     data-success="/images/preview@2x.png"
+                                     class="form-field__preview"
+                                     aria-hidden="true"
+                                     role="presentation"
+                                     alt="@srctxt2"
+                                     data-uploader-image="TenderForm_AttachedDocument2">
+
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label for="form-field-TenderForm_AttachedDocument2" class="form-field__label">
+                                    <strong class="form-field__label-description"></strong>
+                                </label>
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               id="form-field-TenderForm_AttachedDocument2"
+                                               name="TenderForm_AttachedDocument2"
+                                               type="file"
+                                               aria-describedby="description-for-TenderForm_AttachedDocument2"
+                                               data-parsley-errors-container="#description-for-TenderForm_AttachedDocument2"
+                                               data-parsley-required-message="@Translate.Text("SS_BD_CoverAttachReq")"
+                                               data-uploader-field="TenderForm_AttachedDocument2"
+                                               accept="image/x-png,,image/jpg,,image/jpeg,,image/bmp,,application/pdf" data-accepts='"jpg", "bmp","png","jpeg","pdf"' data-size="10048000">
+
+                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+
+
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                <p class="form-field__input--upload-filename" data-uploader-filename="TenderForm_AttachedDocument2" @(!string.IsNullOrWhiteSpace(srctxt2) ? "style=display:block !important" : "")>@srctxt2</p>
+                                <p><button class="button button--text button--remove hidden" data-removeindex="2" data-uploader-remove="TenderForm_AttachedDocument2" @(!string.IsNullOrWhiteSpace(srctxt2) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button></p>
+                                @Html.HiddenFor(m => m.TenderForm_AttachmentRemove2, new { id = "flagremove2" })
+                            </div>
+
+                        </div>
+
+                        <div id="description-for-TenderForm_AttachedDocument2" class="form-field__messages">
+                            <p class="form-field__description">@Translate.Text("SS_BD_FileUploaderNote")</p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="form-field__button">
+                    <button type="submit" class="button button--primary button--fullwidth-mobile" data-submission-text="@Translate.Text("Continue")...">@Translate.Text("Next")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+
+<script type="text/javascript">
+    jQuery('.button--remove').each(function () {
+        jQuery(this).off('click.remove').on('click.remove', function () {
+            var $this = jQuery(this);
+
+            setTimeout(function () {
+                var $index = $this.attr('data-removeindex');
+                if ($index == 1) {
+                    jQuery("#flagremove1").val(true);
+                    jQuery("#form-field-TenderForm_AttachedDocument1").attr('required', true);
+                }
+                if ($index == 2) {
+                    jQuery("#flagremove2").val(true);
+                }
+                $this.closest('.form-field__input-wrapper').find('.form-field__input--upload').change();
+
+            }, 100)
+        });
+    });
+</script>

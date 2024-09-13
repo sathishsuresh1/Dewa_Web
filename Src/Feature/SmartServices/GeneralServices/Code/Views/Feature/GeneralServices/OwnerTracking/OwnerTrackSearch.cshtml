@@ -1,0 +1,265 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Feature.GeneralServices.Models.OwnerTracking
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model TrackOwnerModel
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="m26-page-title title_message">
+                <div class="m26-page-title__links">
+                </div>
+                <h2 class="text__page-title">@Translate.Text("OTS_title")</h2>
+            </div>
+            <p class="intro-text mt12">@Translate.Text("OTS_description") </p>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "ownertrackingform", @class = "form form--single_line", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(x => x.isViewDetail, new { id = "isViewDetail" })
+                @Html.HiddenFor(x => x.processType, new { id = "processType" })
+                @Html.HiddenFor(x => x.nocNumer, new { id = "nocNumer" })
+                @Html.HiddenFor(x => x.applicationNumer, new { id = "applicationNumer" })
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-searchType" class="form-field__label hidden">
+                        Select
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @*<select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-searchType" name="selectedSearchType" aria-describedby="description-for-searchType" data-parsley-errors-container="#description-for-searchType">
+                                <option value="1" selected>Search by Application Number</option>
+                                <option value="2">Search by Emirates ID</option>
+                                <option value="3">Search by Plot number</option>
+                                <option value="4">Search by NOC Number</option>
+                            </select>*@
+                        @Html.DropDownList("selectedSearchType", (IEnumerable<SelectListItem>
+                            )Model.SearchOptions,
+                            new
+                            {
+                            @class = "form-field__input form-field__input--select form-field__input--select-full",
+                            @id = "form-field-searchType",
+                            @name = "selectedSearchType",
+                            @aria_describedby = "description-for-searchType",
+                            @data_parsley_id = "20"
+                            })
+                    </span>
+                    <div id="description-for-searchType" class="form-field__messages">
+                    </div>
+                </div>
+
+                <div class="form-field form-field--text">
+                    <label for="form-field-search" class="form-field__label hidden">
+                        Text Field
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text" id="form-field-search" name="SearchText" value="@Model.SearchText" type="text" placeholder="@Translate.Text("OTS_searchText")" aria-describedby="description-for-search" data-parsley-errors-container="#description-for-search" />
+                    </span>
+                    <div id="description-for-search" class="form-field__messages">
+                    </div>
+                </div>
+                if (ViewBag.IsLoggedIn)
+                {
+                    <div class="form-field--text_float">
+                        @Translate.Text("OTS_or")
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-applicationtype" class="form-field__label hidden">
+                            Select
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @*<select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-applicationtype" name="selectedApplicationType" aria-describedby="description-for-applicationtype" data-parsley-errors-container="#description-for-applicationtype">
+                                    <option value="2" selected>Application Type</option>
+                                    <option value="1">Option 1</option>
+                                    <option value="2">Option 2</option>
+                                </select>*@
+                            @Html.DropDownList("selectedApplicationType", (IEnumerable<SelectListItem>
+                                )Model.ApplicationTypeList,
+                                Sitecore.Globalization.Translate.Text("OTS_Select_ApplicationType"),
+                                new
+                                {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-applicationtype",
+                                @name = "selectedApplicationType",
+                                @aria_describedby = "description-for-applicationtype",
+                                @data_parsley_id = "20"
+                                })
+                        </span>
+                        <div id="description-for-applicationtype" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field--text_float">
+                        @Translate.Text("OTS_or")
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-projectarea" class="form-field__label hidden">
+                            Select
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @*<select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-projectarea" name="selectedProjectArea" aria-describedby="description-for-projectarea" data-parsley-errors-container="#description-for-projectarea">
+                                    <option value="2" selected>Project Area</option>
+                                    <option value="1">Option 1</option>
+                                    <option value="2">Option 2</option>
+                                </select>*@
+                            @Html.DropDownList("selectedProjectArea", (IEnumerable<SelectListItem>
+                                )Model.ProjectAreaList,
+                                Sitecore.Globalization.Translate.Text("OTS_Select_ProjectArea"),
+                                new
+                                {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-projectarea",
+                                @name = "selectedProjectArea",
+                                @aria_describedby = "description-for-projectarea",
+                                @data_parsley_id = "20"
+                                })
+                        </span>
+                        <div id="description-for-mqbdhst54" class="form-field__messages">
+                        </div>
+                    </div>
+                }
+                <div class="form-field__button">
+                    <button class="button button--primary" id="btnSearch" type="submit">@Translate.Text("OTS_search")</button>
+                </div>
+                if (!ViewBag.IsLoggedIn)
+                {
+                    <div class="floatRight">
+                        <a class="link" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J7_LOGIN_PAGE)?returnUrl=@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.OWNERTRACKING_DASHBOARD)">@Translate.Text("OTS_login")</a> @Translate.Text("OTS_formoredetails")
+                    </div>
+                }
+            }
+            <div class="m23-table m23-table--green mt12" id="OwnerTrackingList" data-component="m23-table">
+                @{ Html.RenderPartial("~/Views/Feature/GeneralServices/OwnerTracking/_OwnerTrackingList.cshtml", Model); }
+            </div>
+            <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+                <button data-trigger="true" class="m39-modal__trigger hide" id="applicationstatus_trigger" type="button" aria-controls="applicationstatus_content">MODAL TRIGGER</button>
+                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="applicationstatus_content" aria-labelledby="applicationstatus_trigger">
+                    <div class="m39-modal__dialog m39-modal__dialog--slim">
+                        <div class="m39-modal__header">
+                            <div class="m39-modal__title">@Translate.Text("OTS_statudetails")</div>
+                            <a data-close="true" class="m39-modal__button--close" id="applicationstatus_close" aria-controls="applicationstatus_content">@Translate.Text("OTS_close")</a>
+                            <div class="m39-modal__subtitle"> </div>
+                        </div>
+                        <div class="m39-modal__content p0">
+
+                        </div>
+                        <div class="m39-modal__footer">
+                            <button data-close="true" class="button button--primary">@Translate.Text("OTS_close")</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="m39-modal__overlay"> </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery('#btnSearch').on('click', function () {
+        $("#isViewDetail").val(false);
+        jQuery('.j105-drrg--loader').show();
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        $('body').removeClass('unscrollable').addClass('unscrollable');
+    });
+    $(".applicationdetail").on("click", function () {
+        jQuery('.j105-drrg--loader').show();
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        $('body').removeClass('unscrollable').addClass('unscrollable');
+        $("#isViewDetail").val(true);
+        $("#applicationNumer").val(jQuery(this).attr("data-appNo"));
+        $("#nocNumer").val(jQuery(this).attr("data-noc"));
+        $("#processType").val(jQuery(this).attr("data-processtype"));
+        $("#ownertrackingform").submit();
+        //getApplicationDetail(jQuery(this).attr("data-appNo"), jQuery(this).attr("data-noc"), jQuery(this).attr("data-processtype"));
+    });
+    $(".statusdetail").on("click", function () {
+        getStatus(jQuery(this).attr("data-appNo"), jQuery(this).attr("data-noc"), jQuery(this).attr("data-processtype"));
+    });
+
+    function getStatus(applicationNo, noc, processtype) {
+        var form = jQuery("#ownertrackingform");
+        var token = $('#ownertrackingform input[name="__RequestVerificationToken"]').val();
+        var url = "/api/sitecore/OwnerTracking/getStatusDetails";
+        var headers = {};
+        headers['__RequestVerificationToken'] = token;
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            data: { "__RequestVerificationToken": token,applicationNo: applicationNo, noc: noc, processType: processtype },
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null) {
+                    $(".m39-modal__subtitle").html('@Translate.Text("OTS_applicationno") ' + applicationNo);
+                    $(".m39-modal__content").html('');
+                    $(".m39-modal__content").html(response);
+                    $(".m39-modal__trigger").click();
+                }
+            },
+            error: function (response) {
+                    $(".m39-modal__subtitle").html(response);
+                    $(".m39-modal__content").html('');
+                    $(".m39-modal__content").html(response);
+                    $(".m39-modal__trigger").click();
+
+            }
+        });
+    }
+    function getApplicationDetail(applicationNo, noc, processtype) {
+        var form = jQuery("#ownertrackingform");
+        var token = $('input[name="__RequestVerificationToken"]', form).val();
+        var url = "/api/sitecore/OwnerTracking/getApplicationDetails";
+        var headers = {};
+        headers['__RequestVerificationToken'] = token;
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            headers: headers,
+            datatype: 'application/json',
+            cache: false,
+            data: { applicationNo: applicationNo, noc: noc, processType: processtype },
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null) {
+                    console.log('Success');
+                    $("#trackerModalPopup").html('');
+                    $("#trackerModalPopup").html(response);
+                    $(".m39-modal__trigger").click();
+                }
+            },
+            error: function (response) {
+
+            }
+        });
+    }
+</script>

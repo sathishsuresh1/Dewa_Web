@@ -1,0 +1,52 @@
+﻿@using DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+}
+
+<div class="form-field form-field--iconradio form-field--iconradiosmiley">
+    <fieldset class="fieldset">
+
+        @if (Model.Optionslist != null)
+        {
+            <div class="form-field form-field_radio-wrapper">
+                @if (!string.IsNullOrWhiteSpace(Model.Asheading) && Model.Asheading.Equals("X")) { }
+                else
+                {
+                    <legend class="form-field__label">
+                        @Model.Question
+                    </legend>
+                }
+                <div class="form-field__radio-wrapper-inner">
+                    @foreach (Optionslist optionitem in Model.Optionslist)
+                    {
+                        <div class="form-field__radio">
+                            <label>
+                                <input class="form-field__input form-field__input--radio @(displayonly ? "disabled" : string.Empty)"
+                                       id="form-field-radio_group@(groupnumber)_question@(Model.Questionnumber)_@(Model.Optionslist.IndexOf(optionitem))"
+                                       name="radio_group@(groupnumber)_question@(Model.Questionnumber)"
+                                       type="radio"
+                                       value="@optionitem.Questionoption"
+                                       @(displayonly ? "disabled" : string.Empty)
+                                       @(!string.IsNullOrWhiteSpace(optionitem.Selectedflag) && optionitem.Selectedflag.Equals("X") ? "checked" : string.Empty)
+                                       @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                                       aria-describedby="description-for-radio_group@(groupnumber)_question@(Model.Questionnumber)"
+                                       data-parsley-errors-container="#description-for-radio_group@(groupnumber)_question@(Model.Questionnumber)"
+                                       data-parsley-required-message="@Model.Questionplaceholder"
+                                       data-parsley-error-message="@Model.Questionplaceholder"
+                                       data-parsley-id="45">
+                                <span class="form-field__fakeiconradio focus-enabled icon-face@(optionitem.Questionoption)">
+                                    @optionitem.Questionoptiondescription
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        <div id="description-for-radio_group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+        </div>
+    </fieldset>
+</div>

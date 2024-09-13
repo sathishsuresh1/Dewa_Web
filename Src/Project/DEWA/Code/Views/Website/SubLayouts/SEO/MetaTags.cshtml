@@ -1,0 +1,58 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using DEWAXP.Foundation.Helpers.Extensions
+@model Sitecore.Data.Items.Item
+@{
+
+    string TitleTag = Model.HasField("Browser Title") ? Model.Fields["Browser Title"].Value : null;
+    string DescriptionTag = Model.HasField("Meta Description") ? Model.Fields["Meta Description"].Value : null;
+    string KeywordsTag = Model.HasField("Meta Keywords") ? Model.Fields["Meta Keywords"].Value : null;
+    string OgTitleTag = Model.HasField("Og Title") ? Model.Fields["Og Title"].Value : null;
+    string OgDescriptionTag = Model.HasField("Og Description") ? Model.Fields["Og Description"].Value : null;
+    string OgImageURl = string.Empty;
+
+    if (Model.HasField("Og Image"))
+    {
+        Sitecore.Data.Items.Item ogMediaItem = ((Sitecore.Data.Fields.ImageField)Model.Fields["Og Image"]).MediaItem;
+        if (ogMediaItem != null)
+        {
+            OgImageURl = ogMediaItem.GetFullyQualifiedMediaUrl();
+        }
+
+        if (string.IsNullOrWhiteSpace(OgImageURl))
+        {
+            if (Model.HasField("Teaser Image"))
+            {
+                ogMediaItem = ((Sitecore.Data.Fields.ImageField)Model.Fields["Teaser Image"]).MediaItem;
+                if (ogMediaItem != null)
+                {
+                    OgImageURl = ogMediaItem.GetFullyQualifiedMediaUrl();
+                }
+            }
+        }
+    }
+
+}
+<!--MetaTags-->
+<title>@Html.Raw(TitleTag)</title>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="description" content="@(DescriptionTag)" />
+<meta name="keywords" content="@(KeywordsTag)" />
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="@(!string.IsNullOrWhiteSpace( OgTitleTag)?OgTitleTag :TitleTag)" />
+<meta name="twitter:description" content="@(!string.IsNullOrWhiteSpace( OgDescriptionTag)?OgDescriptionTag :DescriptionTag)" />
+@if (!string.IsNullOrWhiteSpace(OgImageURl))
+{
+    <meta name='twitter:image' content='@OgImageURl' />
+}
+<meta name="og:type" content="article">
+<meta name="og:title" content="@(!string.IsNullOrWhiteSpace( OgTitleTag)?OgTitleTag :TitleTag)" />
+<meta name="og:description" content="@(!string.IsNullOrWhiteSpace( OgDescriptionTag)?OgDescriptionTag :DescriptionTag)" />
+@if (!string.IsNullOrWhiteSpace(OgImageURl))
+{
+    <meta name='og:image' content="@OgImageURl" />
+}
+<!--MetaTags-->

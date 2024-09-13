@@ -1,0 +1,265 @@
+﻿@using Sitecore.Mvc
+@using DEWAXP.Foundation.Integration.CorporatePortal
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model taskDetailsResponseV2
+@{
+    taskDetailExternalEntity task = (taskDetailExternalEntity)ViewBag.taskdetail;
+    attachmentEntity[] attachmentEntities = ViewBag.relateddocumentresponse != null ? (attachmentEntity[])ViewBag.relateddocumentresponse : null;
+}
+<div class="m66-preloader j1-CP--loader hidden">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                <div class="loader"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalmyInbox)">
+                @Translate.Text("cpportal.back to inbox")
+            </a>
+        </div>
+    </div>
+
+    @if (Model.NextTaskDetails != null && Model.NextTaskDetails.Count() > 0 && Model.NextTaskDetails.FirstOrDefault().transitions != null)
+    {
+        var transition = Model.NextTaskDetails.FirstOrDefault().transitions.ToList();
+        <div class="grid__row">
+
+            <div class="grid__column grid__column--12">
+
+                <div class="m68-message-item" data-component="m68-message-item">
+                    <div class="m68-message-item--subject">
+                        @task.title
+                    </div>
+
+                    <div class="m68-message-item--sender">
+
+                        <div class="m68-message-item--sender_details" style="margin: 0;padding:0;">
+                            <div class="m68-message-item--sender_name">@task.objectName</div>
+                            <div class="m68-message-item--sender_time">
+                                @(!string.IsNullOrWhiteSpace(task.date_sent) ? (Convert.ToDateTime(task.date_sent) != null ? DEWAXP.Foundation.Content.Helpers.DateHelper.ConvertLocalDateFormate(Convert.ToDateTime(task.date_sent).ToString("dd MMM"), "dd MMM", "dd MMM") : string.Empty) : string.Empty)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m68-message-item--body">
+                        <h2 class="mb12" style="display:inline-block;margin-right:24px;">
+                            Status: @(Model.lifeCycleState != null && Model.lifeCycleState.FirstOrDefault() != null && Model.lifeCycleState.FirstOrDefault().state != null && Model.lifeCycleState.FirstOrDefault().state.Count() > 0 ? Model.lifeCycleState.FirstOrDefault().state.FirstOrDefault() : string.Empty)
+                        </h2>
+                        <h2 class="mb12" style="display:inline-block;margin-right:24px;">
+                            Document Size : @(task.doc_size) MB
+                        </h2>
+                        <a class="button button--small button--primary" href="/api/sitecore/CorporatePartnership/DownloadAttachment?objectid=@task.objectID">View</a>
+                    </div>
+                    @if (attachmentEntities != null)
+                    {
+                        <div class="m37-expander" data-component="m37-expander">
+                            <button type="button" data-toggle="true" aria-haspopup="true" aria-expanded="false" class="m37-expander__trigger m37-expander__trigger--themed m37-expander__trigger--open" id="_pjedl6d6k_trigger" aria-controls="_pjedl6d6k_content">Related Documents </button>
+
+                            <div data-content="true" class="m37-expander__content m37-expander__content--open" id="_pjedl6d6k_content" aria-labelledby="_pjedl6d6k_trigger" aria-expanded="true">
+                                @foreach (attachmentEntity attachmentEntity in attachmentEntities.ToList())
+                                {
+                                    <div class="m68-message-item--body">
+                                        <h2 class="mb12" style="display:inline-block;margin-right:24px;">
+                                            AttachmentName: @attachmentEntity.object_name
+                                        </h2>
+                                        <h2 class="mb12" style="display:inline-block;margin-right:24px;">
+                                            Status: @attachmentEntity.a_status
+                                        </h2>
+                                        <h2 class="mb12" style="display:inline-block;margin-right:24px;">
+                                            Document Size : @(attachmentEntity.doc_size_mb) MB
+                                        </h2>
+                                        <a class="button button--small button--primary" href="/api/sitecore/CorporatePartnership/DownloadAttachment?objectid=@attachmentEntity.object_id">View</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+
+
+                    <div>
+                        <div class="button button--quaternary m68-message-item--reply @(!Model.CanRejectTask?"disabled":string.Empty)" @(!Model.CanRejectTask ? "disabled" : string.Empty)>
+                            Reject
+                        </div>
+                        <div class="button button--quaternary m68-message-item--forward @(!Model.enableForwardButton?"disabled":string.Empty)" @(!Model.enableForwardButton ? "disabled" : string.Empty)>
+                            Forward
+                        </div>
+                    </div>
+
+                    <div class="m39-modal m39-modal--new m68-message-item--mail_modal" data-component="m39-modal" id="modal_true">
+                        <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="_143796a7r_trigger" aria-controls="_143796a7r_content"></button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_143796a7r_content" aria-labelledby="_143796a7r_trigger">
+                            <div class="m39-modal__dialog">
+                                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-addcomments", data_form = "true", enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title">Add comments</div>
+                                        <a data-close="true" class="m39-modal__button--close" id="_143796a7r_close" aria-controls="_143796a7r_content"></a>
+                                    </div>
+                                    <input type="hidden" id="form-field-workid" value="@task.workitem_Id" />
+                                    <input type="hidden" id="form-field-transitionnamefwd" value="@(transition.Where(x=>x.transition_type.ToLower().Equals("forward")).Any()?transition.Where(x=>x.transition_type.ToLower().Equals("forward")).FirstOrDefault().transition_Name :string.Empty)" />
+                                    <input type="hidden" id="form-field-performernamefwd" value="@(transition.Where(x=>x.transition_type.ToLower().Equals("forward")&& x.performer!=null&&x.performer.Any()&& x.performer.FirstOrDefault().selectedPerformers!=null && x.performer.FirstOrDefault().selectedPerformers.Any()).Any()?transition.Where(x=>x.transition_type.ToLower().Equals("forward")).FirstOrDefault().performer.FirstOrDefault().selectedPerformers.FirstOrDefault() :string.Empty)" />
+                                    <input type="hidden" id="form-field-transitionnamerj" value="@(transition.Where(x=>x.transition_type.ToLower().Equals("reject")).Any()?transition.Where(x=>x.transition_type.ToLower().Equals("reject")).FirstOrDefault().transition_Name :string.Empty)" />
+                                    <input type="hidden" id="form-field-performernamerj" value="@(transition.Where(x=>x.transition_type.ToLower().Equals("reject")&& x.performer!=null&&x.performer.Any()&& x.performer.FirstOrDefault().selectedPerformers!=null && x.performer.FirstOrDefault().selectedPerformers.Any()).Any()?transition.Where(x=>x.transition_type.ToLower().Equals("reject")).FirstOrDefault().performer.FirstOrDefault().selectedPerformers.FirstOrDefault() :string.Empty)" />
+                                    <div class="m39-modal__content">
+                                        <div class="grid__row">
+                                            <div class="grid__column grid__column--12">
+                                                <fieldset class="fieldset">
+                                                    <legend class="legend-color">.</legend>
+                                                    <div class="form-field form-field--text form-field--textarea">
+                                                        <label for="form-field-comments" class="form-field__label">
+                                                            Comments
+                                                        </label>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      data-textarea="comments"
+                                                                      id="form-field-comments"
+                                                                      name="comments"
+                                                                      type="textarea"
+                                                                      placeholder="Some placeholder text"
+                                                                      aria-describedby="description-for-comments"
+                                                                      data-parsley-errors-container="#description-for-comments"
+                                                                      required=""
+                                                                      data-parsley-required-message="This field is required"
+                                                                      data-parsley-id="14"></textarea>
+                                                        </span>
+                                                        <div id="description-for-comments" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="m39-modal__footer">
+                                        <div data-relayaction="" id="commentssubmit" class="button button--primary button--next commentssubmit" data-accountupdate="true" data-modal-confirm="true">Send</div>
+                                        <div class="button m68-message-item--mail_cancel" id="addmessagecancel">Cancel</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+
+
+                    <div class="m39-modal m39-modal--new m5-quick-services--mail_success successsubmit" data-component="m39-modal" id="successmodal">
+                        <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="successmodal_trigger" aria-controls="successmodal_content">fdytdsyrstrstr</button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="successmodal_content" aria-labelledby="successmodal_trigger">
+                            <div class="m39-modal__dialog">
+                                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title">Success Message</div>
+                                        <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="success_content"></a>
+                                    </div>
+                                    <div class="m39-modal__content" id="success_content">
+                                        <div class="grid__row">
+                                            <span>Successfully Submitted</span>
+                                        </div>
+                                    </div>
+                                    <div class="m39-modal__footer">
+                                        <div class="button button--primary m5-quick-services--mail_success-close">Ok</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+
+                    <div class="m39-modal m39-modal--new m5-quick-services--mail_success failedsubmit" data-component="m39-modal" id="failuremodal">
+                        <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="failuremodal_trigger" aria-controls="failuremodal_content">fdytdsyrstrstr</button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="failuremodal_content" aria-labelledby="failuremodal_trigger">
+                            <div class="m39-modal__dialog">
+                                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title">Failure Message</div>
+                                        <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="fail_content"></a>
+                                    </div>
+                                    <div class="m39-modal__content" id="fail_content">
+                                        <div class="grid__row">
+                                            <span>Failed</span>
+                                        </div>
+                                    </div>
+                                    <div class="m39-modal__footer">
+                                        <div class="button button--primary m5-quick-services--mail_success-close">Ok</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    }
+</div>
+
+<script>
+    docReady(function () {
+        jQuery("#commentssubmit").on('click', function (event) {
+            //event.preventDefault();
+            event.stopPropagation();
+            if (jQuery("#form-addcomments").parsley().validate()) {
+                var url = "/api/sitecore/CorporatePartnership/ForwardandReject";
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    data:
+                        AddForgeryToken({
+                            action: $('#commentssubmit').data('relayaction'),
+                            comments: $('#form-field-comments').val(),
+                            workid: $('#form-field-workid').val(),
+                            transitionnamefwd: $('#form-field-transitionnamefwd').val(),
+                            performernamefwd: $('#form-field-performernamefwd').val(),
+                            transitionnamerj: $('#form-field-transitionnamerj').val(),
+                            performernamerj: $('#form-field-performernamerj').val()
+                        }, "form-addcomments"),
+                    beforeSend: function () {
+                        jQuery('.j1-CP--loader').show();
+                        jQuery('.j1-CP--loader').css('top', $(window).scrollTop());
+                    },
+                    complete: function () {
+                        jQuery('.j1-CP--loader').hide();
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                }).done(function (response) {
+                    if (response.status) {
+                        jQuery('#form-addcomments').find('#addmessagecancel').trigger('click');
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                    }
+                    else {
+                        jQuery('#form-addcomments').find('#addmessagecancel').trigger('click');
+                        jQuery('#failuremodal').find('.m39-modal__trigger').trigger('click');
+                    }
+                    console.log(response);
+                });
+            }
+        });
+
+        var $success_modal = jQuery('.successsubmit');
+
+        $success_modal.find('.m5-quick-services--mail_success-close').on('click', function () {
+            window.location.reload();
+        });
+        var $success_modal = jQuery('.failedsubmit');
+
+        $success_modal.find('.m5-quick-services--mail_success-close').on('click', function () {
+            $success_modal.find('.m39-modal__button--close').click();
+        });
+    });
+</script>

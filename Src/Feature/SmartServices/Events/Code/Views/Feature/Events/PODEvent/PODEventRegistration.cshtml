@@ -1,0 +1,165 @@
+﻿
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Feature.Events.Models.Events.PODRegistrationModel
+
+
+<div class="box box--pod">
+    <div class="m97-pod m97-pod-marg" data-component="m97-pod">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--6">
+                    <h2 class="m97-pod-title">
+                        @Translate.Text("POD_Event_Title")
+                    </h2>
+                    <img class="pod-sketch" src="~/images/pod-sketch.png" alt="pod sketch">
+                </div>
+                <div class="grid__column grid__column--6">
+                    <div class="m97-pod-form-wrapper">
+                        <div class="m97-pod-form">
+                            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "event_registration", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+                            {
+                                @Html.Sitecore().FormHandler()
+                                @Html.AntiForgeryToken()
+
+                                <div class="form-field form-field--text ">
+                                    @*<label for="form-field-full_name" class="form-field__label">
+                                            @Translate.Text("Event_FullName")
+                                        </label>*@
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(x => x.FullName,
+                                    new
+                                    {
+                                        @class = "form-field__input form-field__input--text review",
+                                        @name = "FullName",
+                                        @id = "form-field-fullname",
+                                        @placeholder = @Translate.Text("POD_Event_FullNamePlaceholder"),
+                                        @required = "",
+                                        @maxlength = "70",
+                                        @data_parsley_pattern = "/^[a-zA-Z ]*$/",
+                                        @data_parsley_error_message = Translate.Text("POD_Event_ErrorMsgFullName"),
+                                        @data_parsley_errors_container = "#description-for-fullname",
+                                        @aria_describedby = "description-for-fullname",
+                                    })
+
+                                    </span>
+                                    <div id="description-for-fullname" class="form-field__messages">
+                                        @Html.ValidationMessageFor(x => x.FullName, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text ">
+                                    @*<label for="form-field-company" class="form-field__label">
+                                            @Translate.Text("Event_CompanyName")
+                                        </label>*@
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(x => x.CompanyName,
+                                    new
+                                    {
+                                        @class = "form-field__input form-field__input--text review",
+                                        @name = "CompanyName",
+                                        @id = "form-field-company",
+                                        @placeholder = @Translate.Text("POD_Event_CompanyPlaceholder"),
+                                        @required = "",
+                                        @data_parsley_error_message = Translate.Text("POD_Event_ErrorMsgcompany"),
+                                        @data_parsley_errors_container = "#description-for-company",
+                                        @aria_describedby = "description-for-company",
+                                        @maxlength = "70",
+                                    })
+
+                                    </span>
+                                    <div id="description-for-company" class="form-field__messages">
+                                        @Html.ValidationMessageFor(x => x.CompanyName, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--text ">
+                                    @*<label for="form-field-email" class="form-field__label">
+                                            @Translate.Text("Event_Email")
+                                        </label>*@
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text"
+                                               id="form-field-email"
+                                               name="Email"
+                                               type="email"
+                                               placeholder="@Translate.Text("POD_Event_EmailPlaceholder")"
+                                               aria-describedby="description-for-email"
+                                               data-parsley-errors-container="#description-for-email"
+                                               required=""
+                                               maxlength="40"
+                                               data-parsley-error-message="@Translate.Text("POD_Event_ErrorMsgEmail")"
+                                               data-parsley-required-message="@Translate.Text("POD_Event_ErrorMsgEmail")"
+                                               data-parsley-trigger="focusout">
+                                    </span>
+                                    <div id="description-for-email" class="form-field__messages">
+                                        @Html.ValidationMessageFor(x => x.Email, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                </div>
+                                <div class="form-field__checkbox">
+                                    <label>
+                                        <input class="form-field__input form-field__input--checkbox"
+                                               id="form-field-checkbox_1_2"
+                                               name="checkbox_1_2"
+                                               type="checkbox"
+                                               value="2"
+                                               required=""
+                                               aria-describedby="description-for-boksxludd"
+                                               data-parsley-errors-container="#description-for-boksxludd"
+                                               data-parsley-error-message="@Translate.Text("POD_Event_Chkagree")"
+                                               data-parsley-multiple="checkbox_1_2"
+                                               data-parsley-id="48">
+                                        <span class="form-field__fakecheckbox">
+                                            @*@Translate.Text("POD_Event_Chkagree")*@ @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                                        </span>
+                                    </label>
+                                </div>
+
+                                if ((bool)ViewBag.Recaptcha)
+                                {
+                                    <br />
+                                    <div class="g-recaptcha" id="captcha" data-callback="recaptchaCallback" data-sitekey="@(ViewBag.SiteKey)"></div>
+                                    <span id='errorContainer' class="parsley-errors-list"></span>
+                                }
+                                <div class="form-field__button">
+                                    <button id="btnSubmit" type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="text/javascript">
+        jQuery('#btnSubmit').off('click.submit').on('click.submit', function (e) {
+            require(['parsley'], function () {
+                if (!recaptchaCallback()) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+
+        // Validate google captcha
+        function recaptchaCallback() {
+            var v = grecaptcha.getResponse();
+            if (v.length == 0) {
+                jQuery('#errorContainer').show();
+                jQuery('#errorContainer').html('@Translate.Text("FG_Capatcha_Valid")');
+                return false;
+            }
+            else {
+                jQuery('#errorContainer').hide();
+                jQuery('#errorContainer').html('');
+                return true;
+            }
+        }
+</script>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>

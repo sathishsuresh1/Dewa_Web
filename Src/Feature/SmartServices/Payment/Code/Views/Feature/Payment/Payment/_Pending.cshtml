@@ -1,0 +1,83 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models.Bills
+@model DEWAXP.Foundation.Content.Models.Payment.PaymentCompletionModel
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+
+<!--_Pending-->
+@if (!string.IsNullOrWhiteSpace(ViewBag.PaymentSubmittedErorr))
+{
+
+    <div class="grid">
+        <div class="grid__row" id="errorpayment">
+            <div class="grid__column grid__column--12 mt24">
+                <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                    <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                    <div class="m40-status-message__text">@ViewBag.PaymentSubmittedErorr </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form mt24">
+                <div class="m40-status-message m40-status-message--success icon icon-new-success-message " data-component="m40-status-message">
+                    <div class="m40-status-message__title icon--success">@Translate.Text("Payment Submitted Title")</div>
+                    <div class="m40-status-message__text">@Html.Raw(@Translate.Text("Payment Submitted Description"))</div>
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model != null && (!string.IsNullOrWhiteSpace(Model.DegTransactionId) || !string.IsNullOrWhiteSpace(Model.DewaTransactionId)))
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <h2 class="text__section-title success-subtitle__h2">@Translate.Text("Transaction_Details")</h2>
+                    <div class="m42-keyvalue success-page @(Model.pgsTotal)">
+                        <dl>
+                            @if (!string.IsNullOrWhiteSpace(Model.DegTransactionId))
+                            {
+                                <dt class="m42-keyvalue__key--stacked">@Translate.Text("deg transaction id label")</dt>
+                                <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.DewaTransactionId))
+                            {
+                                <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                                <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+                            }
+
+                            @if (Model.pgsTotal != 0)
+                            {
+                                <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                                <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.pgsTotal</dd>
+                            }
+
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+<!--_Pending-->

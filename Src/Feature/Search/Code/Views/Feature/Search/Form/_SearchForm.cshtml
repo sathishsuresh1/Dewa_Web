@@ -1,0 +1,117 @@
+﻿@using Sitecore.Globalization;
+@using Sitecore.Data.Items;
+@using DEWAXP.Foundation.Content;
+@using DEWAXP.Foundation.Content.Models;
+@using DEWAXP.Foundation.Content.Repositories;
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using Glass.Mapper.Sc.Web.Mvc
+@using DEWAXP.Foundation.Content.Models.Common
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@model DEWAXP.Foundation.Content.Models.Base.LinkContainer
+
+
+@using (Html.BeginForm("Submit", "Search", FormMethod.Get, new { @class = "m12-search__item" }))
+{
+
+    <div class="m12-search__panel">
+        <div role="button" class="m12-search__panel--close">@Translate.Text("close")</div>
+        <label for="site_search" class="aria-only">@Translate.Text("Search")</label>
+        <input id="site_search" class="m12-search__input" 
+               type="search" 
+               autocomplete="off"
+               maxlength="200"
+               placeholder="@Translate.Text("Search")" 
+               aria-label="Search" data-search-field="true" name="term" />
+        <button type="submit" class="m12-search__submit" title="@Translate.Text("Search Title")" aria-label="Submit search">
+            <span class="aria-only">@Translate.Text("Search")</span>
+        </button>
+        <input type="hidden" class="m12-search__input site_search_filter " name="filter">
+        <input type="hidden" class="MaxPageSize" name="PageSize" value="20" />
+
+
+
+    </div>
+}
+
+@{
+
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    var _topsearch = _contentRepository.GetItem<DEWAXP.Foundation.Content.Models.Base.LinkContainer>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.GLOBAL_Top_Search)));
+    if (_topsearch != null)
+    {
+        if (_topsearch.Children.Any())
+        {
+            <div class="grid__column grid__column--12 p0">
+                <div class="m31-search--quick">
+                    <div class="m31-search--quick-title">@Translate.Text("Quick Search")</div>
+
+                    @foreach (var item in _topsearch.Children)
+                    {
+                        @Html.Glass().RenderLink(item, x => x.Link, attributes: new { @class = "button button--text m31-search--quick-button", target = "_self" })
+
+                    }
+                </div>
+            </div>
+
+
+        }
+    }
+}
+
+<div class="grid__column grid__column--12 p0">
+    <div class="m31-search--filter">
+
+
+        <fieldset class="fieldset">
+            <legend class="m31-search--filter-title">@Translate.Text("Filter by")</legend>
+            <div class="desktop--searchcategory searchcategory" id="searchcategory">
+                @{
+
+
+                    var SearchTypes = _contentRepository.GetItem<ListDataSources>(new GetItemByPathOptions(DataSources.SEARCHCATEGORIES)).Items;
+                    foreach (var a in SearchTypes)
+                    {
+                        <div class="form-field__checkbox m31-search--filter-checkbox m31-search--filter-checkbox-item">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" type="checkbox" name="filter" value="@a.Value" data-text="@a.Value">
+                                <span class="form-field__fakecheckbox focus-enabled m31-search--filter-checkbox-label">
+                                    @a.Text
+                                </span>
+                            </label>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="form-field__checkbox m31-search--filter-checkbox m31-search--filter-checkbox__all">
+                <label>
+                    <input class="form-field__input form-field__input--checkbox m31-search--filter-checkbox--all" type="checkbox">
+                    <span class="form-field__fakecheckbox focus-enabled m31-search--filter-checkbox-label">
+                        @Translate.Text("All")
+                    </span>
+                </label>
+            </div>
+        </fieldset>
+
+    </div>
+</div>
+<script type="text/javascript">
+  $( function() {
+      $( "#site_search" ).autocomplete({
+      source: "@Url.Action("SearchSuggestion", "Search")",
+      minLength: 3,
+      select: function(event, ui ) {
+          window.location.href = ui.item.url;
+      }
+      }).autocomplete("instance")._renderItem = function (ul, item) {
+          return $("<li>")
+              .append('<div class="grid__column grid__column--6">' + item.label + "<br>" + item.desc + "</div>")
+              .append('<div class="grid__column grid__column--6">' + item.label + "<br>" + item.desc + "</div>")
+              .appendTo(ul);
+      };
+  });
+</script>
+
+

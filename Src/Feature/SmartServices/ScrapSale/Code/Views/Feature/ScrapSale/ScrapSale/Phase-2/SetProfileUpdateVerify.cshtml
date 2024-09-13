@@ -1,0 +1,173 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.ScrapSale.Models.ScrapSale.ProfileUpdateModel
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_PROFILEUPDATE)">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">
+                    @Translate.Text("SS_UP_UpdateProfile")
+                </h2>
+                <p class="text-page__intro">
+                    @if (!string.IsNullOrEmpty(Model.emailotpflag) && Model.emailotpflag.Equals("E") && !Model.mobileotpflag.Equals("M"))
+                    {
+                        @Translate.Text("SS_UP_E_SubHeader")
+                    }
+                    else if (!string.IsNullOrEmpty(Model.mobileotpflag) && Model.mobileotpflag.Equals("M") && !Model.emailotpflag.Equals("E"))
+                    {
+                        @Translate.Text("SS_UP_M_SubHeader")
+                    }
+                    else
+                    {
+                        @Translate.Text("SS_UP_SubHeader")
+                    }
+                </p>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+         FormMethod.Post, new
+         {
+             @class = "form",
+             @id = "IdSetProfileVerify",
+             data_form = "true",
+             data_parsley_focus = "none",
+             @data_submit_validate = "enabled",
+             enctype = "multipart/form-data",
+             @autocomplete = "off"
+         }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                @Html.HiddenFor(x => x.custemailAddress, new { @value = Model.custemailAddress })
+                @Html.HiddenFor(x => x.custmobileNo, new { @value = Model.custmobileNo })
+                @Html.HiddenFor(x => x.mobileNotificationNumber, new { @value = Model.mobileNotificationNumber })
+                @Html.HiddenFor(x => x.emailNotificationNumber, new { @value = Model.emailNotificationNumber })
+                @*<input type="hidden" name="custemailAddress" value="@Model.custemailAddress" />
+                    <input type="hidden" name="custmobileNo" value="@Model.custmobileNo" />
+                        <input type="hidden" name="mobileNotificationNumber" value="@Model.mobileNotificationNumber" />
+                        <input type="hidden" name="emailNotificationNumber" value="@Model.emailNotificationNumber" />*@
+
+                if (!string.IsNullOrEmpty(Model.emailotpflag) && Model.emailotpflag.Equals("E"))
+                {
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-email_otpnumber" class="form-field__label">
+                            @Translate.Text("SS_UP_EmailVerification")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text" id="form-field-email_otpnumbers"
+                                   name="emailVerifyCode"
+                                   maxlength="6"
+                                   data-parsley-maxlength="6"
+                                   type="text"
+                                   lang="en"
+                                   placeholder="@Translate.Text("Moveout.Anonymous.Enter.OTP")"
+                                   aria-describedby="description-for-emailverifycode"
+                                   data-parsley-errors-container="#description-for-emailverifycode"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("Moveout.Anonymous.Enter.OTP")"
+                                   data-parsley-verification_code=""
+                                   data-parsley-verification_code-message="@Translate.Text("Moveout.Anonymous.Enter.OTP")" />
+                        </span>
+
+                        <div id="description-for-emailverifycode" class="form-field__messages">
+                            <p class="form-field__description">
+                                @Translate.Text("Moveout.Anonymous.Notification.Code")
+                            </p>
+                            <p class="form-field__description">
+                                @*<a id="resendpin" href="#" class='link'>@Translate.Text("Moveout.Anonymous.Resend.Code")</a>*@
+                                <a href="javascript:void(0)" id="resendepin" class="link resendmobotp">@Translate.Text("Moveout.Anonymous.Resend.Code")</a>
+                                <div id="divtxtresendpin" style="display:none; color: red; white-space:normal;" class="j108-np"></div>
+                            </p>
+                        </div>
+                    </div>
+                }
+                if (!string.IsNullOrEmpty(Model.mobileotpflag) && Model.mobileotpflag.Equals("M"))
+                {
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-mobile_otpnumber" class="form-field__label">
+                            @Translate.Text("SS_UP_MobileVerification")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text" id="form-field-mobile_otpnumber"
+                                   name="mobileVerifyCode"
+                                   maxlength="6"
+                                   data-parsley-maxlength="6"
+                                   type="text"
+                                   lang="en"
+                                   placeholder="@Translate.Text("Moveout.Anonymous.Enter.OTP")"
+                                   aria-describedby="description-for-mobileverifycode"
+                                   data-parsley-errors-container="#description-for-mobileverifycode"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("Moveout.Anonymous.Enter.OTP")"
+                                   data-parsley-verification_code=""
+                                   data-parsley-verification_code-message="@Translate.Text("Moveout.Anonymous.Enter.OTP")" />
+                        </span>
+
+                        <div id="description-for-mobileverifycode" class="form-field__messages">
+                            <p class="form-field__description">
+                                @Translate.Text("Moveout.Anonymous.Notification.Code")
+                            </p>
+                            <p class="form-field__description">
+
+                                @*<a id="resendpin" href="#" class='link'>@Translate.Text("Moveout.Anonymous.Resend.Code")</a>*@
+                                <a href="javascript:void(0)" id="resendmpin" class="link resendmobotp">@Translate.Text("Moveout.Anonymous.Resend.Code")</a>
+                                <div id="divtxtresendpin" style="display:none; color: red; white-space:normal;" class="j108-np"></div>
+                            </p>
+                        </div>
+                    </div>
+                }
+                <div class="form-field__button">
+                    <button type="submit" name="SubmitType" value="VER" class="button button--primary button--fullwidth-mobile mb12" data-submission-text="@Translate.Text("SS_UP_Verifying")...">
+                        @Translate.Text("SS_UP_Verify")
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+
+    jQuery(".resendmobotp").on("click", function () {
+        var url = "/api/sitecore/ScrapSale/ResendMobileEmailOTP";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            traditional: true,
+            data: AddForgeryToken({
+            }, "IdSetProfileVerify"),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', jQuery(window).scrollTop());
+                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                jQuery('body').removeClass('unscrollable');
+            },
+        }).done(function (response) {
+            if (response != null && response == "Success") {
+                jQuery('.j105-drrg--loader').hide();
+                jQuery('.button--timer').trigger('start');
+            }
+        });
+    });
+
+</script>

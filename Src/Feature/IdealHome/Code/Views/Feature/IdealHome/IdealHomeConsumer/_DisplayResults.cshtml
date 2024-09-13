@@ -1,0 +1,144 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.DisplayResult
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer
+@using Sitecore.Mvc.Configuration
+@using Sitecorex = Sitecore
+@using Sitecore;
+@using DEWAXP.Foundation.Content
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web;
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Globalization
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    var _color = string.Empty;
+    var _assementlabel = string.Empty;
+    SurveyResponse surveryresponse = null;
+    if (Model.user.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted && Model.user.VideoResponses.FirstOrDefault().IsCompleted && Model.user.SurveyResponses.FirstOrDefault().Marks == 100)
+    {
+        surveryresponse = Model.user.SurveyResponses.FirstOrDefault();
+        _assementlabel = Translate.Text("J106.FirstAssessmentScore");
+    }
+    else
+    {
+        surveryresponse = Model.user.SurveyResponses.LastOrDefault();
+        _assementlabel = Translate.Text("J106.FinalAssessmentScore");
+    }
+}
+
+<div class="grid">
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="j106-ideal-home__score">@_assementlabel  <span class="j106-ideal-home__total--score">@surveryresponse.Marks</span>/100</div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .parsley-errors-list {
+        display: none;
+    }
+
+    .survey-error {
+        font-size: .95em;
+        margin: 18px 27px;
+        color: #B00020;
+    }
+</style>
+<div class="grid">
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("ideal-home-score")
+        </div>
+    </div>
+
+    @{
+        <div class="grid m14-richtext">
+
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--content">
+
+                    @foreach (var sectionList in Model.sectionlist.Sections)
+                    {
+                        var usersection = surveryresponse.SectionResponses.Where(x => x.SectionID == sectionList.Id.ToString()).FirstOrDefault();
+                        <ol>
+                            <p class="j106-ideal-home__survey-section--results">@sectionList.SectionTitle</p>
+                            @foreach (var questionList in sectionList.QuestionsList)
+                            {
+                                <li>
+                                    <p class="j106-ideal-home__survey-section--results-query">
+                                        @questionList.Question
+                                    </p>
+                                    <ul>
+                                        @foreach (var optionsList in questionList.AnswersList)
+                                        {
+                                            <li>
+                                                @if (optionsList.Id == questionList.CorrectAnswer.Id)
+                                                {
+                                                    <span style="color:green">@optionsList.Text</span>
+
+                                                }
+                                                else
+                                                {
+                                                    <span>@optionsList.Text</span>
+
+                                                }
+
+                                            </li>
+
+                                        }
+
+                                    </ul>
+                                    <p>
+
+                                        @Translate.Text("J106.Answer") :
+                                        @if (usersection.NameValue.AllKeys.Contains(questionList.Id.ToString("N").ToUpper()))
+                                                {
+                                                    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+                                                    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+
+                                                    var answer = _contentRepository.GetItem<Answers>(new GetItemByIdOptions(Guid.Parse(usersection.NameValue[questionList.Id.ToString("N")])){ Language = Language.Parse(Sitecorex.Context.Language.Name) });
+                                                    if (answer.Id != questionList.CorrectAnswer.Id)
+                                                    {
+                                                <span style="color:red;font-weight:bold">@answer.Text</span>
+                                                                        }
+                                                    else
+                                                    {
+                                                <span style="color:green;font-weight:bold">@answer.Text</span>
+                                                    }
+
+                                                }
+                                    </p>
+
+
+
+                                </li>
+
+                            }
+                        </ol>
+                        <br /><br />
+                    }
+
+                </div>
+            </div>
+
+
+
+
+
+
+            @*<div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--centered">
+                        <a class="button button--primary button--next" href="">Continue</a>
+                    </div>
+                </div>*@
+
+        </div>
+
+    }
+</div>

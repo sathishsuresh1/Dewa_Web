@@ -1,0 +1,212 @@
+﻿@using DEWAXP.Feature.Bills.Models.Estimates;
+@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Content
+@model  DEWAXP.Feature.Bills.Models.Estimates.EstimateAccountSelectorModel
+
+
+@{
+    EstimateAccountDetail selectedAccount = null;
+    bool isAccountExist = Model.EstimateAccountSelectorList != null && Model.EstimateAccountSelectorList.Count > 0;
+    if (isAccountExist)
+    {
+        selectedAccount = Model.EstimateAccountSelectorList.Where(x => x.IsSelected || x.ContractAccNo == Model.SelectedContractAccNo).FirstOrDefault();
+        if (selectedAccount == null)
+        {
+            selectedAccount = Model.EstimateAccountSelectorList.FirstOrDefault();
+        }
+    }
+
+    var isRtl = (bool)ViewBag.IsRTL;
+    var dir = isRtl ? "rtl" : "ltr";
+    var isempty = Model != null && Model.EstimateAccountSelectorList != null && Model.EstimateAccountSelectorList.Count > 0 ? false : true;
+
+}
+
+<div class="grid__row mb0">
+    <div class="grid__column grid__column--12 grid__column--form receipt-form">
+        <div id="form-account-selector">
+
+            <input id="MultiSelect" name="MultiSelect" type="hidden" value="False">
+            <input id="AccountSelectionEnabled" name="AccountSelectionEnabled" type="hidden" value="True">
+            <input id="ShowAccountDetails" name="ShowAccountDetails" type="hidden" value="True">
+            <input id="SubmitOnConfirm" name="SubmitOnConfirm" type="hidden" value="True">
+
+
+
+            <div class="m43-accountsel" data-component="m43-account-selector">
+                <div class="m66-preloader small" style="display: none;">
+                    <div class="loader-small"></div>
+                </div>
+                <div class="m43-accountsel-hidden" style="">
+
+                    @if (isAccountExist && selectedAccount != null)
+                    {
+                        <p class="m43-accountsel__labelstyle">@Translate.Text("Select an account") </p>
+                        <!-- .account selection trigger -->
+                        <button class="m43-accountsel__selected m43-accountsel__selected--dropdown" data-accountselector="acc-sel-ctrl" data-preventsubmit="false" data-minselection="1" data-maxselection="1" aria-haspopup="true" aria-expanded="false" type="button" id="_kluemeqd9_trigger" aria-controls="_kluemeqd9_content">
+                            <span class="m43-accountsel__account _accountInfo" data-acc-detail="wrapper">
+                                <span class="m43-accountsel__header">
+                                    <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                        <span class="inline-block BusinessPartnerNamelabel" dir="ltr">@selectedAccount.BusinessPartnerName</span>
+                                        @*  <span dir="@dir" class="m43-accountsel__status m43-accountsel__status--active">Active</span>*@
+                                        @*<span class="hidden accountselector-ownertype" style="float:right;font-weight:normal;">Tenant</span>*@
+                                    </span>
+                                    <span class="m43-accountsel__details">
+                                        <abbr title="Account">@Translate.Text("Acc")</abbr>: <span dir="@dir" data-acc-detail="acc_number" class="ContractAccNolabel">@selectedAccount.ContractAccNo</span><span class="aria-only"> | </span>
+                                    </span>
+
+
+
+                                </span>
+                            </span>
+
+                            @*<span class="m43-accountsel__message m43-accountsel__message--multiselected  hidden" data-acc-multiselected="accounts selected" data-acc-multiselected-sing=" {number} account selected" aria-hidden="true" id="multiselected"></span>
+                                <span class="m43-accountsel__message m43-accountsel__message--multiselected " data-acc-multiselected-copy="Select Account" aria-hidden="true" id="multiselected-copy"></span>
+                                <span class="m43-accountsel__message m43-accountsel__message--error " data-acc-error="Partial Payment amount cannot exceed AED 200,000." aria-hidden="true"></span>*@
+                        </button>
+                        <!-- ./account selection trigger -->
+                        <!-- .account selection modal -->
+                        <div class="m39-modal" data-component="m39-modal">
+                            <div data-content="acc-sel-ctrl" class="m39-modal__container" role="dialog" id="_kluemeqd9_content" aria-labelledby="_kluemeqd9_trigger" aria-expanded="false">
+
+                                <div class="m39-modal__dialog m39-modal__dialog--account">
+                                    <div class="m39-modal__header ">
+                                        <div class="m39-modal__title">@Translate.Text("Choose account")</div>
+                                        <span class="hidden" id="accountselector-bp"></span>
+                                        <button data-close="acc-sel-ctrl" class="m39-modal__button--close" id="_kluemeqd9_close" aria-controls="_kluemeqd9_content">@Translate.Text("Close")</button>
+
+                                        <label for="m49-list-filter--input"></label>
+                                        <div class="m49-list-filter">
+                                            <input class="m49-list-filter--input" id="m49-list-filter--input" name="m49-list-filter--input" placeholder="@Translate.Text(" EstimateAccountSelectorFilterText")" type="search" value="@Model.SearchText">
+                                            <button class="m49-list-filter-reset-button hidden" title="Clear Filter" type="button" aria-label="Clear Filter"><span class="aria-only">@Translate.Text(DictionaryKeys.AccountSelector.Filter)</span></button>
+                                            <button class="m49-list-filter--button" id="search" onclick="fnFilterAccountSelector()" title="Filter results" type="button" role="search" aria-label="Filter results"><span class="aria-only">@Translate.Text(DictionaryKeys.AccountSelector.Filter)</span></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="EstimateModalContainer">
+                                        @{ Html.RenderAction("GetEstimateAccountSelector", "Estimate", new { OnlyPartailList = true, SelectedContractAccNo = selectedAccount.ContractAccNo });}
+                                    </div>
+
+
+                                    <div class="m39-modal__footer">
+                                        <span class="pager_update" data-pager-update="true"></span>
+                                        <span class="reset_update" data-reset-update="true"></span>
+                                        <p class="m39-modal__accsel-error hidden" data-modal="errormessage" aria-hidden="true" tabindex="0" data-min-error="" data-max-error=""></p>
+                                        <p class="m39-modal__accsel-error m39-modal__accsel-error-BP hidden">@Translate.Text("Account should be selected under same BP")</p>
+                                        <a href="javascript:void(0)" class="button button--primary submitData" onclick="fnFilterAccountSelector()" data-accountupdate="true">@Translate.Text("Confirm")</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- ./account selection modal -->
+                    }
+                    else
+                    {
+                        <button class="m43-accountsel__selected m43-accountsel__selected--dropdown" data-accountselector="acc-sel-ctrl" data-preventsubmit="false" data-minselection="1" data-maxselection="1" aria-haspopup="true" aria-expanded="false" type="button" id="_kluemeqd9_trigger" aria-controls="_kluemeqd9_content">
+                            <span class="m43-accountsel__account _accountInfo" data-acc-detail="wrapper">
+                                <span class="m43-accountsel__header">
+                                    <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                        <span class="inline-block BusinessPartnerNamelabel" dir="ltr">@Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)</span>
+                                        @*  <span dir="@dir" class="m43-accountsel__status m43-accountsel__status--active">Active</span>*@
+                                        @*<span class="hidden accountselector-ownertype" style="float:right;font-weight:normal;">Tenant</span>*@
+                                    </span>
+                                </span>
+                            </span>
+
+                            @*<span class="m43-accountsel__message m43-accountsel__message--multiselected  hidden" data-acc-multiselected="accounts selected" data-acc-multiselected-sing=" {number} account selected" aria-hidden="true" id="multiselected"></span>
+                                <span class="m43-accountsel__message m43-accountsel__message--multiselected " data-acc-multiselected-copy="Select Account" aria-hidden="true" id="multiselected-copy"></span>
+                                <span class="m43-accountsel__message m43-accountsel__message--error " data-acc-error="Partial Payment amount cannot exceed AED 200,000." aria-hidden="true"></span>*@
+                        </button>
+
+                    }
+
+                    <!-- .expander for the selected account -->
+                    @*<div class="m37-expander" data-component="m37-expander">
+                            <button type="button" data-toggle="true" aria-haspopup="true" aria-expanded="false" class="m37-expander__trigger m37-expander__trigger--themed m37-expander__trigger--open" id="_c4nkwo3mi_trigger" aria-controls="_c4nkwo3mi_content">Account details </button>
+
+                            <div data-content="true" class="m37-expander__content m37-expander__content--open" id="_c4nkwo3mi_content" aria-labelledby="_c4nkwo3mi_trigger" aria-expanded="true">
+                                <div class="m42-keyvalue">
+                                    <dl data-accountsel-additional-details="acc-sel-ctrl">
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="ltr">Premise type</dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_type">Residential</dd>
+
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="ltr">Premise Number</dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">258963147</dd>
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="ltr">Business Partner Number</dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_businesspartner">10001125</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>*@
+                    <!-- ./expander for the selected account -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" class="_NoMatchesFound" value="@Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)" />
+
+@if (isAccountExist)
+{
+
+    <script>
+
+    var fnFilterAccountSelector = function () {
+        var selectCheckBox = $("input[name='SelectedAccountNumber']:checked");
+        var selectedAcc = $(selectCheckBox).val();
+        var searchText = $("#m49-list-filter--input").val();
+        var requestData = { OnlyPartailList: true, SelectedContractAccNo: selectedAcc, SearchText: searchText }
+
+        var _BP_Name = selectCheckBox.data("bpName");
+        $.ajax({
+            url: "@Url.Action("GetEstimateAccountSelector", "Estimate")",
+            type: "GET",
+            data: requestData,
+            success: function (data) {
+                try {
+                        //filter-Account-Selector
+                        //debugger;
+                        $(".EstimateModalContainer").html(data);
+                        $("#m49-list-filter--input").val($(".hiddenSearchText").val());
+                        setTimeout(function () {
+                            //debugger;
+
+                            var selectedAcc1 = $("input[name='SelectedAccountNumber']:checked");
+                            var isAccountNoExist = selectedAcc1 != null && selectedAcc1.length > 0;
+                            var _html = "";
+
+                            if (isAccountNoExist) {
+                                _html = '<span class="m43-accountsel__header">'
+                                    + '<span class="m43-accountsel__name" data-acc-detail="acc_name">'
+                                    + '<span class="inline-block BusinessPartnerNamelabel" dir="@dir">' + _BP_Name + '</span></span>'
+                                    + '<span class="m43-accountsel__details"><abbr title="Account">@Translate.Text("Acc")</abbr>: <span dir="@dir"data-acc-detail="acc_number" class="ContractAccNolabel">' + $(selectedAcc1).val() + '</span><span class="aria-only"> | </span></span></span>';
+                            } else {
+                                var jm = $("._NoMatchesFound").val();
+                                _html = '<span class="m43-accountsel__header">'
+                                    + '<span class="m43-accountsel__name" data-acc-detail="acc_name">'
+                                    + '<span class="inline-block BusinessPartnerNamelabel" dir="@dir">' + jm + '</span></span>';
+                            }
+
+                            $("._accountInfo").html(_html);
+
+                            var data = GetDetails();
+                            var request = { Accountnumber: (isAccountNoExist ? data.accountNumber : "") };
+                            GetAsyncPartialView(data.url, request, data.htmlelement);
+                        }, 100)
+                    } catch (e) {
+                        $(".m39-modal__button--close").click()
+                        console.log(e)
+                    }
+            },
+            error: function (e) {
+                console.log(e);
+                $(".m39-modal__button--close").click()
+            }
+        });
+    }
+
+
+    </script>
+}
+

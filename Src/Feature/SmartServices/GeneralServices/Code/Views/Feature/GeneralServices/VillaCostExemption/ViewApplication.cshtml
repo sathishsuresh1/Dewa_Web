@@ -1,0 +1,899 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Integration.APIHandler.Clients;
+
+@model DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel
+@{
+    var Nationalities = DEWAXP.Foundation.Helpers.Extensions.FormExtensions.GetNationalities(null, false);
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j153-villa-exemption" data-journey="j153-villa-exemption">
+    <div class="grid">
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m26-page-title title_message">
+                    <div class="m26-page-title__links">
+                        <p class="m26-page-title__backlink back-villa hidden">
+                            <a class="button button--text button--back ">
+                                @Translate.Text("VE_Back")
+                            </a>
+                        </p>
+                    </div>
+                    <div class="m26-page-title__links">
+                        <p class="m26-page-title__backlink back-villa-status">
+                            <a href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_DASHBOARD)" class="button button--text button--back">@Translate.Text("VE_Back")</a>
+                        </p>
+                    </div>
+
+                    <h1 class="text__page-title">@Translate.Text("VE_New_Application_Heading")</h1>
+                    @*<p class="text-page__intro">Space for sub-description here</p>*@
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="3" data-current-step="1" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="true">
+                    <div class="m38-steptracker__info-wrapper"></div>
+                    <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext=""></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "veform", @class = "form", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    @Html.HiddenFor(x => x.OwnersJson)
+                    @Html.HiddenFor(x => x.Stage)
+                    @Html.HiddenFor(x => x.ApplicationNumber)
+                    @Html.HiddenFor(x => x.ApplicationReferenceNumber)
+                    @Html.HiddenFor(x => x.EstimateNumber)
+                    @Html.HiddenFor(x => x.BusinessPartner)
+                    @Html.HiddenFor(x => x.AapplicationSequenceNumber)
+                    @Html.HiddenFor(x => x.Status)
+
+                    <div id="step1">
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("VE_GI")</legend>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-lblBusinesspartner" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_BP")
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                    <input class="form-field__input form-field__input--readonly"
+                                           readonly=""
+                                           id="form-field-lblBusinesspartner"
+                                           name="BusinessPartner"
+                                           type="text"
+                                           value="@Model.BusinessPartner" />
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-lblApplicationNumber" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_AN")
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                    <input class="form-field__input form-field__input--readonly"
+                                           readonly=""
+                                           id="form-field-lblApplicationNumber"
+                                           name="ApplicationNumber"
+                                           type="text"
+                                           value="@Model.ApplicationNumber" />
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-lblEstimateNumber" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_EN")
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                    <input class="form-field__input form-field__input--readonly"
+                                           readonly=""
+                                           id="form-field-lblEstimateNumber"
+                                           name="EstimateNumber"
+                                           type="text"
+                                           value="@Model.EstimateNumber" />
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text">
+                                <label for="form-field-lblOwnerType" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_OT")
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                    <input class="form-field__input form-field__input--readonly"
+                                           readonly=""
+                                           id="form-field-lblOwnerType"
+                                           name="OwnerTypeText"
+                                           type="text"
+                                           value="@Model.OwnerTypeText" />
+                                </div>
+                            </div>
+                            <div class="form-field form-field--select form-field--select-single hidden">
+                                <label for="form-field-ot" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_OT")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.OwnerType, Model.PropertyOwnerTypeList,
+                                   Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Forms.PurposeSelectionPlaceholder), new
+                 {
+                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                     @id = "form-field-ot",
+                     @aria_describedby = "description-for-ot",
+                     @data_parsley_error_message = Translate.Text("VE_Select_OT"),
+                     @data_parsley_errors_container = "#description-for-ot",
+                     @data_parsley_id = "9",
+                     @disabled = "disabled"
+                 })
+                                </span>
+                                <div id="description-for-ot" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.OwnerType, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="fieldset">
+                            <div class="fieldset-title">
+                                <legend class="legend">@Translate.Text("VE_Personal_Information_Owners")</legend>
+                            </div>
+                            <div class="m23-table" data-component="m23-table">
+                                <table class="m23-table__content-table" id="tblowners">
+                                    <thead class="m23-table__content-table-header">
+                                        <tr class="m23-table__content-table-row" tabindex="0">
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Name")</th>
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Emirates_ID_or_Passport_Number")</th>
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Email")</th>
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Mobile")</th>
+                                            @*<th class="m23-table__content-table-cell--header">@Translate.Text("VE_Expiry_Date")</th>*@
+                                            <th class="m23-table__content-table-cell--header">@Translate.Text("VE_Action")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="m23-table__content-table-body">
+                                        @foreach (var r in Model.Owners)
+                                        {
+                                            <tr class="m23-table__content-table-row" tabindex="0">
+                                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="Name">
+                                                    @r.Name
+                                                </td>
+                                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="Passport Number">
+                                                    @(string.IsNullOrEmpty(r.EmiratesID) ? r.PassportNumber : r.EmiratesID)
+                                                </td>
+                                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="Email">
+                                                    @r.Email
+                                                </td>
+                                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="Mobile1">
+                                                    @r.Mobile1
+                                                </td>
+                                                @*<td class="m23-table__content-table-cell" data-label="Passport Expiry Date" style="min-height: 23px;">
+                                                        @r.PassportExpiry
+                                                        <div class="m23-table__content-table-th-mobile">@r.PassportExpiry</div>
+                                                    </td>*@
+                                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center " data-label="Action">
+                                                    @if (r.Itemnumber != null)
+                                                    {
+                                                        <button class="button button--primary button--very_small ownertype" type="button" data-action="view" data-idtype="@r.IdType" data-ownerid="@r.OwnerID" data-eid="@r.EmiratesID" data-itemno="@r.Itemnumber" data-pp="@r.PassportNumber">@Translate.Text("VE_View_Details")</button>
+                                                    }
+
+                                                </td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+
+                        <div class="form-field__button">
+                            <button type="button" id="btnNext" class="button button--primary button--next">@Translate.Text("VE_Next")</button>
+                        </div>
+                    </div>
+
+                    <div id="step2" class="hidden">
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("NOC_UploadDocuments")</legend>
+                            @if (Model.AttachmentLists != null && Model.AttachmentLists.Count > 0)
+                            {
+
+                                foreach (var item in Model.AttachmentLists)
+                                {
+                                    int index = Model.AttachmentLists.ToList().IndexOf(item);
+                                    var srctxt1 = !string.IsNullOrWhiteSpace(item.FileName) ? item.FileName : "";
+                                    <div class="form-field form-field--text">
+                                        <p class="form-field__helplink">
+                                            <a data-trigger="true" data-docno="@item.DocumentNumber" data-filename="@item.FileName" data-apprefno="@Model.ApplicationReferenceNumber" class="view_modal link downloadfile">@item.FileName</a>
+                                        </p>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="form-field form-field--text">
+                                    <p class="form-field__helplink">
+                                        @Translate.Text("VE_NoDocuments")
+                                    </p>
+                                </div>
+                            }
+                        </fieldset>
+                        <div class="grid__row noprint">
+                            <div class="grid__column grid__column--12 grid__column--centered">
+
+                                <div class="button-container--single">
+                                    <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_DASHBOARD)" class="button button--primary button--next">@Translate.Text("VE_Landing_Page")</a>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal m39-modal--new j153-villa-exemption_modal-add" data-component="m39-modal" id="mdlAddOwner">
+        <button data-trigger="true" class="m39-modal__trigger" id="_vl45qz455_trigger" type="button" aria-controls="_vl45qz455_content"></button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_vl45qz455_content" aria-labelledby="_vl45qz455_trigger">
+            <div class="m39-modal__dialog m39-modal__dialog--slim">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title">@Translate.Text("VE_Add_Owner")</div>
+                    <a data-close="true" class="m39-modal__button--close" id="_vl45qz455_close" aria-controls="_vl45qz455_content">@Translate.Text("VE_Close")</a>
+                    <div class="m39-modal__subtitle">@Translate.Text("VE_Personal_Details")</div>
+                </div>
+                <div class="m39-modal__content">
+                    <form method="post" class="form form-add-owner" id="formAddOwner" name="form22" data-form="true" action="">
+                        <div class="form-field form-field__radio--toggle">
+                            <fieldset class="fieldset">
+                                <legend class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Do_You_Have_Emirates_ID")
+                                    <span class="form-field__label-optional">@Translate.Text("VE_Optional")</span>
+                                </legend>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_1_1" name="radios_group1" type="radio" data-val="01" value="1" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-pvovcgmlr" data-parsley-multiple="radios_group1" data-parsley-id="35" checked="" toggle-target="#yeseid" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Yes")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_1_2" name="radios_group1" type="radio" data-val="02" value="2" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-pvovcgmlr" toggle-target="#noeid" data-parsley-multiple="radios_group1" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_No")
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-pvovcgmlr" class="form-field__messages">
+                                </div>
+                            </fieldset>
+                        </div>
+                        <fieldset class="fieldset eid" id="yeseid">
+                            <div class="form-field form-field--text">
+                                <label for="eid" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_EmiratesID_Label")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text" id="eid" name="eid" type="number" pattern="\d*" placeholder="@Translate.Text("VE_Enter_EmiarteId")" aria-describedby="description-for-eid" data-parsley-errors-container="#description-for-eid" required="" data-parsley-required-message="@Translate.Text("VE_EmirateIdValidation")" data-parsley-emiratesid="" data-parsley-emiratesid-message="@Translate.Text("VE_EmirateIdValidation")" data-parsley-trigger="focusout" data-parsley-id="2">
+                                </span>
+                                <div id="description-for-eid" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-eid-dob" class="form-field form-field--text hidden">
+                                <label for="eid_dob" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_DateofBirth")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input" id="eid_dob" name="eid_dob" type="text" placeholder="Select date" aria-describedby="description-for-eid-dob" data-parsley-errors-container="#description-for-eid-dob" data-el="datepicker-past" data-picker-options='{ "selectYears": true,"selectMonths": true}' readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false" aria-owns="form-field-q3q4iyc63_root" required=""><span data-clicker="#datepicker-container-eid-dob" class="form-field__datepicker-icon-clicker"></span>
+                                </span>
+                                <div id="description-for-eid-dob" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="radio-container-eid-gender" class="form-field form-field--text hidden">
+                                <label for="radios_group_eid" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Gender")
+                                </label>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_eid_1" name="radios_group_eid" type="radio" data-val="01" value="1" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-eid-gender" data-parsley-multiple="radios_group_eid" data-parsley-id="35" checked="">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Male")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_eid_2" name="radios_group_eid" type="radio" data-val="02" value="2" aria-describedby="description-for-pvovcgmlr" data-parsley-errors-container="#description-for-eid-gender" data-parsley-multiple="radios_group_eid" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Female")
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-eid-gender" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="hidden" id="eidDetails">
+                                <div class="form-field form-field--text">
+                                    <label for="owner1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Name")
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="owner1" name="owner1" type="text" value="" aria-describedby="description-for-owner1" data-parsley-errors-container="#description-for-owner1" data-parsley-trigger="focusout" data-parsley-id="3">
+                                    </div>
+                                    <div id="description-for-owner1" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="email1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_EmailID")
+                                        <span id="eidMaskedEmail" class="form-field__label-required"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="email1" name="email1" type="email" placeholder="@Translate.Text("Enter e-mail address")" aria-describedby="description-for-email1" data-parsley-errors-container="#description-for-email1" required="" data-parsley-required-message="@Translate.Text("VE_Email_Required")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </span>
+                                    <div id="description-for-email1" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text ">
+                                    <label for="Mobile1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_MobileNo1")
+                                        <span id="eidMaskedMobile" class="form-field__label-required"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input type="tel" id="Mobile1" name="Mobile1" value="" aria-describedby="description-for-mobilenumber" required="" placeholder="@Translate.Text("Mobile number placeholder")" data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                    </span>
+                                    <div id="description-for-mobilenumber" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text ">
+                                    <label for="Mobile2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_MobileNo2")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input type="tel" id="Mobile2" name="Mobile2" value="" aria-describedby="description-for-mobilenumber2" placeholder="@Translate.Text("Mobile number placeholder")" data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber2" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                    </span>
+                                    <div id="description-for-mobilenumber2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="relation1" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Relationship_Applicant")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="relation1" name="relation1" type="text" aria-describedby="description-for-relation1" data-parsley-errors-container="#description-for-relation1" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </span>
+                                    <div id="description-for-relation1" class="form-field__messages">
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset  passport" id="noeid">
+                            <div class="form-field form-field--text">
+                                <label for="ppno" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Passport_Number")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text" id="ppno" name="ppno" type="text" maxlength="15" aria-describedby="description-for-ppno" data-parsley-errors-container="#description-for-ppno" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                </span>
+                                <div id="description-for-ppno" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-pp_dob" class="form-field form-field--text hidden">
+                                <label for="dob" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_DateofBirth")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input" id="pp_dob" name="pp_dob" type="text" placeholder="Select date" aria-describedby="description-for-pp-dob" data-parsley-errors-container="#description-for-pp-dob" data-el="datepicker-past" data-picker-options='{ "selectYears": true,"selectMonths": true}' readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false" aria-owns="form-field-q3q4iyc63_root" required=""><span data-clicker="#datepicker-container-pp-dob" class="form-field__datepicker-icon-clicker"></span>
+                                </span>
+                                <div id="description-for-pp-dob" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="divnationality" class="form-field form-field--select form-field--select-single hidden">
+                                <label for="nationality" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Nationality")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                            id="nationality"
+                                            name="nationality"
+                                            aria-describedby="description-for-nationality"
+                                            data-parsley-errors-container="#description-for-nationality"
+                                            required=""
+                                            data-parsley-required-message="@Translate.Text("VE_Nationality_Validatio_Message")"
+                                            data-parsley-trigger="change"
+                                            tabindex="1"
+                                            data-parsley-id="18">
+                                        <option value="0" selected=""> @Translate.Text("VE_Select")</option>
+                                        @{
+                                            if (Model.Countrylists != null)
+                                            {
+                                                foreach (var item in Model.Countrylists)
+                                                {
+                                                    <option value="@item.countryid">@item.countrydescription</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </span>
+                                <div id="description-for-nationality" class="form-field__messages parsley-errors-list filled">
+
+                                </div>
+                            </div>
+                            <div id="radio-container-pp-gender" class="form-field form-field--text hidden">
+                                <label for="radios_group_eid" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("VE_Gender")
+                                </label>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_pp_1" name="radios_group_pp" type="radio" data-val="01" value="1" aria-describedby="description-for-pp-gender" data-parsley-errors-container="#description-for-pp-gender" data-parsley-multiple="radios_group_pp" data-parsley-id="35" checked="">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Male")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_pp_2" name="radios_group_pp" type="radio" data-val="02" value="2" aria-describedby="description-for-pp-gender" data-parsley-errors-container="#description-for-pp-gender" data-parsley-multiple="radios_group_pp" is-clear="true">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("VE_Female")
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-pp-gender" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="hidden" id="ppDetails">
+                                <div class="form-field form-field--text">
+                                    <label for="owner2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Name")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="owner2" name="owner2" type="text" aria-describedby="description-for-owner2" data-parsley-errors-container="#description-for-owner2" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </div>
+                                    <div id="description-for-owner2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--select form-field--select-single">
+                                    <label for="ia" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Issuing_Authority")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                        <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                                id="ia"
+                                                name="IssuingAuthority"
+                                                aria-describedby="description-for-user_ia"
+                                                data-parsley-errors-container="#description-for-user_ia" required=""
+                                                data-parsley-required-message="@Translate.Text("VE_IA_validation_message")"
+                                                data-parsley-trigger="change" data-parsley-id="6">
+                                            <option value="" selected=""> @Translate.Text("VE_Select")</option>
+                                            @{
+                                                if (Model.Countrylists != null)
+                                                {
+                                                    foreach (var item in Model.Countrylists)
+                                                    {
+                                                        <option value="@item.countrycode">@item.countrydescription</option>
+                                                    }
+                                                }
+                                            }
+
+                                        </select>
+                                    </span>
+                                    <div id="description-for-user_ia" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div id="datepicker-container-pep" class="form-field form-field--text">
+                                    <label for="ppexpiry" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Passport_Expiry_Date")
+                                    </label>
+                                    <div class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                        <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input" id="ppexpiry" name="ppexpiry" type="text" placeholder="Select date" aria-describedby="description-for-pep" data-parsley-errors-container="#description-for-pep" data-el="datepicker-future" data-picker-options="{}" readonly="" aria-haspopup="true" aria-expanded="false" aria-readonly="false" aria-owns="form-field-pep_root" required=""><span data-clicker="#datepicker-container-pep" class="form-field__datepicker-icon-clicker"></span>
+
+                                    </div>
+                                    <div id="description-for-pep" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="email2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_EmailID")
+                                        <span id="ppMaskedEmail" class="form-field__label-required"></span>
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="email2" name="email2" type="email" placeholder="Enter e-mail address" aria-describedby="description-for-email2" data-parsley-errors-container="#description-for-email2" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="8">
+                                    </div>
+                                    <div id="description-for-email2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="mobile3" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_MobileNo1")
+                                        <span id="ppMaskedMobile" class="form-field__label-required"></span>
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input class="form-field__input form-field__input--text form-field__input--prefixed" id="mobile3" name="mobile3" type="tel" placeholder="Enter mobile number" aria-describedby="description-for-vjhc0fkvh3" data-parsley-errors-container="#description-for-vjhc0fkvh3" required="" data-parsley-required-message="This field is required" data-parsley-mobile_number="" data-parsley-mobile_number-message="Please enter a valid UAE mobile number" data-parsley-trigger="focusout" data-parsley-id="10">
+                                    </span>
+                                    <div id="description-for-vjhc0fkvh3" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div class="form-field form-field--text">
+                                    <label for="relation2" class="form-field__label form-field__label--readonly">
+                                        @Translate.Text("VE_Relationship_Applicant")
+                                        <span class="form-field__label-required aria-only"></span>
+                                    </label>
+                                    <div class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text" id="relation2" name="relation2" type="text" placeholder="Relationship" aria-describedby="description-for-relation2" data-parsley-errors-container="#description-for-relation2" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                    </div>
+                                    <div id="description-for-relation2" class="form-field__messages">
+                                    </div>
+                                </div>
+                                <div id="fpPassportCopy" class="form-field form-field--upload hidden">
+                                    <div class="form-field__input-wrapper">
+                                        <div class="form-field__preview-wrapper">
+                                            <img id="pp_form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" data-uploader-image="PassportCopy">
+                                        </div>
+                                        <div class="form-field__uploader-details">
+                                            <label for="form-field-PassportCopy" class="form-field__label form-field__label--readonly">
+                                                @Translate.Text("VE_PassportCopy")
+                                                <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                            </label>
+                                            <div>
+                                                <label>
+                                                    <input class="form-field__input form-field__input--upload"
+                                                           id="form-field-PassportCopy"
+                                                           name="form-field-PassportCopy"
+                                                           type="file"
+                                                           aria-describedby="description-for-PassportCopy"
+                                                           data-parsley-errors-container="#description-for-PassportCopy"
+                                                           data-parsley-required-message="@Translate.Text("VE_File1RequiredField")"
+                                                           data-uploader-field="PassportCopy"
+                                                           accept=""
+                                                           data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                           data-size="15048000"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="16">
+
+                                                    <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                </label>
+                                            </div>
+                                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                            <p class="form-field__input--upload-filename" data-uploader-filename="PassportCopy"></p>
+                                        </div>
+                                    </div>
+                                    <div id="description-for-PassportCopy" class="form-field__messages">
+                                        <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div id="updateProfileLink" class="m14-richtext hidden">
+                            <p>@Html.Raw(Translate.Text("VE_UpdateProfileLink"))</p>
+                            <ul class="mt0">
+                                <li>
+                                    @Html.Raw(Translate.Text("VE_UpdateEmiratesID"))
+                                </li>
+                                <li>
+                                    @Html.Raw(Translate.Text("VE_UpdateMobileEmail"))
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="form-field__button">
+                            <button class="button button--primary" id="btnICADetail" name="btnICADetail" type="button">@Translate.Text("VE_Submit")</button>
+                            <button class="button button--primary hidden" id="btAddOwner" name="btAddOwner" type="button">@Translate.Text("VE_Save")</button>
+                            <button class="button button--primary hidden" id="btUpdateOwner" name="btUpdateOwner" type="button">@Translate.Text("VE_Update")</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+    <div class="m39-modal m39-modal--confirm m87-gauge-alerts-modalBell m39-modal--nofocus" id="mdldeleteOwner" data-component="m39-modal">
+        <div data-trigger="true" class="m39-modal__trigger deleteOwnerModal hidden" id="deleteOwner">Delete</div>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+            <div class="m39-modal__dialog ">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title">@Translate.Text("VE_Delete")</div>
+                    <button data-close="true" class="m39-modal__button--close"></button>
+                </div>
+                <div class="m39-modal__content">
+                    @Translate.Text("VE_Delete_Owner_Confirm")
+                    <div class="mt24">
+                        <button class="button button--primary yes" id="btnYesDeleteOwner" data-itemno="" data-eid="" data-pp="" data-close="true">@Translate.Text("VE_Yes")</button>
+                        <button class="button button--senary no" id="btnNoDeleteOwner" data-itemno="" data-eid="" data-pp="" data-close="true">@Translate.Text("VE_No")</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+    <div style="display:none">
+        <form id="hhvilla-doc-form" action="/api/sitecore/VillaCostExemption/DownloadViewAttachment" method="post">
+            @Html.AntiForgeryToken();
+            <input type="hidden" name="docno" id="docno" class="docno" value="" />
+            <input type="hidden" name="apprefno" id="apprefno" class="apprefno" value="" />
+            <input type="hidden" name="filename" id="filename" class="filename" value="" />
+        </form>
+    </div>
+    <script type="text/javascript">
+        var ownerFormAttachements = $("#vform");
+        var appjson = JSON.parse('@Html.Raw(DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel.ToJson(Model.Applications))');
+        var estimatejson = JSON.parse('@Html.Raw(DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel.ToJson(Model.Estimates))');
+        var owner = { itemnumber: "", idType: "", eid: "", ownerName: "", email: "", maskedemail: "", mobile1: "", maskedmobile: "", mobile2: "", relation: "", passportNumber: "", passportExpiry: "", passportExpiryDisplay: "", issuingAuthority: "", dob: "", dobDisplay: "", nationlaity: "", PassportCopy: "", isOwner: false };
+        var owners = @Html.Raw(Model.OwnersJson); cssClass = "";
+
+        var html = '<tr class="m23-table__content-table-row" tabindex="0"><td class="m23-table__content-table-cell m23-table__content-table-cell--center initialized" style="min-height: 23px;">{0}<div class="m23-table__content-table-th-mobile">{0}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{1}<div class="m23-table__content-table-th-mobile">{1}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{2}<div class="m23-table__content-table-th-mobile">{2}</div></td><td class="m23-table__content-table-cell initialized" style="min-height: 23px;">{3}</td></tr>';
+        var buttons_viewOnly = '<button class="button button--primary button--very_small ownertype" type="button" data-action="view" data-eid="{0}" data-pp="{1}" data-itemno="{2}">View Details</button><div class="m23-table__content-table-th-mobile">View Details</div>';
+        var buttons_editOnly = '<button class="button button--primary button--very_small ownertype" type="button" data-action="edit" data-eid="{0}" data-pp="{1}" data-itemno="{2}">Edit Details</button><div class="m23-table__content-table-th-mobile">Edit Details</div>';
+        var buttons_deleteOnly = '<button class="button button--primary button--very_small ownertype" type="button" data-action="delete" data-eid="{0}" data-pp="{1}" data-itemno="{2}">Delete</button><div class="m23-table__content-table-th-mobile">Delete</div>'
+        var ids = { modal: "#mdlAddOwner", bAO: "#btAddOwner", bSO: "#btUpdateOwner", sIT: "#idType", tEID: "#eid", tOwner: "#owner1", tEmail1: "#email1", tMob1: "#Mobile1", tMob2: "#Mobile2", tRel1: "#relation1", tPPN: "#ppno", tIA: "#ia", tOwner2: "#owner2", tPE: 'input[name="ppexpiry_submit"]', tPEDisplay: 'input[name="ppexpiry"]', tNat: "#nationality", tEmail2: "#email2", tMob3: "#mobile3", tRel2: "#relation2", tDoB: 'input[name="dob_submit"]', tDoBDisplay: 'input[name="dob"]', tPassportCopy: '#form-field-PassportCopy' }
+
+        jQuery(document).ready(function () {
+            steptrackerwithinpage(2, 1, "@Translate.Text("VE_Step1_Title")", "true");
+            var applicationrefVal = '@Model.ApplicationReferenceNumber';
+            jQuery('#btnNext').on('click', function () {
+                var nxtBtn = jQuery(this);
+                var $page = jQuery(nxtBtn).closest('#step1'),
+                    good = 0;
+
+                if (good == 0) {
+                    $page.next().show();
+                    $page.hide();
+                    steptrackerwithinpage(2, 2, "@Translate.Text("VE_Step2_Title")", "true");
+                    jQuery('#step1').hide();
+                    jQuery('.back-villa').show();
+                    jQuery('.back-villa-status').hide();
+                }
+                jQuery('html,body').animate({ scrollTop: jQuery('.j105-drrg').offset().top }, 1000);
+            });
+            jQuery('.back-villa').on('click', function () {
+                var $page = jQuery('#veform').find('#step2'),
+                    good = 0;
+                if (good == 0) {
+                    $page.prev().show();
+                    $page.hide();
+                    steptrackerwithinpage(2, 1, "@Translate.Text("VE_Step1_Title")", "true");
+                    jQuery('.back-villa').hide();
+                    jQuery('.back-villa-status').show();
+                }
+            });
+
+            $(document).on("click", ".ownertype", function (e) {
+                try {
+                    //console.log($(this).data("history"));
+                    clearFields();
+                    var _case = $(this).data("action").toString();
+                    switch (_case) {
+                        case "view":
+                            var itemNumber = $(this).data("itemno").toString();
+                            var eid = $(this).data("eid").toString();
+                            eid = eid.trim();
+                            var pp = $(this).data("pp").toString();
+                            pp = pp.trim();
+                            var o = {};
+                            if ($(this).attr("data-idtype") === "01" || eid.length > 0) {
+                                var o1 = $.grep(owners, function (v) { return v.eid === eid });
+                                o = o1.length > 0 ? o1[0] : {};
+								o.idType = "01";
+                                jQuery('#form-field-radio_1_1').click();
+                                jQuery('#form-field-radio_1_1').prop('checked', true);
+                                console.log(o1);
+                            }
+                            else if ($(this).attr("data-idtype") === "02" || pp.length > 0) {
+                                o2 = $.grep(owners, function (v) { return v.passportNumber === pp });
+                                o = o2.length > 0 ? o2[0] : {};
+								o.idType = "02";
+                                jQuery('#form-field-radio_1_2').click();
+                                jQuery('#form-field-radio_1_2').prop('checked', true);
+                                console.log(o2);
+                            } else {
+                                console.log("Emirtes ID or Passport is blank");
+                                //return;
+                            }
+                            $(ids.modal).find('input[name="radios_group1"]').prop("disabled", true);
+                            if (itemNumber != null && itemNumber === "0010") {
+                                $("#updateProfileLink").show();
+                                if (o.eid == "" || o.eid == null) {
+                                    jQuery("#formAddOwner").parsley().validate();
+                                }
+                            }
+                            else {
+                                $("#updateProfileLink").hide();
+                            }
+                            fillEidFields(o);
+
+                            $('#mdlAddOwner .m39-modal__trigger').trigger('click');
+                            break;
+                        default:
+                            console.log($(this).data("action"));
+                            break;
+                    }
+                } catch (e) { console.log(e); }
+            });
+            $("#btClose").on("click", function (e) {
+                closeModal();
+                clearFields();
+                $(this).hide();
+                $(ids.bAO).show();
+                $(ids.modal).find(".form-field__input").each(function (i) { jQuery(this).prop("disabled", false); jQuery(this).removeAttr("disabled") });
+            });
+            $('.m39-modal__button--close').on('click', function (e) {
+                clearFields();
+            });
+            $("#form-field-radio_1_2").on("click", function (e) {
+                enabledFields();
+                jQuery("#eidDetails").hide();
+
+            });
+            $("#form-field-radio_1_1").on("click", function (e) {
+                enabledFields();
+                jQuery("#ppDetails").hide();
+            });
+            setTimeout(function () {
+                $(".downloadfile").on("click", function () {
+                    $(".docno").val($(this).attr("data-docno").toString());
+                    $(".apprefno").val($(this).attr("data-apprefno").toString());
+                    $(".filename").val($(this).attr("data-filename").toString());
+                    $("#hhvilla-doc-form").submit();
+                });
+            }, 500);
+        });
+
+        function fillEidFields(o) {
+            //{"idType":"eid","eid":"445678765432154","ownerName":"AZAZ SHAIK","email":"445678765432154","mobile1":"0502227960","mobile2":"","relation":"Self","passportNumber":"","passportExpiry":"","issuingAuthority":"","dob":"","nationlaity":""}
+            if (o.idType === "01") {
+                $(ids.modal).find('input[name="eid"]').val(o.eid);
+                $(ids.modal).find('input[name="owner1"]').val(o.ownerName);
+                $(ids.modal).find('input[name="email1"]').val(o.email);
+                $(ids.modal).find('input[name="Mobile1"]').val(o.mobile1);
+                $(ids.modal).find('input[name="Mobile2"]').val(o.mobile2);
+                $(ids.modal).find('input[name="relation1"]').val(o.relation);
+                if (o.mobile1 != '' && o.mobile1 != undefined)
+                    $(ids.modal).find('input[name="Mobile1"]').attr('data-parsley-excluded', true);
+                $('#eidDetails').show();
+            } else {
+
+                $(ids.modal).find('input[name="ppno"]').val(o.passportNumber);
+                $(ids.modal).find('#ia').val(o.issuingAuthority);
+                $(ids.modal).find('input[name="owner2"]').val(o.ownerName);
+                $(ids.modal).find('input[name="ppexpiry"]').val(o.passportExpiry);
+                $(ids.modal).find('input[name="ppexpiry_submit"]').val(o.passportExpiry);
+
+                $(ids.modal).find('input[name="email2"]').val(o.email);
+                $(ids.modal).find('input[name="mobile3"]').val(o.mobile1);
+                $(ids.modal).find('input[name="relation2"]').val(o.relation);
+
+                $('#ppDetails').show();
+                if (o.mobile1 != '' && o.mobile1 != undefined)
+                    $(ids.modal).find('input[name="mobile3"]').attr('data-parsley-excluded', true);
+            }
+            $('#btnICADetail').hide();
+            disabledFields();
+        }
+        function disabledFields() {
+            $(ids.modal).find('input[name="eid"]').prop("disabled", true);
+            $(ids.modal).find('input[name="ppno"]').prop("disabled", true);
+			$(ids.modal).find('input[name="email1"]').prop("disabled", true);
+            $(ids.modal).find('input[name="email2"]').prop("disabled", true);
+            $(ids.modal).find('input[name="Mobile1"]').prop("disabled", true);
+            $(ids.modal).find('input[name="Mobile2"]').prop("disabled", true);
+            $(ids.modal).find('input[name="relation1"]').prop("disabled", true);
+            $(ids.modal).find('#pp_dob').prop("disabled", true);
+            $(ids.modal).find('#eid_dob').prop("disabled", true);
+            $(ids.modal).find('input[name="ppexpiry"]').prop("disabled", true);
+            $(ids.modal).find('input[name="owner1"]').prop("disabled", true);
+            $(ids.modal).find('input[name="owner2"]').prop("disabled", true);
+            $(ids.modal).find('#nationality').prop("disabled", true);
+            $(ids.modal).find('#ia').prop("disabled", true);
+            $(ids.modal).find('input[name="radios_group_pp"]').attr('disabled', 'disabled');
+            $(ids.modal).find('input[name="radios_group_eid"]').attr('disabled', 'disabled');
+
+            //$(ids.modal).find('input[name="eid"]').addClass("disabled");
+            //$(ids.modal).find('input[name="ppno"]').addClass("disabled");
+            $(ids.modal).find('#pp_dob').addClass("disabled");
+            $(ids.modal).find('#eid_dob').addClass("disabled");
+            $(ids.modal).find('input[name="ppexpiry"]').addClass("disabled");
+            //$(ids.modal).find('input[name="owner1"]').addClass("disabled");
+            //$(ids.modal).find('input[name="owner2"]').addClass("disabled");
+            $(ids.modal).find('#nationality').addClass("disabled");
+            $(ids.modal).find('#ia').addClass("disabled");
+            $(ids.modal).find('input[name="radios_group_pp"]').addClass("disabled");
+            $(ids.modal).find('input[name="radios_group_eid"]').addClass("disabled");
+            $(ids.modal).find('input[name="radios_group1"]').addClass("disabled");
+        }
+        function enabledFields() {
+
+            $(ids.modal).find('input[name="eid"]').prop("disabled", false);
+            $(ids.modal).find('input[name="ppno"]').prop("disabled", false);
+            $(ids.modal).find('#pp_dob').prop("disabled", false);
+            $(ids.modal).find('#eid_dob').prop("disabled", false);
+            $(ids.modal).find('input[name="ppexpiry"]').prop("disabled", false);
+            $(ids.modal).find('input[name="owner1"]').prop("disabled", false);
+            $(ids.modal).find('input[name="owner2"]').prop("disabled", false);
+            $(ids.modal).find('#nationality').prop("disabled", false);
+            $(ids.modal).find('#ia').prop("disabled", false);
+            $(ids.modal).find('input[name="radios_group_pp"]').prop("disabled", false);
+            $(ids.modal).find('input[name="radios_group_eid"]').prop("disabled", false);
+            $(ids.modal).find('input[name="radios_group1"]').prop("disabled", false);
+        }
+
+        function clearFields() {
+            $(ids.modal).find('input[name="eid"]').val('');
+            $(ids.modal).find('input[name="owner1"]').val('');
+            $(ids.modal).find('input[name="email1"]').val('');
+            $(ids.modal).find('input[name="Mobile1"]').val('');
+            $(ids.modal).find('input[name="Mobile2"]').val('');
+            $(ids.modal).find('input[name="relation1"]').val('');
+            $(ids.modal).find('input[name="ppno"]').val('');
+           // $(ids.modal).find('input[name="IssuingAuthority"]').val('');
+            $('#ia option').removeAttr('selected').eq(0).attr('selected', 'selected');
+            $(ids.modal).find('input[name="owner2"]').val('');
+            $(ids.modal).find('input[name="ppexpiry"]').val('');
+            $(ids.modal).find('input[name="eid_dob"]').val('');
+            $(ids.modal).find('input[name="pp_dob"]').val('');
+            //$(ids.modal).find('input[name="nationality"]').val('');
+            $('#nationality option').removeAttr('selected').eq(0).attr('selected', 'selected');
+            $(ids.modal).find('input[name="email2"]').val('');
+            $(ids.modal).find('input[name="mobile3"]').val('');
+            $(ids.modal).find('input[name="relation2"]').val('');
+            jQuery("#mdldeleteOwner").find("button.yes").data("eid");
+            jQuery("#mdldeleteOwner").find("button.yes").data("pp");
+            $("#datepicker-container-pp_dob").show();
+            $("#radio-container-pp-gender").show();
+            $("#divnationality").show();
+            jQuery("#eidDetails").hide();
+            jQuery("#ppDetails").hide();
+            jQuery("#btnICADetail").show();
+            jQuery("#btAddOwner").hide();
+            jQuery("#btUpdateOwner").hide();
+            jQuery('#mdlAddOwner').find('input, select').each(function () {
+                jQuery(this).parsley().reset();
+                jQuery(this).closest('.form-field__input-wrapper').removeClass('form-field__input-wrapper--error');
+                jQuery(this).closest('.form-field__input-wrapper').removeClass('form-field__input-wrapper--validated');
+                jQuery(this).removeClass('form-field__input--error');
+
+            });
+            jQuery('#form-field-radio_1_1').click();
+            jQuery('#form-field-radio_pp_1').prop('checked', true);
+            jQuery('#form-field-PassportCopy').val('');
+            if ($('select[name="OwnerType"]').val() === "03") {
+                jQuery('#form-field-PassportCopy').attr('required', true);
+            }
+            else {
+                jQuery('#form-field-PassportCopy').removeAttr('required');
+            }
+            enabledFields();
+        }
+
+        function closeModal() {
+            jQuery('.m39-modal__container--active .m39-modal__button--close').trigger('click');
+        }
+    </script>
+</div>

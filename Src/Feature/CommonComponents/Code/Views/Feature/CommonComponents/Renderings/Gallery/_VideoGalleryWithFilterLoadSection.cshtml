@@ -1,0 +1,58 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@using DEWAXP.Feature.CommonComponents.Models.Gallery
+@model MediaVidoeGalleryModel
+
+@if (Model != null && Model.Slides != null)
+{
+    foreach (var item in Model.Slides)
+    {
+        string _teaserUrl = string.Format("{0}?id={1}", @LinkHelper.GetItemUrl(SitecoreItemIdentifiers.VIDEOGALLERYPAGE), item.VideoId);
+        string _targetType = "_self";
+        string ImageUrl = item.ImageLink;
+        <div class="grid__column grid__column--4 grid__column--videog">
+            <div class="m9-teaser" data-component="m9-teaser">
+                <a href="@(_teaserUrl)" target="@(_targetType)" class="teaser__link">
+                    <div class="m9-teaser-image" style="background-image:url('@(ImageUrl)')"></div>
+                    <div class="teaser__content">
+                        <h4 class="teaser__title">@Html.Raw(item.Title)</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+    }
+
+
+    if (Model.PaginationInfo.CanLoadMore)
+    {
+        if (Model.PaginationInfo.CurrentPage > 1)
+        {
+            <div class="grid__row loadmore-container" data-pageno="@(Model.PaginationInfo.CurrentPage+1)">
+                <div class="grid__column grid__column--12 grid__column--centered">
+                    <a href="javascript:void(0)" onclick="LoadMore()" class="button button--fullwidth mt12" data-datasrcid="@Model.DatasourceId">@Translate.Text("ViewMore")</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="data-appender-container">
+                <div class="grid__row loadmore-container" data-pageno="@(Model.PaginationInfo.CurrentPage+1)">
+                    <div class="grid__column grid__column--12 grid__column--centered">
+                        <a href="javascript:void(0)" onclick="LoadMore()" class="button button--fullwidth mt12">@Translate.Text("ViewMore")</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+
+}
+else
+{
+    <p>@Translate.Text("NoData")</p>
+}
+

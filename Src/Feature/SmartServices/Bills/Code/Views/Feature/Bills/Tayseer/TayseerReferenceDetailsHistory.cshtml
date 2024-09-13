@@ -1,0 +1,188 @@
+﻿@using System.Activities.Statements
+@using DEWAXP.Foundation.Integration.Extensions
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Feature.Bills.Models.Tayseer.TayseerReferenceListDetail
+
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="box box--1">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("j87/m26-page-title")
+        </div>
+    </div>
+</div>
+@if (ViewBag.Message != null)
+{
+    <div class="grid__row" id="divgriderrormsg">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text">@ViewBag.Message</div>
+            </div>
+        </div>
+    </div>
+}
+@if (ViewBag.ReferenceNo != null)
+{
+    <div style="margin-bottom:12px; text-align:center" class="grid__column--form">
+        <label for="form-field-10rt0ju5e" class="form-field__label" style="display:inline">
+            @Translate.Text("Reference No"):
+        </label>
+        <label for="form-field-10rt0ju5e" class="form-field__label" style="display:inline">
+            <strong>@ViewBag.ReferenceNo</strong>
+        </label>
+    </div>
+}
+@if (ViewBag.SetTotal != null)
+{
+    <script type="text/javascript">
+        $(function () {
+            $("#divTotal").show();
+            $("#divTotal").html(decodeHTMLEntities("@ViewBag.SetTotal"));
+        });
+
+        // Set Total replace applied style/
+        function decodeHTMLEntities(text) {
+            var entities = [
+                ['amp', '&'],
+                ['apos', '\''],
+                ['#x27', '\''],
+                ['#x2F', '/'],
+                ['#39', '\''],
+                ['#47', '/'],
+                ['lt', '<'],
+                ['gt', '>'],
+                ['nbsp', ' '],
+                ['quot', '"']
+            ];
+
+            for (var i = 0, max = entities.length; i < max; ++i)
+                text = text.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
+
+            return text;
+        }
+    </script>
+}
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="j102-tayseer-service-account-head">
+                    <div class="head-numbers hidden" id="divTotal">
+                    </div>
+                    <div class="head-actions">
+                        <span class="total-page">Page <span class="total-page-num">1</span> of <span class="total-page-of-num">2</span></span>
+                    </div>
+                </div>
+                <div class="pagination-container" style="text-align:center"><ul id="pagin" class="pagin pagination"></ul></div>
+                @if (Model.TayseerReferenceListDetails != null)
+                {
+                    foreach (var data in Model.TayseerReferenceListDetails)
+                    {
+                        <div class="j102-tayseer-service--custom-pay line-content">
+                            <div class="j102-tayseer-service--acc">
+                                <div class="j102-tayseer-service--acc-num">@Translate.Text("Contract Account Number")<strong class="j102-tayseer-service--contractaccount"> @data.ContractAccountNumber</strong></div>
+                                <div class="j102-tayseer-service--out-amount">@Translate.Text("Reference Number Amount"):<strong class="j102-tayseer-service--outstanding"> @data.TotalAmount @Translate.Text("Currency")</strong></div>
+                                <div class="j102-tayseer-service--acc-num">@Translate.Text("Paid Amount"):<strong class="j102-tayseer-service--outstanding referencenumberpaid"> @data.ReferenceNumberPaidAmount.ToString("N") @Translate.Text("Currency")</strong></div>
+                            </div>
+                        </div>
+                    }
+                }
+                <div class="pagination-container" style="text-align:center"><ul id="pagin" class="pagin pagination"></ul></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $.fn.digits = function(){
+        return this.each(function(){
+            $(this).text( $(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") );
+        })
+    }
+    $('.j102-tayseer-service--outstanding').digits();
+
+    //Pagination
+
+    pageSize = @Translate.Text("PageSize");
+    var pageCount = $(".line-content").length / pageSize;
+    $(".total-page-of-num").html(Math.ceil(pageCount));
+    if (pageCount > 1) {
+        $(".head-actions").show();
+    }
+    else {
+        $(".head-actions").hide();
+    }
+    for (var i = 0 ; i < pageCount; i++) {
+        if (pageCount > 1) {
+            if (i == 0) {
+                $(".pagin").append('<li class="active"><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+            }
+            else {
+                $(".pagin").append('<li><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+            }
+        }
+
+    }
+    $(".pagin li").first().find("li").addClass("active");
+    showPage = function (page) {
+        $(".line-content").hide();
+        $(".line-content").each(function (n) {
+            if (n >= pageSize * (page - 1) && n < pageSize * page)
+                $(this).show();
+        });
+    }
+
+    showPage(1);
+
+    $(".pagin li a").click(function () {
+        var _this = this;
+
+        $(".pagin li").removeClass("active");
+        $(".pagin li a").each(function () {
+            if ($(this).html() == $(_this).html()) {
+                $(this).parent().addClass("active");
+            }
+        })
+        //$(this).parent().addClass("active");
+        showPage(parseInt($(this).text()));
+        $(".total-page-num").html(Math.ceil($(this).text()));
+    });
+
+</script>
+<style>
+    .j102-tayseer-service--amount-pay-form {
+        display: none;
+    }
+
+    .current {
+        color: green;
+    }
+
+    .pagin li {
+        display: inline-block;
+    }
+
+    ul.pagination li a {
+        border: 0px solid #ddd;
+    }
+
+    .pagin li a {
+        color: black;
+        float: left;
+        padding: 5px 7px;
+        text-decoration: none;
+        font-weight: bold;
+        /*transition: background-color 0.3s;*/
+        /*border: 1px solid #ddd;*/
+    }
+
+    .pagination-container .active a {
+        /*background-color: #4CAF50;*/
+        color: #4CAF50 !important;
+        font-weight: bold;
+        /*border: 1px solid #4CAF50;*/
+    }
+</style>

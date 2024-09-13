@@ -1,0 +1,444 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc
+@using Sitecore.Data.Items
+@using DEWAXP.Foundation.Content
+@Html.Sitecore().Placeholder("j1/m26-page-title")
+
+<div class="grid__row mb0">
+    <div class="grid__column grid__column--12 grid__column--form receipt-form">
+        <form id="form-account-selector" action="#" method="POST" form-skipvalidation="true">
+            @*data-form="false"*@
+            @Html.Sitecore().Placeholder("j1/m43-account-selector")
+        </form>
+    </div>
+</div>
+
+<div class="grid__row j01-transaction-history" data-journey="j01-transaction-history">
+
+    <div id="refund-list-wrapper" class="transaction-history--wrapper grid__column grid__column--12 grid__column--form receipt-form">
+        <form id="form-refund-filter" method="GET" class="form hidden" data-form="true" data-parsley-focus="none" novalidate>
+            <fieldset class="fieldset">
+                <legend class="legend-color">.</legend>
+                <div>
+                    @*<div class="form-field form-field--select form-field--select-single form-field-refundfilter">*@
+                    <label for="refund-filter"></label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownList("refund-filter", (IEnumerable<SelectListItem>
+                            )ViewBag.NotificationFilters, Translate.Text("EV Show All Notifications"),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "refund-filter",
+                                @name = "refund-filter",
+                                @aria_describedby = "description-for-refund-filter",
+                                @data_parsley_id = "20"
+                            })
+
+                    </span>
+                    <div class="form-field__messages"></div>
+                </div>
+            </fieldset>
+        </form>
+        <div id="refund-history-placeholder" class="ajax-placeholder">
+
+        </div>
+
+    </div>
+    <div id="no-refund-wrapper" class="grid__column grid__column--12 grid__column--form grid__column--centered form-field__messages parsley-errors-list hidden">@Translate.Text("EV No Notification Found")</div>
+    <div id="error-refund-wrapper" class="grid__column grid__column--12 grid__column--form grid__column--centered form-field__messages parsley-errors-list hidden">@Translate.Text("EV Notifications Timeout Error Message")</div>
+    <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+        <button data-trigger="true" class="m39-modal__trigger m39-modal__trigger_refundstatus" id="m39-modal__trigger_refundstatus"></button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+            <div class="m39-modal__dialog">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title"></div>
+                    <a data-close="true" class="m39-modal__button--close">@Translate.Text("EV Close")</a>
+                    <div class="m39-modal__subtitle"></div>
+                </div>
+                <div class="m39-modal__content">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <div class="m70-status-tracker" data-component="m70-status-tracker" data-steps="" data-current-step="" data-has-error="">
+                                <div class="m70-status-tracker__progressbar" data-m70-progressbar="true" role="progressbar" aria-valuetext="status">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid__column grid__column--12 grid__column--centered m14-richtext hidden" id="modalstatusdescription">
+                        <p class="status__text" id="modalstatus"></p>
+                        <p class="status__subtext">@Translate.Text("EV Customer Care")</p>
+                    </div>
+                </div>
+                <div class="m39-modal__footer">
+                    <button class="button button--primary modal_close" data-accountupdate="true" data-modal-confirm="true">@Translate.Text("EV Done")</button>
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+</div>
+
+<script id="refund-item-template" type="text/x-handlebars-template">
+    {{#refunds}}
+    <div class="transaction-history__item mt12">
+        <div class="transaction-history__title">{{requesttypetext}}</div>
+        <span class="transaction-history__detail-amount--bill">
+            <span class="transaction-history__detail-item--content">{{shortstatustext}}</span>
+        </span>
+        <ul class="transaction-history__detail-refund">
+            <li class="transaction-history__detail-item-refund">
+                @Translate.Text("EV Notification Tracking Number") {{trackingnumber}}
+            </li>
+            <li class="transaction-history__detail-item-refund">
+                {{shortDate}}
+            </li>
+        </ul>
+        <a class="button button--primary refund_history_status_button mt12" data-trackingnumber="{{trackingnumber}}" data-bpnumber="{{pbnumber}}" data-request-type-text="{{requesttypetext}}" data-shortstatustext="{{shortstatustext}}">@Translate.Text("Notification status")</a>
+
+    </div>
+    {{/refunds}}
+    <div id="pagination-list">
+    </div>
+</script>
+
+<script id="refund-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination">
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="ajaxSelection({{firstpagenumber}})" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+            </a>
+            {{/if}}
+            {{#if previouspage}}
+            <a onclick="ajaxSelection({{previouspagenumber}})" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+            {{/if}}
+            <ul class="m34-pagination__page-list">
+                {{#pagenumbers}}
+                {{#ifCond ../page this}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                    <a onclick="ajaxSelection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{else}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                    <a onclick="ajaxSelection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{/ifCond}}
+                {{/pagenumbers}}
+            </ul>
+            {{#if nextpage}}
+            <a onclick="ajaxSelection({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="ajaxSelection({{lastpagenumber}})" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</script>
+
+
+<script type="text/javascript">
+    var tracking_label = "@Translate.Text("EV Notification Tracking Number")";
+    docReady(function () {
+        var _this = this;
+
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        jQuery('#form-account-selector').submit(handleAccountSelection);
+        jQuery('#form-account-selector').submit();
+        jQuery('select[name="refund-filter"]').change(handleFilterSelection);
+        var bindEvents = function () {
+
+            jQuery('.modal_close').off('click.close').on('click.close', function () {
+                jQuery(this).closest('.m39-modal__dialog').find('.m39-modal__button--close').click();
+            });
+
+            jQuery('.refund_history_status_button').each(function () {
+                jQuery(this).off('click.bind').on('click.bind', function (event) {
+                    event.preventDefault();
+                    $('.m39-modal__title').html($(this).attr('data-request-type-text'));
+                    $('.m39-modal__subtitle').html(tracking_label + ' '+ $(this).attr('data-trackingnumber'));
+                    //$('#modalstatus').html($(this).attr('data-shortstatustext'));
+
+                    var accnumber = getAccountNumber();
+                    var bpnumber = getBpNumber();
+                    var trnumber = $(this).attr('data-trackingnumber');
+                    jQuery.ajax({
+                        type: 'GET',
+                        url: '/api/EVGreenCardCharger/GetNotificationDetails',
+                        traditional: true,
+                        data: {
+                            accnumber:accnumber,
+                            trnumber: trnumber,
+                            bpnumber: bpnumber
+                        },
+
+                        dataType: 'json',
+                        method: 'GET',
+                        success: function (response) {
+                            var res = response.Result;
+
+                            //console.log(res.Steps);
+                            $('.m70-status-tracker').attr('data-steps', res.Steps);
+                            $('.m70-status-tracker').attr('data-current-step', res.CurrentStepIndex);
+                            $('.m70-status-tracker').attr('data-has-error', res.success);
+
+                            $('#modalstatusdescription').show();
+                            $('#modalstatus').html(res.StatusDescription);
+
+                            jQuery(window).trigger('reinit_m70');
+                            jQuery('.m39-modal__trigger_refundstatus').click();
+                        }
+                    });
+                    /*
+                       public string Steps { get; set; }
+                       public int TotalSteps { get; set; }
+                       public string ResponseCode { get; set; }
+                       public int CurrentStepIndex { get; set; }
+                       public string StatusDescription { get; set; }
+                     */
+
+
+                });
+            });
+        };
+        jQuery(window).off('bindClickEvents').on('bindClickEvents', function () {
+            bindEvents();
+        });
+    });
+
+    function getAccountNumber() {
+        return jQuery('#form-account-selector').find('input[name="SelectedAccountNumber"]:checked').val();
+    }
+    function getBpNumber() {
+        return jQuery('#form-account-selector').find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+    }
+
+    function handleAccountSelection() {
+        ajaxSelection(1);
+        return false;
+    }
+
+    function ajaxSelection(page, sortby) {
+        if (typeof (sortby) === 'undefined')
+            sortby = jQuery('select[name="refund-filter"]').val();
+        var accountNumber = getAccountNumber();
+        var bpnumber = getBpNumber();
+        if (accountNumber) {
+            jQuery('a[href*="?a="]').each(function () {
+                var $a = jQuery(this);
+                var $href = $a.attr('href');
+                var $newHref = $href.replace(/(\?a=\d*)/g, '?a={accnum}'.replace('{accnum}', accountNumber));
+
+                $a.attr('href', $newHref);
+            });
+            var url = "/api/EVGreenCardCharger/GetNotifications";
+            jQuery.ajax({
+                type: 'GET',
+                url: url,
+                traditional: true,
+                data: {
+                    id: accountNumber,
+                    bp: bpnumber,
+                    page: page,
+                    sortby: sortby
+                },
+                beforeSend: function () {
+                    jQuery('select[name="refund-filter"]').val('');
+                    jQuery('#refund-history-placeholder').removeClass('hidden').empty();
+                    jQuery('#refund-list-wrapper').removeClass('hidden');
+                    jQuery('#no-refund-wrapper, #error-refund-wrapper, #form-refund-filter, #downloadstmt').addClass('hidden');
+
+                    window.attachSpinner('#refund-history-placeholder', { minHeight: 100 });
+                },
+                complete: function () {
+                    window.detachSpinner('#refund-list-wrapper');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        var result = response.Result;
+                        if (result.StatusList.length === 0 && sortby == "") {
+                            jQuery('#no-refund-wrapper').removeClass('hidden');
+                            jQuery('#refund-list-wrapper, #error-refund-wrapper, #form-refund-filter').addClass('hidden');
+                        }
+                        else if (result.StatusList.length === 0 && sortby != "") {
+                            jQuery('#no-refund-wrapper, #form-refund-filter').removeClass('hidden');
+                            jQuery('select[name="refund-filter"]').val(result.sortby);
+                            jQuery('#refund-history-placeholder').addClass('hidden');
+                        } else {
+                            jQuery('#no-refund-wrapper, #error-refund-wrapper').addClass('hidden');
+                            jQuery('#refund-list-wrapper, #form-refund-filter').removeClass('hidden');
+                            jQuery('select[name="refund-filter"]').val(result.sortby);
+                            //console.log(result.StatusList);
+                            /*
+                              public IEnumerable<Evnotificationlist> StatusList { get; private set; }
+                              public int totalpage { get; set; }
+                              public int page { get; set; }
+                              public bool pagination { get; set; }
+                              public string sortby { get; set; }
+                              public IEnumerable<int> pagenumbers { get; set; }
+                             */
+                            var context = {
+                                refunds: function () {
+                                    return _.map(result.StatusList, transform);
+                                }
+                            };
+                            renderHistory(context);
+
+                            if (result.pagination) {
+                                var pagedata = {
+                                    previouspage: function () {
+                                        if (result.page > 1)
+                                            return true;
+                                        else
+                                            return false;
+                                    },
+                                    nextpage: function () {
+                                        if (result.page < result.totalpage)
+                                            return true;
+                                        else
+                                            return false;
+                                    },
+                                    page: result.page,
+                                    firstpagenumber: 1,
+                                    lastpagenumber: result.totalpage,
+                                    previouspagenumber: result.page - 1,
+                                    nextpagenumber: result.page + 1,
+                                    pagenumbers: result.pagenumbers,
+                                    totalpage: result.totalpage
+                                }
+                                renderSearchPagination(pagedata);
+                            }
+                        }
+                        jQuery(window).trigger('bindClickEvents');
+                    }
+                    else {
+                        jQuery('#no-refund-wrapper').removeClass('hidden');
+                        jQuery('#no-refund-wrapper').html(response.Message);
+                        jQuery('#refund-list-wrapper, #error-refund-wrapper, #form-refund-filter').addClass('hidden');
+                    }
+                },
+                error: function () {
+                    jQuery('#no-refund-wrapper, #refund-list-wrapper, #form-refund-filter').addClass('hidden');
+                    jQuery('#error-refund-wrapper').removeClass('hidden');
+                }
+            });
+        }
+        return false;
+    }
+
+    function handleExpanderOpened($trigger) {
+        var $expander = $trigger.parent();
+        if ($expander.attr('data-loaded')) return;
+
+        var accountNumber = getAccountNumber();
+        var transaction = $trigger.closest('[data-transaction-ref]').data('transaction-ref');
+        var url = "/api/receipts/account/" + transaction;
+        var $content = $trigger.next('.m37-expander__content').first();
+
+        jQuery.ajax(url, {
+            beforeSend: function () {
+                $expander.find('.no-receipt-data-wrapper').addClass('hidden');
+
+                window.attachSpinner($content, { minHeight: 100 });
+            },
+            complete: function () {
+                window.detachSpinner($content);
+            },
+            dataType: 'json',
+            method: 'GET',
+            success:function(response) {
+                if (!response || response.length === 0) {
+                    $expander.find('.no-receipt-data-wrapper').removeClass('hidden');
+                }
+                else {
+                    $expander.find('.no-receipt-data-wrapper').addClass('hidden');
+                    $expander.attr('data-loaded', 'true');
+
+                    var context = {
+                        transactions: function () {
+                            return _.chain(response)
+                                .filter(function (r) {
+                                    return sanitize(r.AccountNumber) === accountNumber;
+                                })
+                                .map(transform)
+                                .value();
+                        }
+                    };
+
+                    var markup = jQuery('#receipt-details-template').html();
+                    var template = Handlebars.compile(markup);
+
+                    var rendering = template(context);
+                    $trigger.siblings('.m37-expander__content:first').html(rendering);
+                }
+            }, error:function() {
+                $expander.find('.no-receipt-data-wrapper').removeClass('hidden');
+            }
+        });
+    }
+
+    function handleFilterSelection() {
+        var type = jQuery(this).val();
+        ajaxSelection(1, type);
+    }
+
+    function sanitize(accountNumber) {
+        if (accountNumber) {
+            if (accountNumber.substring(0, 2) === '00') {
+                return accountNumber.substring(2);
+            }
+        }
+        return accountNumber;
+    }
+    /**
+        public string Date { get; set; }
+        public string RequestType { get; set; }
+        public string NotificationNumber { get; set; }
+        public string ShortStatusText { get; set; }
+        public string BPNumber { get; set; }
+     */
+    function transform(notices) {
+        var r = {
+            shortDate: notices.Date,
+            requesttypetext: notices.RequestType,
+            trackingnumber: notices.NotificationNumber,
+            shortstatustext: notices.ShortStatusText,
+            bpnumber: notices.BPNumber
+        }
+        return r;
+    }
+
+    function renderHistory(context) {
+        var markup = jQuery('#refund-item-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#refund-history-placeholder').html(rendering);
+
+        window.initComponents('refund-history-placeholder');
+        //console.log("render done");
+    }
+
+    function renderSearchPagination(context) {
+        var markup = jQuery('#refund-pagination-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#pagination-list').html(rendering);
+
+        //window.initComponents('pagination-list');
+    }
+</script>
+

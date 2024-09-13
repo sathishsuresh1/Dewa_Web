@@ -1,0 +1,169 @@
+﻿@using DEWAXP.Feature.EV.Models.EVCharger
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.EV.Models.EVCharger.EVDeactivate
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Sitecore().Placeholder("j18/m26-page-title")
+            @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+            @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+        </div>
+    </div>
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="form-field form-field--account-details">
+                <!-- m43-account-selector-start -->
+                <fieldset class="fieldset ">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--account-details">
+                        <form id="form-account-selector" data-form="true" action="#" method="POST" form-skipvalidation="true">
+                            @Html.AntiForgeryToken()
+                            @Html.Sitecore().Placeholder("EV/m43-account-selector")
+                        </form>
+                    </div>
+                </fieldset>
+                <!-- m42-account-selector-end -->
+            </div>
+            <div class="mt24" id="listofcard-placeholder"></div>
+            <div id="evdeactiate-error" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;">
+            </div>
+            <br />
+            <dl style="font-size: 1.125em;" class="hidden" id="totaloutstandingamtdiv">
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="ltr" style="font-weight: 300;">@Translate.Text("evdeactivate.totaloutstandingamout")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" id="totaloutstandingamtlbl"></dd>
+            </dl>
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "deactivateevcardform", @data_form = "true", @data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                <fieldset class="fieldset" id="divpaymentdetails">
+                    <legend class="legend-color">.</legend>
+
+                    <div class="form-field__button" id="divBtnSubmit">
+                        <button type="submit" id="evdeactivatenext" class="button button--primary hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Evdeactivate.Continue")</button>
+                        <a id="evdeactivatepay-popup" class="button button--primary hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Evdeactivate.pay")</a>
+                    </div>
+                </fieldset>
+                <input type="hidden" id="totalAmount" />
+                @* Payment Type Popup module *@
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            }
+        </div>
+    </div>
+</div>
+@Html.Partial("~/Views/Feature/EV/EVCharger/ListofEVCards.cshtml")
+<script type="text/javascript">
+
+    var $evdeactiateerror = jQuery('#evdeactiate-error');
+    $(function () {
+        jQuery("#form-account-selector").submit(handleAccountSelection);
+        jQuery("#form-account-selector").submit();
+    });
+
+    // Open Payment Method popup
+    jQuery('#evdeactivatepay-popup').on('click', function () {
+        var total = jQuery('#totalAmount').val();
+        var currency = '@Translate.Text("AED")';
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (total != "" && numeral(total) > 0) {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        }
+    });
+
+    function handleAccountSelection() {
+        firstTime = true;
+        _listofevcardsHandler();
+        return false;
+    }
+
+    function fnAfterEVCardSelected() {
+        var accountNumber = jQuery("input[name='SelectedAccountNumber']:checked").val();
+        var cardno = jQuery(".evcardnumber_value").attr('data-cardnumber');
+        if (accountNumber && cardno) {
+            var url = "/api/MoveOut/Get/";
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                type: "GET",
+                data: {
+                    accounts: accountNumber,
+                    evflag: true,
+                    cardnumber: cardno
+                },
+                beforeSend: function () {
+                    jQuery("#deactivateevcardform").hide();
+                    jQuery('#evdeactiate-error').hide();
+                    $evdeactiateerror.html("");
+                    jQuery("#totaloutstandingamtdiv").hide();
+                    jQuery("#totaloutstandingamtlbl").html("");
+                    beforesendfnc();
+                },
+                complete: function () {
+                    completefunc();
+                },
+                success: function (response) {
+                    if (response.issuccess) {
+                        jQuery("#deactivateevcardform").show();
+                        if (response.proceed) {
+                            jQuery("#evdeactivatenext").show();
+                            jQuery("#evdeactivatenext").removeAttr('disabled');
+
+                            jQuery("#evdeactivatepay").hide();
+                            jQuery("#evdeactivatepay").attr('disabled', true);
+
+                            jQuery("#evdeactivatepay-popup").hide();
+                            jQuery("#evdeactivatepay-popup").attr('disabled', true);
+                        }
+                        else {
+                            jQuery("#evdeactivatenext").hide();
+                            jQuery("#evdeactivatenext").attr('disabled', true);
+                            jQuery("#evdeactivatepay").show();
+                            jQuery("#evdeactivatepay-popup").show();
+                            jQuery("#totaloutstandingamtdiv").show();
+                            jQuery("#totaloutstandingamtlbl").html(numeral(response.totalamounttopay).format('0,0.00') + " " + '@Translate.Text("AED")');
+                            jQuery("#evdeactivatepay").text('@Translate.Text("moveout.pay")' + numeral(response.totalamounttopay).format('0,0.00') + " " + '@Translate.Text("AED")');
+                            jQuery("#evdeactivatepay").removeAttr('disabled');
+
+                            jQuery("#evdeactivatepay-popup").text('@Translate.Text("moveout.pay")' + numeral(response.totalamounttopay).format('0,0.00') + " " + '@Translate.Text("AED")');
+                            jQuery("#evdeactivatepay-popup").removeAttr('disabled');
+
+                            jQuery("#totalAmount").val(response.totalamounttopay);
+                        }
+                    }
+                    else {
+                        $("#deactivateevcardform").hide();
+                        $('#evdeactiate-error').show();
+                        $evdeactiateerror.html(response.errormessage);
+                    }
+                }
+            });
+        }
+        else {
+            $("#deactivateevcardform").hide();
+            $('#evdeactiate-error').show();
+            $evdeactiateerror.html("");
+        }
+        return false;
+        }
+
+
+
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,188 @@
+﻿@using DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey
+@using Sitecore.Globalization
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+}
+@if (!displayonly)
+{
+    <div class="form-field form-field--text mb24">
+        @if (!string.IsNullOrWhiteSpace(Model.Asheading) && Model.Asheading.Equals("X")) { }
+        else
+        {
+            <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label">
+                @Model.Question
+            </label>
+        }
+        <div class="form-field">
+            @if (!string.IsNullOrWhiteSpace(Model.Alignment) && Model.Alignment.Equals("R"))
+            {
+                <div class="form-field--6">
+                    <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label">
+                        @Translate.Text("StartTime")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text-fix-padding form-field__input--text-force-rtl from-time" data-el="timepicker"
+                               id="form-field-group@(groupnumber)_question@(Model.Questionnumber)From"
+                               name="form-field-group@(groupnumber)_question@(Model.Questionnumber)From"
+                               type="text"
+                               value=""
+                               placeholder="@Model.Questionplaceholder"
+                               aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)From"
+                               data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)From"
+                               @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                               data-parsley-required-message="@Model.Questionplaceholder"
+                               data-parsley-trigger="focusout" data-parsley-id="4"
+                               data-close="@Translate.Text("Close")"
+                               data-parsley-group="startdatetimepickervalidation">
+                    </span>
+                </div>
+                <div class="form-field--6">
+                    <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label">
+                        @Translate.Text("EndTime")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text-fix-padding form-field__input--text-force-rtl to-time" data-el="timepicker"
+                               id="form-field-group@(groupnumber)_question@(Model.Questionnumber)To"
+                               name="form-field-group@(groupnumber)_question@(Model.Questionnumber)To"
+                               type="text"
+                               value=""
+                               placeholder="@Model.Questionplaceholder"
+                               aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)To"
+                               data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)To"
+                               @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                               data-parsley-required-message="@Model.Questionplaceholder"
+                               data-parsley-trigger="focusout" data-parsley-id="4"
+                               data-close="@Translate.Text("Close")"
+                               data-parsley-group="enddatetimepickervalidation">
+                    </span>
+                </div>
+                <div class="time-error-message"></div>
+            }
+            else
+            {
+                <div class="form-field form-field--text">
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text-fix-padding form-field__input--text-force-rtl" data-el="timepicker"
+                               id="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                               name="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                               type="text"
+                               value=""
+                               placeholder="@Model.Questionplaceholder"
+                               aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                               data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                               @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                               data-parsley-required-message="@Model.Questionplaceholder"
+                               data-parsley-trigger="focusout" data-parsley-id="4"
+                               data-close="@Translate.Text("Close")"
+                               data-parsley-group="startdatetimepickervalidation">
+                    </span>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="form-field form-field--text">
+        @if (!string.IsNullOrWhiteSpace(Model.Asheading) && !Model.Asheading.Equals("X")) { }
+        else
+        {
+            <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label form-field__label--readonly">
+                @Model.Question
+                <span class="form-field__label-required aria-only">(@(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : "optional"))</span>
+            </label>
+        }
+        <span class="form-field__input-wrapper form-field__input-wrapper--readonly">
+            <input class="form-field__input form-field__input--text form-field__input--readonly @(displayonly ? "disabled" : string.Empty)"
+                   id="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                   name="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                   type="text" placeholder="@Model.Questionplaceholder"
+                   value="@GetSurveyValue(Model)"
+                   @(displayonly ? "disabled" : string.Empty)
+                   aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                   data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                   @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                   data-parsley-required-message="@Model.Questionplaceholder"
+                   data-parsley-trigger="focusout"
+                   data-parsley-id="6">
+        </span>
+        <div id="description-for-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+        </div>
+
+    </div>
+    @functions
+    {
+        public string GetSurveyValue(Questiontypeslist questiontypeslist)
+        {
+            if (!string.IsNullOrWhiteSpace(questiontypeslist.Alignment) && questiontypeslist.Alignment.Equals("R"))
+            {
+                if (questiontypeslist.Surveyfeedback != null)
+                {
+                    string[] dates = questiontypeslist.Surveyfeedback.Split('-');
+                    if (dates != null && dates.Length > 1)
+                    {
+                        TimeSpan fromTime;
+                        TimeSpan ToTime;
+                        TimeSpan.TryParseExact(dates[0], "hhmmss", System.Globalization.CultureInfo.InvariantCulture, out fromTime);
+                        TimeSpan.TryParseExact(dates[1], "hhmmss", System.Globalization.CultureInfo.InvariantCulture, out ToTime);
+                        if (fromTime != null && ToTime != null && fromTime.Ticks > 0 && ToTime.Ticks > 0)
+                        {
+                            //TimeSpan.TryParseExact(intervalString, format, culture, out interval)
+                            return string.Format("{0} - {1}", fromTime.ToString(), ToTime.ToString());
+                        }
+                    }
+                }
+            }
+            else
+            {
+                TimeSpan fromTime;
+                TimeSpan.TryParseExact(questiontypeslist.Surveyfeedback, "hhmmss", System.Globalization.CultureInfo.InvariantCulture, out fromTime);
+                if (fromTime != null && fromTime.Ticks > 0)
+                {
+                    return fromTime.ToString();
+                }
+            }
+            return "";
+        }
+    }
+}
+
+<script type="text/javascript">
+
+    docReady(function () {
+
+        $("#btSubmit").click(function (event) {
+            var time1 = $('.from-time').val();
+            var time2 = $('.to-time').val();
+            var time1Parts = time1.split(/[:\s]/);
+            var time2Parts = time2.split(/[:\s]/);
+            if (time1Parts[2] === 'pm' && time1Parts[0] !== '12') {
+                time1Parts[0] = parseInt(time1Parts[0]) + 12;
+            }
+            if (time2Parts[2] === 'pm' && time2Parts[0] !== '12') {
+                time2Parts[0] = parseInt(time2Parts[0]) + 12;
+            }
+            var date1 = new Date(0, 0, 0, time1Parts[0], time1Parts[1]);
+            var date2 = new Date(0, 0, 0, time2Parts[0], time2Parts[1]);
+
+
+            if (date2.getTime() >= date1.getTime()) {
+                $('.time-error-message').text('');
+                console.log('success');
+            } else {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                $('.to-time').val('');
+                $('.time-error-message').text('@Translate.Text("EndTime_Msg")');
+                $('.to-time').focus();
+            }
+
+
+
+        });
+    });
+</script>

@@ -1,0 +1,80 @@
+﻿@using Sitecore.Globalization
+@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@using DEWAXP.Foundation.Content
+@{
+    var profilePic = Model.ProfilePic != null ? "data:image/png;base64," + @Model.ProfilePic : "../../images/no-image.png";
+}
+
+@if (Model.CandidateAttchments != null)
+{
+    <input type="hidden" id="PP" value="@profilePic" />
+    <input type="hidden" id="PPID" value="@Model.ProfilePicId" />
+
+    foreach (var itemAttachment in Model.CandidateAttchments)
+    {
+        <div class="form--data-table-row" data-row-of="@itemAttachment.attachmenttype" data-table-row="">
+            <div class="tab-title tab-expand">@itemAttachment.attachmenttypetext</div>
+            <div class="form--date-table-upload-details">
+                <div class="form--data-table-wrapper">
+                    <a class="form-data-table__label" href="#" data-filedata="@itemAttachment.ContentBase64">
+                        @itemAttachment.attachmentheader
+                    </a>
+                    <span data-select="false" data-val="@itemAttachment.content" class="form-data-table__value form-field__input--upload-filename">@itemAttachment.contenttype</span>
+                    <button class="button button--text button--remove button-row-remove" type="button" data-row-remove="@itemAttachment.objectid#@itemAttachment.objecttype#@itemAttachment.planversion#@itemAttachment.sequencenumber#@itemAttachment.attachment#@itemAttachment.attachmenttype">@Translate.Text("remove button text")</button>
+                </div>
+                @*<p>
+                        <a class="button button--text replace-file" data-row-replace="@itemAttachment.objectid#@itemAttachment.objecttype#@itemAttachment.planversion#@itemAttachment.sequencenumber#@itemAttachment.attachment#@itemAttachment.attachmenttype">Replace Current Document </a>
+                    </p>*@
+            </div>
+
+        </div>
+    }
+}
+<script type="text/javascript">
+    setTimeout(function () {
+        jQuery(window).trigger('proprogress', [@Model.ProfileProgress]);
+    }, 500);
+
+    $('.button--remove').bind('click', function (e) {
+        var objData = $(this).attr('data-row-remove');
+        var url = "/api/sitecore/CareerPortal/AjaxDeleteFile";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            //datatype: 'application/json',
+            data: { removeFiles: objData },
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+        }).done(function (response) {
+            //debugger;
+            jQuery("#attachmentList").html('');
+            var sec = '@Model.Section';
+            jQuery("#attachmentList").html(response);
+            jQuery(".m21-avatar__image").css("background-image", "url('')");
+            if (jQuery("#PP").val() != undefined)
+            {
+                jQuery(".m21-avatar__image").css("background-image", "url(" + jQuery("#PP").val() + ")");
+            }
+            else {
+                jQuery(".m21-avatar__image").css("background-image", "url(../../images/no-image.png)");
+            }
+            require(['parsley'], function () {
+                jQuery('#candidateprofile' + sec).parsley();
+            });
+            jQuery(window).trigger('reinitremoveFile');
+        });
+
+    });
+
+    //$('.replace-file').bind('click', function (e) {
+    //    var objData = $(this).attr('data-row-replace');
+    //    $("#previewImage").attr("data-row-replace", objData);
+    //});
+</script>

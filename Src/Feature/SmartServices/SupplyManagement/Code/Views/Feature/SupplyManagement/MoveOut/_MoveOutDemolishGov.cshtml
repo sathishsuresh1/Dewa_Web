@@ -1,0 +1,354 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content 
+@model DEWAXP.Foundation.Content.Models.MoveOut.MoveOutDemolish
+
+@{
+    var now = DateHelper.DubaiNow().AddMonths(-1);
+    var threeinfuture = now.AddMonths(3);
+    var disableDate = "";
+    var disconnectionTimeText = "";
+    if (Model.DisconnectionTimeOptions != null)
+    {
+        disconnectionTimeText = Model.DisconnectionTimeOptions[0].Text + " " + Translate.Text("moveout.to.text") + " " + Model.DisconnectionTimeOptions[Model.DisconnectionTimeOptions.Count - 1].Text;
+    }
+    if (Model.DisconnectionCurrentTimeOptions != null && Model.DisconnectionCurrentTimeOptions.Count == 0)
+    {
+        if (disableDate != "")
+        {
+            disableDate += ",";
+        }
+        disableDate += "[" + DateTime.Now.Year + "," + (DateTime.Now.Month - 1) + "," + DateTime.Now.Day + "]";
+    }
+
+    if (Model.HolidayList != null && Model.HolidayList.Count > 0)
+    {
+
+        foreach (var holidayItem in Model.HolidayList)
+        {
+            if (disableDate != "")
+            {
+                disableDate += ",";
+            }
+            DateTime dt = Convert.ToDateTime(holidayItem);
+            disableDate += "[" + dt.Year + "," + (dt.Month - 1) + "," + dt.Day + "]";
+        }
+    }
+}
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m26-page-title")
+    </div>
+</div>
+@Html.Sitecore().Placeholder("j87/m41-tab-box")
+@Html.Sitecore().Placeholder("mandatoryfields")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "move-out-demolish", @class = "form", data_form = "true", data_parsley_focus = "none", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(x => x.contractaccountnumber)
+            <div class="form-field form-field--text ">
+                <label for="form-field-email" class="form-field__label">@Translate.Text("Email address") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                <label class="form-field__input-wrapper">
+                    @Html.TextBoxFor(x => x.Emailaddress,
+                        new
+                        {
+                            @type = "email",
+                            @class = "form-field-email",
+                            @id = "form-field-email",
+                            @placeholder = Translate.Text("J40.EnterEmailAddressPlaceHolder"),
+                            @required = "",
+                            @data_parsley_error_message = Translate.Text("Please enter a valid email address"),
+                            @data_parsley_errors_container = "#description-for-email",
+                            @aria_describedby = "description-for-email",
+                            @data_parsley_id = "14",
+                            @data_parsley_email = "",
+                            @step = "any"
+                        })
+
+                </label>
+                <div id="description-for-email" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.Emailaddress, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--text ">
+                <label for="form-field-mobilenumber" class="form-field__label">
+                    @Translate.Text("moveout.mobilenumber")
+                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                    <input type="tel" name="MobileNumber" value="@Model.MobileNumber" @*aria-required="true"*@ aria-describedby="description-for-mobilenumber" required="required" placeholder="@Translate.Text("Mobile number placeholder")" data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                </span>
+                <div id="description-for-mobilenumber" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.MobileNumber)
+                </div>
+            </div>
+
+            <div class="form-field form-field--text ">
+                <label for="form-field-plotnumber" class="form-field__label">@Translate.Text("Plot Number") <span class="form-field__label-required aria-only">(@Translate.Text("optional")) </span></label>
+                <label class="form-field__input-wrapper">
+                    @Html.TextBoxFor(x => x.plotnumber,
+         new
+         {
+             @class = "form-field__input form-field__input--text",
+             @name = "plotnumber",
+             @id = "form-field-plotnumber",
+             @placeholder = Translate.Text("Enter plot number"),
+             @required = "",
+             //@data_parsley_plotnumber = "",
+             @data_parsley_error_message = Translate.Text("Please enter a value"),
+             @data_parsley_errors_container = "#description-for-plotnumber",
+             @aria_describedby = "description-for-plotnumber",
+             @data_parsley_id = "10",
+             @step = "any"
+         })
+                </label>
+                <div id="description-for-plotnumber" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.plotnumber, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--text ">
+                <label for="form-field-premisenumber" class="form-field__label">@Translate.Text("Premise Number") <span class="form-field__label-required aria-only">(@Translate.Text("optional")) </span></label>
+                <label class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text"
+                           id="form-field-premisenumber"
+                           type="number" lang="en"
+                           name="PremiseNumber"
+                           placeholder="@Translate.Text("premise number placeholder")"
+                           value="@Model.premisenumber"
+                           aria-describedby="description-for-premisenumber"
+                           required="required"
+                           data-parsley-error-message="@Translate.Text("premise number validation message")"
+                           data-parsley-errors-container="#description-for-premisenumber"
+                           data-parsley-premise_number="" />
+                </label>
+                <div id="description-for-premisenumber" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.premisenumber, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div id="datepicker-container-movedate" class="form-field form-field--text form-field--6 relative">
+                <label for="form-field-movedate" class="form-field__label">
+                    @Translate.Text("moveout.disconnect")
+                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    @Html.TextBoxFor(x => x.DisconnectDate, new
+               {
+
+                   data_parsley_id = "6",
+                   @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                   id = "form-field-movedate",
+                   placeholder = Translate.Text("Select date"),
+                   required = "required",
+                   data_parsley_required_message = Translate.Text("moveout.pleaseenteravalue"),
+                   data_el = "datepicker-future",
+                   data_parsley_errors_container = "#description-for-movedate",
+                   data_parsley_cannotbebeforetoday_message = Translate.Text(DictionaryKeys.MoveOut.DisconnectDateNotInPast),
+                   data_parsley_cannotbeafterthreemonth_message = Translate.Text(DictionaryKeys.MoveOut.DisconnectDateNotthreemonths),
+                   data_picker_options = "{ \"max\": [" + threeinfuture.Year + "," + (threeinfuture.Month) + "," + threeinfuture.Day + "],\"disable\": [ " + disableDate + "] }",
+                   type = "text",
+                   @data_initial_date = string.Empty
+               })
+                </span>
+                <div id="description-for-movedate" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.DisconnectDate)
+                </div>
+            </div>
+            <div id="datepicker-container-movetime" class="form-field form-field--select form-field--select-single form-field--6  nopadding">
+                <label for="form-field-disconnectiontime" class="form-field__label">
+                    @Translate.Text("moveout.time")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full time_select"
+                            id="form-field-disconnectiontime"
+                            name="DisconnectionTime"
+                            required
+                            aria-describedby="description-for-disconnectiontime"
+                            data-parsley-errors-container="#description-for-disconnectiontime"
+                            data-parsley-required-message="@Translate.Text("moveout.selectdisconnectiontime")">
+                        <option value="" selected="">@Translate.Text("moveout.selecttime")</option>
+                        @if (Model.DisconnectionTimeOptions != null)
+                        {
+                            foreach (var item in Model.DisconnectionTimeOptions)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-disconnectiontime" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.DisconnectionTime)
+                </div>
+            </div>
+            <div class="form-field form-field--text  form-field--12">
+                @Html.Raw(Model.DisconnectionDateTimeNotes)
+            </div>
+            <fieldset class="fieldset">
+                <legend class="legend">@Translate.Text("Request Letter")</legend>
+                <div class="form-field form-field--upload">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="RequestLetter">
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label for="form-field-RequestLetter" class="form-field__label">
+                                <strong class="form-field__label-description"></strong>
+                            </label>
+                            <div>
+                                <label>
+                                    @Html.TextBoxFor(m => m.RequestLetter,
+                                        new
+                                        {
+                                            @type = "file",
+                                            @class = "form-field__input form-field__input--upload",
+                                            @id = "form-field-RequestLetter",
+                                            @name = "RequestLetter",
+                                            @aria_describedby = "description-for-RequestLetter",
+                                            @required = "",
+                                            @data_parsley_error_message = @Translate.Text("Upload.Text") + " " + @Translate.Text("Letter/Receipt"),
+                                            @data_parsley_errors_container = "#errors-for-RequestLetter",
+                                            @data_uploader_field = "RequestLetter",
+                                            @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                            @data_size = @AttachmentValidation.maximumFileSize,
+                                            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            @data_parsley_id = "16"
+                                        })
+
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="RequestLetter"></p>
+                            <p>
+                                <button class="button button--text button--remove hidden" data-uploader-remove="RequestLetter">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div id="description-for-RequestLetter" class="form-field__messages">
+                        <div id="errors-for-RequestLetter">
+                            @Html.ValidationMessageFor(x => x.RequestLetter, "", new { @class = "parsley-errors-list" })
+                        </div>
+                        <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend class="legend">@Translate.Text("Site Plan")</legend>
+                <div class="form-field form-field--upload">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="SitePlan">
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label for="form-field-SitePlan" class="form-field__label">
+                                <strong class="form-field__label-description"></strong>
+                            </label>
+                            <div>
+                                <label>
+                                    @Html.TextBoxFor(m => m.SitePlan,
+                                        new
+                                        {
+                                            @type = "file",
+                                            @class = "form-field__input form-field__input--upload",
+                                            @id = "form-field-SitePlan",
+                                            @name = "SitePlan",
+                                            @aria_describedby = "description-for-SitePlan",
+                                            @required = "",
+                                            @data_parsley_error_message = @Translate.Text("Upload.Text") + " " + @Translate.Text("Site Plan"),
+                                            @data_parsley_errors_container = "#errors-for-SitePlan",
+                                            @data_uploader_field = "SitePlan",
+                                            @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                            @data_size = @AttachmentValidation.maximumFileSize,
+                                            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            @data_parsley_id = "16"
+                                        })
+
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="SitePlan"></p>
+                            <p>
+                                <button class="button button--text button--remove hidden" data-uploader-remove="SitePlan">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div id="description-for-SitePlan" class="form-field__messages">
+                        <div id="errors-for-SitePlan">
+                            @Html.ValidationMessageFor(x => x.SitePlan, "", new { @class = "parsley-errors-list" })
+                        </div>
+                        <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="form-field__button">
+                @*<button class="button button--primary button--next" data-submission-text="@Translate.Text(" Submitting")...">@Translate.Text("moveto.detailssubmit")</button>*@
+                <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+            </div>
+        }
+    </div>
+</div>
+
+
+@*<script type="text/javascript">
+        docReady(function () {
+            jQuery('#form-account-selector').submit(handleAccountSelection);
+            jQuery('#form-account-selector').submit();
+        });
+
+        function handleAccountSelection(e) {
+            var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+            jQuery('input[name="contractaccountnumber"]').val(accountNumber);
+            jQuery('#form-field-premisenumber').val(jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-acc-number"));
+            console.log(accountNumber);
+            return false;
+        }
+
+    </script>*@
+
+
+<script type="text/javascript">
+    docReady(function () {
+        jQuery("#form-field-movedate").on('change', function () {
+            fillTimeOption();
+        });
+        jQuery(".shiftTime").append('@disconnectionTimeText');
+        function fillTimeOption() {
+            var currentdate = jQuery('#form-field-movedate').val();
+            currentdate = currentdate.replace("يناير", "January").replace("فبراير", "February").replace("مارس", "March").replace("أبريل", "April").replace("مايو", "May").replace("يونيو", "June").replace("يوليو", "July").replace("أغسطس", "August").replace("سبتمبر", "September").replace("أكتوبر", "October").replace("نوفمبر", "November").replace("ديسمبر", "December");
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (Date.parse(currentdate) == Date.parse(today)) {
+                // date is greater than today
+                var timeOptions = @Html.Raw(Json.Encode(Model.DisconnectionCurrentTimeOptions));
+                jQuery("#form-field-disconnectiontime").empty();
+                jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val("").html('@Translate.Text("moveout.selecttime")'));
+                for (var i = 0; i < timeOptions.length; i++) {
+                    jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val(timeOptions[i].Value).html(timeOptions[i].Text));
+                }
+            }
+            else {
+                var timeOptions = @Html.Raw(Json.Encode(Model.DisconnectionTimeOptions));
+                jQuery("#form-field-disconnectiontime").empty();
+                jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val("").html('@Translate.Text("moveout.selecttime")'));
+                for (var i = 0; i < timeOptions.length; i++) {
+                    jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val(timeOptions[i].Value).html(timeOptions[i].Text));
+                }
+            }
+        }
+    });
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

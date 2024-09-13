@@ -1,0 +1,56 @@
+﻿@using DEWAXP.Foundation.Content.Models.Bills
+@using System.Linq
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@model BillCompareViewModel
+
+
+<div class="m84-bills-compare--graph_wrapper">
+    <div class="m84-bills-compare--graph_inner m84-bills-compare--graph_inner--active m84-bills-compare--graph_billed" style="display: block; opacity: 1;">
+        <div class="m84-bills-compare--graph" id="m84-bills-compare--graph_bill"
+             data-chart-container="true"
+             data-x-axis-categories="@Model.BilledAmountXaxis"
+             data-y-axis-title-text=""
+             data-ev-series='[{"data":@(!string.IsNullOrWhiteSpace(Model.BilledAmountEVSeries)? Model.BilledAmountEVSeries: "[]"),"name":"@Translate.Text("billComp.Billed Amount")","color":"#087232"}]'
+             data-tooltip-value-suffix=""
+             data-usagefor="@Translate.Text("billComp.Per 1000 IG")"
+             data-step="1"
+             data-x-axis-text="@Translate.Text("billComp.month")"
+             data-y-axis-text="@Translate.Text("billComp.Per kWh")"
+             data-legend="Showing: "
+             data-step-s="2"
+             data-currency="@Translate.Text("AED")"
+             data-highcharts-chart="1"
+             style="overflow: hidden;">
+        </div>
+        @if (Model.Invoices != null && Model.Invoices.Count > 0)
+        {
+            <div class="m84-bills-compare--graph_footer">
+                @foreach (InvoiceModel invoice in Model.Invoices)
+                {
+                <div class="m84-bills-compare--graph_footerwrp @(!string.IsNullOrWhiteSpace(invoice.DegTransactionReference)?"":"no-visilibility")">
+                    @if (!string.IsNullOrWhiteSpace(invoice.DegTransactionReference))
+                    {
+                        <a class="" href="/api/billdownloads/account/@invoice.DegTransactionReference" target="_blank">
+                            <div class="m84-bills-compare--graph_footerimg">
+                                <img src="/images/greenbill_logo.png" alt="">
+                            </div>
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="m84-bills-compare--graph_footerimg">
+                            <img src="/images/greenbill_logo.png" alt="">
+                        </div>
+                    }
+                </div>
+                }
+            </div>
+        }
+        <div class="m84-bills-compare--no-data">
+            @Translate.Text("billComp.No Data Available")
+        </div>
+    </div>
+</div>
+

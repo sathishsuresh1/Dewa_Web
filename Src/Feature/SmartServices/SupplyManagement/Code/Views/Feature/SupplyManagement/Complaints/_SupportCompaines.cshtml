@@ -1,0 +1,239 @@
+﻿@using Sitecore.Globalization;
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.SmartResponse.SmartResponseHelper;
+@using _langCode = DEWAXP.Foundation.Content.Models.SmartResponseModel.SmlangCode
+
+@model DEWAXP.Foundation.Integration.DewaSvc.GetSRCompanyDetailsResponse
+
+@{
+    string dirClass = ViewBag.IsRTL ? "j120-smart-response--rtl" : "j120-smart-response--ltr";
+
+    _langCode smlangCode = ViewBag.IsRTL ? _langCode.ar : _langCode.en;
+
+
+
+    string _btntitle = _commonHelper.GetSMTranslation("Call", smlangCode);
+    string _tId = "32131";
+}
+<div class="j120-smart-response @dirClass" id="j120smartresponse" data-journey="j120-smart-response">
+    <div id="ramas-section" class="smartResponseContainer">
+        <div class="box box--7">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <div class="j120-smart-response--window">
+
+                            <div class="j120-smart-response--content">
+                                <img class="j120-smart-response--rammas_icon" alt="" src="@Url.Content("~/images/Rammas/rammas_icon.png")" />
+
+                                <div class="j120-smart-response--content-content custom_screen_wrapper">
+                                    <p class="j120-smart-response--text">@_commonHelper.GetSMTranslation("I have selected for you the list of support companies", smlangCode)</p>
+                                    @{
+                                        if (Model != null && Model.@return != null && Model.@return.listofcompany != null &&
+                                                                   Convert.ToInt32(Model.@return.listofcompany.Count()) > 0)
+                                        {
+                                            <div class="grid__row j120-smart-response--card_row">
+
+
+                                                @foreach (var item in Model.@return.listofcompany)
+                                                {
+                                                    bool IsMapLink = item.location.Contains("gl/maps");
+                                                    @*<div class="grid__column grid__column--3">
+                                                            <div class="j120-smart-response--card" data-companyid="@item.partner">
+                                                                <div class="j120-smart-response--card_title">
+                                                                    @item.company_name
+                                                                </div>
+                                                                <div class="j120-smart-response--card_link">
+                                                                    @item.area
+                                                                </div>
+                                                                <div class="j120-smart-response--card_link">
+                                                                    @item.contact_name - @item.email_address
+                                                                </div>
+                                                                <div class="j120-smart-response--card_link">
+                                                                    <p>
+                                                                        <span class="green"> @item.timing</span>
+                                                                        - @item.note
+                                                                    </p>
+                                                                </div>
+                                                                <div class="j120-smart-response--icon_links mb12">
+
+                                                                    <a class="green icon-new-call" role="link" title="Call" target="_blank" href="tel:@item.mobile_address">
+                                                                        @_commonHelper.GetSMTranslation("Call",smlangCode)
+                                                                    </a>
+
+
+                                                                    <a class="green icon-location" role="link" target="_blank" title="Get Direction" href="@item.location">
+                                                                        @_commonHelper.GetSMTranslation("Get Direction",smlangCode)
+                                                                    </a>
+
+                                                                </div>
+
+                                                            </div>
+                                                        </div>*@
+
+                                                    <div class="grid__column grid__column--3">
+                                                        <div class="j120-smart-response--card company-cards">
+                                                            <div class="j120-smart-response--card_title">
+                                                                @item.company_name
+                                                            </div>
+                                                            <div class="j120-smart-response--card_link">
+                                                                @item.area
+                                                            </div>
+                                                            @if (!string.IsNullOrEmpty(item.mobile_address))
+                                                            {
+                                                                <div class="j120-smart-response--card_link">
+                                                                    @_commonHelper.GetSMTranslation("Contact", smlangCode) : <span class="j120-smart-response--card_numtext MobilecallTigger" style="cursor:pointer;" data-mobileno="@item.mobile_address" data-partnerno="@item.partner" dir="ltr">@item.mobile_address</span>
+                                                                </div>
+                                                            }
+
+
+                                                            @if (IsMapLink)
+                                                            {
+                                                                <div class="j120-smart-response--card_address-icon">
+                                                                    <a target="_blank" href="@item.location"><img alt="" src="@Url.Content("~/images/dewa-pin-_darkgreen.png")"></a>
+                                                                </div>
+
+                                                            }
+
+                                                            @if (!string.IsNullOrEmpty(item.timing))
+                                                            {
+                                                                <div class="j120-smart-response--card_link mt12">
+                                                                    <p>
+                                                                        <span class="green"> @item.timing</span>
+                                                                    </p>
+                                                                </div>
+                                                            }
+
+                                                            @if (!IsMapLink)
+                                                            {
+                                                                <div class="j120-smart-response--card_link">
+                                                                    @Html.Raw(item.location)
+                                                                </div>
+                                                            }
+
+                                                            @if (!string.IsNullOrEmpty(item.note))
+                                                            {
+                                                                <div class="j120-smart-response--card_link">
+                                                                    <p>
+                                                                        @item.note
+                                                                    </p>
+                                                                </div>
+                                                            }
+
+
+                                                            <div class="j120-smart-response--card_num link">
+                                                                <div class="j120-smart-response--card_text MobilecallTigger" data-mobileno="@item.mobile_address" data-partnerno="@item.partner"> @_commonHelper.GetSMTranslation("Call", smlangCode)</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <script>
+                                                                        var _cTid = "@(_tId)";
+                                                                        docReady(function () {
+                                                                            setTimeout(function () {
+
+                                                                                SetEqualCard(".company-cards");
+                                                                                $(".MobilecallTigger").click(function () {
+                                                                                    var ActionData = $(this).data('mobileno');
+                                                                                    $(".CompanyMobileNO").text(ActionData);
+                                                                                    $(".CompanyMobileNO").prop("href", "tel:" + ActionData);
+                                                                                    $(".CompanyPartnerId").val($(this).data('partnerno'));
+                                                                                    call(_cTid, ActionData);
+                                                                                })
+                                                                            }, 100)
+
+                                                                            $(window).resize(function () {
+                                                                                //debugger;
+                                                                                SetEqualCard(".company-cards");
+                                                                            })
+                                                                        })
+                                                </script>
+                                            </div>
+
+                                            <div class="m39-modal m39-modal--new j120-smart-response--infoModal" data-component="m39-modal" id="modal_true">
+                                                <button data-trigger="true" class="m39-modal__trigger hidden trigger-@(_tId)" type="button" id="trigger-@(_tId)" aria-controls="content-@(_tId)"></button>
+                                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="content-@(_tId)" aria-labelledby="trigger-@(_tId)">
+                                                    <div class="m39-modal__dialog">
+                                                        <div class="m39-modal__header">
+                                                            <div class="m39-modal__title">@Html.Raw(_btntitle)</div>
+                                                            <a data-close="true" class="optselected m39-modal__button--close optselected_call" id="close-@(_tId)" aria-controls="content-@(_tId)"></a>
+                                                        </div>
+                                                        <div class="m39-modal__content">
+                                                            <p class="icon-new-call link-call">
+                                                                @Html.Raw(_btntitle) : <a title="@Html.Raw(_btntitle)" class="link CompanyMobileNO" href="tel:"></a>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="m39-modal__overlay"> </div>
+                                            </div>
+
+                                        }
+                                        else
+                                        {
+                                            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                                        }
+
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    var isDevice = function () {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    };
+
+    function call(id, actionData) {
+        if (isDevice()) {
+            //console.log(actionData);
+
+            $(".optselected_call").click();
+            window.location.href = "tel:" + actionData;
+        } else {
+            //console.log('laptop');
+            //debugger;
+            jQuery('.trigger-' + id).trigger('click');
+        }
+
+    }
+
+    function getMaxHeight(el) {
+        var h = $(el).height();
+        $(el).each(function () {
+            var _h = $(this).height(this);
+            if (h > _h) {
+                h = _h;
+            }
+        });
+        return h;
+    }
+
+    function SetEqualCard(el) {
+        if ($(el).length > 0) {
+
+            $(el).removeAttr("style");
+            $(el).hide();
+            //$(cel).css("height", "auto");
+            setTimeout(function () {
+                var _maxHeight = getMaxHeight(el);
+                console.log(_maxHeight);
+                if ($(window).width() > 555) {
+                    $(el).height(_maxHeight + 25);
+                }
+                $(el).show();
+                jQuery(window).trigger("reinit_j120");
+            }, 500)
+
+        }
+    }
+</script>

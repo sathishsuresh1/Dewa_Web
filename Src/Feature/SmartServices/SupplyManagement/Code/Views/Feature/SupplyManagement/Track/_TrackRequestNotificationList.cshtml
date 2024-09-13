@@ -1,0 +1,153 @@
+﻿@model DEWAXP.Feature.SupplyManagement.Models.Track.TrackRequestAnonymous
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+
+@{
+
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    var dir = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="j141-tracking-anonymous j120-smart-response-status" data-journey="j141-tracking-anonymous">
+    <div class="grid__row">
+        @if (Model != null && Model.TrackList != null && Model.TrackList.Count > 0)
+        {
+            <div class="grid__column grid__column--12">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TRACK_REQUEST_ANONYMOUS)" class="j120-smart-response--button">@Translate.Text("TRA_Back")</a>
+                <h2 class="j120-smart-response--track_title">@Translate.Text("TRA_TrackNotifications_List")</h2>
+                <span class="j120-smart-response--track_ac">@Translate.Text("TRA_Account") @Model.AccountNumber</span>
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form form--inline", @id = "TrackRequestAnonymous", @data_form = "true", @novalidate = string.Empty }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    foreach (DEWAXP.Foundation.Integration.APIHandler.Models.Response.AnonymousTrack.TrackRequests item in Model.TrackList)
+                    {
+                        var isComplelted = (!string.IsNullOrWhiteSpace(item.completed) && item.completed.ToLower().Equals("false")) ? "not-resolved" : "";
+                        <div class="j120-smart-response-status-vert">
+                            <div class="j120-smart-response-statusbox j120-smart-response--track track-content-box">
+                                <div class="j120-smart-response--track-head">
+                                    <div class="j120-smart-response--track-head-title">
+                                        <div class="j120-smart-response--track_title">@item.codetext</div>
+                                        <div class="j120-smart-response--track_subtitle">@Translate.Text("TRA_NotificationNo") @item.notificationnumber</div>
+                                    </div>
+                                    <div class="j120-smart-response--track-head-status">
+                                        <div class="resolved-details-wrapper">
+                                            <div class="resolved-details">
+                                                <span class="resolved-details-status icon-tick @isComplelted">@_commonHelper.GetSMTranslation(item.shorttext, lang)</span>
+                                                @if (!string.IsNullOrWhiteSpace(item.startdate) && item.startdate != "0000-00-00")
+                                                {
+                                                    string mnth = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.startdate, "yyyy-MM-dd", "MMM"), lang);
+                                                    string dd = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.startdate, "yyyy-MM-dd", "dd"), lang);
+                                                    string yyyy = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.startdate, "yyyy-MM-dd", "yyyy"), lang);
+
+                                                    string fromattedDate = string.Format("{0} {1} {2}", dd, mnth, yyyy);
+
+                                                    if (item.newstatus == "S002")
+                                                    {
+                                                        <span class="resolved-details-datetime parentarrivaldesc">@string.Format("{0} {1}", fromattedDate, item.starttime)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="resolved-details-datetime">@string.Format("{0} {1}", fromattedDate, item.starttime)</span>
+                                                    }
+                                                }
+
+                                                <span data-nid="@(item.notificationnumber)" dir="@dir" data-showstatus="true" data-ac="@(Model.AccountNumber)" class="resolved-details-button expand">
+                                                    <span class="hide" dir="@dir">@Translate.Text("TRA_ViewAllStages")</span>
+                                                    <span class="view" dir="@dir">@Translate.Text("TRA_HideAllStages")</span>
+                                                </span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="track-status-content">
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <script type="text/javascript">
+                docReady(function () {
+                    if ('@lang' == 'ar') {
+                        jQuery(".j141-tracking-anonymous").parent("div").addClass("j120-smart-response--rtl");
+                    }
+                    var AddCustomForgeryToken = function (data, elementId) {
+                        data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                        return data;
+                    };
+                    jQuery(".resolved-details-button").on("click", function () {
+                        var currentActionBtn = $(this);
+                        var isShow = $(this).data("showstatus");
+                        var trackContainer = $(currentActionBtn).closest(".track-content-box").find(".track-status-content");
+                        if (!isShow) {
+
+                            $(trackContainer).html("");
+                            $(currentActionBtn).attr("data-showstatus", true);
+                            $(currentActionBtn).data("showstatus", true);
+
+                            $(currentActionBtn).removeClass('collapse')
+                            $(currentActionBtn).addClass('expand')
+
+                            return;
+                        }
+                        var requestData = {
+                            NotificationNumber: $(this).data("nid"),
+                        }
+                        var _postUrl = '@Url.Content("~/api/sitecore/Track/TrackRequestStatus")';
+                        requestData = AddCustomForgeryToken(requestData, "#TrackRequestAnonymous");
+
+                        $.ajax({
+                            url: _postUrl,
+                            type: 'POST',
+                            data: requestData,
+                            beforeSend: function () {
+
+                            },
+                            success: function (successdata) {
+                                if (typeof successdata == "object") {
+                                    //window.location.href = successdata.RedirectUrl;
+                                }
+                                else {
+                                    $(trackContainer).html(successdata);
+                                }
+                                $(currentActionBtn).attr("data-showstatus", false);
+                                $(currentActionBtn).data("showstatus", false);
+                                $(currentActionBtn).removeClass("expand");
+                                $(currentActionBtn).addClass('collapse');
+                            },
+                            complete: function (x) {
+
+                            },
+                            error: function (errorData) {
+                                console.log(errorData);
+                            }
+                        });
+                    });
+                });
+            </script>
+        }
+        else
+        {
+            <div class="grid__column grid__column--12 grid__column--content j120-smart-response--formcontent">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TRACK_REQUEST_ANONYMOUS)" class="j120-smart-response--button">@Translate.Text("TRA_Back")</a>
+                <div class="j120-smart-response--track">
+                    <div class="j120-smart-response--track-head">
+                        <div class="j120-smart-response--track-head-title">
+                            <div class="j120-smart-response--track_title" style="padding-right:30px;padding-left:30px;padding-top:15px;">@Translate.Text("TRA_NoRecord_Found")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

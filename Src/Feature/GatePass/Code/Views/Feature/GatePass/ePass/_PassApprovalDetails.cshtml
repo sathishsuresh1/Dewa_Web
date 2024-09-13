@@ -1,0 +1,1839 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using System.Linq
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Feature.GatePass.Models.ePass.SubPasses
+@using DEWAXP.Foundation.Content
+@using Roles = DEWAXP.Foundation.Content.Roles
+@model List<DEWAXP.Feature.GatePass.Models.ePass.SecurityPassViewModel>
+
+@if (Model != null && Model.Count > 0)
+{
+    var mainpass = Model.Where(y => !y.Subpass).FirstOrDefault();
+    var holidaypass = Model.Where(y => y.Subpass && y.passType.Equals(EpassHelper.GetDisplayName(SubPassType.Holiday)));
+    var nightpass = Model.Where(y => y.Subpass && y.passType.Equals(EpassHelper.GetDisplayName(SubPassType.Night)));
+    var devicepass = Model.Where(y => y.Subpass && y.passType.Equals(EpassHelper.GetDisplayName(SubPassType.Device)));
+    var materialpass = Model.Where(y => y.Subpass && y.passType.Equals(EpassHelper.GetDisplayName(SubPassType.Material)));
+    var viewPassport = "";
+    var viewEmirateID = "";
+    var viewVisa = "";
+    var viewPhoto = "";
+    var viewvehicle = "";
+    bool onedaypass = mainpass.passType.Equals(EpassHelper.GetDisplayName(PassType.OnedayPass));
+    var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(1);
+    DateTime nowoneyear;
+    nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddYears(1);
+    <div class="j113-epass">
+        <div class="m66-preloader j113-epass--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    if (mainpass != null)
+    {
+        using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-mainform", data_form = "true", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+        }
+
+        <div class="j113-epass" data-journey="j113-epass">
+            <div class="grid">
+                @Html.Sitecore().Placeholder("pagetitle")
+                <div class="grid__row mb12">
+                    <div class="grid__column grid__column--12">
+                        <div class="m10-avatar">
+                            <div class="m10-avatar__content">
+                                @if (!string.IsNullOrWhiteSpace(mainpass.profilepic))
+                                {
+                                    <img class="m10-avatar__image" alt="" src="data:image/png;base64,@mainpass.profilepic">
+                                }
+                                else
+                                {
+                                    <img class="m10-avatar__image" alt="" src="~/images/IdealHome/profile-icon.png">
+                                }
+                                <h2 class="m10-avatar__name">@mainpass.name</h2>
+                                <div class="j113-epass--status @mainpass.strclass.ToLower()">@(mainpass.strstatus != null ? mainpass.strstatus : " N/A")</div>
+                                <div>
+                                    @if ((string)ViewBag.usertype == Roles.DewaonedayInitiator && mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Initiated && mainpass.linkExpiryDate.HasValue)
+                                    {
+                                        if (mainpass.linkExpiryDate.Value.Ticks > 0)
+                                        {
+                                            if (mainpass.linkExpiryDate.Value.Date < DateTime.Now.Date)
+                                            {
+                                                <div>
+                                                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { id = mainpass.passNumber }, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                                                    {
+                                                        @Html.Sitecore().FormHandler("ePass", "ReinitiateOnedaypass")
+                                                        @Html.AntiForgeryToken()
+                                                        <p class="mb12 red">@Translate.Text("Epass.ReinitiateNote")</p>
+                                                        <button class="button button--secondary" id="btnReInitiate " type="submit">@Translate.Text("Epass.Reinitiate")</button>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+
+                                    }
+                                    @if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                    {
+                                        <button class="button button--primary icon-tick" id="btnApprovePass" type="button">@Translate.Text("Epass.Approve")</button>
+                                        <button class="button button--cancel button--cancel-icon btnRejectPass" id="btnRejectPass" data-close="true" data-passnumber="@mainpass.passNumber" type="button">
+                                            @Translate.Text("Epass.Reject")
+                                        </button>
+                                    }
+                                    @if ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Blocked)
+                                    {
+                                        <button class="button button--secondary" id="btnUnblockPass" type="button">
+                                            @Translate.Text("Epass.Unblock")
+                                        </button>
+                                    }
+                                    @if ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && (mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Active || mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.SoontoExpire || mainpass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Rejected || mainpass.status != DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Blocked))
+                                    {
+                                        <button class="button button--secondary" id="btnBlockPass" type="button">
+                                            @Translate.Text("Epass.Block")
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box box--3">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__colum grid__column--12">
+                            <div class="m25-tabs" data-component="m25-tabs" data-toggle-breakpoint="m" data-helper="toggle-menu" data-selected-tab-id="m25-tab-5">
+                                <div class="grid">
+                                    <div class="grid__row">
+                                        <div class="grid__column grid__column--4">
+                                            <div class="m25-tabs__menu m25-tabs__menu-modified" data-m25-tabs-menu="true">
+                                                <ul aria-role="tablist">
+                                                    <li>
+                                                        <a class="m25-tabs__tab m25-tabs__tab--active" id="m25-tab-0" aria-selected="true" aria-controls="m25-panel-0" href="#m25-panel-0" data-m25-tabs-tab="true">
+                                                            @Translate.Text("Epass.Profiledetails")
+                                                        </a>
+                                                    </li>
+                                                    @if (!mainpass.passType.Equals(EpassHelper.GetDisplayName(PassType.OnedayPass)))
+                                                    {
+                                                        <li>
+                                                            <a class="m25-tabs__tab m25-tabs__tab--active" id="m25-tab-1" aria-selected="true" aria-controls="m25-panel-1" href="#m25-panel-1" data-m25-tabs-tab="true">@Translate.Text("Epass.Holiday Passes")</a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="m25-tabs__tab m25-tabs__tab--active" id="m25-tab-2" aria-selected="true" aria-controls="m25-panel-2" href="#m25-panel-2" data-m25-tabs-tab="true">@Translate.Text("Epass.Night Passes")</a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="m25-tabs__tab m25-tabs__tab--active" id="m25-tab-3" aria-selected="true" aria-controls="m25-panel-3" href="#m25-panel-3" data-m25-tabs-tab="true">@Translate.Text("Epass.Electronic Device Passes")</a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="m25-tabs__tab m25-tabs__tab--active" id="m25-tab-4" aria-selected="true" aria-controls="m25-panel-4" href="#m25-panel-4" data-m25-tabs-tab="true">@Translate.Text("Epass.Material Passes")</a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="m25-tabs__body grid__column grid__column--8">
+                                            <div class="m15-tabs--mobile">
+                                                <div class="m25-tabs--title-mobile">
+                                                </div>
+                                                <div class="form-field form-field--select form-field--select-single">
+                                                    <label for="form-field-mpassapproval" class="form-field__label"><span class="aria-only">select</span></label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        <select id="form-field-mpassapproval" class="m25-tabs--select-mobile form-field__input form-field__input--select"></select>
+                                                    </span>
+                                                </div>
+                                                <div class="m25-tabs--container-mobile">
+                                                </div>
+                                            </div>
+                                            <div class="toggle-menu__item toggle-menu__itemactive">
+                                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                    <h2 class="m25-tabs__title toggle-menu__title icon-">
+                                                        @Translate.Text("Epass.Profiledetails")
+                                                    </h2>
+                                                </div>
+                                                <div class="m25-tabs__content toggle-menu__content m25-tabs__content--active" id="m25-panel-0" aria-labelledby="m25-tab-0" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Passdetails")
+                                                    </div>
+                                                    <div class="j113-epass--pass_detail_card">
+                                                        <div class="grid__column grid__column--6">
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-passnumber">
+                                                                    @Translate.Text("Epass.Passnumber")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-passnumber" aria-describedby="description-for-wsd1kg28f" type="text" readonly="" value="@(mainpass.passNumber != null ? mainpass.passNumber : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-wsd1kg28f" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-passIssueDate">
+                                                                    @Translate.Text("Epass.From")
+                                                                </label>
+                                                                @if (mainpass.passIssueDate != null)
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        @Html.TextBoxFor(m => mainpass.passIssueDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-passIssueDate", @name = "segment", @type = "text" })
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-passIssueDate" name="passIssueDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f2">
+                                                                    @Translate.Text("Epass.Timing")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-wsd1kg28f2" aria-describedby="description-for-wsd1kg28f2" type="text" readonly="" value="@mainpass.fromTime - @mainpass.toTime" data-parsley-errors-container="#description-for-wsd1kg28f2" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-listlocations">
+                                                                    @Translate.Text("Epass.Locations")
+                                                                </label>
+
+                                                                @if (mainpass.Location.Count > 0)
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-listlocations" name="Locations" type="text" value="@string.Join(",", mainpass.Location.ToArray()).Trim()" aria-describedby="description-for-Locations" data-parsley-errors-container="#description-for-Locations" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-listlocations" aria-describedby="description-for-locations" type="text" readonly="" value="N/A" data-parsley-errors-container="#description-for-locations" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        <div class="grid__column grid__column--6">
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-passtype">
+                                                                    @Translate.Text("Epass.PassType")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-passtype" aria-describedby="description-for-passtype" type="text" readonly="" value="@(mainpass.passType != null ? mainpass.passType : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-wsd1kg28f4" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-passExpiryDate">
+                                                                    @Translate.Text("Epass.TO")
+                                                                </label>
+                                                                @if (mainpass.passExpiryDate != null)
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        @Html.TextBoxFor(m => mainpass.passExpiryDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-passExpiryDate", @name = "segment", @type = "text" })
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-passExpiryDate" name="passExpiryDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-Subcontractor">
+                                                                    @Translate.Text("Epass.Subcontractor")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-Subcontractor" aria-describedby="description-for-Subcontractor" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.Subcontractor) ? mainpass.Subcontractor : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-Subcontractor" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            @if (!string.IsNullOrWhiteSpace(mainpass.pendingwith))
+                                                            {
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-pendingwith">
+                                                                        @Translate.Text("Epass.pendingwith")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-pendingwith" aria-describedby="description-for-pendingwith" type="text" readonly="" value="@(mainpass.pendingwith)" data-parsley-errors-container="#description-for-pendingwith" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Projectdetails")
+                                                    </div>
+                                                    <div class="j113-epass--pass_detail_card">
+                                                        <div class="grid__column grid__column--6">
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-projectname">
+                                                                    @Translate.Text("Epass.IndProjectName")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-projectname" aria-describedby="description-for-projectname" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.projectName) ? mainpass.projectName : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-name" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            @if (!onedaypass)
+                                                            {
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-projectStartDate">
+                                                                        @Translate.Text("Epass.Startdate")
+                                                                    </label>
+                                                                    @if (mainpass.projectStartDate != null)
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            @Html.TextBoxFor(m => mainpass.projectStartDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-projectStartDate", @name = "segment", @type = "text" })
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-projectStartDate" name="projectStartDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-companyName">
+                                                                    @Translate.Text("Epass.Companyname")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-companyName" aria-describedby="description-for-companyName" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.companyName) ? mainpass.companyName : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-companyname" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="grid__column grid__column--6">
+                                                            @if (!onedaypass)
+                                                            {
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-projectstatus">
+                                                                        @Translate.Text("Epass.Status")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-projectstatus" aria-describedby="description-for-projectstatus" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.projectStatus) ? mainpass.projectStatus : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-projectstatus" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-projectEndDate">
+                                                                        @Translate.Text("Epass.Enddate")
+                                                                    </label>
+                                                                    @if (mainpass.projectEndDate != null)
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            @Html.TextBoxFor(m => mainpass.projectEndDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-projectEndDate", @name = "segment", @type = "text" })
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-projectEndDate" name="projectEndDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-departmentName">
+                                                                        @Translate.Text("Epass.Departmentname")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-departmentName" aria-describedby="description-for-departmentName" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.departmentName) ? mainpass.departmentName : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-departmentname" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Personaldetails")
+                                                    </div>
+                                                    <div class="j113-epass--pass_detail_card">
+                                                        <div class="grid__column grid__column--6">
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-name">
+                                                                    @Translate.Text("Epass.IndName")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-name" aria-describedby="description-for-name" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.name) ? mainpass.name : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-name" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-mobile">
+                                                                    @Translate.Text("Epass.Mobile")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-mobile" aria-describedby="description-for-mobile" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.mobile) ? mainpass.mobile : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-mobile" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-nationality">
+                                                                    @Translate.Text("Epass.IndNationality")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-nationality" aria-describedby="description-for-nationality" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.nationality) ? mainpass.nationality : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-nationality" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="grid__column grid__column--6">
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-profession">
+                                                                    @Translate.Text("Epass.Position")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-profession" aria-describedby="description-for-profession" type="text" readonly="" value="@(onedaypass?(!string.IsNullOrWhiteSpace(mainpass.DEWAdesignation) ? mainpass.DEWAdesignation : @Translate.Text("Epass.notApp")): (mainpass.profession != null ? mainpass.profession : @Translate.Text("Epass.notApp")))" data-parsley-errors-container="#description-for-profession" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-email">
+                                                                    @Translate.Text("Epass.Email")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-email" aria-describedby="description-for-email" type="text" readonly="" value="@(onedaypass? (!string.IsNullOrWhiteSpace(mainpass.VisitorEmail)  ? mainpass.VisitorEmail : @Translate.Text("Epass.notApp")) :( mainpass.email != null ? mainpass.email : @Translate.Text("Epass.notApp")))" data-parsley-errors-container="#description-for-email" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    @if (!string.IsNullOrWhiteSpace(mainpass.passportNumber))
+                                                    {
+                                                        <div class="j113-epass--pass_detail_title">
+                                                            @Translate.Text("Epass.Passport")
+                                                        </div>
+                                                        <div class="j113-epass--pass_detail_card">
+                                                            <div class="grid__column grid__column--6">
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-passportNumber">
+                                                                        @Translate.Text("Epass.Passportnumber")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-passportNumber" aria-describedby="description-for-passportNumber" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.passportNumber) ? mainpass.passportNumber : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-passportNumber" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-passportExpiryDate">
+                                                                        @Translate.Text("Epass.Expiry")
+                                                                    </label>
+                                                                    @if (mainpass.passportExpiryDate != null)
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            @Html.TextBoxFor(m => mainpass.passportExpiryDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-passportExpiryDate", @name = "segment", @type = "text" })
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-passExpiryDate" name="passExpiryDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            @*<div class="button button--text button--next j113-epass--pass_detail_view" data-title="Edit User Profile">View Passport</div>*@
+                                                            <a class="button button--text button--next j113-epass--pass_detail_view attachment" data-passnumber="@mainpass.passNumber" data-cat="Passport" data-id="@viewPassport" title="@Translate.Text("Epass.Viewpassport")">
+                                                                @Translate.Text("Epass.Viewpassport")
+                                                            </a>
+                                                        </div>
+                                                    }
+                                                    @if (!string.IsNullOrWhiteSpace(mainpass.DEWAID))
+                                                    {
+                                                        <div class="j113-epass--pass_detail_title">
+                                                            @Translate.Text("Epass.dewa Details")
+                                                        </div>
+                                                        <div class="j113-epass--pass_detail_card">
+                                                            <div class="grid__column grid__column--6">
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-visaNumber">
+                                                                        @Translate.Text("Epass.PR no")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-visaNumber" aria-describedby="description-for-visaNumber" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.DEWAID)? mainpass.DEWAID : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-wsd1kg28f14" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-visaNumber">
+                                                                        @Translate.Text("Epass.dewa designation")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-visaNumber" aria-describedby="description-for-visaNumber" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.DEWAdesignation) ? mainpass.DEWAdesignation : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-wsd1kg28f14" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            @*<div class="button button--text button--next j113-epass--pass_detail_view" data-title="Edit User Profile">View Visa</div>*@
+                                                            <a class="button button--text button--next j113-epass--pass_detail_view attachment" data-passnumber="@mainpass.passNumber" data-cat="Visa" data-id="@viewVisa" title="@Translate.Text("Epass.ViewDEWAID")">
+                                                                @Translate.Text("Epass.ViewDEWAID")
+                                                            </a>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="j113-epass--pass_detail_title">
+                                                            @Translate.Text("Epass.Visa")
+                                                        </div>
+                                                        <div class="j113-epass--pass_detail_card">
+                                                            <div class="grid__column grid__column--6">
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-visaNumber">
+                                                                        @Translate.Text("Epass.Visanumber")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-visaNumber" aria-describedby="description-for-visaNumber" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.visaNumber) ? mainpass.visaNumber : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-wsd1kg28f14" data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-visaExpiryDate">
+                                                                        @Translate.Text("Epass.Expiry")
+                                                                    </label>
+                                                                    @if (mainpass.visaExpiryDate != null)
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            @Html.TextBoxFor(m => mainpass.visaExpiryDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-visaExpiryDate", @name = "segment", @type = "text" })
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-visaExpiryDate" name="visaExpiryDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            @*<div class="button button--text button--next j113-epass--pass_detail_view" data-title="Edit User Profile">View Visa</div>*@
+                                                            <a class="button button--text button--next j113-epass--pass_detail_view attachment" data-passnumber="@mainpass.passNumber" data-cat="Visa" data-id="@viewVisa" title="@Translate.Text("Epass.Viewvisa")">
+                                                                @Translate.Text("Epass.Viewvisa")
+                                                            </a>
+                                                        </div>
+                                                    }
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.EmiratesID")
+                                                    </div>
+                                                    <div class="j113-epass--pass_detail_card">
+                                                        <div class="grid__column grid__column--6">
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                    @Translate.Text("Epass.EIdnumber")
+                                                                </label>
+                                                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                    <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-wsd1kg28f17" aria-describedby="description-for-wsd1kg28f17" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(mainpass.emiratesId) ? mainpass.emiratesId : @Translate.Text("Epass.notApp"))" data-parsley-errors-container="#description-for-wsd1kg28f17" data-parsley-trigger="focusout">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-field form-field--readonly">
+                                                                <label class="form-field__label form-field__label--readonly" for="form-field-emiratesExpiryDate">
+                                                                    @Translate.Text("Epass.Expiry")
+                                                                </label>
+                                                                @if (mainpass.emiratesExpiryDate != null)
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        @Html.TextBoxFor(m => mainpass.emiratesExpiryDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-emiratesExpiryDate", @name = "segment", @type = "text" })
+                                                                    </div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-emiratesExpiryDate" name="emiratesExpiryDate" type="text" value=@Translate.Text("Epass.notApp")>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                        @*<div class="button button--text button--next j113-epass--pass_detail_view" data-title="Edit User Profile">View Emirates ID</div>*@
+                                                        <a class="button button--text button--next j113-epass--pass_detail_view attachment" data-id="@viewEmirateID" data-passnumber="@mainpass.passNumber" data-cat="EmirateID" title="@Translate.Text("Epass.ViewEmiratesID")">@Translate.Text("Epass.ViewEmiratesID")</a>
+                                                    </div>
+
+                                                    @if (!string.IsNullOrWhiteSpace(mainpass.VehicleRegNumber))
+                                                    {
+                                                        <div class="j113-epass--pass_detail_title">
+                                                            @Translate.Text("Epass.Vehicle Details")
+                                                        </div>
+                                                        <div class="j113-epass--pass_detail_card">
+                                                            <div class="grid__column grid__column--6">
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-vehiclenumber">
+                                                                        @Translate.Text("Epass.Vehicle Number")
+                                                                    </label>
+                                                                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                        <input name="segment" class="form-field__input form-field__input--readonly"
+                                                                               id="form-field-vehiclenumber" aria-describedby="description-for-vehiclenumber"
+                                                                               type="text" readonly=""
+                                                                               value="@(!string.IsNullOrWhiteSpace(mainpass.VehicleRegNumber) ? mainpass.VehicleRegNumber : " N/A")"
+                                                                               data-parsley-errors-container="#description-for-vehiclenumber"
+                                                                               data-parsley-trigger="focusout">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--readonly">
+                                                                    <label class="form-field__label form-field__label--readonly" for="form-field-VehRegistrationDate">@Translate.Text("Epass.VehicleRegistrationDate")</label>
+                                                                    @if (mainpass.VehRegistrationDate != null)
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            @Html.TextBoxFor(m => mainpass.VehRegistrationDate, "{0:MMM d, yyyy}", new { @class = "form-field__input form-field__input--readonly", @id = "form-field-VehRegistrationDate", @name = "segment", @type = "text" })
+                                                                        </div>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                            <input class="form-field__input form-field__input--readonly" readonly="" id="form-field-VehRegistrationDate" name="VehRegistrationDate" type="text" value=" N/A">
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <a class="button button--text button--next j113-epass--pass_detail_view attachment" data-passnumber="@mainpass.passNumber" data-cat="Vehicle" data-id="" title="@Translate.Text("Epass.ViewVehicleID")">@Translate.Text("Epass.ViewVehicleID")</a>
+                                                            <a class="button button--text button--next j113-epass--pass_detail_view attachment" data-passnumber="@mainpass.passNumber" data-cat="DrivingLicense" data-id="" title="@Translate.Text("Epass.ViewDrivingLicense")">@Translate.Text("Epass.ViewDrivingLicense")</a>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="toggle-menu__item">
+                                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                    <h2 class="m25-tabs__title toggle-menu__title icon-">@Translate.Text("Epass.Holiday Passes")</h2>
+                                                </div>
+                                                <div class="m25-tabs__content toggle-menu__content" id="m25-panel-1" aria-labelledby="m25-tab-1" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Holiday pass Details")
+                                                        @*<div style="float: right;"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SUBPASS_LANDING_PAGE)" class="link" type="button">@Translate.Text("Epass.Apply for new pass")</a></div>*@
+                                                    </div>
+                                                    @if (holidaypass != null && holidaypass.Count() > 0)
+                                                    {
+                                                        <table class="j113-epass--table">
+                                                            <thead class="j113-epass--table_header">
+                                                                <tr>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                                @foreach (SecurityPassViewModel subPass in holidaypass.ToList())
+                                                                {
+                                                                    <tr class="j113-epass--table_row">
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @*<a class="j113-epass--table_cell--pnumber button--text holidaypass" href="#">@subPass.passNumber</a>*@
+                                                                            <span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            <div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.strstatus</div>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </td>
+                                                                    </tr>
+
+                                                                }
+
+                                                            </tbody>
+                                                        </table>
+
+                                                        foreach (SecurityPassViewModel subPass in holidaypass.ToList())
+                                                        {
+                                                            <div class="m39-modal m39-modal--new " data-component="m39-modal" id="@subPass.passNumber">
+                                                                <button data-trigger="true" data-modaltrigger="@subPass.passNumber" class="m39-modal__trigger j113-epass--table_cell--pnumber button--text holidaypass hidden" type="button" id="@(subPass.passNumber+"_trigger")" aria-controls="@(subPass.passNumber+"_content")">@subPass.passNumber</button>
+                                                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="@(subPass.passNumber+"_content")" aria-labelledby="@(subPass.passNumber+"_trigger")">
+                                                                    <div class="m39-modal__dialog" id="ApproverForm">
+
+                                                                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", data_form = "true", enctype = "multipart/form-data" }))
+                                                                        {
+                                                                            @Html.AntiForgeryToken()
+                                                                            <div class="m39-modal__header">
+                                                                                <div class="m39-modal__title">@Translate.Text("Epass.Holiday pass Details")</div>
+                                                                                <a data-close="true" class="m39-modal__button--close">@Translate.Text("Epass.Close")</a>
+                                                                                <div class="m39-modal__subtitle">
+                                                                                    @subPass.passNumber
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__content">
+                                                                                <div class="grid__row mb0">
+                                                                                    <div class="grid__column grid__column--12">
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Name")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.name) ? subPass.name : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Linked to")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.mainpassNumber) ? subPass.mainpassNumber : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Expiry")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strpassExpiryDate) ? subPass.strpassExpiryDate : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Pass Type")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@Translate.Text("Epass.Holiday Pass")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Status")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strstatus) ? subPass.strstatus : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__footer">
+                                                                                @if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                                {
+                                                                                    <button class="button button--primary btnConfirmApprove  btnConfirmApproveholiday" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Approve")</button>
+                                                                                    <button class="button button--cancel button--cancel-icon btnRejectPass" id="btnRejectPassholiday" data-close="true" data-passnumber="@subPass.passNumber" type="button">
+                                                                                        @Translate.Text("Epass.Reject")
+                                                                                    </button>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <button class="button button--primary" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Done")</button>
+                                                                                }
+                                                                            </div>
+                                                                        }
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="m39-modal__overlay"> </div>
+                                                            </div>
+                                                        }
+                                                        <div class="j113-epass--keypair">
+                                                            <div class="m42-keyvalue">
+                                                                @foreach (SecurityPassViewModel subPass in holidaypass.ToList())
+                                                                {
+                                                                    <dl>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.status</div></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+
+                                                                        </dd>
+                                                                    </dl>
+                                                                }
+                                                            </div>
+
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="mt56 centered">@Translate.Text("Epass.No record")</div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="toggle-menu__item">
+                                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                    <h2 class="m25-tabs__title toggle-menu__title icon-">@Translate.Text("Epass.Night Passes")</h2>
+                                                </div>
+                                                <div class="m25-tabs__content toggle-menu__content" id="m25-panel-2" aria-labelledby="m25-tab-2" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Night pass Details")
+                                                        @*<div style="float: right;"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SUBPASS_LANDING_PAGE)" class="link--green" type="button">@Translate.Text("Epass.Apply for new pass")</a></div>*@
+                                                    </div>
+                                                    @if (nightpass != null && nightpass.Count() > 0)
+                                                    {
+                                                        <table class="j113-epass--table">
+                                                            <thead class="j113-epass--table_header">
+                                                                <tr>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                                @foreach (SecurityPassViewModel subPass in nightpass.ToList())
+                                                                {
+                                                                    <tr class="j113-epass--table_row">
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @*<a class="j113-epass--table_cell--pnumber button--text holidaypass" href="#">@subPass.passNumber</a>*@
+                                                                            <span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            <div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.strstatus</div>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </td>
+                                                                    </tr>
+
+                                                                }
+
+                                                            </tbody>
+                                                        </table>
+
+                                                        foreach (SecurityPassViewModel subPass in nightpass.ToList())
+                                                        {
+                                                            <div class="m39-modal m39-modal--new " data-component="m39-modal" id="@subPass.passNumber">
+                                                                <button data-trigger="true" data-modaltrigger="@subPass.passNumber" class="m39-modal__trigger j113-epass--table_cell--pnumber button--text holidaypass hidden" type="button" id="@(subPass.passNumber+"_trigger")" aria-controls="@(subPass.passNumber+"_content")">@subPass.passNumber</button>
+                                                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="@(subPass.passNumber+"_content")" aria-labelledby="@(subPass.passNumber+"_trigger")">
+                                                                    <div class="m39-modal__dialog" id="ApproverForm">
+
+                                                                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", data_form = "true", enctype = "multipart/form-data" }))
+                                                                        {
+                                                                            @Html.AntiForgeryToken()
+                                                                            <div class="m39-modal__header">
+                                                                                <div class="m39-modal__title">
+                                                                                    <span>@Translate.Text("Epass.Night pass Details")</span>
+
+                                                                                </div>
+                                                                                <a data-close="true" class="m39-modal__button--close">@Translate.Text("Epass.Close")</a>
+                                                                                <div class="m39-modal__subtitle">
+                                                                                    @subPass.passNumber
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__content">
+                                                                                <div class="grid__row mb0">
+                                                                                    <div class="grid__column grid__column--12">
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Name")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.name) ? subPass.name : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Linked to")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.mainpassNumber) ? subPass.mainpassNumber : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Expiry")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strpassExpiryDate) ? subPass.strpassExpiryDate : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Pass Type")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@Translate.Text("Epass.Night Pass")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Status")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strstatus) ? subPass.strstatus : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__footer">
+                                                                                @if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                                {
+                                                                                    <button class="button button--primary btnConfirmApprove  btnConfirmApprovenight" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Approve")</button>
+                                                                                    <button class="button button--cancel button--cancel-icon btnRejectPass" id="btnRejectPassnight" data-close="true" data-passnumber="@subPass.passNumber" type="button">
+                                                                                        @Translate.Text("Epass.Reject")
+                                                                                    </button>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <button class="button button--primary" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Done")</button>
+                                                                                }
+                                                                            </div>
+                                                                        }
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="m39-modal__overlay"> </div>
+                                                            </div>
+                                                        }
+                                                        <div class="j113-epass--keypair">
+                                                            <div class="m42-keyvalue">
+
+                                                                @foreach (SecurityPassViewModel subPass in nightpass.ToList())
+                                                                {
+                                                                    <dl>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.status</div></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </dd>
+                                                                    </dl>
+                                                                }
+                                                            </div>
+
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="mt56 centered">@Translate.Text("Epass.No record")</div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="toggle-menu__item">
+                                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                    <h2 class="m25-tabs__title toggle-menu__title icon-">@Translate.Text("Epass.Electronic Device Passes")</h2>
+                                                </div>
+                                                <div class="m25-tabs__content toggle-menu__content" id="m25-panel-3" aria-labelledby="m25-tab-3" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Electronic pass Details")
+                                                        @*<div style="float: right;"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SUBPASS_LANDING_PAGE)" class="link--green" type="button">@Translate.Text("Epass.Apply for new pass")</a></div>*@
+                                                    </div>
+                                                    @if (devicepass != null && devicepass.Count() > 0)
+                                                    {
+                                                        <table class="j113-epass--table">
+                                                            <thead class="j113-epass--table_header">
+                                                                <tr>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                                @foreach (SecurityPassViewModel subPass in devicepass.ToList())
+                                                                {
+                                                                    <tr class="j113-epass--table_row">
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @*<a class="j113-epass--table_cell--pnumber button--text holidaypass" href="#">@subPass.passNumber</a>*@
+                                                                            <span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            <div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.strstatus</div>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </td>
+                                                                    </tr>
+
+                                                                }
+
+                                                            </tbody>
+                                                        </table>
+
+                                                        foreach (SecurityPassViewModel subPass in devicepass.ToList())
+                                                        {
+                                                            <div class="m39-modal m39-modal--new " data-component="m39-modal" id="@subPass.passNumber">
+                                                                <button data-trigger="true" data-modaltrigger="@subPass.passNumber" class="m39-modal__trigger j113-epass--table_cell--pnumber button--text holidaypass hidden" type="button" id="@(subPass.passNumber+"_trigger")" aria-controls="@(subPass.passNumber+"_content")">@subPass.passNumber</button>
+                                                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="@(subPass.passNumber+"_content")" aria-labelledby="@(subPass.passNumber+"_trigger")">
+                                                                    <div class="m39-modal__dialog" id="ApproverForm">
+
+                                                                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", data_form = "true", enctype = "multipart/form-data" }))
+                                                                        {
+                                                                            @Html.AntiForgeryToken()
+                                                                            <div class="m39-modal__header">
+                                                                                <div class="m39-modal__title">@Translate.Text("Epass.Electronic pass Details")</div>
+                                                                                <a data-close="true" class="m39-modal__button--close">@Translate.Text("Epass.Close")</a>
+                                                                                <div class="m39-modal__subtitle">
+                                                                                    @subPass.passNumber
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__content">
+                                                                                <div class="grid__row mb0">
+                                                                                    <div class="grid__column grid__column--12">
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Name")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.name) ? subPass.name : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Linked to")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.mainpassNumber) ? subPass.mainpassNumber : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Expiry")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strpassExpiryDate) ? subPass.strpassExpiryDate : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Pass Type")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@Translate.Text("Epass.Electronic Pass")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Status")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strstatus) ? subPass.strstatus : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__footer">
+                                                                                @if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                                {
+                                                                                    <button class="button button--primary btnConfirmApprove  btnConfirmApprovedevice" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Approve")</button>
+                                                                                    <button class="button button--cancel button--cancel-icon btnRejectPass" id="btnRejectPassdevice" data-close="true" data-passnumber="@subPass.passNumber" type="button">
+                                                                                        @Translate.Text("Epass.Reject")
+                                                                                    </button>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <button class="button button--primary" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Done")</button>
+                                                                                }
+                                                                            </div>
+                                                                        }
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="m39-modal__overlay"> </div>
+                                                            </div>
+                                                        }
+                                                        <div class="j113-epass--keypair">
+                                                            <div class="m42-keyvalue">
+
+                                                                @foreach (SecurityPassViewModel subPass in devicepass.ToList())
+                                                                {
+                                                                    <dl>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.status</div></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (subPass.status.Equals(SecurityPassStatus.PendingApprovalwithCoordinator) || subPass.status.Equals(SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </dd>
+                                                                    </dl>
+                                                                }
+                                                            </div>
+
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="mt56 centered">@Translate.Text("Epass.No record")</div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="toggle-menu__item">
+                                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                    <h2 class="m25-tabs__title toggle-menu__title icon-">@Translate.Text("Epass.Material Passes")</h2>
+                                                </div>
+                                                <div class="m25-tabs__content toggle-menu__content" id="m25-panel-4" aria-labelledby="m25-tab-4" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                    <div class="j113-epass--pass_detail_title">
+                                                        @Translate.Text("Epass.Material pass Details")
+                                                        @*<div style="float: right;"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SUBPASS_LANDING_PAGE)" class="link--green" type="button">@Translate.Text("Epass.Apply for new pass")</a></div>*@
+                                                    </div>
+                                                    @if (materialpass != null && materialpass.Count() > 0)
+                                                    {
+                                                        <table class="j113-epass--table">
+                                                            <thead class="j113-epass--table_header">
+                                                                <tr>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                                                                    <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (SecurityPassViewModel subPass in materialpass.ToList())
+                                                                {
+                                                                    <tr class="j113-epass--table_row">
+                                                                        <td class="j113-epass--table_cell">
+                                                                            <span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            <div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.strstatus</div>
+                                                                        </td>
+                                                                        <td class="j113-epass--table_cell">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </td>
+                                                                    </tr>
+
+                                                                }
+                                                            </tbody>
+                                                        </table>
+
+                                                        foreach (SecurityPassViewModel subPass in materialpass.ToList())
+                                                        {
+                                                            <div class="m39-modal m39-modal--new " data-component="m39-modal" id="@subPass.passNumber">
+                                                                <button data-trigger="true" data-modaltrigger="@subPass.passNumber" class="m39-modal__trigger j113-epass--table_cell--pnumber button--text holidaypass hidden" type="button" id="@(subPass.passNumber+"_trigger")" aria-controls="@(subPass.passNumber+"_content")">@subPass.passNumber</button>
+                                                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="@(subPass.passNumber+"_content")" aria-labelledby="@(subPass.passNumber+"_trigger")">
+                                                                    <div class="m39-modal__dialog" id="ApproverForm">
+
+                                                                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-pendingrequest", data_form = "true", enctype = "multipart/form-data" }))
+                                                                        {
+                                                                            @Html.AntiForgeryToken()
+                                                                            <div class="m39-modal__header">
+                                                                                <div class="m39-modal__title">@Translate.Text("Epass.Electronic pass Details")</div>
+                                                                                <a data-close="true" class="m39-modal__button--close">@Translate.Text("Epass.Close")</a>
+                                                                                <div class="m39-modal__subtitle">
+                                                                                    @subPass.passNumber
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__content">
+                                                                                <div class="grid__row mb0">
+                                                                                    <div class="grid__column grid__column--12">
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Name")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.name) ? subPass.name : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Linked to")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.mainpassNumber) ? subPass.mainpassNumber : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Expiry")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strpassExpiryDate) ? subPass.strpassExpiryDate : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Pass Type")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@Translate.Text("Epass.Material Pass")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="form-field form-field--readonly">
+                                                                                            <label class="form-field__label form-field__label--readonly" for="form-field-wsd1kg28f17">
+                                                                                                @Translate.Text("Epass.Status")
+                                                                                            </label>
+                                                                                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                <input name="segment"
+                                                                                                       class="form-field__input form-field__input--readonly"
+                                                                                                       id="form-field-wsd1kg28f17"
+                                                                                                       aria-describedby="description-for-wsd1kg28f17"
+                                                                                                       type="text"
+                                                                                                       readonly=""
+                                                                                                       value="@(!string.IsNullOrWhiteSpace(subPass.strstatus) ? subPass.strstatus : " N/A")"
+                                                                                                       data-parsley-errors-container="#description-for-wsd1kg28f17"
+                                                                                                       data-parsley-trigger="focusout">
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m39-modal__footer">
+                                                                                @if (((string)ViewBag.usertype == Roles.DewaSupplierAdmin && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator) || ((string)ViewBag.usertype == Roles.DewaSupplierSecurity && subPass.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                                {
+                                                                                    <button class="button button--primary btnConfirmApprove  btnConfirmApprovematerial" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Approve")</button>
+                                                                                    <button class="button button--cancel button--cancel-icon btnRejectPass" id="btnRejectPassmaterial" data-close="true" data-passnumber="@subPass.passNumber" type="button">
+                                                                                        @Translate.Text("Epass.Reject")
+                                                                                    </button>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <button class="button button--primary" data-passnumber="@subPass.passNumber" data-close="true" data-accountupdate="true" type="button">@Translate.Text("Epass.Done")</button>
+                                                                                }
+                                                                            </div>
+                                                                        }
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="m39-modal__overlay"> </div>
+                                                            </div>
+                                                        }
+                                                        <div class="j113-epass--keypair">
+                                                            <div class="m42-keyvalue">
+
+                                                                @foreach (SecurityPassViewModel subPass in materialpass.ToList())
+                                                                {
+                                                                    <dl>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><span data-modaltrigger="@subPass.passNumber" class="j113-epass--table_cell--pnumber j113-epass--table_cell--modaltrigger button--text">@subPass.passNumber</span></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><div class="j113-epass--status @subPass.strclass.ToLower()">@subPass.status</div></dd>
+                                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                                                                            @if (subPass.status.Equals(SecurityPassStatus.Active) || subPass.status.Equals(SecurityPassStatus.SoontoExpire))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@subPass.passNumber">@Translate.Text("Epass.Share") </a>
+                                                                            }
+                                                                            else if (subPass.status.Equals(SecurityPassStatus.PendingApprovalwithCoordinator) || subPass.status.Equals(SecurityPassStatus.PendingApprovalwithSecurity))
+                                                                            {
+                                                                                <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="@subPass.passNumber">@Translate.Text("Epass.Cancel") </a>
+                                                                            }
+                                                                        </dd>
+                                                                    </dl>
+                                                                }
+                                                            </div>
+
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="mt56 centered">@Translate.Text("Epass.No record")</div>
+                                                    }
+                                                </div>
+                                            </div>
+
+
+                                            @*<div class="toggle-menu__item">
+                                                    <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                        <h2 class="m25-tabs__title toggle-menu__title icon-">@Translate.Text("Epass.Partnercontactinfo")</h2>
+                                                    </div>
+                                                    <div class="m25-tabs__content toggle-menu__content" id="m25-panel-4" aria-labelledby="m25-tab-4" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                        <div class="m14-richtext">
+                                                            <h2>@Translate.Text("Epass.Activity")</h2>
+                                                            @Html.Action("ePassActivityLogs", "ePass", new { eFolderId = mainpass.eFolderId })
+                                                        </div>
+                                                    </div>
+                                                </div>*@
+                                            <div class="toggle-menu__item">
+                                                <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                                                    <h2 class="m25-tabs__title toggle-menu__title icon-">@Translate.Text("Epass.Worklogs")</h2>
+                                                </div>
+                                                <div class="m25-tabs__content toggle-menu__content" id="m25-panel-5" aria-labelledby="m25-tab-5" aria-role="tabpanel" data-toggle-content="true" data-m25-tabs-content="true">
+                                                    <div class="m14-richtext">
+                                                        <h2>@Translate.Text("Epass.Worklogs")</h2>
+                                                    </div>
+                                                    <div class="grid__row mb0">
+                                                        <div class="grid__column grid__column--6">
+                                                            <div id="datepicker-container-j0o6zzw1u" class="form-field form-field--text">
+                                                                <label for="form-field-StartDate" class="form-field__label">
+                                                                    @Translate.Text("Epass.Startdate")
+                                                                </label>
+                                                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input form-field__binding"
+                                                                           id="form-field-StartDate"
+                                                                           value=""
+                                                                           name="PassIssueDate"
+                                                                           type="text"
+                                                                           placeholder="@Translate.Text("Epass.Startdate")"
+                                                                           data-el="datepicker"
+                                                                           aria-describedby="description-for-StartDate"
+                                                                           data-parsley-errors-container="#description-for-StartDate"
+                                                                           data-parsley-error-message="@Translate.Text("Epass.Entercorrectdate")"
+                                                                           required data-parsley-required-message="@Translate.Text("Epass.Requiredfield")"
+                                                                           data-parsley-trigger="focusout"
+                                                                           data-scroll="false"
+                                                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day] }' />
+
+                                                                </span>
+                                                                <div id="description-for-StartDate" class="form-field__messages">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="grid__column grid__column--6">
+                                                            <div id="datepicker-container-j0o6zzw11" class="form-field form-field--text">
+                                                                <label for="form-field-EndDate" class="form-field__label">
+                                                                    @Translate.Text("Epass.Enddate")
+                                                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                                                </label>
+                                                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                                    <input class="form-field__input form-field__input--text form-field__input--datepicker picker__input form-field__binding"
+                                                                           id="form-field-EndDate"
+                                                                           name="EndDate"
+                                                                           type="text"
+                                                                           value=""
+                                                                           placeholder="@Translate.Text("Epass.Enddate")"
+                                                                           aria-describedby="description-for-EndDate"
+                                                                           data-parsley-errors-container="#description-for-EndDate"
+                                                                           data-el="datepicker"
+                                                                           data-parsley-error-message="@Translate.Text("Epass.Entercorrectdate")"
+                                                                           required data-parsley-required-message="@Translate.Text("Epass.Requiredfield")"
+                                                                           data-parsley-trigger="focusout"
+                                                                           data-scroll="false"
+                                                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot;}' />
+                                                                </span>
+                                                                <div id="description-for-EndDate" class="form-field__messages">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="grid__row mb0">
+                                                        <div class="grid__column--6">
+                                                            <button class="button button--primary" id="btnSearchWorklog" data-accountupdate="true" type="button" data-modal-confirm="true">@Translate.Text("Epass.Search")</button>
+                                                        </div>
+                                                    </div>
+                                                    <div id="tblWorkLogs">
+                                                        @*@Html.Action("ePassWorkLogs", "ePass", new { passNo = mainpass.passNumber, currentPage = 1 })*@
+                                                    </div>
+                                                    <input type="hidden" id="hfCurrentPageIndex" name="currentPageIndex" />
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="j113-epass">
+            <div class="grid">
+                <div class="m39-modal j113-epass_modal--confirm" data-component="m39-modal" id="successmodal">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="successmodal_trigger" aria-controls="successmodal_content">fdytdsyrstrstr</button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="successmodal_content" aria-labelledby="successmodal_trigger">
+                        <div class="m39-modal__dialog">
+                            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="m39-modal__header">
+                                    <div class="m39-modal__title">
+                                        @Translate.Text("Epass.SuccessMess")
+                                    </div>
+                                    <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="success_content"></a>
+                                </div>
+                                <div class="m39-modal__content">
+                                    <div class="grid__row">
+                                        <span id="responseMessage">@Translate.Text("Epass.Passapprovedsuccess")</span>
+                                    </div>
+                                </div>
+                                <div class="m39-modal__footer">
+                                    <div id="cancelsuccessfulbutton" class="button button--primary m39-m12-no">
+                                        @Translate.Text("Epass.Ok")
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+                @Html.Action("ApprovePasses", "ePass", new { passNumber = mainpass.passNumber, eFolderId = mainpass.eFolderId })
+                @Html.Partial("~/Views/Feature/GatePass/ePass/RejectPasses.cshtml", mainpass.passNumber)
+                @Html.Partial("~/Views/Feature/GatePass/ePass/_BlockUserOrPass.cshtml", mainpass)
+            </div>
+        </div>
+
+        <script language="javascript" type="text/javascript">
+            function PagerClick(index) {
+                document.getElementById("hfCurrentPageIndex").value = index;
+                var url = "/api/sitecore/ePass/AjaxWorkLogs";
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    datatype: 'application/json',
+                    data: { currentPage: parseInt(index) },
+                    beforeSend: function () {
+                        jQuery('.j113-epass--loader').show();
+                        jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                    },
+                    complete: function () {
+                        jQuery('.j113-epass--loader').hide();
+                    },
+                    success: function (response) {
+                        jQuery('#tblWorkLogs').html('');
+                        jQuery('#tblWorkLogs').html(response);
+                    }
+                });
+            }
+        </script>
+        <script language="javascript" type="text/javascript">
+
+    docReady(function () {
+        jQuery(".m26-page-title.title_message").parent("div").parent("div").css("margin-bottom", "0px");
+        jQuery("#cancelsuccessfulbutton").on('click', function (event) {
+            window.location.reload();
+        });
+        $('#btnSearchWorklog').click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+            var url = "/api/sitecore/ePass/ePassWorkLogs";
+            var passNo = '@mainpass.passNumber';
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'application/json',
+                data: { passNo: passNo, startDate: $('#form-field-StartDate').val(), endDate: $('#form-field-EndDate').val() },
+                beforeSend: function () {
+                    jQuery('.j113-epass--loader').show();
+                    jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                },
+                complete: function () {
+                    jQuery('.j113-epass--loader').hide();
+                },
+                success:function(response) {
+                    jQuery('#tblWorkLogs').html(response);
+                }
+            });
+        });
+        var efId = '@mainpass.eFolderId';
+        var pnumber = '@mainpass.passNumber';
+        $("#btnConfirmApprove").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+            if (jQuery("#form-pendingrequest").parsley().validate()) {
+                var tolistlocations = [];
+                $('#form-field-locations option:selected').each(function () {
+                    tolistlocations.push($(this).val());
+                });
+                var $tolist = tolistlocations.join("; ");
+                var data = AddForgeryToken({
+                    passnumber: pnumber,
+                    eFolderId: efId,
+                    locations: $tolist,
+                    fromdate: $('#form-field-PassIssueDate').val(),
+                    todate: $('#form-field-PassExpiryDate').val(),
+                    fromtime: $('#form-field-FromTime option:selected').val(),
+                    totime: $('#form-field-ToTime option:selected').val(),
+                }, "form-pendingrequest");
+                Approvebuttonconfirm(data);
+            }
+        });
+        $(".btnConfirmApprove").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+                var data = AddForgeryToken({
+                    passnumber: $(this).attr('data-passnumber')
+                }, "form-mainform");
+                Approvebuttonconfirm(data);
+        });
+
+   function Approvebuttonconfirm(data) {
+                var url = "/api/sitecore/ePass/ApprovePasses";
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    data: data,
+                    beforeSend: function () {
+                        jQuery('.j113-epass--loader').show();
+                        jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                    },
+                    complete: function () {
+                        jQuery('.j113-epass--loader').hide();
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                   success: function(response) {
+                        if (response.status) {
+                            jQuery('#responseMessage').html(response.Message);
+                            jQuery("#ApproverForm").find("a[data-close='true']").click();
+                            jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                        }
+                        else {
+                            var msg= '@mainpass.passNumber';
+                            jQuery(".m39-modal__title").html(msg);
+                            jQuery("#responseMessage").html(response.Message);
+                            jQuery("#ApproverForm").find("a[data-close='true']").click();
+                            jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                        }
+                    }
+                });
+        }
+        $("#m39-m12-yesApprove").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var url = "/api/sitecore/ePass/ApprovePasses";
+            var efId = '@mainpass.eFolderId';
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: AddForgeryToken({ passnumber: pnumber, eFolderId: efId }, "form-pendingrequest"),
+                beforeSend: function () {
+                    jQuery('.j113-epass--loader').show();
+                    jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                },
+                complete: function () {
+                    jQuery('.j113-epass--loader').hide();
+                },
+                dataType: 'json',
+                type: 'POST',
+                success:function(response) {
+                    if (response.status) {
+                        jQuery('#responseMessage').html(response.Message);
+                        jQuery("#SecurityApproverForm").find(".m39-m12-no").click();
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                    }
+                    else {
+                        var msg= '@mainpass.passNumber';
+                        jQuery(".m39-modal__title").html(msg);
+                        jQuery("#responseMessage").html(response.Message);
+                        jQuery("#SecurityApproverForm").find(".m39-m12-no").click();
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                    }
+                }
+            });
+        });
+        $("#m39-m12-unblockpass").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var url = "/api/sitecore/ePass/UnblockPass";
+            var efId = '@mainpass.passNumber';
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: AddForgeryToken({ Passnumber: efId }, "form-unblockpass"),
+                beforeSend: function () {
+                    jQuery('.j113-epass--loader').show();
+                    jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                },
+                complete: function () {
+                    jQuery('.j113-epass--loader').hide();
+                },
+                dataType: 'json',
+                type: 'POST',
+                success: function (response) {
+                    if (response.status) {
+                        jQuery('#responseMessage').html(response.Message);
+                        jQuery("#form-unblockpass").find(".m39-m12-no").click();
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+
+                    }
+                    else {
+                        var msg= '@mainpass.passNumber';
+                        jQuery(".m39-modal__title").html(msg);
+                        jQuery("#responseMessage").html(response.Message);
+                        jQuery("#form-unblockpass").find(".m39-m12-no").click();
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                    }
+                }
+            });
+        });
+        $("#btnConfirmReject").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+            if (jQuery("#form-rejectrequest").parsley().validate()) {
+                var url = "/api/sitecore/ePass/RejectPasses";
+                var efId = '@mainpass.eFolderId';
+                var cmts = $("#form-field-comments").val();
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    data:
+                        AddForgeryToken({
+                            passnumber: $(this).attr('data-passnumber'),
+                            eFolderId: "",
+                            Comments: cmts,
+                        }, "form-rejectrequest"),
+                    beforeSend: function () {
+                        jQuery('.j113-epass--loader').show();
+                        jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                    },
+                    complete: function () {
+                        jQuery('.j113-epass--loader').hide();
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                    success:function(response) {
+                        if (response.status) {
+                            jQuery('#responseMessage').html(response.Message);
+                            jQuery("#form-rejectrequest").find("a[data-close='true']").click();
+                            jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+
+                        }
+                        else {
+                            var msg= '@mainpass.passNumber';
+                            jQuery(".m39-modal__title").html(msg);
+                            jQuery("#responseMessage").html(response.Message);
+                            jQuery("#form-rejectrequest").find("a[data-close='true']").click();
+                            jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                        }
+                    }
+                });
+            }
+        });
+        $("#btnConfirmBlock").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var url = "/api/sitecore/ePass/BlockUnBlockPassOrUser";
+            var efId = '@mainpass.passNumber';
+            var chkUser = $('#chkUser').is(':checked');;
+            var chkPass = $('#chkPass').is(':checked');;
+
+            var cmts = $("#form-field-blockcomments").val();
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: { Passnumber: efId, Comments: cmts, BlockUser: chkUser, BlockPass: chkPass, __RequestVerificationToken: $('form input[name=__RequestVerificationToken]').val()  },
+                beforeSend: function () {
+                    jQuery('.j113-epass--loader').show();
+                    jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                },
+                complete: function () {
+                    jQuery('.j113-epass--loader').hide();
+                },
+                dataType: 'json',
+                type: 'POST',
+                success:function(response) {
+                    if (response.status) {
+                        jQuery('#responseMessage').html(response.Message);
+                        jQuery("#form-blockuserorpass").find("a[data-close='true']").click();
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+
+                    }
+                    else {
+                        var msg= '@mainpass.passNumber';
+                        jQuery(".m39-modal__title").html(msg);
+                        jQuery("#responseMessage").html(response.Message);
+                        jQuery("#form-blockuserorpass").find("a[data-close='true']").click();
+                        jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+
+                    }
+                }
+            });
+        });
+        $('#btnApprovePass').off('click.share').on('click.share', function () {
+            $('#approve_modal_true').find('.m39-modal__trigger').click();
+        });
+        $('.btnRejectPass').off('click.share').on('click.share', function () {
+            $('#reject_modal_true').find('.m39-modal__title').html('@Translate.Text("Epass.IndPassNo"):' + $(this).attr('data-passnumber'));
+            $('#reject_modal_true').find('#btnConfirmReject').attr('data-passnumber', $(this).attr('data-passnumber'));
+            $('#reject_modal_true').find('.m39-modal__trigger').click();
+        });
+        $('#btnBlockPass').off('click.share').on('click.share', function () {
+            $('#block_modal_true').find('.m39-modal__trigger').click();
+        });
+        $('#btnUnblockPass').off('click.share').on('click.share', function () {
+            $('#unblock_modal_true').find('.m39-modal__trigger').click();
+        });
+    });
+
+        </script>
+        <script type="text/javascript" language="javascript">
+            $(".attachment").click(function () {
+                var passno = $(this).data('passnumber');
+                var category = $(this).data('cat')
+                //var win = window.open("/api/sitecore/ePass/DownloadAttachment?objectid=" + dms_objectId, '_blank');
+                var win = window.open("/api/sitecore/ePass/DownloadAttachmentKofax?passnumber=" + passno + "&cat=" + category, '_blank');
+                win.focus();
+            });
+        </script>
+    }
+}

@@ -1,0 +1,70 @@
+﻿
+@using DEWAXP.Feature.CommonComponents.Models.RenderingParameters
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.J160ListContainer
+
+<div class="j160-customer-results" data-journey="j160-customer-results">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+                <h3 class="m17-sectiontitle__title m17-sectiontitle__title_center text__section-title">@Model.Title</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        @if (Model != null && Model.Items != null && Model.Items.Count() > 0)
+        {
+            var i = 1;
+            foreach (var item in Model.Items)
+            {
+                var gridColumn = item.LstItems.Count() > 0 ? "grid__column--12" : "grid__column--3 grid__column-result";
+                var tLarge = item.LstItems.Count() > 0 ? "j160-customer-results-teaser t-large" : "j160-customer-results-teaser t-box";
+                var borderGreen = i > 2 ? "" : "border-green";
+                <div class="grid__column @gridColumn">
+                    @if (item.LstItems.Count() > 0)
+                    {
+                        @:<div class="j160-customer-results-wide-chart">
+                        }
+                    <div class="@tLarge">
+                        <div class="results-teaser_title">@item.Title</div>
+                        <div class="results-teaser_number">@item.Percentage</div>
+                        <div class="results-teaser_year">@item.Year</div>
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <p class="m7-teaser__copy teaser__copy">
+                                @Html.Raw(item.Description)
+                            </p>
+                        }
+                    </div>
+                    <div class="m107-mbar-chart m107-mbar-chart-5 clearfix" data-component="m107-mbar-chart">
+                        @{
+                            foreach (var itemHeading in item.LstItems)
+                            {
+                                foreach (var barItem in itemHeading.BarItems)
+                                {
+                                    <div class="m107-mbar-chart-container">
+                                        <div style="height:200px;"
+                                             data-chart-type="column"
+                                             data-category='["@barItem.BarName"]'
+                                             data-series='[{"data":[{"name":"@barItem.BarName", "color":"@barItem.Color", "y":"@barItem.Value"}]}]'
+                                             data-chart107-container=""
+                                             data-category-hidden="true"></div>
+                                        <div class="m107-mbar-chart-container-title">@barItem.BarName</div>
+                                    </div>
+                                }
+                            }
+                        }
+                    </div>
+                    @if (item.LstItems.Count() > 0)
+                    {
+                    @:</div>
+                }
+                </div>
+                i++;
+            }
+        }
+    </div>
+</div>
+

@@ -1,0 +1,351 @@
+﻿@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.HR.Models.CareerPortal
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.HR.Helpers.CareerPortal
+@{
+
+    var genderList = CareerPortalHelper.GetGender();
+    var MaritalStatusList = CareerPortalHelper.GetMaritalStatus();
+
+}
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { Action = "CandidateProfile", Controller = "CareerPortal" }, FormMethod.Post, new { @id = "candidateprofile" + Model.Section, @name = "j126-career-portal-profile", @data_parsley_focus = "true", @data_form = "true", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+{
+    @Html.Sitecore().FormHandler("CareerPortal", "WorkExperience")
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Section)
+    @Html.HiddenFor(x => x.JobId)
+    @Html.HiddenFor(x => x.ExperienceType)
+    <p>@Translate.Text("work exp intro text")</p>
+    <p><label id="workExpError" class="parsley-errors-list"></label></p>
+    <div class="form-field--group mb0">
+        <div class="form-field form-field--select form-field--select-single  mb12">
+            <label for="form-field-workexperience" class="form-field__label form-field__label_large">
+                @Translate.Text("work experience title")
+
+            </label>
+
+            <div class="form-field--add_button" data-toggle-button="true"><span>+</span> @Translate.Text("add text")</div>
+            <div id="description-for-workexperience" class="form-field__messages">
+            </div>
+        </div>
+
+        <div data-toggle-target="true" data-table-post="experience-data-table" class="form-field  fieldset--hidden form-field-table mb24" id="experience" aria-expanded="false">
+            @*<div class="form-field form-field--select form-field--select-single    ">
+                    <label for="form-field-workexperience" class="form-field__label ">
+                        @Translate.Text("work experience title")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper ">
+                        <input class="form-field__input form-field__input--text form-field-workexp"
+                               id="form-field-workexperience"
+                               name="specify"
+                               type="text"
+                               data-option-target-id="experience"
+                               data-required-options="true"
+                               aria-controls="experience"
+                               placeholder="Enter Experience/Designation"
+                               aria-describedby="description-for-workexperience"
+                               data-parsley-errors-container="#description-for-workexperience"
+                               required
+                               data-parsley-required-message="This field is required" />
+                    </span>
+
+                    <div id="description-for-workexperience" class="form-field__messages">
+                    </div>
+                </div>*@
+            <div class="form-field form-field--text">
+                <label for="form-field-EmployerName" class="form-field__label">
+                    @Translate.Text("employer name label")
+                    <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text"
+                           id="form-field-EmployerName"
+                           name="specify"
+                           type="text"
+                           data-form-of="true"
+                           placeholder="@Translate.Text("enter text") @Translate.Text("employer name label")"
+                           aria-describedby="description-for-EmployerName"
+                           data-parsley-errors-container="#description-for-EmployerName"
+                           required="required"
+                           data-parsley-required-message="@Translate.Text("required field text")" />
+                </span>
+                <div id="description-for-EmployerName" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field__checkbox last hidden-check current-employer">
+                <label>
+                    <input class="form-field__input form-field__input--checkbox required-checkbox" id="form-field-CurrentEmployer" name="form-field-CurrentEmployer" type="checkbox" value="1" aria-describedby="description-for-8xszmvt86" data-text="Current Employer" data-target="targetId">
+                    <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("current employer label")</span>
+                </label>
+                <div id="description-for-ikmgaxjeq" class="form-field__messages">
+                    <p class="form-field__description">@Translate.Text("current employer message")</p>
+                </div>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-jobtitle" class="form-field__label">
+                    @Translate.Text("designation label")
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--text"
+                           id="form-field-jobtitle"
+                           name="specify"
+                           type="text"
+                           data-form-of="true"
+                           placeholder="@Translate.Text("designation label")"
+                           aria-describedby="description-for-jobtitle"
+                           data-parsley-errors-container="#description-for-jobtitle"
+                           required="required"
+                           data-parsley-required-message="@Translate.Text("required field text")" />
+                    @*<select class="form-field__input form-field__input--select form-field__input--select-full form_select_textVal"
+                                id="form-field-DesignationList"
+                                name="DesignationLis"
+                                required="required"
+                                aria-describedby="description-for-DesignationList"
+                                data-parsley-required-message="@Translate.Text("required field text")"
+                                data-parsley-errors-container="#description-for-DesignationList">
+                            <option value="" selected>@Translate.Text("select designation text")</option>
+                            @{
+                                foreach (var item in Model.DesignationList)
+                                {
+                                    <option value="@item.Text" data-option-value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>*@
+                </span>
+                @*<div id="description-for-DesignationList" class="form-field__messages">
+                    </div>*@
+                <div id="description-for-jobtitle" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-JobLocation" class="form-field__label">
+                    @Translate.Text("job location label")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full form_select_textVal"
+                            id="form-field-JobLocation"
+                            name="JobLocation"
+                            required="required"
+                            aria-describedby="description-for-JobLocation"
+                            data-parsley-required-message="@Translate.Text("required field text")"
+                            data-parsley-errors-container="#description-for-JobLocation">
+                        <option value="" selected>@Translate.Text("select country")</option>
+                        @{
+                            foreach (var item in Model.CountryList)
+                            {
+                                <option value="@item.Text" data-option-value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-JobLocation" class="form-field__messages">
+                </div>
+            </div>
+            <div id="datepicker-container-startdate" class="form-field form-field--text form-field--6">
+                <label for="form-field-startdate" class="form-field__label">
+                    @Translate.Text("start date label")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    <input class="form-field__input form-field__input--text form-field__input--datepicker"
+                           id="form-field-startdate"
+                           name="edu_start_date"
+                           type="text"
+                           required="required"
+                           placeholder="DD/MM/YY"
+                           aria-describedby="description-for-startdate"
+                           data-parsley-errors-container="#description-for-startdate"
+                           data-parsley-required-message="@Translate.Text("required field text")"
+                           data-el="datepicker"
+                           data-picker-options='{&quot;selectYears&quot;: 50 , &quot;selectMonths&quot;: true }' />
+                </span>
+                <div id="description-for-startdate" class="form-field__messages">
+                </div>
+            </div>
+            <div id="datepicker-container-enddate" class="form-field form-field--text form-field--6 end-date">
+                <label for="form-field-enddate" class="form-field__label">
+                    @Translate.Text("end date label")
+                    <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker ">
+                    <input class="form-field__input form-field__input--text form-field__input--datepicker"
+                           id="form-field-enddate"
+                           name="edu_end_date"
+                           type="text"
+                           data-checkbox="targetId"
+                           required="required"
+                           placeholder="DD/MM/YY"
+                           aria-describedby="description-for-enddate"
+                           data-parsley-errors-container="#description-for-enddate"
+                           data-parsley-required-message="@Translate.Text("required field text")"
+                           data-el="datepicker"
+                           data-picker-options='{&quot;selectYears&quot;: 50 , &quot;selectMonths&quot;: true }' />
+                </span>
+                <div id="description-for-enddate" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field__button">
+                <div type="button" id="btnSaveWorkExp" class="button  button--text button--save_legend">@Translate.Text("save button text")</div>
+                <div type="button" class="button  button--text button--cancel_legand">@Translate.Text("cancel button text")</div>
+            </div>
+        </div>
+        <div data-table-form="true" class="form-field mt0 mb0" id="experience-data-table">
+            @if (Model.CandidateWorkExperience != null && Model.CandidateWorkExperience.Count == 0)
+            {
+                <div class="form--data-table-row template-row hidden" data-component="m73-form-expand-tab">
+                    <span data-toggle="true" class="form--data-table-tab form--data-table-title tab-large m73-form-trigger-expand">
+                        <div class="tab-title tab-expand">Grade 10x</div>
+                    </span>
+                    <div data-content="true" aria-labelledby="" aria-expanded="false" class="m73-form-content-expand">
+                        <div class="form--data-table-buttons">
+                            <div class="form-field--add_button edit">@Translate.Text("edit button text")</div>
+                            <div class="form-field--add_button remove">@Translate.Text("remove button text")</div>
+                        </div>
+                        <div class="form--data-table-content">
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">School/University </label><span class="form-data-table__value">sdfsdfsdf</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Designation</label><span class="form-data-table__value"></span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">JobLocation</label><span class="form-data-table__value">1</span></div>
+                            <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">StartDate </label><span class="form-data-table__value">14 March 2019</span></div>
+                            <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">EndDate </label><span class="form-data-table__value">22 March 2019</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Country </label><span class="form-data-table__value">United Arab Emirates</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Region </label><span class="form-data-table__value">Dubai</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Grade/Percentage </label><span class="form-data-table__value">sdfsdf</span></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div id="workExpList">
+
+                @{ Html.RenderPartial("~/Views/Feature/HR/CareerPortal/Modules/_WorkExpList.cshtml", Model); }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-field__button save-continue-btns form-field--12 mb0">
+        @Html.HiddenFor(x => x.SaveandContinueButtonClicked, new { id = "saveandcontinuebuttonclicked" })
+        @Html.HiddenFor(x => x.postedWorkExperience, new { id = "postedWorkExperience", @value = "" })
+        <button id="btnWorkExpContinue" type="submit" data-text="False" class="button button--quaternary">@Translate.Text("exit text")</button>
+        <button id="btnWorkExpSave" type="submit" data-text="True" class="button button--primary">@Translate.Text("continue text")</button>
+    </div>
+
+}
+<script type="text/javascript">
+    $('.m21-avatar__name').html('@ViewBag.FullName');
+    setTimeout(function () {
+        jQuery(window).trigger('proprogress', [@Model.ProfileProgress]);
+    }, 500);
+
+    var $saveandcontinuebuttonclicked = jQuery('#saveandcontinuebuttonclicked');
+    $("form button[type=submit]").click(function (e) {
+        var id = "#candidateprofile" +@Model.Section;
+        jQuery(id).parsley().destroy();
+        if ($(this).attr("data-text") == "True") {
+            $saveandcontinuebuttonclicked[0].value = true;
+        }
+        else {
+            $saveandcontinuebuttonclicked[0].value = false;
+        }
+        //handleQualificationSelection1(e);
+    });
+    $("#btnSaveWorkExp").click(function (e) {
+        var check = 0,
+            $form = $(this).closest('.form-field-table');
+
+        requirejs(['parsley'], function () {
+            $form.find('input, select').each(function () {
+                jQuery(this).parsley().validate();
+                if (!jQuery(this).parsley().isValid()) {
+                    check = check + 1;
+                };
+            });
+            if (check == 0) {
+                handleWorkExpSelection(e);
+                var formId = "candidateprofile" + @Model.Section;
+                var url = "/api/sitecore/CareerPortal/AjaxSaveWorkExpDetails";
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    traditional: true,
+                    data: AddForgeryToken({ workExpData: $("#postedWorkExperience").val(), IsDelete: "false" }, formId),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                        jQuery('#workExpError').html('');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                    },
+                }).done(function (response) {
+                    if (response != null && response.strMessage != undefined && response.strMessage != "") {
+                        jQuery('#workExpError').html('');
+                        jQuery('#workExpError').html(response.strMessage);
+                    }
+                    else {
+                        jQuery("#workExpList").html('');
+                        jQuery("#workExpList").html(response);
+                        $form.addClass('fieldset--hidden');
+                        $('#' + $form.attr('id').replace('_target', '_button') + '').removeClass('form_button_disable');
+                    }
+                });
+            }
+        });
+
+    });
+
+    function handleWorkExpSelection(e) {
+        var postedWorkExplist = jQuery('#postedWorkExperience');
+        var workExperiencelist = [];
+        var obj = {};
+        //obj.EducationLevel = $('#university_grades-data-table').find('[data-component="m73-form-expand-tab"]').find('.tab-title.tab-expand').html();
+        obj.EmployerName = jQuery("#form-field-EmployerName").val();
+        obj.Designation = jQuery("#form-field-jobtitle").val(); //jQuery("#form-field-DesignationList option:selected").attr("data-option-value");
+        obj.JobLocation = jQuery("#form-field-JobLocation option:selected").attr("data-option-value");
+        obj.StartDate = jQuery("#form-field-startdate").val();
+        obj.EndDate = jQuery("#form-field-enddate").val();
+        obj.CurrentEmployer = jQuery("#form-field-CurrentEmployer").is(":checked");
+        if (jQuery('#btnSaveWorkExp.button--save_legend').closest('.form-field-table').attr('data-seq-no') != undefined) {
+            var objData = jQuery('#btnSaveWorkExp.button--save_legend').closest('.form-field-table').attr('data-seq-no').split('#');
+            if (objData.length > 0) {
+                obj.sequenceNo = objData[0];
+                obj.objectid = objData[1];
+                obj.objectversion = objData[2];
+                obj.planversion = objData[3];
+            }
+        }
+        workExperiencelist.push(obj);
+
+        if (workExperiencelist.length > 0) {
+            jQuery(".form-field-workexp").removeAttr('required');
+        }
+        postedWorkExplist[0].value = JSON.stringify(workExperiencelist);
+        return true;
+    }
+
+    //$checkbox_required.on('click', function () {
+    $('#form-field-CurrentEmployer').on('click', function () {
+        var thisCheckBox = $(this),
+            thisCheckBoxTargetId = thisCheckBox.data('target'),
+            thisCheckBoxTarget = $("[data-checkbox='" + thisCheckBoxTargetId + "']"),
+            thisCheckBoxTargetFrom = thisCheckBoxTarget.closest('.form-field');
+        if (thisCheckBox.is(':checked')) {
+            thisCheckBoxTarget.prop('required', false);
+            thisCheckBoxTargetFrom.addClass('form-field--disabled');
+            thisCheckBoxTarget.val('');
+            thisCheckBoxTarget.prop('disabled', true);
+        } else {
+            thisCheckBoxTarget.prop('required', true);
+            thisCheckBoxTargetFrom.removeClass('form-field--disabled');
+            thisCheckBoxTarget.val('')
+            thisCheckBoxTarget.prop('disabled', false);
+        }
+    });
+</script>
+

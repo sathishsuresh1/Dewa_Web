@@ -1,0 +1,77 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Foundation.Content.Models.SelectedAccountViewModel
+
+@{
+    var defaultStatusIndicatorClass = Model != null && Model.Account.Active ? "active" : "inactive";
+    var defaultStatusIndicatorText = Model != null && Model.Account.Active ? "Active" : "Inactive";
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+
+<div data-component="m43-account-selector" class="m43-accountsel">
+    @if (!string.IsNullOrWhiteSpace(Model.FieldLabel))
+    {
+        <p class="m43-accountsel__labelstyle">@Model.FieldLabel</p>
+    }
+    <p class="m43-accountsel__selected">
+        <span data-acc-detail="wrapper" class="m43-accountsel__account">
+            @if (!string.IsNullOrWhiteSpace(Model.Account.ImageUrl))
+            {
+                <img data-acc-detail="acc_image" role="presentation" alt="@Model.Account.Name @Sitecore.Globalization.Translate.Text("profile picture")" class="m43-accountsel__image" src="@Model.Account.ImageUrl">
+                <span class="m43-accountsel__header">
+                    <span data-acc-detail="acc_name" class="m43-accountsel__name"><span class="inline-block" dir="ltr">@Model.Account.Name</span><span dir="@direction" class="m43-accountsel__status m43-accountsel__status--@defaultStatusIndicatorClass">@*@Translate.Text(defaultStatusIndicatorText)*@</span></span>
+                    <span class="m43-accountsel__details">
+                        <span title="Account">@Sitecore.Globalization.Translate.Text("Acc")</span>: <span data-acc-detail="acc_number">@Model.Account.AccountNumber</span><span class="aria-only"> | </span>
+                    </span>
+                </span>
+            }
+            else
+            {
+                <span class="m43-accountsel__header">
+                    <span data-acc-detail="acc_name" class="m43-accountsel__name">
+                        <span class="inline-block" dir="ltr">@Model.Account.Name</span>
+                    </span>
+                    <span class="m43-accountsel__details">
+                        <span title="Account">@Sitecore.Globalization.Translate.Text("Acc")</span>: <span data-acc-detail="acc_number">@Model.Account.AccountNumber</span><span class="aria-only"> | </span>
+                    </span>
+                </span>
+            }
+
+        </span>
+    </p>
+
+    @if (Model.Account.ShowAccountSummary)
+    {
+        <div class="m37-expander" data-component="m37-expander">
+            <button data-toggle="true" class="m37-expander__trigger">@Translate.Text("Account Details")</button>
+
+            <div data-content="true" class="m37-expander__content" role="region" aria-expanded="false">
+                <div class="m42-keyvalue">
+                    <dl data-accountsel-additional-details="acc-sel-3">
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt">@Sitecore.Globalization.Translate.Text("Type"):</dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_type">@Model.Account.BillingClass</dd>
+                        @if (Model.Account.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle))
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt">@Sitecore.Globalization.Translate.Text("Number of EV Cards"):</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">@Model.Account.Premise</dd>
+                        }
+                        else
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt">@Sitecore.Globalization.Translate.Text("Premise"):</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">@Model.Account.Premise</dd>
+                        }
+
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt">@Sitecore.Globalization.Translate.Text("Business Partner"):</dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_businesspartner">@Model.Account.BusinessPartner.TrimStart(new[] { '0' })</dd>
+
+                        @if (Model.Account.LinkedToIbanAccount)
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Sitecore.Globalization.Translate.Text("Your IBAN account"):</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.Account.IbanAccountNumber</dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+    }
+</div>

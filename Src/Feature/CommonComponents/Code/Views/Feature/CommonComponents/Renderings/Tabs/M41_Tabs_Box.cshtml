@@ -1,0 +1,93 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.Renderings;
+@using Sitecore.Mvc
+@using Sitecore.Links
+
+@model  FormattedTabs
+
+<div class="m41-tabs-box m41-tabs-box--variant4 m41-tabs-box--scripted m41-tabs-box--variant4_service-guide guide m41-tabs-box--select-padding" data-component="m41-tabs-box" id="components-reinit">
+    <div class="m41-tabs-box__tabs m41-tabs-box--desktop">
+        <ul class="m41-tabs-box__tab-items">
+            @foreach (Tab tab in Model.Children)
+            {
+                var index = Model.Children.ToList().IndexOf(tab);
+                var pageUrl = LinkManager.GetItemUrl(Sitecore.Context.Item);
+                var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                var active = pageUrl.Equals(tabTargetUrl);
+                var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+                if (!string.IsNullOrWhiteSpace(tabTargetUrl))
+                {
+                    <li class="m41-tabs-box__tab-item" data-index="@(index)">
+                        <a href="@tabTargetUrl" data-rdurl="@(tabTargetUrl)" class="m41-tabs-box__tab-link cus_urlRedirect @(additionalCssClasses)">@Html.Raw(tab.Title)</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="m41-tabs-box__tab-item" data-index="@(index)">
+                        <a href="#" class="m41-tabs-box__tab-link @(additionalCssClasses)">@Html.Raw(tab.Title)</a>
+                    </li>
+                }
+
+            }
+        </ul>
+        <div class="m41-tabs-box__tab-panels">
+            @{ bool isRichtext = false;
+                foreach (Tab tab in Model.Children)
+                {
+                    var index = Model.Children.ToList().IndexOf(tab);
+                    <div class="m41-tabs-box__tab-panel" data-index="@index">
+                        <div class='grid'>
+                            <div class='grid__row'>
+                                @{
+                                    if (tab.Module && !string.IsNullOrWhiteSpace(tab.ModulePlaceholder))
+                                    {
+                                        <!--Start @(tab.ModulePlaceholder)-->
+                                        @Html.Sitecore().Placeholder(tab.ModulePlaceholder)
+                                        <!--End @(tab.ModulePlaceholder)-->
+                                    }
+                                    else if (tab.InterlinkTab != null && tab.InterlinkTab.Count() > 0)
+                                    {
+                                        isRichtext = true;
+                                        <div class="m14-richtext">
+                                            @Html.Raw(tab.InterlinkTab.FirstOrDefault().Body)
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        isRichtext = true;
+                                        @Html.Raw(tab.Body)
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (isRichtext)
+            {
+                <style type="text/css">
+                    .m14-richtext ul li + li {
+                        margin-top: 0 !important;
+                    }
+                </style>
+            }
+        </div>
+
+        <script>
+
+            docReady(function () {
+                setTimeout(function () {
+
+                    jQuery(".cus_urlRedirect").on("click", function () {
+                        console.log(jQuery(this).data("rdurl"));
+                        window.location.href = jQuery(this).data("rdurl");
+                    })
+
+                    if (jQuery(".m41-tabs-box__tab-link--active").length == 0) {
+                        jQuery(jQuery(".m41-tabs-box__tab-link")[0]).click()
+                    }
+                }, 100)
+            })
+        </script>
+    </div>
+</div>

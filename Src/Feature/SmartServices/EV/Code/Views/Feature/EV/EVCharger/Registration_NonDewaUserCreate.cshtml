@@ -1,0 +1,127 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Feature.EV.Models.EVCharger
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.EV.Models.EVCharger.EVAccountSetup
+
+@Html.Sitecore().Placeholder("j100/m26-page-title")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @*@Html.Sitecore().Placeholder("j100/m14-formatted-text")*@
+        <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="4" data-current-step="3">
+            <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="EV Login Card">
+            </div>
+        </div>
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form" id="evBPAccountSetup">
+
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "applyEVCardForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+        {
+
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="RegistrationStage" id="RegistrationStage" value="@Model.RegistrationStage" />
+
+            <div class="form-field form-field--text ">
+                <label for="form-field-setusername" class="form-field__label">
+                    @Translate.Text("username label")
+                    <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input type="text"
+                           name="Username"
+                           id="form-field-setusername"
+                           class="form-field__input form-field__input--text"
+                           @*aria-required="true"*@
+                           aria-describedby="description-for-setusername"
+                           required="required"
+                           autocomplete="off"
+                           data-parsley-dewausername=""
+                           maxlength="20"
+                           placeholder="@Translate.Text("username label")"
+                           value="@Model.Username"
+                           data-parsley-error-message="@Translate.Text("register username validation message")"
+                           data-parsley-errors-container="#description-for-setusername" />
+                </span>
+                <div id="description-for-setusername" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field--text ">
+                <label for="form-field-password" class="form-field__label">
+                    @Translate.Text("password label")
+                    <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input type="password"
+                           name="Password"
+                           id="form-field-password"
+                           class="form-field__input form-field__input--text"
+                           @*aria-required="true"*@
+                           aria-describedby="description-for-set-password"
+                           autocomplete="off"
+                           required="required"
+                           placeholder="@Translate.Text("password label")"
+                           data-parsley-password=""
+                           data-parsley-error-message="@Translate.Text("login password validation message")"
+                           data-parsley-password-message="@Translate.Text("login password validation message")"
+                           data-parsley-errors-container="#description-for-set-password"
+                           data-parsley-trigger="focusout" />
+                </span>
+                <div id="description-for-set-password" class="form-field__messages">
+                    <p class="form-field__description">@Translate.Text("password description text")</p>
+                </div>
+            </div>
+            <div class="form-field form-field--text ">
+                <label for="form-field-set-confirm-password" class="form-field__label">
+                    @Translate.Text("confirm password label")
+                    <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input type="password"
+                           name="ConfirmPassword"
+                           id="form-field-set-confirm-password"
+                           class="form-field__input form-field__input--text"
+                           aria-required="true"
+                           aria-describedby="description-for-set-confirm-password"
+                           autocomplete="off"
+                           placeholder="@Translate.Text("confirm password label")"
+                           data-parsley-equalto="#form-field-password"
+                           data-parsley-equalto-message="@Translate.Text("Password mismatch error")"
+                           data-parsley-errors-container="#description-for-set-confirm-password"
+                           data-parsley-trigger="focusout" />
+                </span>
+                <div id="description-for-set-confirm-password" class="form-field__messages">
+                </div>
+            </div>
+
+
+
+            <div class="form-field form-field--toggles mt24">
+                <div class="form-field__checkbox  last">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                        <span class="form-field__fakecheckbox focus-enabled m39-modal__tncev">@Translate.Text("Terms Agreement")  @Html.Sitecore().Placeholder("j26/m39-modal-overlay")</span>
+                    </label>
+                </div>
+                <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                <input type="hidden" name="AgreedToPayment" value="false" />
+            </div>
+            <div class="form-field__button">
+                <button type="submit" id="evsubmitbutton" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Continue")</button>
+            </div>
+
+        }
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+        $(".title_message").prepend("<div class='m26-page-title__links'><p class='m26-page-title__backlink'><a class='button button--text button--back' href='@(LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_Registration) + "?s=1")'>@Translate.Text("Back")</a></p></div>");
+</script>

@@ -1,0 +1,114 @@
+﻿
+@using DEWAXP.Feature.CommonComponents.Models.RenderingParameters
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.M107ListContainer
+
+
+@if (Model != null && Model.LstItems != null && Model.LstItems.Count() > 0)
+{
+    var gridCol = Model.GridCol != null ? Model.GridCol.Text : "6";
+    //var chartType = Model.ChartType != null ? Model.ChartType.Text : "column";
+    var barClass = Model.BarClass != null ? Model.BarClass.Text : "clearfix";
+    //var dataCategory = Model.DataCategory != null ? Model.DataCategory.Text : "";
+    <div class="j160-customer-results" data-journey="j160-customer-results">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+                    <h3 class="m17-sectiontitle__title m17-sectiontitle__title_center text__section-title">@Model.Title</h3>
+                    <h5 class="text__section-subtitle align-center">@Model.SubTitle</h5>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            @foreach (var container in Model.LstItems)
+            {
+                <div class="grid__column grid__column--@gridCol">
+                    <div class="m107-mbar-chart @(barClass)" data-component="m107-mbar-chart">
+                        <div class="m107-mbar-chart-title">@container.Heading</div>
+                        @{
+                            foreach (var itemHeading in container.LstItems)
+                            {
+                                var index = 0;
+                                var jsonDataSeries = string.Empty;
+                                var jsonDataCategory = string.Empty;
+                                var chartType = itemHeading.ChartType != null ? itemHeading.ChartType.Text : "column";
+                                var dataCategory = itemHeading.DataCategory != null ? itemHeading.DataCategory.Text : "";
+                                @*if (chartType.Equals("number"))
+                                    {
+                                        foreach (var item in itemHeading.BarItems)
+                                        {
+                                            <div class="m107-mbar-chart-container">
+                                                <div style="height: 60px; overflow: hidden;"
+                                                     data-chart-type="@chartType"
+                                                     data-category='[@item.BarName]'
+                                                     data-target="@item.TargetValue"
+                                                     data-actual="@item.Value"
+                                                     data-actual-color="@item.Color"
+                                                     data-target-color="@item.TargetColor"
+                                                     data-chart107-container="@dataCategory" data-highcharts-chart="38">
+                                                </div>
+                                                @if (!string.IsNullOrWhiteSpace(itemHeading.Title))
+                                                {
+                                                    <div class="m107-mbar-chart-container-title">@itemHeading.Title</div>
+                                                }
+                                            </div>
+                                        }
+                                    }*@
+                                if (chartType.Equals("bar") || chartType.Equals("number"))
+                                {
+                                    foreach (var item in itemHeading.BarItems)
+                                    {
+                                        jsonDataSeries = "{\"name\":\"" + item.BarName + "\",\"actualcolor\":\"" + item.Color + "\",\"actual\":\"" + item.Value + "\",\"target\":\"" + item.TargetValue + "\",\"targetcolor\":\"" + item.TargetColor + "\"}";
+                                        <div class="m107-mbar-chart-container">
+                                            <div style="height: 60px; overflow: hidden;"
+                                                 data-chart-type="@chartType"
+                                                 data-category='[@item.BarName]'
+                                                 data-series='[{"data":[@jsonDataSeries]}]'
+                                                 data-chart107-container="@dataCategory">
+                                            </div>
+                                            @if (!string.IsNullOrWhiteSpace(itemHeading.Title))
+                                            {
+                                                <div class="m107-mbar-chart-container-title">@itemHeading.Title</div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var item in itemHeading.BarItems)
+                                    {
+                                        if (index > 0)
+                                        {
+                                            jsonDataSeries += ",{\"name\":\"" + item.BarName + "\",\"color\":\"" + item.Color + "\",\"y\":\"" + item.Value + "\"}";
+                                            jsonDataCategory += ",\"" + item.BarName + "\"";
+                                        }
+                                        else
+                                        {
+                                            jsonDataSeries = "{\"name\":\"" + item.BarName + "\",\"color\":\"" + item.Color + "\",\"y\":\"" + item.Value + "\"}";
+                                            jsonDataCategory = "\"" + item.BarName + "\"";
+                                        }
+                                        index++;
+                                    }
+                                    <div class="m107-mbar-chart-container">
+                                        <div style="height:200px;"
+                                             data-chart-type="@chartType"
+                                             data-category='[@jsonDataCategory]'
+                                             data-series='[{"data":[@jsonDataSeries]}]'
+                                             data-chart107-container="@dataCategory">
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(itemHeading.Title))
+                                        {
+                                            <div class="m107-mbar-chart-container-title">@itemHeading.Title</div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        }
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

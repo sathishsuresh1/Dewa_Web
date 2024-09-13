@@ -1,0 +1,188 @@
+﻿@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint;
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content 
+@using DEWAXP.Foundation.Content.Models.Consumption
+@model TrackingMapDetail
+@{
+    string StartLat = "0";
+    string StartLng = "0";
+    string EndLat = "0";
+    string EndLng = "0";
+
+    if (Model.FromLocation != null)
+    {
+        StartLat = Model.FromLocation.geolatitude;
+        StartLng = Model.FromLocation.geolongitude;
+    }
+
+    if (Model.FromLocation != null)
+    {
+        EndLat = Model.ToLocation.geolatitude;
+        EndLng = Model.ToLocation.geolongitude;
+    }
+    //StartLat = "25.284588";
+    //StartLng = "55.337906";
+    //EndLat = "25.281042";
+    //EndLng = "55.384367";
+    bool IsError = !string.IsNullOrEmpty(Model.ErrorMessages);
+    string lang = _commonHelper.GetSMTranslation("en");
+
+    var smDetail = _commonHelper.GetUserSubmittedData();
+
+    string dirClass = smDetail.LangType == SmlangCode.ar ? "j120-smart-response--rtl" : "j120-smart-response--ltr";
+}
+<style>
+    .mymarkerlabel {
+        transform: translateX(-50%);
+        background-color:#ccc;
+        padding:10px;
+    }
+</style>
+<div class="j120-smart-response @(dirClass) mapdata" data-journey="j120-smart-response"
+     data-slat="@(StartLat)"
+     data-slngt="@(StartLng)"
+     data-elat="@(EndLat)"
+     data-elngt="@(EndLng)"
+     data-serrormsg="@_commonHelper.GetSMTranslation("No routes available.")"
+     data-soriginmarker="@Url.Content("~/temp/content/marker2.png")"
+     data-sdesmarker="@Url.Content("~/temp/content/marker1.png")"
+     data-sDefaultTimetext="@_commonHelper.GetSMTranslation("Home")"
+     data-mapgeoapiurl="@Url.Content("~/api/sitecore/Consumption/GetConsumptiontTrackingMapData")"
+     data-homeimage_apiurl="@Url.Content("~/api/sitecore/Consumption/GetMarkerImage?t=")"
+     data-dataloaderinterval="@Translate.Text("map_DataLoadCounter")"
+     data-guidtext="@Model.GuidText" 
+     >
+    <script src="https://maps.googleapis.com/maps/api/js?key=@Translate.Text("Map_key")&language=@(lang)"
+            defer></script>
+    @*<script type="text/javascript" src="@Url.Content("~/Scripts/custom/dtmc.consumptiontracking.map.js?v=0.4")"></script>*@
+    @Scripts.Render("~/bundles/dtmc_track_map")
+    <script>
+        docReady(function () {
+
+            //jQuery(window).bind('beforeunload', function () {
+            //    // do something, preferably ajax request etc
+            //  var test= 
+            //});
+
+
+           
+        })
+    </script>
+
+    <div class="box box--7">
+        <div class="j120-smart-response--window j120-smart-response--map-wrapper">
+
+            <div class="j120-smart-response--map">
+                @Html.AntiForgeryToken()
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <div class="j120-smart-response--map-content-wrapper">
+                                <div class="j120-smart-response--map-content-header">
+                                    <a class="j120-smart-response--back j120-smart-response--button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J24_BILLING_COMPLAINT)">@_commonHelper.GetSMTranslation("Back")</a>
+
+                                    <div id="error-content-ele" class="j120-smart-response--alert warning" style="display:@(IsError?"blockx":"none")">
+                                        <div id="error-content" class="j120-smart-response--alert_text icon-notif-triangle">
+                                            @Html.Raw(Model.ErrorMessages)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (Model.NotificationDetail != null)
+                                {
+
+                                    <div id="floating-panel">
+                                        <input id="origin-input"
+                                               class="controls"
+                                               value="@_commonHelper.GetSMTranslation("Technician")"
+                                               @*data-lat="@Model.FromLocation.geolatitude"
+                                   data-lang="@Model.FromLocation.geolongitude"*@
+                                               data-lat="25.284588"
+                                               data-lang="55.337906"
+                                               type="text"
+                                               readonly
+                                               placeholder="Enter an origin location" 
+                                               data-defaultaddress="@_commonHelper.GetSMTranslation("Technician")"/>
+                                        <input id="destination-input"
+                                               value="@_commonHelper.GetSMTranslation("Your Home")"
+                                               class="controls"
+                                               data-lat="25.281042"
+                                               data-lang="55.384367"
+                                               @*data-lat="@Model.ToLocation.geolatitude"
+                               data-lang="@Model.ToLocation.geolongitude"*@
+                                               type="text"
+                                               readonly
+                                               placeholder="Enter a destination location"
+                                               data-defaultaddress="@_commonHelper.GetSMTranslation("Your Home")"/>
+                                    </div>
+                                    <div class="j120-smart-response-status-vert" id="notificationPanel" data-nid="@(Model.NotificationDetail.Reference)">
+                                        <div class="j120-smart-response-statusbox j120-smart-response--track">
+                                            <div class="j120-smart-response--track-head">
+                                                <div class="j120-smart-response--track-head-title">
+                                                    <div class="j120-smart-response--track_title">@_commonHelper.GetSMTranslation(Model.NotificationDetail.RequestType)</div>
+                                                    <div class="j120-smart-response--track_subtitle">@string.Format("{0} {1}", _commonHelper.GetSMTranslation("Notification no."), Model.NotificationDetail.Reference)</div>
+                                                </div>
+                                                <div class="j120-smart-response--track-head-status">
+                                                    <div class="resolved-details-wrapper">
+                                                        <div class="resolved-details">
+                                                            <span class="resolved-details-status icon-tick">@_commonHelper.GetSMTranslation(Model.NotificationDetail.StatusDescription)</span>
+                                                            @if (!string.IsNullOrWhiteSpace(Model.NotificationDetail.StatusDate) && Model.NotificationDetail.StatusDate != "0000-00-00")
+                                                            {
+                                                                if (Model.NotificationDetail.StatusCode == "S002")
+                                                                {
+                                                                    <span  class="resolved-details-datetime arrivaltime" data-msg="@(_commonHelper.GetSMTranslation(Translate.Text("TrackingStatusMapStatusDesc")))"></span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    string mnth = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(Model.NotificationDetail.StatusDate, "yyyy-MM-dd", "MMM"));
+                                                                    string dd = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(Model.NotificationDetail.StatusDate, "yyyy-MM-dd", "dd"));
+                                                                    string yyyy = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(Model.NotificationDetail.StatusDate, "yyyy-MM-dd", "yyyy"));
+                                                                    string fromattedDate = string.Format("{0} {1} {2}", dd, mnth, yyyy);
+                                                                    <span class="resolved-details-datetime">@string.Format("{0} {1}", fromattedDate, Model.NotificationDetail.StatusTime)</span>
+
+                                                                }
+                                                            }
+                                                            <a onclick="ReloadMapData()" data-nid="@(Model.NotificationDetail.Reference)" data-ac="@(Model.AccountNo)" class="resolved-details-button expand" href="#">
+                                                                <span class="view"> @_commonHelper.GetSMTranslation("Refresh")</span>
+                                                                <span class="hide"> @_commonHelper.GetSMTranslation("Refresh")</span>
+                                                            </a>
+
+
+                                                            @*<a data-nid="@(Model.NotificationDetail.Reference)" data-ac="@(Model.AccountNo)" class="resolved-details-button expand" href="#">
+                                                                    <span class="view"> @_commonHelper.GetSMTranslation("Refresh")</span>
+                                                                </a>*@
+                                                        </div>
+
+                                                    </div>
+                                                    @*<button class="button button--senary">Rate it</button>*@
+
+                                                </div>
+                                            </div>
+
+                                            @*<ul class="j120-smart-response--track_list">
+                                                    <li class="j120-smart-response--track_item j120-smart-response--track_item--done"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Notification created </span><span class="date-time">16 Jun 2020 03:09 pm</span></div></li>
+                                                    <li class="j120-smart-response--track_item j120-smart-response--track_item--current j120-smart-response--track_item--done"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Team assigned and on his way </span><span class="date-time">Expected to arrive at 8:30 pm</span></div></li>
+                                                    <li class="j120-smart-response--track_item"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Team reached the location</span></div></li>
+                                                    <li class="j120-smart-response--track_item"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Investigation completed</span></div></li>
+                                                    <li class="j120-smart-response--track_item"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Forwarded for reviewing the bill</span></div></li>
+                                                    <li class="j120-smart-response--track_item"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Billing reviewed</span></div></li>
+                                                    <li class="j120-smart-response--track_item"><div class="j120-smart-response--track_item-content"><span class="j120-smart-response--track_item-status-title">Case resolved</span></div></li>
+                                                </ul>*@
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</div>
+

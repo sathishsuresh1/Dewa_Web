@@ -1,0 +1,396 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Globalization
+@using DEWAXP.Feature.ChatBot.Models.HayakChat
+@using DEWAXP.Foundation.Content 
+@model DEWAXP.Feature.ChatBot.Models.HayakChat.HayakChatModel
+
+<link href="/styles/External/jquery.fancybox.css" rel="stylesheet" type="text/css" media="screen" />
+<div>
+    <style>
+        .fheight {
+            height: 100%;
+        }
+    </style>
+</div>
+@Html.AntiForgeryToken()
+<div id="rs_area">
+    <div class="rs_preserve">
+        <div class="j145-hayak" data-journey="j145-hayak" data-requestid="" data-settings='@Model.configdata()'>
+            <div id="replaceAsVideoWebRTCCaller"></div>
+            <div class="mdl-js-snackbar hidden">
+                <div class="mdl-snackbar__text"></div>
+                <button class="mdl-snackbar__action" type="button"></button>
+            </div>
+
+            <div class="box j145-header">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h3 class="j145-header-title">
+                                @Html.Sitecore().Field("Header")
+                                <span class="icon icon-b-videocall videocall-btn hidden" id="videoClickToCall"></span>
+                            </h3>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box j145-subheader j145-chat-obj">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12 grid__column--form">
+                            <h3 class="j145-subheader-title">@Translate.Text("j145 Tap return video call")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid" id="dv_prechat">
+                <div class="grid__row" id="dv_initial">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <h2 class="j145-page-title">@Translate.Text("j145 Contact Details")</h2>
+
+                        <span class="j145-page-label">@Translate.Text("j145 I am a")</span>
+                        <div class="m41-tabs-box m41-tabs-box--variant3 m41-tabs-box--scripted" data-component="m41-tabs-box" id="dv_unreg_user">
+                            <div class="m41-tabs-box__tabs m41-tabs-box--desktop">
+                                <div class="m41-tabs-box__tab-items">
+                                    <div class="m41-tabs-box__tab-item" data-index="0">
+                                        <button class="button button--active m41-tabs-box__tab-link m41-tabs-box__tab-link--active" data-tabname="consumer">@Translate.Text("j145 Consumer")</button>
+
+                                    </div>
+                                    @if (!User.Identity.IsAuthenticated)
+                                    {
+                                    <div class="m41-tabs-box__tab-item" data-index="1">
+                                        <button class="button m41-tabs-box__tab-link" data-tabname="guest">@Translate.Text("j145 Guest")</button>
+
+                                    </div>
+                                    }
+                                </div>
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                <div class="m41-tabs-box__tab-panels">
+                                    <div class="m41-tabs-box__tab-panel" data-index="0" style="display: block;">
+                                        <form method="post" class="form" data-form="true" action="" novalidate="" id="form0">
+                                            @Html.Sitecore().Placeholder("account-selector")
+                                            <div class="form-field__button form-field__button-bottom-fix">
+                                                <button type="submit" class="button button--primary" id="btStartChat1" disabled="disabled">@Translate.Text("j145 Start Chat")</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                }
+                                else
+                                {
+                                <div class="m41-tabs-box__tab-panels">
+                                    <div class="m41-tabs-box__tab-panel" data-index="0" style="display: block;">
+                                        <form method="post" class="form" data-form="true" action="" novalidate="" id="form1">
+                                            <div class="form-field form-field--text    ">
+                                                <label for="txFN1" class="form-field__label">
+                                                    @Translate.Text("j145 Full Name")<span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text" id="txFN1" name="firstname1" type="text" placeholder='@Translate.Text("j145 Enter your full name")' aria-describedby="description-for-fn1" data-parsley-errors-container="#description-for-fn1" required="" data-parsley-required-message='@Translate.Text("j145 Enter your full name")' data-parsley-trigger="focusout" data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-fn1" class="form-field__messages">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-field form-field--text">
+                                                <label for="txEmail1" class="form-field__label">
+                                                    @Translate.Text("j145 Email")
+                                                    <span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="txEmail1"
+                                                           name="txEmail1"
+                                                           type="email"
+                                                           placeholder='@Translate.Text("j145 Enter your email address")'
+                                                           aria-describedby="description-for-email1"
+                                                           data-parsley-errors-container="#description-for-email1"
+                                                           data-parsley-error-message='@Translate.Text("j145 Enter valid email address")'
+                                                           required
+                                                           data-parsley-required-message='@Translate.Text("j145 Enter valid email address")' />
+                                                </span>
+
+                                                    <div id="description-for-email1" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="form-field form-field--text">
+                                                    <label for="MobileNumber1" class="form-field__label">
+                                                        @Translate.Text("j145 Mobile Number")
+                                                        <span class="form-field__label-required aria-only">(required)</span>
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                                        <input class="form-field__input form-field__input--text form-field__input--prefixed" id="MobileNumber1" name="mobile1" type="tel" placeholder='@Translate.Text("Mobile number placeholder")' aria-describedby="description-for-mb1" data-parsley-errors-container="#description-for-mb1" required="" data-parsley-required-message='@Translate.Text("Please enter a valid UAE mobile number")' data-parsley-mobile_number="" data-parsley-mobile_number-message='@Translate.Text("Please enter a valid UAE mobile number")' data-parsley-trigger="focusout">
+                                                    </span>
+                                                    <div id="description-for-mb1" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="form-field form-field--text">
+                                                    <label for="txCAN1" class="form-field__label">
+                                                        @Translate.Text("j145 Contract Account Number")
+                                                        <span class="form-field__label-required aria-only">(required)</span>
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        <input class="form-field__input form-field__input--text" id="txCAN1" name="can1" type="number" placeholder='@Translate.Text("J145 Enter CAN Placeholder")' aria-describedby="description-for-can1" data-parsley-errors-container="#description-for-can1" required="" data-parsley-required-message='@Translate.Text("J145 Enter CAN Placeholder")' data-parsley-account_number="" data-parsley-account_number-message='@Translate.Text("Please enter a valid 10 digit account number")' data-parsley-trigger="focusout" data-parsley-pattern="/^(2|3)[0-9]+$/" data-parsley-pattern-message='@Translate.Text("Please enter a valid 10 digit account number")'>
+                                                    </span>
+                                                    <div id="description-for-can1" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="form-field form-field--toggles">
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--checkbox" id="form-field-iban_terms_checkbox1a" name="checkbox_1a" type="checkbox" value="1" aria-describedby="description-terms1a" data-parsley-errors-container="#description-terms1a" required="" data-parsley-required-message='@Translate.Text("j145 agree to tc")' data-parsley-multiple="checkbox_1a" data-parsley-id="17">
+                                                        <span class="form-field__fakecheckbox focus-enabled">
+                                                            @Html.Sitecore().Placeholder("j145/m39-modal-overlay/terms")
+                                                        </span>
+                                                    </label>
+                                                    <div id="description-terms1a" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="form-field__checkbox  last  first">
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--checkbox" id="form-field-iban_terms_checkbox1b" name="checkbox_1b" type="checkbox" value="1" aria-describedby="description-terms1b" data-parsley-errors-container="#description-terms1b" required="" data-parsley-required-message='@Translate.Text("j145 agree to psp")' data-parsley-multiple="checkbox_1b" data-parsley-id="17b">
+                                                        <span class="form-field__fakecheckbox focus-enabled">
+                                                            @Html.Sitecore().Placeholder("j145/m39-modal-overlay/privacy")
+                                                        </span>
+                                                    </label>
+                                                    <div id="description-terms1b" class="form-field__messages">
+
+                                                </div>
+                                            </div>
+                                            <div class="form-field__button form-field__button-bottom-fix">
+                                                <button type="submit" class="button button--primary">@Translate.Text("j145 Start Chat")</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="m41-tabs-box__tab-panel" data-index="1" style="display: none;">
+                                        <form method="post" class="form" data-form="true" action="" novalidate="" id="form2">
+                                            <div class="form-field form-field--text">
+                                                <label for="txFN2" class="form-field__label">
+                                                    @Translate.Text("j145 Full Name")
+                                                    <span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text" id="txFN2" name="firstname2" type="text" placeholder='@Translate.Text("j145 Enter your full name")' aria-describedby="description-for-fn2" data-parsley-errors-container="#description-for-fn2" required="" data-parsley-required-message='@Translate.Text("j145 Enter your full name")' data-parsley-trigger="focusout" data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-fn2" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text">
+                                                <label for="txEmail2" class="form-field__label">
+                                                    @Translate.Text("j145 Email")
+                                                    <span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="txEmail2"
+                                                           name="txEmail2"
+                                                           type="email"
+                                                           placeholder='@Translate.Text("j145 Enter your email address")'
+                                                           aria-describedby="description-for-email2"
+                                                           data-parsley-errors-container="#description-for-email2"
+                                                           data-parsley-error-message='@Translate.Text("j145 Enter valid email address")'
+                                                           required
+                                                           data-parsley-required-message='@Translate.Text("j145 Enter valid email address")' />
+                                                </span>
+
+                                                <div id="description-for-email2" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text">
+                                                <label for="MobileNumber2" class="form-field__label">
+                                                    @Translate.Text("j145 Mobile Number")
+                                                    <span class="form-field__label-required aria-only">(required)</span>
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                                    <input class="form-field__input form-field__input--text form-field__input--prefixed" id="MobileNumber2" name="mobile2" type="tel" placeholder='@Translate.Text("Mobile number placeholder")' aria-describedby="description-for-mn2" data-parsley-errors-container="#description-for-mn2" required="" data-parsley-required-message='@Translate.Text("Please enter a valid UAE mobile number")' data-parsley-mobile_number="" data-parsley-mobile_number-message='@Translate.Text("Please enter a valid UAE mobile number")' data-parsley-trigger="focusout" data-parsley-id="8">
+                                                </span>
+                                                <div id="description-for-mn2" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--toggles">
+                                                <label>
+                                                    <input class="form-field__input form-field__input--checkbox" id="form-field-iban_terms_checkbox2a" name="checkbox_2a" type="checkbox" value="1" aria-describedby="description-terms2a" data-parsley-errors-container="#description-terms2a" required="" data-parsley-required-message='@Translate.Text("j145 agree to tc")' data-parsley-multiple="checkbox_2a">
+                                                    <span class="form-field__fakecheckbox focus-enabled">
+                                                        @Html.Sitecore().Placeholder("j145/m39-modal-overlay/terms")
+                                                    </span>
+                                                </label>
+                                                <div id="description-terms2a" class="form-field__messages">
+
+                                                </div>
+                                            </div>
+                                            <div class="form-field__checkbox  last  first">
+                                                <label>
+                                                    <input class="form-field__input form-field__input--checkbox" id="form-field-iban_terms_checkbox2b" name="checkbox_2b" type="checkbox" value="1" aria-describedby="description-terms2b" data-parsley-errors-container="#description-terms2b" required="" data-parsley-required-message='@Translate.Text("j145 agree to psp")' data-parsley-multiple="checkbox_2b">
+                                                    <span class="form-field__fakecheckbox focus-enabled">
+                                                        @Html.Sitecore().Placeholder("j145/m39-modal-overlay/privacy")
+                                                    </span>
+                                                </label>
+                                                <div id="description-terms2b" class="form-field__messages">
+
+                                                </div>
+                                            </div>
+                                            <div class="form-field__button form-field__button-bottom-fix">
+                                                <button type="submit" class="button button--primary">@Translate.Text("j145 Start Chat")</button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                                }
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <!-- alert in case of any exception, fatal error or back downtime -->
+            <div class="grid" id="dv_error" style="display:none;">
+
+                <div class="grid__row">
+
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="j145-hayak-hold">
+
+                            <p id="errorbody"></p>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!--estimated wait time-->
+
+            <div class="grid" id="dv_ewt1" style="display:none;">
+
+                <div class="grid__row">
+
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="j145-hayak-hold" id="alertbody">
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="j145-hayak-progress-wrapper" id="dv_ewt2" style="display:none">
+                <div class="j145-hayak-progress-popup">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto; animation-play-state: running; animation-delay: 0s;" width="40px" height="50px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                        <circle cx="50" cy="50" fill="none" stroke="#717173" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138" style="animation-play-state: running; animation-delay: 0s;">
+                            <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="0.6097560975609756s" values="0 50 50;360 50 50" keyTimes="0;1" style="animation-play-state: running; animation-delay: 0s;"></animateTransform>
+                        </circle>
+                    </svg>
+                    <div class="j145-hayak-progress-text" id="dvwaitmsg"></div>
+                </div>
+            </div>
+
+            <div class="mask" id="dv_ewt3" style="display:none;visibility:visible;opacity:0.8">
+
+            </div>
+            <!-- end ewt-->
+            <!-- chat window starts -->
+            <div class="grid j145-hayak-chat" id="dv_chat_console" style="display:none;">
+
+                <div class="grid__row j145-hayak-chat-row">
+
+                    <div class="grid__column j145-hayak-chat-column grid__column--12 grid__column--form">
+                        <div class="j145-hayak-chat-section">
+                            <div class="j145-hayak-chat-section-agent active" id="dv_agent_welcome"></div>
+                            <div class="icon icon-cancel j145-close-chat"></div>
+
+                            <div class="j145-hayak-chat-section-container" id="dv_container">
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="box j145-footer j145-footer-draggable" id="dv_chat_footer" style="display:none;">
+                <div class="grid fheight">
+                    <div class="grid__row fheight">
+                        <div class="grid__column grid__column--12 grid__column--form fheight">
+                            <div class="j145-hayak-chat-input fheight">
+                                <textarea class="form-field__input form-field__input--text form-field__input--textarea" name="textarea" id="cid" type="textarea" placeholder='@Translate.Text("j145 Ask your question")'></textarea>
+                                <span class="j145-hayak-chat-send" id="btSend"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m13-footer--floating">
+                @Html.Sitecore().Rendering(SitecoreRenderingIds.HappinessIndicator)
+            </div>
+            <!-- chat window ends-->
+        </div>
+
+    </div>
+</div>
+<script src="~/Scripts/hayak/video/material.min.js"></script>
+<script src="~/Scripts/hayak/video/pubsub.js"></script>
+<script src="~/Scripts/hayak/video/auth.js"></script>
+<script src="~/Scripts/hayak/video/core.js"></script>
+<script src="~/Scripts/hayak/video/setup.js"></script>
+<!-- Include the Oceana Customer Services SDK -->
+<script src="~/Scripts/hayak/video/OceanaCustomerWebVoiceVideo.js"></script>
+<!-- configuration Files -->
+<script src="~/Scripts/hayak/video/MessagesConfig.js"></script>
+<!-- Ocenana reference client dependencies -->
+<script src="~/Scripts/hayak/video/utils.js"></script>
+<script src="~/Scripts/hayak/video/settings.js"></script>
+<script src="~/Scripts/hayak/video/ui.js"></script>
+<script src="~/Scripts/hayak/chat.js?v=2"></script>
+<script src="~/scripts/external/jquery.fancybox.js?v=2.1.5" type="text/javascript"></script>
+<script src="~/scripts/external/nml/happiness-indicator.js" type="text/javascript"></script>
+<script type="text/javascript">
+    myModel.isServerError=@Html.Raw((Model.IsServerError ? "true" : "false").ToString());
+    myModel.socketUrl = '@Html.Raw(HayakChatModel.chatHost)';
+    myModel.estimateWaitTimeUrl = '@HayakChatModel.estimatedWaitTimeUrl';
+    isUserLoggedIn =@Html.Raw(User.Identity.IsAuthenticated ? "true" : "false");
+    myModel.language = '@Html.Raw(Sitecore.Context.Language.ToString().ToLower()=="ar-ae" ? "Arabic" : "English")';
+    myModel.fullName = '@Model.UserProfile.FullName';
+    myModel.email = '@Html.Raw(User.Identity.IsAuthenticated ? Model.UserProfile.EmailAddress : "")';
+    myModel.phone = '@Html.Raw(User.Identity.IsAuthenticated ? Model.UserProfile.MobileNumber : "")';
+
+    var CONST = {
+        chatAvailableHeader: '@Html.Raw(Translate.Text("j145 chat available header"))',
+        chatAvailableMsg: '@Html.Raw(Translate.Text("j145 chat available body"))',
+        chatAvailableWaitMsg: '@Html.Raw(Translate.Text("j145 chat available wait"))',
+        chatPossibleHeader: '@Html.Raw(Translate.Text("j145 chat possible header"))',
+        chatPossibleMsg: '@Html.Raw(Translate.Text("j145 chat possible body"))',
+        chatPossibleWaitMsg: '@Html.Raw(Translate.Text("j145 chat possible wait"))',
+        chatNotAvailableHeader: '@Html.Raw(Translate.Text("j145 chat not available header"))',
+        chatNotAvailableMsg: '@Html.Raw(Translate.Text("j145 chat not available body"))',
+        noAgentsAvailableMsg: '@Html.Raw(Translate.Text("j145 no agent available"))',
+        @*coBrowseHost: '@HayakChatModel.coBrowseHost',*@
+        youAreNowChattingWith: '@Html.Raw(Translate.Text("j145 you are now chatting with"))',
+        agentIsTyping: '@Html.Raw(Translate.Text("j145 agent is typing"))',
+        chatEnded: '@Html.Raw(Translate.Text("j145 Chat ended"))',
+        fileTransfer: '@Html.Raw(Translate.Text("j145 File Transfer"))',
+        actionUrl: '@Url.Action("InitializeChat", "HayakChat")',
+        fileDownloadUrl: '@HayakChatModel.fileDownloadUrl',
+        closeChatConfirmationMessage:'@Html.Raw(Translate.Text("j145 close chat confirmation"))'
+    };
+
+    //CONST.chatAvailableMsg = CONST.chatAvailableMsg.replaceAll("{0}", "<br><br>").replace("{1}", "{0}");
+    //CONST.chatEnded = CONST.chatEnded.replace("{0}", "<br><br>");
+</script>
+<style type="text/css">
+    #happiness-indicator-wrapper {
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        padding: 7px;
+        z-index: 998;
+        border-radius: 5px 5px 0px 0px;
+        background-color: #007560;
+    }
+</style>

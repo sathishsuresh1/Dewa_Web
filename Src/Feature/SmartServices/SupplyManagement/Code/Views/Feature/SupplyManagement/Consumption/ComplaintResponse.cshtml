@@ -1,0 +1,1755 @@
+﻿
+@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint;
+@using Sitecore.Globalization;
+@model CommonRender
+@using Sitecore.Mvc
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using smConfig = DEWAXP.Foundation.Content.ConsumptionComplaintResponseCofig;
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models.Consumption
+@{
+
+    bool isAccountView = Convert.ToBoolean(ViewBag.ShowAccountSelector);
+    bool showNotication = Convert.ToBoolean(ViewBag.ShowNotification);
+    var _answers = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionSessionHelper.CC_CurrentUserAnswer;
+    bool isStepExit = Convert.ToBoolean(_answers != null && Convert.ToInt32(_answers.Count()) > 0);
+    var smDetail = _commonHelper.GetUserSubmittedData();
+
+    string dirClass = smDetail.LangType == SmlangCode.ar ? "j120-smart-response--rtl" : "j120-smart-response--ltr";
+    string cmptGobalUrl = DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J24_BILLING_COMPLAINT);
+
+    if (!string.IsNullOrWhiteSpace(cmptGobalUrl) && cmptGobalUrl.Contains("/ar-ae/") || cmptGobalUrl.Contains("/en/"))
+    {
+        cmptGobalUrl = cmptGobalUrl.Replace("/ar-ae/", "/").Replace("/en/", "/");
+    }
+
+    var isPageRefesh = Model.CurrentRequest.IsPageRefesh;
+
+    #region [Consumption]
+    string consumptionType = _commonHelper.GetSelectedAnswerValue(SM_Id.ConsumptionType);
+    string consumptionUnit = consumptionType == "D8" ? "kWh" : (consumptionType == "D9" ? "IG" : "");
+    string ConsumtionTypeText = _commonHelper.GetConsumptionTextValue(SM_Id.ConsumptionType);
+    string BillingMonthText = _commonHelper.GetConsumptionTextValue(SM_Id.BillingMonth);
+    string ComplaintTypeText = _commonHelper.GetConsumptionTextValue(SM_Id.ComplaintType);
+    string ConsumptionValueText = _commonHelper.GetConsumptionTextValue(SM_Id.ConsumptionValue) + " " + consumptionUnit;
+    string chargeFee = _commonHelper.GetSelectedAnswerValue(SM_Id.chargeAmount);
+
+    #endregion
+
+}
+
+<div class="j120-smart-response @dirClass" id="j120smartresponse" data-journey="j120-smart-response">
+    @Html.AntiForgeryToken()
+    <div id="ramas-section" class="smartResponseContainer">
+        @{
+            if (isAccountView || showNotication)
+            {
+
+                var _notificationUrl = DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J22_TRACK_COMPLAINTS) + "?a={0}&o=CV";
+                string accountNo = _commonHelper.GetSelectedAnswerValue(SM_Id.Account);
+                var _imagePredictUrl = DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SmPredcitPageID);
+
+                var image1Url = Path.Combine(smConfig.CC_RESPONSE_UPLOADPATH, smDetail.Image1);
+                var image2Url = Path.Combine(smConfig.CC_RESPONSE_UPLOADPATH, smDetail.Image2);
+                bool isLast = Model.Answer != null && Model.Answer.Questions != null && Convert.ToBoolean(Model.Answer.Questions.ToList().Where(x => x.Id == SM_Id.Success).Count() > 0);
+                bool isSubmitPage = Model.Answer != null && Model.Answer.Questions != null && Convert.ToBoolean(Model.Answer.Questions.ToList().Where(x => x.Answers != null && x.Answers.Where(y => y.Action == SM_Action.Submit).Count() > 0).Count() > 0);
+                bool isImagePreview = isSubmitPage && (!string.IsNullOrEmpty(smDetail.Image1) || !string.IsNullOrEmpty(smDetail.Image2));
+                string _compaintId = _commonHelper.GetSelectedAnswerValue(SM_Id.ComplaintId);
+
+                bool isUploadMediaSSD = Model.Answer != null && Model.Answer.Action == SM_Action.UploadMedia_ssd;
+
+                string btnHtml = "";
+                int inputTextCount = 0;
+                string FocusTag = "autofocus";
+                @functions{
+
+                    public string BindBtn(string TrackingId, string Id, string BtnValue, string _buttonClass, string _btntitle, bool IsSavedBtn = false, bool isConfrimPage = false)
+                    {
+                        return " <button  data-confirmpage='" + isConfrimPage + "' data-tid='" + TrackingId + "' data-IdAns='" + Id + "' data-submitted_val='" + BtnValue + "' class='j120-smart-response--button " + _buttonClass + "' " + (IsSavedBtn ? " data-btntype='submit'" : "") + ">" + _btntitle + "</button>";
+                    }
+                }
+
+                <div class="box box--7">
+                    <div class="m39-modal" data-component="m39-modal" id="modal_true">
+                        <button data-trigger="true" class="m39-modal__trigger j120-smart-response--img-button--trigger hidden" type="button" id="_a69upchmt_trigger" aria-controls="_a69upchmt_content"></button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_a69upchmt_content" aria-labelledby="_a69upchmt_trigger">
+                            <a data-close="true" class="m39-modal__button--close" id="_a69upchmt_close" aria-controls="_a69upchmt_content">Close</a>
+                            <img class="j120-smart-response--img" alt="" src="">
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+
+                    @*@if (isImagePreview)
+                        {
+                            <div class="m39-modal" data-component="m39-modal" id="modal_true">
+                                <button data-trigger="true" class="m39-modal__trigger j120-smart-response--img-button--trigger hidden" type="button" id="_a69upchmt_trigger" aria-controls="_a69upchmt_content"></button>
+                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_a69upchmt_content" aria-labelledby="_a69upchmt_trigger">
+                                    <a data-close="true" class="m39-modal__button--close" id="_a69upchmt_close" aria-controls="_a69upchmt_content">Close</a>
+                                    <img class="j120-smart-response--img" src="">
+                                </div>
+                                <div class="m39-modal__overlay"> </div>
+                            </div>
+                        }
+                        @if (isUploadMediaSSD)
+                        {
+                            <div class="m39-modal" data-component="m39-modal">
+                                <button data-trigger="true" class="m39-modal__trigger j120-smart-response--iframe-button--trigger hidden" type="button" id="_iframe_trigger" aria-controls="_iframe_content"></button>
+                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_iframe_content" aria-labelledby="_iframe_trigger">
+                                    <a data-close="true" class="m39-modal__button--close" id="_iframe_close" aria-controls="_iframe_content">Close</a>
+                                    <iframe style="width:100%;height:100%" class="j120-smart-response--iframe" id="j120-smart-response--iframe" src="@_imagePredictUrl" />
+                                </div>
+                                <div class="m39-modal__overlay"> </div>
+                            </div>
+                        }*@
+                    <div class="grid">
+                        @if (Model != null && (Model.Question != null || Model.Answer != null))
+                        {
+
+                            if (Model.Answer != null && Model.Answer.Questions != null && Model.Answer.Questions.Count > 0)
+                            {
+                                var error = Model.Answer.Questions.Where(x => x.Id == SM_Id.Error).FirstOrDefault();
+                                if (error != null)
+                                {
+                                    Model.Answer.Questions = new List<Question>();
+                                    Model.Answer.Questions.Add(error);
+                                }
+
+                                <div class="grid__row">
+                                    @foreach (Question qus in Model.Answer.Questions)
+                                    {
+                                        string username = _commonHelper.GetSelectedAnswerValue(SM_Id.UsernName);
+                                        string qusText = _commonHelper.GetSMTranslation(qus.Value).Replace("{{notif}}", _commonHelper.TextHighlight(smDetail.NotificationNumber)).Replace("\n", "<br/>").Replace("\\n", "<br/>");
+                                        qusText = qusText.Replace("{{username}}", _commonHelper.TextHighlight(username));
+                                        string _infotext = _commonHelper.GetSMTranslation(qus.Infotext).Replace("{{notif}}", _commonHelper.TextHighlight(smDetail.ComplaintId));
+                                        _infotext = _infotext.Replace("{{RequestNo_W}}", _commonHelper.TextHighlight(_compaintId));
+                                        _infotext = _infotext.Replace("{{RequestNo_E}}", _commonHelper.TextHighlight(_compaintId));
+
+                                        #region [consumption]
+                                        qusText = qusText.Replace("{{ConsumptionType}}", _commonHelper.TextHighlight(ConsumtionTypeText));
+                                        qusText = qusText.Replace("{{BillingMonth}}", _commonHelper.TextHighlight(BillingMonthText));
+                                        qusText = qusText.Replace("{{ComplaintType}}", _commonHelper.TextHighlight(ComplaintTypeText));
+                                        qusText = qusText.Replace("{{ConsumptionValue}}", _commonHelper.TextHighlight(ConsumptionValueText));
+                                        qusText = qusText.Replace("{{RequestNo_W}}", _commonHelper.TextHighlight(_compaintId));
+                                        qusText = qusText.Replace("{{RequestNo_E}}", _commonHelper.TextHighlight(_compaintId));
+                                        qusText = qusText.Replace("{{Fee}} ", _commonHelper.TextHighlight(chargeFee));
+                                        #endregion
+                                        string SubmittedIds = string.Join(",", qus.Answers.Where(x => x.Id != SM_Id.Empty || x.Id != SM_Id.Error).Select(x => x.Id).ToArray());
+                                        <input type="text" value="@SubmittedIds" style="display:none;" class="SubmittedIds" />
+
+                                        if (qus.Id == SM_Id.Error)
+                                        {
+                                            <div class="grid__column grid__column--12">
+                                                <div class="j120-smart-response--window">
+                                                    <button class="j120-smart-response--back j120-smart-response--button optselected" data-tid="@Model.Answer.ParentTrackingId" data-isback="true">@_commonHelper.GetSMTranslation("Back")</button>
+                                                    <div class="j120-smart-response--alert warning">
+                                                        <div class="j120-smart-response--alert_text icon-notif-triangle">@Html.Raw(qusText)</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            int BtnCount = qus.Answers.Where(x => x.Type == TypeEnum.Button).Count();
+                                            bool IsOnlyButton = Convert.ToBoolean(BtnCount > 1 || qus.Answers.Count() == BtnCount);
+                                            bool IsSuccessPage = Convert.ToBoolean(qus.Id == SM_Id.Success);
+
+
+
+                                            <div class="grid__column grid__column--12">
+
+                                                <div class="j120-smart-response--window">
+                                                    @if (Model.CurrentRequest != null && !Model.CurrentRequest.IsPageRefesh && Model.CurrentRequest.TckId == 0)
+                                                    {
+                                                        <button class="j120-smart-response--back j120-smart-response--button" onclick="(location.reload())">@_commonHelper.GetSMTranslation("Back")</button>
+                                                    }
+                                                    @if (qus.TrackingId > 1 && !isLast)
+                                                    {
+                                                        <button class="j120-smart-response--back j120-smart-response--button optselected" data-tid="@Model.Answer.ParentTrackingId" data-isback="true">@_commonHelper.GetSMTranslation("Back")</button>
+                                                    }
+                                                    @if (Model.IsError && Model.ErrorDetails != null && Model.ErrorDetails.Count > 0)
+                                                    {
+                                                        foreach (var erorr in Model.ErrorDetails)
+                                                        {
+                                                            string errorMessage = !string.IsNullOrWhiteSpace(erorr.ErorrMessage) ? _commonHelper.GetSMTranslation(erorr.ErorrMessage) : _commonHelper.GetErrorMsgByErrorId(erorr.ControlId);
+                                                            <div class="j120-smart-response--alert warning">
+                                                                <div class="j120-smart-response--alert_text icon-notif-triangle">@Html.Raw(errorMessage)</div>
+                                                            </div>
+                                                        }
+                                                    }
+
+
+
+                                                    @if (!string.IsNullOrEmpty(_infotext) && !isLast)
+                                                    {
+                                                        string alertType = qus.Infotype == Infotype.WarningR || qus.Infotype == Infotype.WarningAction ? "warning" : (qus.Infotype == Infotype.WarningO ? "alert" : "");
+
+                                                        if (qus.Infotype == Infotype.WarningAction && qus.InfoAnswer != null)
+                                                        {
+                                                            var infoAns = qus.InfoAnswer;
+                                                            string _btntitle = _commonHelper.GetSMTranslation(infoAns.Btntitle);
+                                                            bool isConfrimPage = Convert.ToBoolean(infoAns.Action == SM_Action.Submit);
+                                                            string selectedButtonClass = infoAns.IsSelected ? "j120-smart-response--button__active" : "";
+
+                                                            string actionData = (!string.IsNullOrEmpty(infoAns.Actiondata) ? infoAns.Actiondata : "no number");
+                                                            <div class="m39-modal m39-modal--new j120-smart-response--infoModal" data-component="m39-modal" id="modal_true">
+                                                                <button data-trigger="true" class="m39-modal__trigger hidden trigger-@infoAns.TrackingId" type="button" id="trigger-@infoAns.TrackingId" aria-controls="content-@infoAns.TrackingId"></button>
+                                                                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="content-@infoAns.TrackingId" aria-labelledby="trigger-@infoAns.TrackingId">
+                                                                    <div class="m39-modal__dialog">
+                                                                        <div class="m39-modal__header">
+                                                                            <div class="m39-modal__title">@Html.Raw(_btntitle)</div>
+                                                                            <a data-close="true" data-tid="@infoAns.TrackingId" data-IdAns="@infoAns.Id" data-submitted_val="@infoAns.BtnValue" class="optselected m39-modal__button--close optselected_call" id="close-@infoAns.TrackingId" aria-controls="content-@infoAns.TrackingId"></a>
+                                                                        </div>
+                                                                        <div class="m39-modal__content">
+                                                                            <p class="icon-new-call link-call">
+                                                                                @Html.Raw(_btntitle) : <a title="@Html.Raw(_btntitle)" class="link" href="tel:@actionData">@actionData</a>
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="m39-modal__overlay"> </div>
+                                                            </div>
+
+                                                            <div class="j120-smart-response--alert warning">
+                                                                <div class="j120-smart-response--alert_text icon-notif-triangle has_call">
+                                                                    @Html.Raw(_infotext)
+                                                                </div>
+                                                                <button class="icon-new-call red j120-smart-response--alert_call" data-tid="@infoAns.TrackingId" onclick="call('@(infoAns.TrackingId)','@(actionData)')" data-IdAns="@infoAns.Id" data-submitted_val="@infoAns.BtnValue">
+                                                                    @Html.Raw(_btntitle)
+                                                                </button>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+
+                                                            <div class="j120-smart-response--alert @(alertType)">
+                                                                <div class="j120-smart-response--alert_text icon-notif-triangle">@Html.Raw(_infotext)</div>
+                                                            </div>
+                                                        }
+                                                    }
+
+                                                    <div class="j120-smart-response--content">
+                                                        @if (!isLast)
+                                                        {
+                                                            <img class="j120-smart-response--rammas_icon" alt="" src="@Url.Content("~/images/Rammas/rammas_icon.png")" />
+                                                        }
+                                                        @if (isImagePreview || isUploadMediaSSD)
+                                                        {
+
+                                                            <div class="j120-smart-response--img-button_wrapper">
+                                                                @if (!string.IsNullOrEmpty(smDetail.Image1))
+                                                                {
+                                                                    @*if (isUploadMediaSSD)
+                                                                        {
+                                                                            <img class="j120-smart-response--img-button j120-smart-response--iframe-buttonclick" src="@Url.Content(image1Url)">
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <img class="j120-smart-response--img-button j120-smart-response--img-buttonclick" src="@Url.Content(image1Url)">
+                                                                        }*@
+                                                                    <img class="j120-smart-response--img-button j120-smart-response--img-buttonclick" alt="" src="@Url.Content(image1Url)">
+
+
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(smDetail.Image2))
+                                                                {
+                                                                    <img class="j120-smart-response--img-button j120-smart-response--img-buttonclick" alt="" src="@Url.Content(image2Url)">
+
+                                                                }
+                                                            </div>
+
+                                                        }
+
+                                                        @{
+                                                            bool IsAr = smDetail.LangType == SmlangCode.ar;
+                                                            bool IsEn = smDetail.LangType == SmlangCode.en;
+                                                            bool IsUr = smDetail.LangType == SmlangCode.ur;
+                                                            bool IsZh = smDetail.LangType == SmlangCode.zh;
+                                                            bool IsTl = smDetail.LangType == SmlangCode.tl;
+                                                        }
+
+                                                        @if (Model.CurrentRequest != null && Model.CurrentRequest.IsPageRefesh && Model.CurrentRequest.TckId == 0)
+                                                        {
+
+                                                            <div class="custom_lang_wrapper">
+                                                                <p class="j120-smart-response--text">@_commonHelper.GetSMTranslation("Please select language to continue")</p>
+                                                                <div class="j120-smart-response--lang_wrapper">
+
+                                                                    <div class="j120-smart-response--lang_card @(IsAr?"j120-smart-response--lang_cardA":"")" style="padding-left:0px;text-align:center">
+                                                                        @*<img class="j120-smart-response--lang_icon" src="@Url.Content("~/images/uae_flag.png")">*@
+                                                                        العربية
+                                                                        <input name="j120-smart-response--langBox" class="hidden j120-smart-response--langBox" type="checkbox" @(IsAr ? "checked" : "") value="@Convert.ToString(SmlangCode.ar)">
+                                                                    </div>
+
+                                                                    <div class="j120-smart-response--lang_card  @(IsEn?"j120-smart-response--lang_cardA":"")" style="padding-left:0px;text-align:center">
+                                                                        @*<img class="j120-smart-response--lang_icon" src="@Url.Content("~/images/uk_flag.png")">*@
+                                                                        English
+                                                                        <input name="j120-smart-response--langBox" class="hidden j120-smart-response--langBox" type="checkbox" @(IsEn ? "checked" : "") value="@Convert.ToString(SmlangCode.en )">
+                                                                    </div>
+                                                                    @if (true)
+                                                                    {<div class="j120-smart-response--lang_card  @(IsUr?"j120-smart-response--lang_cardA":"")" style="padding-left:0px;text-align:center">
+                                                                            @*<img class="j120-smart-response--lang_icon" src="@Url.Content("~/images/pk_flag.png")">*@
+                                                                            اردو
+                                                                            <input name="j120-smart-response--langBox" class="hidden j120-smart-response--langBox" type="checkbox" @(IsUr ? "checked" : "") value="@Convert.ToString(SmlangCode.ur)">
+                                                                        </div>
+
+                                                                        <div class="j120-smart-response--lang_card  @(IsTl?"j120-smart-response--lang_cardA":"")" style="padding-left:0px;text-align:center">
+                                                                            @*<img class="j120-smart-response--lang_icon" src="@Url.Content("~/images/ph_flag.png")">*@
+                                                                            Tagalog
+                                                                            <input name="j120-smart-response--langBox" class="hidden j120-smart-response--langBox" type="checkbox" @(IsTl ? "checked" : "") value="@Convert.ToString(SmlangCode.tl)">
+                                                                        </div>
+                                                                        <div class="j120-smart-response--lang_card  @(IsZh?"j120-smart-response--lang_cardA":"")" style="padding-left:0px;text-align:center">
+                                                                            @*<img class="j120-smart-response--lang_icon" src="@Url.Content("~/images/ch_flag.png")">*@
+                                                                            中文
+                                                                            <input name="j120-smart-response--langBox" class="hidden j120-smart-response--langBox" type="checkbox" @(IsZh ? "checked" : "") value="@Convert.ToString(SmlangCode.zh)">
+                                                                        </div>
+
+
+                                                                    }
+
+
+                                                                    <script>
+                                                                        docReady(function(){
+
+                                                                            var isStartPage = '@Convert.ToBoolean(Model.CurrentRequest.TckId == 0)'=='True';
+                                                                            jQuery(".j120-smart-response--lang_card").click(function(){
+                                                                                var lanInput = $(this).find(".j120-smart-response--langBox");
+                                                                                //console.log($(lanInput).val());
+                                                                                $(".LangType").val($(lanInput).val());
+                                                                                $(".pageReloaded").val(1);
+                                                                                $(".optselected").click();
+                                                                            })
+                                                                        })
+
+                                                                    </script>
+
+                                                                </div>
+
+                                                            </div>
+                                                        }
+
+                                                        <input type="text" name="LangType" class="LangType optselected" value="@Convert.ToString(smDetail.LangType)" style="display:none;" />
+                                                        @if (Model.CurrentRequest == null || Model.CurrentRequest != null && (!Model.CurrentRequest.IsPageRefesh || Model.CurrentRequest.TckId > 0))
+                                                        {
+                                                            <div class="j120-smart-response--content-content custom_screen_wrapper">
+                                                                @{if (!isLast)
+                                                                    {
+                                                                        <p class="j120-smart-response--text" data-tid="@qus.TrackingId">@Html.Raw(qusText)</p>
+
+                                                                    }
+
+                                                                    string wrapperClass = "grid__column grid__column--12 grid__column--form j120-smart-response--form";
+
+                                                                    if (IsOnlyButton && !isLast || (qus.Answers.Where(x => x.Type == TypeEnum.insights).Count() > 0))
+                                                                    {
+                                                                        wrapperClass = "j120-smart-response--button_wrapper";
+                                                                    }
+
+                                                                    if (qus.Answers.Where(x => x.Action == SM_Action.GetNotificationList && x.Id != SM_Id.Account).Count() > 0)
+                                                                    {
+                                                                        wrapperClass = "grid__column grid__column--12 grid__column--content";
+                                                                    }
+                                                                    if (qus.Answers.Where(x => x.Type == TypeEnum.maintenanceproviders).Count() > 0)
+                                                                    {
+                                                                        wrapperClass = "grid__column grid__column--12";
+                                                                    }
+                                                                }
+
+                                                                <div class="@(wrapperClass) questionDiv" data-pId="@qus.TrackingId">
+                                                                    @if (isLast)
+                                                                    {
+                                                                        <div class="m40v2-status-message m40v2-status-message--success  icon icon-new-success-message " data-component="m40v2-status-message">
+                                                                            <div class="m40v2-status-message__title">@Html.Raw(qusText)</div>
+                                                                            <div class="m40v2-status-message__text">@Html.Raw(_infotext)</div>
+                                                                        </div>
+                                                                        @*if (!string.IsNullOrWhiteSpace(Model.RedirectUrl))
+                                                                            {
+                                                                                <script>
+                                                                                    docReady(function () {
+
+
+                                                                                        setTimeout(function () {
+                                                                                            OpenPageinNewtab('@(Model.RedirectUrl)');
+                                                                                        }, 100)
+                                                                                    })
+                                                                                </script>
+                                                                            }*@
+                                                                    }
+                                                                    @foreach (var ans in qus.Answers.Where(x => x != null && !Convert.ToBoolean(x.disabled.HasValue && x.disabled.Value)))
+                                                                    {
+                                                                        bool isNotification = ans.Action == SM_Action.GetNotificationList && ans.Id != SM_Id.Empty && ans.Id != SM_Id.Account;
+                                                                        string selectedButtonClass = ans.IsSelected ? "j120-smart-response--button__active" : "";
+
+                                                                        if (ans.Action == SM_Action.SHOWSAVINGPLAN)
+                                                                        {
+
+                                                                            selectedButtonClass += " btnSHOWSAVINGPLAN";
+                                                                        }
+                                                                        string _btntitle = _commonHelper.GetSMTranslation(ans.Btntitle);
+                                                                        string _placeholder = _commonHelper.GetSMTranslation(ans.Placeholder);
+                                                                        _placeholder = _placeholder.Replace("{{Fee}}", chargeFee);
+                                                                        bool isConfrimPage = false;
+                                                                        isConfrimPage = Convert.ToBoolean(ans.Action == SM_Action.Submit);
+
+                                                                        if (!isConfrimPage && ans.Questions != null)
+                                                                        {
+                                                                            isConfrimPage = ans.Questions.Where(x => x.Id == SM_Id.Success).Count() > 0;
+                                                                        }
+                                                                        if (Convert.ToBoolean(ans.Type == TypeEnum.Button) == true)
+                                                                        {
+                                                                            if (IsOnlyButton && !isLast)
+                                                                            {
+                                                                                if (ans.Action == SM_Action.Call)
+                                                                                {
+                                                                                    string actionData = (!string.IsNullOrEmpty(ans.Actiondata) ? ans.Actiondata : "no number");
+                                                                                    <div class="m39-modal m39-modal--new j120-smart-response--infoModal" data-component="m39-modal" id="modal_true">
+                                                                                        <button data-trigger="true" class="m39-modal__trigger hidden trigger-@ans.TrackingId" type="button" id="trigger-@ans.TrackingId" aria-controls="content-@ans.TrackingId"></button>
+                                                                                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="content-@ans.TrackingId" aria-labelledby="trigger-@ans.TrackingId">
+                                                                                            <div class="m39-modal__dialog">
+                                                                                                <div class="m39-modal__header">
+                                                                                                    <div class="m39-modal__title">@Html.Raw(_btntitle)</div>
+                                                                                                    <a data-close="true" data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected m39-modal__button--close optselected_call" id="close-@ans.TrackingId" aria-controls="content-@ans.TrackingId"></a>
+                                                                                                </div>
+                                                                                                <div class="m39-modal__content">
+                                                                                                    <p class="icon-new-call link-call">
+                                                                                                        @Html.Raw(_btntitle) : <a title="@Html.Raw(_btntitle)" class="link" href="tel:@actionData">@actionData</a>
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="m39-modal__overlay"> </div>
+                                                                                    </div>
+
+                                                                                    <button data-confirmpage="@isConfrimPage" data-tid="@ans.TrackingId" onclick="call('@(ans.TrackingId)','@(actionData)')" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="j120-smart-response--button @(selectedButtonClass)">@Html.Raw(_btntitle)</button>
+
+                                                                                }
+                                                                                else if (ans.Action == SM_Action.Paybill)
+                                                                                {
+                                                                                    <a data-tid="@ans.TrackingId" href="@ans.Actiondata" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="j120-smart-response--button">@Html.Raw(_btntitle)</a>
+                                                                                }
+                                                                                else if (ans.Action == SM_Action.UploadMedia || ans.Action == SM_Action.UploadMedia_ssd)
+                                                                                {
+                                                                                    string mediaUploadId = "form-field-" + Guid.NewGuid();
+
+                                                                                    <button data-confirmpage="@isConfrimPage" data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="j120-smart-response--button j120-smart-response--upload">@Html.Raw(_btntitle)</button>
+                                                                                    <a data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" data-btntype="submit" class="optselected j120-smart-response--uploadhandler" style="display:none!important;">@Html.Raw(_btntitle)</a>
+                                                                                    <div id="errorDesc" class="mb12 parsley-errors-list form-field__messages @(mediaUploadId)" style="display:none;">
+                                                                                        @_commonHelper.GetSMTranslation("Please upload a valid image i.e( .png,.jpeg,jpg & file size not exceed 4mb).")
+                                                                                    </div>
+                                                                                    <div class="form-field form-field--upload hidden">
+                                                                                        <div class="form-field__input-wrapper">
+                                                                                            <div class="form-field__uploader-details">
+                                                                                                <div>
+                                                                                                    <label>
+                                                                                                        <input class="form-field__input form-field__input--upload" id="@mediaUploadId" data-IdAns="@ans.Id" onchange="UploadFile('@mediaUploadId')" name="upload" type="file" aria-describedby="description-for-@mediaUploadId" data-parsley-errors-container="#description-for-@mediaUploadId" required="" data-parsley-required-message="This field is required" data-uploader-field="@mediaUploadId" accept=".png, .jpg, .jpeg" data-accepts=".png, .jpg, .jpeg" data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="6">
+                                                                                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">Choose</span>
+                                                                                                    </label>
+                                                                                                </div>
+                                                                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">Upload format is not correct</p>
+                                                                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">Upload file size is too high</p>
+                                                                                                <p class="form-field__input--upload-filename" data-uploader-filename="@mediaUploadId"></p>
+                                                                                                <p>
+                                                                                                    <button class="button button--text button--remove hidden" data-uploader-remove="@mediaUploadId">Remove</button>
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                }
+                                                                                else
+                                                                                {
+
+                                                                                    if (wrapperClass != "j120-smart-response--button_wrapper")
+                                                                                    {
+                                                                                        btnHtml += BindBtn(Convert.ToString(ans.TrackingId), ans.Id.ToString(), ans.BtnValue, " optselected " + selectedButtonClass, _btntitle);
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <button data-confirmpage="@isConfrimPage" data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected j120-smart-response--button @(selectedButtonClass)">@Html.Raw(_btntitle)</button>
+
+                                                                                    }
+
+                                                                                    if (ans.Action == SM_Action.SHOWSAVINGPLAN)
+                                                                                    {
+                                                                                        <script>
+                                                                                            docReady(function () {
+                                                                                                checkBesAvailable("@(accountNo)", ".btnSHOWSAVINGPLAN");
+                                                                                            })
+                                                                                        </script>
+                                                                                    }
+
+                                                                                }
+                                                                            }
+                                                                            else
+                                                                            {
+
+
+                                                                                if (ans.Action == SM_Action.Call)
+                                                                                {
+                                                                                    string actionData = (!string.IsNullOrEmpty(ans.Actiondata) ? ans.Actiondata : "no number");
+
+                                                                                    <button data-confirmpage="@isConfrimPage" data-tid="@ans.TrackingId" onclick="alert('@(actionData)')" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected j120-smart-response--button @(selectedButtonClass)">@Html.Raw(_btntitle)</button>
+                                                                                }
+                                                                                else if (ans.Action == SM_Action.Paybill)
+                                                                                {
+                                                                                    <a data-tid="@ans.TrackingId" href="@ans.Actiondata" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="j120-smart-response--button @(selectedButtonClass)">@Html.Raw(_btntitle)</a>
+                                                                                }
+                                                                                else if (IsSuccessPage && !string.IsNullOrEmpty(_compaintId))
+                                                                                {
+                                                                                    <div class="j120-smart-response--button_wrapper">
+                                                                                        <a href="@string.Format(_notificationUrl,accountNo)" class="j120-smart-response--button @_compaintId @(selectedButtonClass)">@Html.Raw(_btntitle)</a>
+                                                                                    </div>
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    @*<div class="j120-smart-response--button_wrapper">
+                                                                                            <button data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected j120-smart-response--button @(selectedButtonClass)">@Html.Raw(_btntitle)</button>
+                                                                                        </div>*@
+                                                                                    btnHtml += BindBtn(Convert.ToString(ans.TrackingId), ans.Id.ToString(), ans.BtnValue, " optselected " + selectedButtonClass, _btntitle);
+                                                                                }
+                                                                            }
+
+                                                                        }
+
+                                                                        if (Convert.ToBoolean(ans.Type == TypeEnum.Notes) == true)
+                                                                        {
+                                                                            <p class="j120-smart-response--subtext">@Html.Raw(_placeholder)</p>
+                                                                        }
+
+
+                                                                        if (Convert.ToBoolean(ans.Type == TypeEnum.Accountselection) == true)
+                                                                        {
+                                                                            string value = _commonHelper.GetSelectedAnswerValue(ans.Id);
+                                                                            @Html.Sitecore().Placeholder("CustomAjaxPlaceholder")
+                                                                            <input type="text" class="accountHidden textAns" style="display:none;" data-IdAns="@ans.Id" data-tid="@ans.TrackingId" value="@value" />
+                                                                            <div class="j120-smart-response--button_wrapper">
+                                                                                <button data-tid="@ans.TrackingId" class="optselected j120-smart-response--button">@Html.Raw(_btntitle)</button>
+                                                                            </div>
+                                                                            <script>
+                                                                                docReady(function () {
+                                                                                    var accountNo = '@value';
+
+
+
+
+
+
+                                                                                })
+                                                                            </script>
+ }
+
+                                                                        if (Convert.ToBoolean(ans.Type == TypeEnum.Confirmation) == true)
+                                                                        {
+
+                                                                            List<string> fieldsArray = _placeholder.Split(',').ToList();
+
+
+                                                                            var pd = Model.RequestConfirmationDetail;
+                                                                            if (pd != null && fieldsArray != null)
+                                                                            {
+                                                                                //name,mobile,location
+
+                                                                                bool isContactAccountNo = fieldsArray.Where(x => x == "account").Count() > 0 && !string.IsNullOrWhiteSpace(pd.ContactAccountNo);
+                                                                                bool isContactPerson = fieldsArray.Where(x => x == "name").Count() > 0 && !string.IsNullOrWhiteSpace(pd.ContactPerson);
+                                                                                bool isContactNumber = fieldsArray.Where(x => x == "mobile").Count() > 0 && !string.IsNullOrWhiteSpace(pd.ContactNumber);
+                                                                                bool isLocation = fieldsArray.Where(x => x == "location").Count() > 0 && !string.IsNullOrWhiteSpace(pd.ContactLocation);
+                                                                                bool isEditable = true;//isContactPerson || (_commonHelper.Get_CC_SessionType() != SM_SessionType.IsGuest && isContactNumber);
+                                                                                bool isContactMonth = fieldsArray.Where(x => x == "month").Count() > 0 && !string.IsNullOrWhiteSpace(pd.ContactMonth);
+                                                                                bool isContactEmail = fieldsArray.Where(x => x == "email").Count() > 0 && !string.IsNullOrWhiteSpace(pd.ContactEmail);
+                                                                                <div class="j120-smart-response--confirm m42-keyvalue">
+                                                                                    @if (isEditable)
+                                                                                    {
+                                                                                        <button class="j120-smart-response--confirm_edit icon-new-edit" title="@_commonHelper.GetSMTranslation("Edit")"></button>
+                                                                                    }
+                                                                                    <dl>
+                                                                                        @if (isContactAccountNo)
+                                                                                        {
+                                                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@_commonHelper.GetSMTranslation("Account number")</dt>
+                                                                                            <dd data-type="account" class="m42-keyvalue__value m42-keyvalue__value--secondary">@pd.ContactAccountNo</dd>
+                                                                                        }
+                                                                                        @if (isContactMonth)
+                                                                                        {
+                                                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@_commonHelper.GetSMTranslation("Selected Month")</dt>
+                                                                                            <dd data-type="month" class="m42-keyvalue__value m42-keyvalue__value--secondary">@pd.ContactMonth</dd>
+                                                                                        }
+                                                                                        @if (isContactPerson)
+                                                                                        {
+                                                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@_commonHelper.GetSMTranslation("Contact person name")</dt>
+                                                                                            <dd data-type="name" data-IdAns="@(SM_Id.ContactPersonName)" data-confirm="true" class="m42-keyvalue__value m42-keyvalue__value--secondary textAns">@pd.ContactPerson</dd>
+
+                                                                                        } @if (isContactNumber)
+                                                                                        {
+                                                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@_commonHelper.GetSMTranslation("Mobile number")</dt>
+                                                                                            <dd data-type="mobile" data-IdAns="@(SM_Id.Mobile)" data-confirm="true" class="m42-keyvalue__value m42-keyvalue__value--secondary textAns">@pd.ContactNumber</dd>
+
+                                                                                        }
+                                                                                        @if (isContactEmail)
+                                                                                        {
+                                                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@_commonHelper.GetSMTranslation("Email Id")</dt>
+                                                                                            <dd data-type="email" data-IdAns="@(SM_Id.Email)" data-confirm="true" class="m42-keyvalue__value m42-keyvalue__value--secondary textAns">@pd.ContactEmail</dd>
+
+                                                                                        }
+                                                                                        @if (isLocation)
+                                                                                        {
+                                                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@_commonHelper.GetSMTranslation("Location")</dt>
+                                                                                            <dd data-type="location" class="m42-keyvalue__value m42-keyvalue__value--secondary">@pd.ContactLocation</dd>
+
+                                                                                        }
+
+                                                                                    </dl>
+                                                                                    <div class="m39-modal m39-modal--new j120-smart-response--confirm_formModal" data-component="m39-modal" id="modal_true">
+                                                                                        <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="_ihnorrrdc_trigger" aria-controls="_ihnorrrdc_content"></button>
+                                                                                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_ihnorrrdc_content" aria-labelledby="_ihnorrrdc_trigger">
+                                                                                            <div class="m39-modal__dialog">
+                                                                                                <div class="m39-modal__header">
+                                                                                                    <div class="m39-modal__title">@_commonHelper.GetSMTranslation("Edit Details")</div>
+                                                                                                    <a data-close="true" class="m39-modal__button--close" id="_ihnorrrdc_close" aria-controls="_ihnorrrdc_content"></a>
+                                                                                                </div>
+                                                                                                <div class="m39-modal__content">
+                                                                                                    <div class="j120-smart-response--confirm_form">
+                                                                                                        <div class="form" data-form="true">
+
+                                                                                                            @if (isContactAccountNo)
+                                                                                                            {
+                                                                                                                <div class="form-field form-field--text">
+                                                                                                                    <label for="form-field-acxvacgd0" class="form-field__label form-field__label--readonly">
+                                                                                                                        @_commonHelper.GetSMTranslation("Affected account number")
+                                                                                                                    </label>
+                                                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                                        <input data-type="account" class="form-field__input form-field__input--readonly" disabled id="form-field-acxvacgd0" name="account" type="number" placeholder="10-digit Account Number" aria-describedby="description-for-acxvacgd0" data-parsley-errors-container="#description-for-acxvacgd0" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                                                    </span>
+                                                                                                                    <div id="description-for-acxvacgd0" class="form-field__messages">
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
+                                                                                                            @if (isContactMonth)
+                                                                                                            {
+                                                                                                                <div class="form-field form-field--text">
+                                                                                                                    <label for="form-field-acxvacgd7" class="form-field__label form-field__label--readonly">
+                                                                                                                        @_commonHelper.GetSMTranslation("Selected Month")
+                                                                                                                    </label>
+                                                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                                        <input data-type="month" class="form-field__input form-field__input--readonly" disabled id="form-field-acxvacgd0" name="month" type="text" placeholder="MMM yyyy" aria-describedby="description-for-acxvacgd7" data-parsley-errors-container="#description-for-acxvacgd7" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="7">
+                                                                                                                    </span>
+                                                                                                                    <div id="description-for-acxvacgd7" class="form-field__messages">
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
+                                                                                                            @if (isContactPerson)
+                                                                                                            {
+                                                                                                                <div class="form-field form-field--text">
+                                                                                                                    <label for="form-field-acxvacgd1" class="form-field__label">
+                                                                                                                        @_commonHelper.GetSMTranslation("Contact person name")
+                                                                                                                    </label>
+                                                                                                                    <span class="form-field__input-wrapper">
+                                                                                                                        <input data-type="name" class="form-field__input form-field__input--text" id="form-field-acxvacgd1" name="account" type="text" placeholder="Contact Person" aria-describedby="description-for-acxvacgd1" data-parsley-errors-container="#description-for-acxvacgd1" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                                                    </span>
+                                                                                                                    <div id="description-for-acxvacgd1" class="form-field__messages">
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
+                                                                                                            @if (isContactNumber)
+                                                                                                            {
+                                                                                                                var isdisabled = (User.Identity.IsAuthenticated ? "" : "disabled");
+                                                                                                                <div class="form-field form-field--text">
+                                                                                                                    <label for="form-field-k4u8on3rt" class="form-field__label">
+                                                                                                                        @_commonHelper.GetSMTranslation("Contact person mobile number")
+                                                                                                                    </label>
+                                                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                                                                                                        <input @isdisabled data-type="mobile" maxlength="9" class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-k4u8on3rt" name="mobile_number" type="tel" placeholder="Enter a Mobile numbers" aria-describedby="description-for-k4u8on3rt" data-parsley-errors-container="#description-for-k4u8on3rt" required="" data-parsley-required-message="This field is required" data-parsley-mobile_number="" data-parsley-mobile_number-message="Please enter a valid UAE mobile number" data-parsley-trigger="focusout" data-parsley-id="23">
+                                                                                                                    </span>
+                                                                                                                    <div id="description-for-k4u8on3rt" class="form-field__messages">
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
+                                                                                                            @if (isContactEmail)
+                                                                                                            {
+                                                                                                                var isdisabled = (User.Identity.IsAuthenticated ? "" : "disabled");
+                                                                                                                <div class="form-field form-field--text">
+                                                                                                                    <label for="description-for-k4u8on3rt8" class="form-field__label">
+                                                                                                                        @_commonHelper.GetSMTranslation("Contact person email")
+                                                                                                                    </label>
+                                                                                                                    <span class="form-field__input-wrapper">
+                                                                                                                        <input @isdisabled data-type="email" class="form-field__input form-field__input--text" id="form-field-k4u8on3rt" name="email" type="email" placeholder="Enter a Email" aria-describedby="description-for-k4u8on3rt8" data-parsley-errors-container="#description-for-k4u8on3rt8" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="25">
+                                                                                                                    </span>
+                                                                                                                    <div id="description-for-k4u8on3rt8" class="form-field__messages">
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
+                                                                                                            @if (isLocation)
+                                                                                                            {
+                                                                                                                <div class="form-field form-field--text">
+                                                                                                                    <label for="form-field-yepj8b1wx" class="form-field__label form-field__label--readonly">
+                                                                                                                        @_commonHelper.GetSMTranslation("Location")
+                                                                                                                    </label>
+                                                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                                                                                                        <input data-type="location" class="form-field__input form-field__input--text form-field__input--readonly" disabled id="form-field-yepj8b1wx" name="input" type="text" placeholder="Some placeholder text" aria-describedby="description-for-yepj8b1wx" data-parsley-errors-container="#description-for-yepj8b1wx" data-parsley-required-message="This field is required" data-parsley-id="22"></input>
+                                                                                                                    </span>
+                                                                                                                    <div id="description-for-yepj8b1wx" class="form-field__messages">
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
+
+                                                                                                            <div class="form-field__button">
+                                                                                                                <div class="button button--primary button--next j120-smart-response--confirm_save">@_commonHelper.GetSMTranslation("Update Details")</div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="m39-modal__overlay"> </div>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            }
+
+
+                                                                            if (!string.IsNullOrEmpty(_btntitle))
+                                                                            {
+                                                                                @*<div class="j120-smart-response--button_wrapper">
+                                                                                        <button data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected j120-smart-response--button @(selectedButtonClass)">@Html.Raw(_btntitle)</button>
+                                                                                    </div>*@
+
+                                                                                btnHtml += BindBtn(Convert.ToString(ans.TrackingId), ans.Id.ToString(), ans.BtnValue, " optselected " + selectedButtonClass, _btntitle);
+                                                                            }
+                                                                        }
+
+                                                                        if (Convert.ToBoolean(ans.Type == TypeEnum.Textinput) == true)
+                                                                        {
+                                                                            string value = _commonHelper.GetSelectedAnswerValue(ans.Id);
+                                                                            Dictionary<string, string>
+validations = _commonHelper.GetValidationBySM_IdType(ans.Id);
+
+                                                                            string htmlValidation = "";
+                                                                            string htmlErrorMessage = "";
+                                                                            string ElementErrorContainerId = "";
+                                                                            string ElementId = "";
+                                                                            if (validations.Count > 0)
+                                                                            {
+                                                                                htmlValidation = Convert.ToString(validations[CommonConst.ValidationRule] ?? "");
+                                                                                htmlErrorMessage = Convert.ToString(validations[CommonConst.ErrorMessage] ?? "");
+                                                                                ElementId = Convert.ToString(validations[CommonConst.ElementId] ?? "");
+                                                                                ElementErrorContainerId = Convert.ToString(validations[CommonConst.ElementErrorContainerId] ?? "");
+                                                                            }
+
+                                                                            string htmlAtuoFocus = inputTextCount == 0 ? FocusTag : "";
+                                                                            if (Convert.ToBoolean(ans.Id == SM_Id.Otp) == true)
+                                                                            {
+
+                                                                                <div class="form-field form-field--otp">
+                                                                                    <span class="form-field__input-wrapper_otp">
+                                                                                        <input @htmlAtuoFocus class="form-field__input form-field__input--otp" id="form-field-azcterkh" name="text" type="number" aria-describedby="@ElementErrorContainerId" data-parsley-maxnumber="1" data-parsley-errors-container="#@(ElementErrorContainerId)" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                    </span>
+
+                                                                                    <span class="form-field__input-wrapper_otp">
+                                                                                        <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" name="text" type="number" aria-describedby="@ElementErrorContainerId" data-parsley-maxnumber="1" data-parsley-errors-container="#@(ElementErrorContainerId)" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                    </span>
+
+                                                                                    <span class="form-field__input-wrapper_otp">
+                                                                                        <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" name="text" type="number" aria-describedby="@ElementErrorContainerId" data-parsley-maxnumber="1" data-parsley-errors-container="#@(ElementErrorContainerId)" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                    </span>
+
+                                                                                    <span class="form-field__input-wrapper_otp">
+                                                                                        <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" name="text" type="number" aria-describedby="@ElementErrorContainerId" data-parsley-maxnumber="1" data-parsley-errors-container="#@(ElementErrorContainerId)" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                    </span>
+                                                                                    <span class="form-field__input-wrapper_otp">
+                                                                                        <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" name="text" type="number" aria-describedby="@ElementErrorContainerId" data-parsley-maxnumber="1" data-parsley-errors-container="#@(ElementErrorContainerId)" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                    </span>
+                                                                                    <span class="form-field__input-wrapper_otp">
+                                                                                        <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" name="text" type="number" aria-describedby="@ElementErrorContainerId" data-parsley-maxnumber="1" data-parsley-errors-container="#@(ElementErrorContainerId)" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                                    </span>
+
+                                                                                    <input @Html.Raw(htmlValidation) class="form-field__input form-field__input--otp_main textAns" data-IdAns="@ans.Id" data-parsley-trigger="focusout">
+
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else if (Convert.ToBoolean(ans.Id == SM_Id.Mobile) == true)
+                                                                            {
+                                                                                <div class="form-field form-field--text">
+                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                                                                        <input @htmlAtuoFocus @Html.Raw(htmlValidation) data-type="mobile" class="form-field__input form-field__input--text form-field__input--prefixed textAns" data-IdAns="@ans.Id" data-tid="@ans.TrackingId" value="@value" placeholder="@Html.Raw(_placeholder)" data-parsley-trigger="focusout">
+                                                                                    </span>
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else if (Convert.ToBoolean(ans.Id == SM_Id.Location) == true)
+                                                                            {
+                                                                                string selectedCity = _commonHelper.GetSelectedAnswerValue(ans.Id);
+                                                                                <div class="j120-smart-response--location_input form-field form-field--select form-field--select-single">
+                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                                                        <select @Html.Raw(htmlValidation) class="textAns form-field__input form-field__input--select form-field__input--select2 j120-location-form-field__input--select2 form-field__input--select-full"
+                                                                                                data-IdAns="@ans.Id" data-tid="@ans.TrackingId" data-parsley-trigger="change">
+
+                                                                                            <option value="">@Html.Raw(_placeholder)</option>
+                                                                                            @foreach (var item in Model.CurrentRequest.DdlList)
+                                                                                            {
+                                                                                                <option value="@item.Value" @(selectedCity == item.Value ? "selected" : "" )>@item.Text</option>
+                                                                                            }
+
+
+                                                                                        </select>
+                                                                                    </span>
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else if (Convert.ToBoolean(ans.Id == SM_Id.BillingMonth) == true)
+                                                                            {
+                                                                                string selectedBillingMonth = _commonHelper.GetSelectedAnswerValue(ans.Id);
+                                                                                @*<div class="j120-smart-response--location_input form-field form-field--select form-field--select-single">
+                                                                                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                                                            <select @Html.Raw(htmlValidation) class="textAns form-field__input form-field__input--select form-field__input--select2 j120-location-form-field__input--select2 form-field__input--select-full"
+                                                                                                    data-IdAns="@ans.Id" data-tid="@ans.TrackingId" data-parsley-trigger="change">
+
+                                                                                                <option value="">@Html.Raw(_placeholder)</option>
+                                                                                                @foreach (var item in Model.CurrentRequest.BillingMonthList)
+                                                                                                {
+                                                                                                    <option value="@item.Value" @(selectedBillingMonth == item.Text ? "selected" : "" )>@item.Text</option>
+                                                                                                }
+
+
+                                                                                            </select>
+                                                                                        </span>
+                                                                                        <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                        </div>
+                                                                                    </div>*@
+
+                                                                                <div class="form-field form-field--select">
+                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                                                        <select @Html.Raw(htmlValidation) class="textAns form-field__input form-field__input--select form-field__input--select-full"
+                                                                                                data-IdAns="@ans.Id" data-tid="@ans.TrackingId" data-parsley-trigger="change">
+
+                                                                                            <option value="">--@Html.Raw(_placeholder)--</option>
+                                                                                            @foreach (var item in Model.CurrentRequest.BillingMonthList)
+                                                                                            {
+                                                                                                <option value="@item.Value" @(selectedBillingMonth == item.Value ? "selected" : "" )>@item.Text</option>
+                                                                                            }
+
+
+                                                                                        </select>
+                                                                                    </span>
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else if (Convert.ToBoolean(ans.Id == SM_Id.DateOfNotification) == true)
+                                                                            {
+                                                                                string selectDate = _commonHelper.GetSelectedAnswerValue(ans.Id);
+                                                                                int DayNo = Convert.ToInt32(_commonHelper.GetSelectedAnswerValue(SM_Id.DNo));
+                                                                                var now = DEWAXP.Foundation.Helpers.DateHelper.DubaiNow().AddMonths(-1).AddDays(1);
+                                                                                var threeinfuture = now.AddDays(DayNo);
+
+                                                                                <div id="datepicker-container-3ewayxhnl" class="form-field form-field--text">
+                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                                                        <input data-IdAns="@ans.Id" data-tid="@ans.TrackingId" value="@value" placeholder="@Html.Raw(_placeholder)" class="form-field__input form-field__input--text form-field__input--datepicker textAns" @htmlAtuoFocus @Html.Raw(htmlValidation) data-el="datepicker"
+                                                                                               data-picker-options='{ "max": ["@(threeinfuture.Year)","@(threeinfuture.Month)","@(threeinfuture.Day)"],
+                                                                                                      "min": ["@(now.Year)","@(now.Month)","@(now.Day)"],
+                                                                                                      "disable": [@Html.Raw(Model.CurrentRequest.HolidayListJson)] }' />
+                                                                                    </span>
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+
+                                                                            }
+                                                                            else if (Convert.ToBoolean(ans.Id == SM_Id.TimeOfNotification) == true)
+                                                                            {
+                                                                                string selectedShiftTiming = _commonHelper.GetSelectedAnswerValue(ans.Id);
+                                                                                <div class="form-field form-field--select mt24">
+                                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                                                        <select @Html.Raw(htmlValidation) class="textAns form-field__input form-field__input--select form-field__input--select-full"
+                                                                                                data-IdAns="@ans.Id" data-tid="@ans.TrackingId" data-parsley-trigger="change"
+                                                                                                data-listval="@(Model.CurrentRequest.ShiftTimeListJson)">
+
+                                                                                            <option value="">@Html.Raw(_placeholder)</option>
+                                                                                            @foreach (var item in Model.CurrentRequest.ShiftTimeList)
+                                                                                            {
+                                                                                                <option value="@item.Value" @(selectedShiftTiming == item.Value ? "selected" : "" )>@item.Text</option>
+                                                                                            }
+
+
+                                                                                        </select>
+                                                                                    </span>
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                if (IsOnlyButton)
+                                                                                {
+                                                                                    @Html.Raw("<div class='grid__column grid__column--12 grid__column--form j120-smart-response--form'>")
+                                                                                }
+                                                                                <div class="form-field form-field--text">
+                                                                                    <span class="form-field__input-wrapper">
+                                                                                        <input @htmlAtuoFocus @Html.Raw(htmlValidation) data-parsley-trigger="focusout" autocomplete="off" class="form-field__input form-field__input--text textAns" data-IdAns="@ans.Id" data-tid="@ans.TrackingId" value="@value" placeholder="@Html.Raw(_placeholder)">
+                                                                                    </span>
+                                                                                    <div id="@ElementErrorContainerId" class="form-field__messages">
+                                                                                    </div>
+                                                                                </div>
+                                                                                if (IsOnlyButton)
+                                                                                {
+                                                                                    @Html.Raw("</div>")
+                                                                                }
+                                                                            }
+
+
+                                                                            if (!string.IsNullOrEmpty(_btntitle))
+                                                                            {
+
+
+                                                                                btnHtml += BindBtn(Convert.ToString(ans.TrackingId), ans.Id.ToString(), ans.BtnValue, " " + (isNotification ? " ntfBtn" : "optselected") + " " + selectedButtonClass, _btntitle, true);
+                                                                            }
+
+                                                                            inputTextCount++;
+                                                                        }
+
+
+                                                                        if (Convert.ToBoolean(ans.Type == TypeEnum.maintenanceproviders) == true)
+                                                                        {
+
+                                                                            if (Model.SRCompanyDetails != null && Model.SRCompanyDetails.@return != null && Model.SRCompanyDetails.@return.listofcompany != null &&
+                                                                            Convert.ToInt32(Model.SRCompanyDetails.@return.listofcompany.Count()) > 0)
+                                                                            {
+                                                                                <div class="grid__row j120-smart-response--card_row">
+
+
+                                                                                    @foreach (var item in Model.SRCompanyDetails.@return.listofcompany)
+                                                                                    {
+                                                                                        bool IsMapLink = item.location.Contains("gl/maps");
+                                                                                        @*<div class="grid__column grid__column--3">
+                                                                                                <div class="j120-smart-response--card" data-companyid="@item.partner">
+                                                                                                    <div class="j120-smart-response--card_title">
+                                                                                                        @item.company_name
+                                                                                                    </div>
+                                                                                                    <div class="j120-smart-response--card_link">
+                                                                                                        @item.area
+                                                                                                    </div>
+                                                                                                    <div class="j120-smart-response--card_link">
+                                                                                                        @item.contact_name - @item.email_address
+                                                                                                    </div>
+                                                                                                    <div class="j120-smart-response--card_link">
+                                                                                                        <p>
+                                                                                                            <span class="green"> @item.timing</span>
+                                                                                                            - @item.note
+                                                                                                        </p>
+                                                                                                    </div>
+                                                                                                    <div class="j120-smart-response--icon_links mb12">
+
+                                                                                                        <a class="green icon-new-call" role="link" title="Call" target="_blank" href="tel:@item.mobile_address">
+                                                                                                            @_commonHelper.GetSMTranslation("Call")
+                                                                                                        </a>
+
+
+                                                                                                        <a class="green icon-location" role="link" target="_blank" title="Get Direction" href="@item.location">
+                                                                                                            @_commonHelper.GetSMTranslation("Get Direction")
+                                                                                                        </a>
+
+                                                                                                    </div>
+
+                                                                                                </div>
+                                                                                            </div>*@
+
+                                                                                        <div class="grid__column grid__column--3">
+                                                                                            <div class="j120-smart-response--card company-cards">
+                                                                                                <div class="j120-smart-response--card_title">
+                                                                                                    @item.company_name
+                                                                                                </div>
+                                                                                                <div class="j120-smart-response--card_link">
+                                                                                                    @item.area
+                                                                                                </div>
+                                                                                                @if (!string.IsNullOrEmpty(item.mobile_address))
+                                                                                                {
+                                                                                                    <div class="j120-smart-response--card_link">
+                                                                                                        @_commonHelper.GetSMTranslation("Contact") : <span class="j120-smart-response--card_numtext MobilecallTigger" style="cursor:pointer;" data-mobileno="@item.mobile_address" data-partnerno="@item.partner" dir="ltr">@item.mobile_address</span>
+                                                                                                    </div>
+                                                                                                }
+
+
+                                                                                                @if (IsMapLink)
+                                                                                                {
+                                                                                                    <div class="j120-smart-response--card_address-icon">
+                                                                                                        <a target="_blank" href="@item.location"><img src="@Url.Content("~/images/dewa-pin-_darkgreen.png")" alt=""></a>
+                                                                                                    </div>
+
+                                                                                                }
+
+                                                                                                @if (!string.IsNullOrEmpty(item.timing))
+                                                                                                {
+                                                                                                    <div class="j120-smart-response--card_link mt12">
+                                                                                                        <p>
+                                                                                                            <span class="green"> @item.timing</span>
+                                                                                                        </p>
+                                                                                                    </div>
+                                                                                                }
+
+                                                                                                @if (!IsMapLink)
+                                                                                                {
+                                                                                                    <div class="j120-smart-response--card_link">
+                                                                                                        @Html.Raw(item.location)
+                                                                                                    </div>
+                                                                                                }
+
+                                                                                                @if (!string.IsNullOrEmpty(item.note))
+                                                                                                {
+                                                                                                    <div class="j120-smart-response--card_link">
+                                                                                                        <p>
+                                                                                                            @item.note
+                                                                                                        </p>
+                                                                                                    </div>
+                                                                                                }
+
+
+                                                                                                <div class="j120-smart-response--card_num link">
+                                                                                                    <div class="j120-smart-response--card_text MobilecallTigger" data-mobileno="@item.mobile_address" data-partnerno="@item.partner"> @_commonHelper.GetSMTranslation("Call")</div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    }
+
+                                                                                    <script>
+                                                                        var _cTid = '@ans.TrackingId';
+                                                                        //function getMaxHeight(el) {
+                                                                        //    var h = $(el).height();
+                                                                        //    $(el).each(function () {
+                                                                        //        var _h = $(this).height(this);
+                                                                        //        if (h > _h) {
+                                                                        //            h = _h;
+                                                                        //        }
+                                                                        //    });
+                                                                        //    h;
+                                                                        //}
+                                                                        docReady(function () {
+                                                                            setTimeout(function () {
+                                                                                //var _maxHeight = getMaxHeight(".company-cards");
+                                                                                //$(".company-cards").height(_maxHeight);
+                                                                                SetEqualCard(".company-cards");
+                                                                                $(".MobilecallTigger").click(function () {
+                                                                                    var ActionData = $(this).data('mobileno');
+                                                                                    $(".CompanyMobileNO").text(ActionData);
+                                                                                    $(".CompanyMobileNO").prop("href", "tel:" + ActionData);
+                                                                                    $(".CompanyPartnerId").val($(this).data('partnerno'));
+                                                                                    call(_cTid, ActionData);
+                                                                                })
+                                                                            }, 100)
+
+                                                                            $(window).resize(function () {
+                                                                                SetEqualCard(".company-cards");
+                                                                            })
+                                                                        })
+                                                                                    </script>
+                                                                                </div>
+
+                                                                                <div class="m39-modal m39-modal--new j120-smart-response--infoModal" data-component="m39-modal" id="modal_true">
+                                                                                    <button data-trigger="true" class="m39-modal__trigger hidden trigger-@ans.TrackingId" type="button" id="trigger-@ans.TrackingId" aria-controls="content-@ans.TrackingId"></button>
+                                                                                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="content-@ans.TrackingId" aria-labelledby="trigger-@ans.TrackingId">
+                                                                                        <div class="m39-modal__dialog">
+                                                                                            <div class="m39-modal__header">
+                                                                                                <div class="m39-modal__title">@Html.Raw(_btntitle)</div>
+                                                                                                <a data-close="true" data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected m39-modal__button--close optselected_call" id="close-@ans.TrackingId" aria-controls="content-@ans.TrackingId"></a>
+                                                                                                <input type="text" class="textAns CompanyPartnerId" style="display:none;" data-IdAns="@(SM_Id.PartnerId.ToString())" data-submitted_val="" />
+                                                                                            </div>
+                                                                                            <div class="m39-modal__content">
+                                                                                                <p class="icon-new-call link-call">
+                                                                                                    @Html.Raw(_btntitle) : <a title="@Html.Raw(_btntitle)" class="link CompanyMobileNO" href="tel:"></a>
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="m39-modal__overlay"> </div>
+                                                                                </div>
+
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                                                                            }
+
+                                                                            @*<button data-confirmpage="@isConfrimPage" data-tid="@ans.TrackingId" data-IdAns="@ans.Id" data-submitted_val="@ans.BtnValue" class="optselected j120-smart-response--button hidden @(selectedButtonClass)">@Html.Raw("Next")</button>*@
+                                                                        }
+                                                                        if (isNotification)
+                                                                        {
+                                                                            <div id="notificationlist">
+                                                                            </div>
+
+                                                                            <script>
+
+                                                                                var selectedAnswers = [];
+                                                                                docReady(function () {
+
+                                                                                    var rq = {
+                                                                                        SearchText: "@ans.Actiondata",
+                                                                                        Id: "@ans.Id",
+                                                                                        Action: "@ans.Action"
+                                                                                    };
+                                                                                    RenderNotificationList(rq);
+                                                                                    jQuery(".textAns[data-idans='SearchTxt']").blur(function () {
+                                                                                        var rq = {
+                                                                                            SearchText: $(this).val(),
+                                                                                            Id: $(this).data("idans"),
+                                                                                            Action: "@ans.Action"
+                                                                                        };
+                                                                                        RenderNotificationList(rq);
+                                                                                    })
+
+                                                                                })
+
+
+
+                                                                            </script>
+                                                                        }
+
+
+                                                                        if (ans.Type == TypeEnum.Loading)
+                                                                        {
+                                                                            <div class="j120-smart-response--countdown" data-time="60">
+                                                                                60
+                                                                            </div>
+
+                                                                            @*foreach (var item in ans.Questions.Where(x => x != null))
+                                                                                {
+                                                                                <input type="hidden" class="typeCode" value="@item.Code" />
+                                                                                }*@
+                                                                            <script>
+                                                                                ///
+
+                                                                                var TimerCount =0;
+                                                                                var checkSmartMeter = null;
+                                                                                function smartMeterScreen(d) {
+                                                                                    if(d)
+                                                                                    {
+                                                                                        clearInterval(checkSmartMeter);
+                                                                                        var rq = {
+                                                                                            tckId: @(ans.TrackingId),
+                                                                                            filterCode :  'The000',
+                                                                                        };
+                                                                                        RenderScreen(rq);
+
+                                                                                        return false;
+                                                                                    }
+
+                                                                                    if(TimerCount>=3  && !d)
+                                                                                    {   clearInterval(checkSmartMeter);
+                                                                                        var rq = {
+                                                                                            tckId: @(ans.TrackingId),
+                                                                                            filterCode :'The001',
+                                                                                        };
+                                                                                        RenderScreen(rq);
+                                                                                    }
+
+                                                                                }
+
+                                                                                docReady(function () {
+                                                                                    checkSmartMeter = setInterval(function () {
+                                                                                        TimerCount++;
+                                                                                        if (parseInt( jQuery(".j120-smart-response--countdown").text())>"0")
+                                                                                        {
+                                                                                            var _postUrl = '@Url.Content("~/api/sitecore/Consumption/ValidateCurrentSmartMeter")';
+                                                                                            $.ajax({
+                                                                                                url: _postUrl,
+                                                                                               // type: 'GET',
+                                                                                                type: 'POST',
+                                                                                                dataType: 'json',
+                                                                                                cache: false,
+                                                                                                data: AddForgeryToken({
+                                                                                                }, "j120smartresponse"),
+                                                                                                success: function (result) {
+                                                                                                    smartMeterScreen(result.success);
+                                                                                                }
+                                                                                            });
+                                                                                        } else
+                                                                                        {
+
+                                                                                            clearInterval(checkSmartMeter);
+                                                                                            var rq = {
+                                                                                                tckId: @(ans.TrackingId),
+                                                                                                filterCode :'The001',
+                                                                                            };
+                                                                                            RenderScreen(rq);
+                                                                                        }
+
+
+                                                                                    }, 20000);
+                                                                                });
+                                                                            </script>
+                                                                        }
+
+
+                                                                        if (ans.Id == SM_Id.trcodegroup)
+                                                                        {
+                                                                            <input type="text" style="display:none;" class="textAns" data-IdAns="@(SM_Id.trcode.ToString())" data-submitted_val="@ans.BtnValue2" />
+                                                                        }
+                                                                    }
+
+                                                                    @if (!string.IsNullOrWhiteSpace(btnHtml))
+                                                                    {
+                                                                        @Html.Raw("<div class='j120-smart-response--button_wrapper'>" + btnHtml + "</div>")
+                                                                    }
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    }
+                                </div>
+
+                            }
+                            else
+                            {
+
+                                <div class="grid__row">
+                                    <div class="grid__column grid__column--12">
+
+                                        <div class="j120-smart-response--window">
+                                            <button class="j120-smart-response--back j120-smart-response--button optselected" data-tid="@Model.Answer.ParentTrackingId">@_commonHelper.GetSMTranslation("Back")</button>
+                                            <div class="j120-smart-response--content" style="margin-top: 12px; display: block;">
+                                                <img class="j120-smart-response--rammas_icon" alt="" src="@Url.Content("~/images/Rammas/rammas_icon.png")" />
+
+                                                <p class="j120-smart-response--text">No Steps</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+                        }
+                    </div>
+                </div>
+                if (isLast && Model.Answer.Type != TypeEnum.maintenanceproviders)
+                {
+                    _commonHelper.Clear_CC_Session();
+                }
+
+            }
+
+
+        }
+    </div>
+
+    <input type="text" name="pageReloaded" class="pageReloaded" value="0" style="display:none;" />
+    <input type="text" name="LangType" class="LangType optselected" style="display:none;" value="@Convert.ToString(smDetail.LangType)" />
+</div>
+
+
+<div class="m66-preloader j120-smart-response--loader hidden">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <h2 class="text__section-subtitle">Please wait .....</h2>
+                <img class="j120-smart-response--rammas_loader" alt="" src="@Url.Content("~/images/Rammas/rammas_icon.png")">
+            </div>
+        </div>
+    </div>
+</div>
+@{
+    string _happinexUrl = Url.Action("PostData", "HappinessIndicator", new
+    {
+        type = DEWAXP.Foundation.Content.Models.HappinessIndicator.IndicatorType.Transaction,
+        language = Sitecore.Context.Language.Name,
+        transactionId = Guid.NewGuid(),
+        serviceCode = "787",
+        islocal = true,
+        ServiceDescription = "Request for Consumption Verification - Electricity/Water"
+    });
+
+}
+<input type="hidden" id="happinexUrl" value='@_happinexUrl' />
+<div class="m13-footer--floating">
+    <div class="m13-footer--floating_inner">
+        <div class="m13-footer--floating_item">
+            <a id="hitrigger" class="green m13-footer--floating_link icon-b-smile-sdg happiness fancybox fancybox.iframe" href="@_happinexUrl">
+                <span class="aria-only">@Translate.Text("Happiness Icon")</span>
+            </a>
+            <a href="/@(Language.Current.Name.ToLowerInvariant())/about-us/service-guide/consumer-services" class="green m13-footer--floating_link icon-b-services-sdg">
+                <span class="mobile-hide">
+                    @Translate.Text("Services")
+                </span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function HideLoder()
+    {
+        setTimeout(function () {
+            jQuery(".m66-preloader").hide();
+            $(".j120-smart-response--content__loaded").removeClass('j120-smart-response-opaque')
+            $('.j120-smart-response--content__loaded').find(".j120-smart-response--clearscreen").remove();
+        }, 200)
+    }
+
+    function RenderScreen(requestData) {
+        var _postUrl = '@Url.Content("~/api/sitecore/Consumption/ComplaintResponse")';
+        requestData.LangType = $(".LangType").val();
+        requestData = AddCustomForgeryToken(requestData,".j120-smart-response");
+        //console.log(requestData);
+        //ltr n rtl
+        if(requestData.LangType=="ar" ||requestData.LangType=="ur")
+        {
+            $(".j120-smart-response").removeClass("j120-smart-response--ltr");
+            $(".j120-smart-response").addClass("j120-smart-response--rtl");
+        }else{
+            $(".j120-smart-response").removeClass("j120-smart-response--rtl");
+            $(".j120-smart-response").addClass("j120-smart-response--ltr");
+        }
+        $.ajax({
+            url: _postUrl,
+            type: 'POST',
+            data: requestData,
+            beforeSend: function () {
+                // setting a timeout
+                // jQuery(".m66-preloader").show();
+                jQuery(window).trigger('j120_load');
+                fnDisabledBackButton();
+                jQuery(".box--7").removeClass("box--news");
+            },
+            success: function (successdata) {
+                 //switch the page language by redirecting
+                if ($(".pageReloaded").val() == 1) {
+                    pageLang = '/en';
+                    if (requestData.LangType == 'ar' || requestData.LangType == 'ur') {
+                        pageLang = '/ar-ae'
+                    }
+                    window.location.href = pageLang + '@cmptGobalUrl' +"?isLang=1";
+
+                }else
+                {
+                    if (typeof successdata == "object") {
+                        window.location.href = successdata.RedirectUrl;
+                    }
+                    else {
+                        $("#ramas-section").html(successdata);
+                        var sitecoreSelector = $(".smartResponseContainer").find(".sitecoreSelector");
+                        if (sitecoreSelector != null && sitecoreSelector.length > 0) {
+
+                            var accnt = $("#ramas-section").find(".AccountselectionComponent");
+                            if (accnt != null && accnt.length > 0) {
+                                //$(accnt).html($(".sitecoreSelector").html());
+                            }
+                        }
+                    }
+                }
+
+
+                setTimeout(function () {
+                    jQuery(window).trigger("reinit_j120");
+                    HideLoder();
+                    window.initComponents("ramas-section");
+                },100)
+
+            },
+            error: function (xhr) { // if error occured
+                HideLoder();
+            },
+            complete: function () {
+                HideLoder();
+                //fnEnabledBackButton();
+            },
+        })
+    }
+    function RenderNotificationList(requestData) {
+        var _postUrl ='@Url.Content("~/api/sitecore/Consumption/SmartDubaiNotificationList")';
+        requestData = AddCustomForgeryToken(requestData,".j120-smart-response");
+        //console.log(requestData);
+        $.ajax({
+            url: _postUrl,
+            type: 'POST',
+            data: requestData,
+            beforeSend: function(){
+                fnDisabledBackButton();
+            },
+            success: function (successdata) {
+                if (typeof successdata == "object") {
+                    window.location.href = successdata.RedirectUrl;
+                }
+                else {
+                    $("#notificationlist").html(successdata);
+                }
+
+
+                jQuery(window).trigger("reinit_j120");
+                window.initComponents("ramas-section");
+                //$(window).resize();
+
+                //require(['parsley'], function () {
+                //    jQuery('input').parsley();
+                //    jQuery('select').parsley();
+                //});
+            },
+            complete:function(x){
+                //console.log(x);
+                fnEnabledBackButton();
+            }
+
+        })
+    }
+
+
+     function RenderConsumptionNotificationList(requestData) {
+        var _postUrl ='@Url.Content("~/api/sitecore/Consumption/ConsumptionNotificationList")';
+        requestData = AddCustomForgeryToken(requestData,".j120-smart-response");
+        //console.log(requestData);
+        $.ajax({
+            url: _postUrl,
+            type: 'POST',
+            data: requestData,
+            beforeSend: function(){
+                fnDisabledBackButton();
+
+                $(".notificationList").html("");
+            },
+            success: function (successdata) {
+
+
+                if (typeof successdata == "object") {
+                    window.location.href = successdata.RedirectUrl;
+                }
+                else {
+
+                    //debugger;
+                    $(".notificationList").closest(".j120-smart-response--window").addClass("j120-smart-response-status")
+                    $(".notificationList").html(successdata);
+
+                }
+
+
+                jQuery(window).trigger("reinit_j120");
+                window.initComponents("ramas-section");
+                $(".common-screen").hide();
+                //$(window).resize();
+
+                //require(['parsley'], function () {
+                //    jQuery('input').parsley();
+                //    jQuery('select').parsley();
+                //});
+            },
+            complete:function(x){
+                //console.log(x);
+                fnEnabledBackButton();
+            }
+
+        })
+    }
+
+
+    function UploadFile(fileInput)
+    {
+        var _inputFile = document.getElementById(fileInput);
+        var IsSuccess = false;
+        try {
+            if($(_inputFile).length>0)
+            {
+                jQuery("."+fileInput).hide();
+                var _postUrl = '@Url.Content("~/api/sitecore/Consumption/UploadSMComplaintFile")';
+                var fromdata = new  FormData();
+                var fileData = _inputFile.files[0];
+
+                var fileSize = _inputFile.files[0].size / 1024 / 1024; // in MB
+
+                if(fileSize>4)
+                {
+                    jQuery("."+fileInput).show();
+                    return false;
+                }
+
+                fromdata.append("Uploadfile",fileData);
+                fromdata.append("ImageType",jQuery(_inputFile).data("idans"));
+                var d =[];
+                d = AddCustomForgeryToken(d,".j120-smart-response");
+                fromdata.append("__RequestVerificationToken",d.__RequestVerificationToken);
+                //console.log(fromdata);
+                $.ajax({
+                    url: _postUrl,
+                    type: 'POST',
+                    data: fromdata,
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function () {
+                        jQuery(window).trigger('j120_load');
+                        fnDisabledBackButton();
+                        jQuery("#errorDesc").hide();
+                    },
+                    success: function (d) {
+                        IsSuccess = d.success
+                        if (IsSuccess) {
+                            var btnValueSetter = jQuery(_inputFile).closest('.questionDiv').find(".j120-smart-response--uploadhandler");
+                            $(btnValueSetter).attr("data-submitted_val", d.fName);
+                            HideLoder();
+                            $(btnValueSetter).click();
+                        }
+                        else {
+                            HideLoder();
+                            jQuery("#errorDesc").show();
+                        }
+                    },
+                    error: function (xhr) { // if error occured
+                        //console.log(xhr);
+                        HideLoder();
+                        jQuery("#errorDesc").show();
+                    },
+                    complete: function (x) {
+                        //console.log(x);
+                        HideLoder();
+                        ///fnEnabledBackButton();
+                    },
+                });
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+</script>
+
+
+
+@if (!isAccountView && !showNotication)
+{
+    <script>
+
+        docReady(function () {
+            var IsStart = ('@isStepExit' == 'True');
+            var rq = { tckId: 0, isStart: !IsStart, isPageRefesh: true };
+
+            if ('@isPageRefesh' == 'False') {
+                rq.isPageRefesh = false;
+            }
+            RenderScreen(rq);
+            $(window).resize();
+        });
+    </script>
+}
+else
+{
+    <script type="text/javascript">
+        docReady(function () {
+            require(['parsley'], function () {
+                function validateSRForm() {
+                    var isValid = true;
+                    jQuery('.j120-smart-response').find('.form, input, select, textarea').each(function (i,o) {
+                        if (isValid) {
+                            isValid = jQuery(o).parsley().isValid();
+                            jQuery(o).trigger('focusout');
+                            if( jQuery(o).prop("type")!="file")
+                            {
+                                jQuery(o).trigger('change');
+                            }
+
+                        }
+                    });
+                    return isValid;
+                }
+                var selectedAnswers = [];
+
+
+                setTimeout(function () {
+                    $(".optselected").click(function () {
+                        if(jQuery(this).prop('disabled'))
+                        {
+                            return false;
+                        }
+                        isValidSubmit = true;
+                        if ($(this).data('btntype') == 'submit') {
+                            isValidSubmit = validateSRForm();
+                        }
+
+                        if (!isValidSubmit) {
+                            return false;
+                        }
+
+
+                        selectedAnswers = [];
+
+                        var accntlist = $('.accountHidden');
+                        if (accntlist != null && accntlist.length > 0) {
+                            var selectCheckBox = $("input[name='SelectedAccountNumber']:checked").val();
+                            $('.accountHidden').val(selectCheckBox);
+                        }
+                        try {
+
+
+                            var idAns = $(this).data("idans");
+                            if (idAns != null && idAns != "Empty") {
+                                selectedAnswers.push({ Type: idAns, Value: $(this).data("submitted_val") })
+                            }
+
+
+                            $.each($(".textAns"), function (i, o) {
+                                var s = $(o).val();
+                                if (s != null && s != "") {
+                                    selectedAnswers.push({ Type: $(o).data("idans"), Value: s })
+                                }
+                            });
+                        } catch (e) {
+                            //console.log(e);
+                        }
+                        var parentID = $(this).parent().data("pid");
+                        var trackingId = $(this).data('tid');
+                        var isPageBack = $(this).data('isback');
+                        var isAnsAltered = '@(Convert.ToBoolean(Model != null && Model.CurrentRequest != null && Model.CurrentRequest.IsAnsAltered))'=='True';
+                        var rq = {
+                            tckId: trackingId,
+                            isStart: false,
+                            QusId: parentID,
+                            //AnswerValue: $("#AnswerValue").val(),
+                            SelectedValues: selectedAnswers,
+                            IsPageBack: isPageBack,
+                            //IsPageRefesh : true
+                            isAnsAltered : isAnsAltered,
+                            submittedIds :  jQuery(".SubmittedIds").val(),
+                        };
+                        RenderScreen(rq);
+                    })
+                }, 200);
+
+            })
+        })
+    </script>
+}
+
+<script>
+    docReady(function () {
+        var _urls = window.location.href.split('?');
+        if (_urls.length > 1 && !_urls[1].includes("asc")) {
+            window.history.pushState({ url: "" + _urls[0] + "" }, '', _urls[0])
+
+        };
+    })
+
+    function OpenUrlWindow(_url) {
+        //window.open(_url,'_blank');
+        window.open(_url, "_blank", "toolbar=no,scrollbars=yes,resizable=no,top=0,left=0");
+    }
+
+    String.prototype.includes = function (str) {
+        var returnValue = false;
+
+        if (this.indexOf(str) !== -1) {
+            returnValue = true;
+        }
+
+        return returnValue;
+    }
+
+    AddCustomForgeryToken = function (data, elementId) {
+        data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+
+
+    function fnDisabledBackButton() {
+        $(".j120-smart-response--back").attr("disabled", true);
+    }
+
+    function fnEnabledBackButton() {
+        $(".j120-smart-response--back").removeAttr("disabled");
+    }
+
+
+    jQuery(document).keypress(function (event) {
+
+        try {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            //enter key press
+            if (keycode == '13') {
+                var submitBtn = jQuery('button[data-btntype="submit"]');
+                if (submitBtn != null && submitBtn.length > 0) {
+                    submitBtn.click();
+                }
+            }
+        } catch (e) {
+            //console.log(e);
+        }
+
+
+    });
+
+    isDevice = function () {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    };
+    function call(id, actionData) {
+        if (isDevice()) {
+            //console.log(actionData);
+
+            $(".optselected_call").click();
+            window.location.href = "tel:" + actionData;
+        } else {
+            //console.log('laptop');
+            jQuery('.trigger-' + id).trigger('click');
+        }
+
+    }
+
+    function getMaxHeight(el) {
+        var h = $(el).height();
+        $(el).each(function () {
+            var _h = $(this).height(this);
+            if (h > _h) {
+                h = _h;
+            }
+        });
+        return h;
+    }
+
+    function SetEqualCard(el) {
+        if ($(el).length > 0) {
+
+            $(el).removeAttr("style");
+            $(el).hide();
+            //$(cel).css("height", "auto");
+            setTimeout(function () {
+                var _maxHeight = getMaxHeight(el);
+                console.log(_maxHeight);
+                if ($(window).width() > 555) {
+                    $(el).height(_maxHeight + 25);
+                }
+                $(el).show();
+                jQuery(window).trigger("reinit_j120");
+            }, 700)
+
+        }
+    }
+
+
+    function checkBesAvailable(accountNo, btnId) {
+        $(btnId).hide()
+        var data = { service: 'info', account_id: "00" + accountNo };
+        jQuery.ajax("/api/bes/proxy", {
+            dataType: 'json',
+            data: data,
+            method: 'POST',
+            async: true,
+            success: function (response) {
+                var result = response;
+                console.log("BES")
+                console.log(response)
+                if (result != null && result.account != null) {
+                    if (result.account.show_bes != null && result.account.show_bes == "true") {
+                        $(btnId).show();
+                    }
+                }
+
+            }, error: function (response) {
+            }, complete: function (response) {
+
+            }
+        });
+    }
+
+    function OpenPageinNewtab(url) {
+
+        window.open(url, '_blank')// <- This is what makes it open in a new window.
+    }
+
+</script>

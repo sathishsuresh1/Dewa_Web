@@ -1,0 +1,617 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+<div class="j113-epass">
+    <div class="j113-epass">
+        <div class="m66-preloader j113-epass--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+        <div class="grid">
+            <div class="grid__row mb32">
+                <div class="grid__column grid__column--12">
+                    <div class="m15-filter mt24" data-component="m15-filter">
+                        <div class="m15-filter--input_wrapper">
+                            <input placeholder="Search by Pass No, Name, Emirates id, Passport, VISA" class="m15-filter--input" id="mymainpasseskeyword" type="text" name="">
+                            <button class="m15-filter--input_button icon-search" id="mymainpassesbutton"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row hidden" id="gridpanel">
+            <div class="grid__column grid__column--12">
+                <div id="sharedetailsdiv"></div>
+                <div id="canceldetailsdiv"></div>
+                <div class="m41-tabs-box m41-tabs-box--scripted" data-component="m41-tabs-box">
+                    <div class="m41-tabs-box__tabs m41-tabs-box--desktop white">
+                        <ul class="m41-tabs-box__tab-items">
+                            <li class="m41-tabs-box__tab-item" data-index="0">
+                                <a href="" data-passmainfilter="main" class="m41-tabs-box__tab-link m41-tabs-box__tab-link--active">@Translate.Text("Epass.Permanent Passes")</a>
+                            </li>
+                            <li class="m41-tabs-box__tab-item" data-index="1">
+                                <a href="" data-passmainfilter="subpass" class="m41-tabs-box__tab-link">@Translate.Text("Epass.Add-on Passes")</a>
+                            </li>
+                        </ul>
+                        <div class="m15-filter" data-component="m15-filter">
+                            <div class="m15-filter--select_wrapper icon-open" data-title="Page size">
+                                @Translate.Text("Epass.Pagesize")
+
+                                @Html.DropDownList("pagesizefilter", EpassHelper.GetPageSize(),
+                                    new
+                                    {
+                                        @class = "m15-filter--select",
+                                        @id = "pagesizefilter",
+                                        @name = "pagesizefilter",
+                                        @aria_describedby = "description-for-pagesizefilter",
+                                        @data_parsley_id = "20"
+                                    })
+                            </div>
+                            <form id="form-mypasses-filter" class="hidden" action="#" method="POST" form-skipvalidation="true">
+                                @Html.AntiForgeryToken()
+                            </form>
+                        </div>
+                        <div class="m41-tabs-box__tab-panels" id="mypassespanel">
+                            <div class="m41-tabs-box__tab-panel" data-index="0" style="display: block;">
+                                <div class="grid">
+                                    <div class="grid__row">
+                                        <div class="grid__column grid__column--12">
+                                            <div class="m15-filter mt24" data-component="m15-filter">
+                                                <div class="form-field__label">
+                                                    @Translate.Text("Epass.Filter By")
+                                                </div>
+                                                <div class="m15-filter--input_wrapper select">
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        @Html.DropDownList("mainpassstatusfilter", EpassHelper.GetPageStatus(),
+                                                            new
+                                                            {
+                                                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                                @id = "mainpassstatusfilter",
+                                                                @name = "mainpassstatusfilter",
+                                                                @aria_describedby = "description-for-mainpassstatusfilter",
+                                                                @data_parsley_id = "20"
+                                                            })
+                                                    </span>
+                                                </div>
+                                                @*<div class="m15-filter--input_wrapper">
+                                                        <input placeholder="@Translate.Text("Epass.Searchby")" class="m15-filter--input" id="mymainpasseskeyword" type="text" name="">
+                                                        <button class="m15-filter--input_button icon-search" id="mymainpassesbutton"></button>
+                                                    </div>*@
+                                            </div>
+                                            <div id="mainpasspanel"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m41-tabs-box__tab-panel" data-index="1" style="display: none;">
+                                <div class="grid">
+                                    <div class="grid__row">
+                                        <div class="grid__column grid__column--12">
+                                            <div class="m15-filter mt24" data-component="m15-filter">
+                                                <div class="form-field__label">
+                                                    @Translate.Text("Epass.Filter By")
+                                                </div>
+                                                <div class="m15-filter--input_wrapper select">
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        @Html.DropDownList("subpassstatusfilter", EpassHelper.GetPageStatus(),
+                                                            new
+                                                            {
+                                                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                                @id = "subpassstatusfilter",
+                                                                @name = "subpassstatusfilter",
+                                                                @aria_describedby = "description-for-subpassstatusfilter",
+                                                                @data_parsley_id = "20"
+                                                            })
+                                                    </span>
+                                                </div>
+                                                @*<div class="m15-filter--input_wrapper">
+                                                        <input placeholder="@Translate.Text("Epass.Searchby")" class="m15-filter--input" id="mysubpasseskeyword" type="text" name="">
+                                                        <button class="m15-filter--input_button icon-search" id="mysubpassesbutton"></button>
+                                                    </div>*@
+                                                @*<div style="float: right;"><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SUBPASS_LANDING_PAGE)" class="button button--primary" type="button">@Translate.Text("Epass.Apply for new pass")</a></div>*@
+                                            </div>
+                                            <div id="subpasspanel"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="mymainpasses-item-template" type="text/x-handlebars-template">
+    <table class="j113-epass--table">
+        <thead class="j113-epass--table_header">
+            <tr>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                <th class="j113-epass--table_cell j113-epass--table_cell--name j113-epass--table_filter {{strnamesort}}">@Translate.Text("Epass.IndName")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Expirydate")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.PassType")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Addonpasses")</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#results}}
+            <tr class="j113-epass--table_row">
+                <td class="j113-epass--table_cell">
+                    <a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?passNumber={{passNumber}}"> {{passNumber}}</a>
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{name}}
+                </td>
+                <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                    {{strpassExpiryDate}}
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{passType}}
+                </td>
+                <td class="j113-epass--table_cell">
+                    <div class="j113-epass--status {{toLowerCase strclass}}">{{strstatus}}</div>
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{#unless wppass}}
+                    {{#ifEquals strclass '@SecurityPassStatus.Active.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.SoontoExpire.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithCoordinator.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithSecurity.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{/unless}}
+                </td>
+            </tr>
+            {{/results}}
+        </tbody>
+    </table>
+    <div class="j113-epass--keypair">
+        <div class="m42-keyvalue">
+            {{#results}}
+            <dl>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?passNumber={{passNumber}}"> {{passNumber}}</a></dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.IndName")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{name}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Expirydate")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{strpassExpiryDate}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.PassType")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{passType}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><div class="j113-epass--status {{toLowerCase strclass}}">{{strstatus}}</div></dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                    {{#unless wppass}}
+                    {{#ifEquals strclass '@SecurityPassStatus.Active.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.SoontoExpire.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithSecurity.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithCoordinator.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{/unless}}
+                </dd>
+            </dl>
+            {{/results}}
+        </div>
+
+    </div>
+    <div class="grid__column grid__column--12 pagination-list" id="pagination-list">
+    </div>
+
+    <script type="text/javascript">
+        jQuery(window).trigger('sharemodal_reinit')
+    </script>
+</script>
+
+<script id="mysubpasses-item-template" type="text/x-handlebars-template">
+    <table class="j113-epass--table">
+        <thead class="j113-epass--table_header">
+            <tr>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+                <th class="j113-epass--table_cell j113-epass--table_cell--name j113-epass--table_filter {{strnamesort}}">@Translate.Text("Epass.IndName")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Linked to")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Expirydate")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.PassType")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#results}}
+            <tr class="j113-epass--table_row">
+                <td class="j113-epass--table_cell">
+                    <a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?passNumber={{mainpassNumber}}"> {{passNumber}}</a>
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{name}}
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{mainpassNumber}}
+                </td>
+                <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                    {{strpassExpiryDate}}
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{passType}}
+                </td>
+                <td class="j113-epass--table_cell">
+                    <div class="j113-epass--status {{toLowerCase strclass}}">{{strstatus}}</div>
+                </td>
+                <td class="j113-epass--table_cell">
+                    {{#unless wppass}}
+                    {{#ifEquals strclass '@SecurityPassStatus.Active.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.SoontoExpire.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithCoordinator.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithSecurity.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{/unless}}
+                </td>
+            </tr>
+            {{/results}}
+        </tbody>
+    </table>
+    <div class="j113-epass--keypair">
+        <div class="m42-keyvalue">
+            {{#results}}
+            <dl>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><a class="j113-epass--table_cell--pnumber button--text" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS)?passNumber={{passNumber}}"> {{passNumber}}</a></dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.IndName")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{name}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Linked to")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{mainpassNumber}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Expirydate")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{strpassExpiryDate}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.PassType")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">{{passType}}</dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><div class="j113-epass--status {{toLowerCase strclass}}">{{strstatus}}</div></dd>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                    {{#unless wppass}}
+                    {{#ifEquals strclass '@SecurityPassStatus.Active.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.SoontoExpire.ToString()'}}
+                    <a href="#" class="link j113-epass-sharelink icon-share" data-id="{{passNumber}}">@Translate.Text("Epass.Share") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithSecurity.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{#ifEquals strclass '@SecurityPassStatus.PendingApprovalwithCoordinator.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                    {{/unless}}
+                    {{#ifEquals strclass '@SecurityPassStatus.UnderApprovalinWorkPermit.ToString()'}}
+                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-id="{{passNumber}}">@Translate.Text("Epass.Cancel") </a>
+                    {{/ifEquals}}
+                </dd>
+            </dl>
+            {{/results}}
+        </div>
+
+    </div>
+    <div class="grid__column grid__column--12 pagination-list" id="pagination-list">
+    </div>
+
+    <script type="text/javascript">
+        jQuery(window).trigger('sharemodal_reinit')
+    </script>
+</script>
+
+<script id="mypasses-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination">
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="ajaxpage(1,undefined,undefined)" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+            </a>
+            {{/if}}
+            {{#if previouspage}}
+            <a onclick="ajaxpage({{previouspagenumber}},undefined,undefined)" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev">@Translate.Text("Previous")</a>
+            {{/if}}
+            <ul class="m34-pagination__page-list">
+                {{#pagenumbers}}
+                {{#ifCond ../page this}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                    <a onclick="ajaxpage({{this}},undefined,undefined)" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{else}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                    <a onclick="ajaxpage({{this}},undefined,undefined)" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{/ifCond}}
+                {{/pagenumbers}}
+            </ul>
+            {{#if nextpage}}
+            <a onclick="ajaxpage({{nextpagenumber}},undefined,undefined)" role="button" aria-label="@Translate.Text("Next")" class="button button--text button--next m34-pagination__button--next">@Translate.Text("Next")</a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="ajaxpage({{totalpage}},undefined,undefined)" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    docReady(function () {
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('toLowerCase', function (str) {
+            return str.toLowerCase();
+        });
+        Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        });
+        Handlebars.registerHelper('ifPassTypeEquals', function (arg1, arg2, options) {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        });
+        setTimeout(function () {
+            jQuery(".m41-tabs-box__tab-link").on('click', function (event) {
+                //event.preventDefault();
+                //event.stopImmediatePropagation();
+                //var status = jQuery(this).attr('data-status');
+               ajaxpage(1);
+            });
+            jQuery('select[name="pagesizefilter"]').change(handleFilterSelection);
+            jQuery('select[name="mainpassstatusfilter"]').change(handleFilterSelection);
+            jQuery('select[name="subpassstatusfilter"]').change(handleFilterSelection);
+            jQuery('.j113-epass--table_filter').off('click.filter').on('click.filter', HandleFilterClick);
+        }, 200);
+        //var url = window.location.href;
+        //if (url.indexOf("#") > -1) {
+        //    var hash = url.substring(url.indexOf("#") + 1);
+        //    if (hash) {
+        //        $('.m41-tabs-box__tab-item').each(function () {
+        //            $(this).find('.m41-tabs-box__tab-link').removeClass('m41-tabs-box__tab-link--active');
+        //        })
+        //        $('.m41-tabs-box__tab-item' + '[data-status="' + hash + '"]').find('.m41-tabs-box__tab-link').addClass('m41-tabs-box__tab-link--active');
+        //    }
+        //}
+        jQuery("#form-mypasses-filter").on('submit', function (event) {
+            //if (jQuery("#form-mypasses-filter").parsley().validate()) {
+            //    if ($("#mypasseskeyword").val().length < 3)
+            //        return false;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                handleSearchFilter(event);
+           // }
+        });
+        jQuery("#mymainpassesbutton,#mysubpassesbutton").on('click', function (event) {
+            handleSearchFilter(event);
+        });
+        //jQuery('#form-mypasses-filter').submit();
+        function handleSearchFilter(e) {
+            e.preventDefault();
+            ajaxpage(1);
+        }
+    });
+    function HandleFilterClick () {
+        var $fil = jQuery(this);
+        if (!$fil.hasClass('ascending') && !$fil.hasClass('descending')) {
+            $fil.addClass('ascending');
+            ajaxpage(1, undefined, undefined, "ascending");
+        } else if ($fil.hasClass('ascending') && !$fil.hasClass('descending')) {
+            $fil.removeClass('ascending');
+            $fil.addClass('descending');
+            ajaxpage(1, undefined, undefined, "descending");
+        } else {
+            $fil.removeClass('ascending');
+            $fil.removeClass('descending');
+            ajaxpage(1, undefined, undefined, "ascending");
+        }
+    }
+    function ajaxpage(page, pagesize, statustxt,namesort)
+    {
+        var view;
+        var keyword = jQuery('#mymainpasseskeyword').val();
+        var passfilter = jQuery('.m41-tabs-box__tab-link--active').attr('data-passmainfilter');
+        if (passfilter === 'main') {
+            statustxt = jQuery("#mainpassstatusfilter option:selected").val();
+        }
+        else if (passfilter === 'subpass') {
+            statustxt = jQuery("#subpassstatusfilter option:selected").val();
+        }
+        if (typeof (pagesize) === 'undefined')
+            pagesize = parseInt(jQuery("#pagesizefilter option:selected").val());
+
+        if (typeof (namesort) === 'undefined') {
+            namesort = "";
+            if (!jQuery(".j113-epass--table_filter").hasClass('ascending') && jQuery(".j113-epass--table_filter").hasClass('descending')) {
+                namesort = "descending";
+            } else if (jQuery(".j113-epass--table_filter").hasClass('ascending') && !jQuery(".j113-epass--table_filter").hasClass('descending')) {
+                namesort = "ascending";
+            }
+        }
+        var url = "/api/Sitecore/ePass/AllpassesAjax";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            traditional: true,
+            data: AddForgeryToken({
+                pagesize: pagesize,
+                keyword: keyword,
+                statustxt: statustxt,
+                page: page,
+                namesort: namesort,
+                passfilter: passfilter
+            }, "form-mypasses-filter"),
+            beforeSend: function () {
+                jQuery('.j113-epass--loader').show();
+                jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j113-epass--loader').hide();
+                //jQuery('.m41-tabs-box__tab-panel').show();
+                jQuery('.j113-epass--table_filter').off('click.filter').on('click.filter', HandleFilterClick);
+                $('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                $("#allPassess").show();
+                $("#pageSize").show();
+                $("#gridpanel").show();
+                if (response.status && response.Message != null) {
+                    var Jsondata = JSON.parse(response.Message.lstpasses);
+                    if (Jsondata.length > 0) {
+                        var context = {
+                            results: Jsondata,
+                            strnamesort: response.Message.namesort
+                        };
+                        if (passfilter === 'main') {
+                            renderMyMainpassesReceived(context);
+                        }
+                        else {
+                            renderMySubpasspassesReceived(context);
+                        }
+
+                        if (response.Message.pagination) {
+                            var pagedata = {
+                                previouspage: function () {
+                                    if (response.Message.page > 1)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                nextpage: function () {
+                                    if (response.Message.page < response.Message.totalpage)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                page: response.Message.page,
+                                previouspagenumber: response.Message.page - 1,
+                                nextpagenumber: response.Message.page + 1,
+                                pagenumbers: response.Message.pagenumbers,
+                                totalpage: response.Message.totalpage,
+                                receivedorsentstr: response.Message.receivedorsent
+                            }
+                            renderSearchPagination(pagedata);
+
+                        }
+                    }
+                    else {
+                        if (passfilter === 'main') {
+                            jQuery('#mainpasspanel').html("<p class='centered' style='margin-top: 48px;'>@Translate.Text("Epass.Noresultsfound")</p>");
+                        }
+                        else if (passfilter === 'subpass') {
+                            jQuery('#subpasspanel').html("<p class='centered' style='margin-top: 48px;'>@Translate.Text("Epass.Noresultsfound")</p>");
+                        }
+                    }
+                }
+                else {
+                    if (passfilter === 'main') {
+                            jQuery('#mainpasspanel').html("<p class='centered' style='margin-top: 48px;'>@Translate.Text("Epass.Noresultsfound")</p>");
+                        }
+                        else if (passfilter === 'subpass') {
+                            jQuery('#subpasspanel').html("<p class='centered' style='margin-top: 48px;'>@Translate.Text("Epass.Noresultsfound")</p>");
+                        }
+                }
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+
+            }
+        });
+    }
+    function transform(response,Message) {
+        var r = {
+            lstpasses: JSON.parse(Message.lstpasses),
+            strnamesort: Message.namesort
+        }
+        return r;
+    }
+    function handleFilterSelection() {
+        var pagesize = parseInt(jQuery(this).val());
+        ajaxpage(1, pagesize, undefined);
+    }
+    function renderMyMainpassesReceived(context) {
+        var markup = jQuery('#mymainpasses-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#mainpasspanel').html(rendering);
+    }
+    function renderMySubpasspassesReceived(context) {
+        var markup = jQuery('#mysubpasses-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#subpasspanel').html(rendering);
+    }
+    function renderMypassesReceived(context) {
+
+        var markup = jQuery('#mypasses-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.m41-tabs-box__tab-panels').html(rendering);
+    }
+    function renderSearchPagination(context) {
+
+        var markup = jQuery('#mypasses-pagination-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.pagination-list').html(rendering);
+    }
+</script>
+

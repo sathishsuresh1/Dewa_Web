@@ -1,0 +1,605 @@
+﻿@using System.Activities.Statements
+@using DEWAXP.Foundation.Integration.Extensions
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.Tayseer.TayseerFileUploadDetail
+
+@if (ViewBag.SetTotal != null)
+{
+    <script type="text/javascript">
+        $(function () {
+            $("#divTotal").show();
+            $("#divTotal").html(decodeHTMLEntities("@ViewBag.SetTotal"));
+          $("#divTotalBottom").show();
+            $("#divTotalBottom").html(decodeHTMLEntities("@ViewBag.SetTotal"));
+        });
+
+        // Set Total replace applied style/
+        function decodeHTMLEntities(text) {
+            var entities = [
+                ['amp', '&'],
+                ['apos', '\''],
+                ['#x27', '\''],
+                ['#x2F', '/'],
+                ['#39', '\''],
+                ['#47', '/'],
+                ['lt', '<'],
+                ['gt', '>'],
+                ['nbsp', ' '],
+                ['quot', '"']
+            ];
+
+            for (var i = 0, max = entities.length; i < max; ++i)
+                text = text.replace(new RegExp('&'+entities[i][0]+';', 'g'), entities[i][1]);
+
+            return text;
+        }
+    </script>
+}
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j87/m26-page-title")
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m14-richtext">
+                    <div data-content="true" role="region" aria-expanded="false">
+                        @if (ViewBag.ChequePayment == "true")
+                        {
+                            @Html.Raw(Translate.Text("ChequePayment"))
+                        }
+                        @if (ViewBag.CashPayment == "true")
+                        {
+                            @Html.Raw(Translate.Text("CashPayment"))
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="grid__row" id="divgriderrormsg">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                <div class="m40-status-message__text">@ViewBag.ErrorMessage</div>
+            </div>
+        </div>
+    </div>
+}
+<div class="grid__row" style="display:none" id="divTableMessageRP">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+            <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+            <div class="m40-status-message__text" id="divErrortextmsgRP"></div>
+        </div>
+    </div>
+</div>
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="j102-tayseer-service-account-head">
+                    <div class="head-numbers hidden" id="divTotal">
+                    </div>
+                    <div class="head-actions">
+                        <span class="total-page">@Translate.Text("Page") <span class="total-page-num">1</span> @Translate.Text("of") <span class="total-page-of-num">2</span></span>
+                    </div>
+                </div>
+                @*<div class="pagination-container" style="text-align:center"><ul id="pagin" class="pagin pagination"></ul></div>*@
+                <div class="m49-list-filter" data-component="m49-list-filter" data-filter-list="[name='history-line-content']">
+                    <input class="m49-list-filter--input" id="m49-list-filter--input" name="m49-list-filter--input" placeholder="@Translate.Text("Search by account number")" pattern="\d*" maxlength="20" type="text" data-parsley-maxnumber="20" >
+                    <button class="m49-list-filter-reset-button hidden mt0" title="@Translate.Text("Clear Filter")" type="button" aria-label="@Translate.Text("Clear Filter")"> <span class="aria-only">Filter</span></button>
+                    <button class="m49-list-filter--button" title="@Translate.Text("Filter Results")" type="button" role="search" id="btnSearch" aria-label="@Translate.Text("Filter Results")"><span class="aria-only">Filter</span></button>
+                </div>
+                <div class="form-field form-field--toggles" name="history-line-content">
+                    @if (Model.TayseerFileUploadDetails != null)
+                    {
+                        foreach (var data in Model.TayseerFileUploadDetails)
+                        {
+                            <div class="form-field__checkbox line-content">
+                                <div class="j102-tayseer-service--acc">
+                                    <div class="j102-tayseer-service--acc-num contractaccount">@Translate.Text("Contract Account") - <span data-acc-detail="acc_number">@data.ContractAccountNo</span></div>
+                                    <div class="j102-tayseer-service--out-amount">@Translate.Text("Outstanding Amount"): <span class="j102-tayseer-service--outstanding">@data.OutstandingAmount</span> @Translate.Text("Currency")</div>
+                                    @if (!string.IsNullOrEmpty(data.Remarks))
+                                    {
+                                        <p class="j102-tayseer-service--acc-num">@Translate.Text("Remarks"): <strong>@data.Remarks</strong></p>
+                                        <p class="caution-message"><span class="icon-caution red"></span>@Translate.Text("Cheque payment not allowed")</p>
+                                    }
+                                    <div class="j102-tayseer-service--custom-pay">
+                                        <div class="j102-tayseer-service--pay-amount"><strong>@Translate.Text("Amount to Pay"):</strong> <span class="j102-tayseer-service--amount spanamount topay" id="idspanamount_@data.ContractAccountNo">@data.AmounttoPay</span> <span class="topay">@Translate.Text("Currency")</span></div>
+                                        <div class="j102-tayseer-service--custom-pay-buttons">
+                                            <a class="j102-tayseer-en-service--delete-amount lnkDeleteConfirm" data-contractaccount="@data.ContractAccountNo">@Translate.Text("Delete account")</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="j102-tayseer-service--amount-pay-form">
+                                    <fieldset class="fieldset">
+                                        <legend class="legend-color">.</legend>
+                                        @*<div id="divSetAmount" style="display:none">
+                                        *@
+                                        <div class="j102-tayseer-service--amount-pay-form-input">
+                                            <form method="get" class="form" data-form="true" action="#">
+                                                <div class="form-field form-field--text ">
+                                                    <label for="form-field-@data.ContractAccountNo" class="form-field__label">
+                                                        @Translate.Text("Set Amount")
+                                                        <span class="form-field__label-required aria-only">(required)</span>
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--currency">
+                                                        <input class="form-field__input form-field__input--text form-field__input--prefixed txtAmountPay"
+                                                               id="form-field-@data.ContractAccountNo"
+                                                               data-cotractaccount="@data.ContractAccountNo"
+                                                               name="number-currency"
+                                                               max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                                                               min="0"
+                                                               step="any"
+                                                               type="number"
+                                                               aria-describedby="description-for-@data.ContractAccountNo"
+                                                               data-parsley-errors-container="#description-for-@data.ContractAccountNo"
+                                                               data-parsley-required="required"
+                                                               data-parsley-required-message="This field is required"
+                                                               data-parsley-currency=""
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-currency-message="Please enter a valid monetary value"
+                                                               value="@data.AmounttoPay"
+                                                               data-parsley-range-message
+                                                               data-parsley-max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                                                               lang="en" />
+                                                    </span>
+                                                    <div id="description-for-@data.ContractAccountNo" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                                <div class="form-field__button">
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="j102-tayseer-service--amount-pay-form-button--cancel">
+                                            <a class="button button--text button--cancel" role="button" aria-label="Cancel">@Translate.Text("Cancel")</a>
+                                        </div>
+                                        <div class="j102-tayseer-service--amount-pay-form-button--set">
+                                            <a class="button button--text lnkSaveFU" data-cotractaccount="@data.ContractAccountNo" role="button">@Translate.Text("Set")</a>
+                                        </div>
+                                        @*
+                                            </div>*@
+                                    </fieldset>
+                                </div>
+
+                            </div>
+                        }
+                        <div class="m49-no-matches hidden">@Translate.Text("M43.NoMatchesFound")</div>
+                    }
+                </div>
+
+                @using (Html.BeginForm("lnkGenerateReference", "Tayseer", FormMethod.Post, new { @class = "post-login-clear-cert-form form form--inline", id = "TayseerReviewPayment", enctype = "multipart/form-data", @data_form = "true" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="hdnPaymentchecked" name="hdnPaymentchecked" value="@ViewBag.ChequePayment" />
+                    <div class="form-field form-field--select form-field--select-single mt56">
+                        <label for="form-field__label" class="form-field-emaildropdown">
+                            <strong>@Translate.Text("EmailMobile")</strong>
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select mt12">
+                            @Html.DropDownList("drpEmailDropdown", new SelectList(Model._emaildropdown, "Value", "Text"),
+                           new
+                           {
+                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                               @aria_describedby = "description-for-emaildropdown",
+                               @required = "required",
+                               @data_parsley_error_message = Translate.Text("Please enter a emailmobile"),
+                               @data_parsley_errors_container = "#description-for-emaildropdown",
+                               @data_parsley_id = "22"
+                           })
+                        </span>
+                        <div class="form-field__messages" id="description-for-purpose"></div>
+                        <div id="divEmailMobileNo" style="display:none">
+                            @*<label for="form-field-emailaddress" class="form-field__label">
+                                    @Translate.Text("Email")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input id="form-field-emailaddress"
+                                           type="email"
+                                           name="emailaddress"
+                                           class="form-field__input form-field__input--text"
+                                           aria-describedby="description-for-emailaddress"
+                                           data-parsley-errors-container="#description-for-emailaddress"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-required-message="This field is required" />
+                                    <span id="description-for-emailaddress" class="form-field__messages">
+                                    </span>
+                                </span>*@
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-emailaddress" class="form-field__label">
+                                    @Translate.Text("Email address")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input id="form-field-emailaddress"
+                                           type="email"
+                                           name="emailaddress"
+                                           @*aria-required="true"*@
+                                           required="required"
+                                           placeholder="@Translate.Text("Email address placeholder")"
+                                           aria-describedby="description-for-emailaddress"
+                                           data-parsley-error-message="@Translate.Text("Please enter a valid email address")"
+                                           data-parsley-trigger="focusout" data-parsley-errors-container="#description-for-emailaddress"
+                                           class="form-field__input form-field__input--text" />
+                                </span>
+                                <div id="description-for-emailaddress" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-mobilenumber" class="form-field__label">
+                                    @Translate.Text("Mobile number")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                    <input id="form-field-mobilenumber"
+                                           type="text"
+                                           name="mobilenumber"
+                                           @*aria-required="true"*@
+                                           aria-describedby="description-for-mobilenumber"
+                                           required="required"
+                                           placeholder="@Translate.Text("Mobile number placeholder")"
+                                           data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                                           data-parsley-type="digits"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-mobile_number
+                                           data-parsley-errors-container="#description-for-mobilenumber"
+                                           class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                </span>
+                                <div id="description-for-mobilenumber" class="form-field__messages">
+                                </div>
+                            </div>
+                            @*<label for="form-field-Mobile" class="form-field__label">
+                                    @Translate.Text("MobileCodeNumber")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span style="width: 25%;float: left;" class="form-field__input-wrapper form-field__input-wrapper--prefixed">
+                                    <input name="mobilecode" style="padding: 10px 12px 14px;"
+                                           class="form-field__input form-field__input--text form-field__input--prefixed"
+                                           id="form-field-mobilecode"
+                                           type="number"
+                                           onkeypress="return isNumeric(event)"
+                                           oninput="maxLengthCheck(this)"
+                                           maxlength="3"
+                                           aria-describedby="description-for-mobilecode"
+                                           data-parsley-errors-container="#description-for-mobilecode"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-required-message="This field is required"
+                                           lang="en"
+                                           value="@Translate.Text("971")" />
+                                    <span id="description-for-mobilecode" class="form-field__messages">
+                                    </span>
+                                </span>
+                                <span style="width: 74%;float: left;margin-top: 8px;margin-left: 1%;" class="form-field__input-wrapper form-field__input-wrapper--prefixed">
+                                    <input name="mobilenumber"
+                                           style="padding: 10px 12px 14px;"
+                                           class="form-field__input form-field__input--text form-field__input--prefixed"
+                                           type="number"
+                                           id="form-field-mobilenumber"
+                                           onkeypress="return isNumeric(event)"
+                                           oninput="maxLengthCheck(this)"
+                                           maxlength="7"
+                                           aria-describedby="description-for-mobilenumber"
+                                           data-parsley-errors-container="#description-for-mobilenumber"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-required-message="This field is required"
+                                           lang="en" />
+                                    <span id="description-for-mobilenumber" class="form-field__messages">
+                                    </span>
+                                </span>*@
+                        </div>
+                    </div>
+                    <div class="pagination-container mt12" style="text-align:center;"><ul id="pagin" class="pagin pagination"></ul></div>
+                    <div class="j102-tayseer-service-account-head">
+                        <div class="head-numbers hidden" id="divTotalBottom">
+                        </div>
+                    </div>
+                    <div class="form-field__button">
+                    </div>
+                    if (ViewBag.GenerateRefNo == true)
+                    {
+                        <div class="grid__row">
+                            <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                                @*<a role="button" class="button button--primary lnkGenerateReferance" href="javascript:void(0)">Generate New Reference No</a>*@
+                                <button type="submit" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Generate New Reference")</button>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="hdndeleteacc" id="hdndeleteacc" value="" />
+    <div class="m39-modal m39-modal--confirm" data-component="m39-modal" id="modal_true">
+        <a role="button" data-trigger="true" class="button hidden lnkHiddenDelete" data-contractaccount="" id="_lcwyzq4m6_trigger" aria-controls="_lcwyzq4m6_content"></a>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_lcwyzq4m6_content" aria-labelledby="_lcwyzq4m6_trigger">
+            <div class="m39-modal__dialog">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title">@Translate.Text("Tayseer")</div>
+                    <button data-close="true" class="m39-modal__button--close"></button>
+                </div>
+                <div class="m39-modal__content">
+                    <div class="grid__row mb12">
+                        @Translate.Text("Remove Confirmation")
+                    </div>
+                    <div class="grid__row">
+                        <div class="button m39-m12-no confirm-delete-false" data-contractaccount=""> @Translate.Text("No") </div>
+                        <a class="button button--primary confirm-delete-true lnkDeleteFU" data-contractaccount=""> @Translate.Text("Yes") </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $.fn.digits = function () {
+        return this.each(function () {
+            $(this).text($(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"));
+        })
+    }
+
+    function maxLengthCheck(object) {
+        if (object.value.length > object.maxLength)
+            object.value = object.value.slice(0, object.maxLength)
+    }
+
+    function isNumeric(evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        key = String.fromCharCode(key);
+        var regex = /[0-9]|\./;
+        if (!regex.test(key)) {
+            theEvent.returnValue = false;
+            if (theEvent.preventDefault) theEvent.preventDefault();
+        }
+    }
+
+    $(function () {
+
+        // Delete Button
+        $('.lnkDeleteConfirm').on('click', function (e) {
+            $("#hdndeleteacc").val('');
+            jQuery('.lnkHiddenDelete').trigger('click');
+            var contractAcc = $(this).data("contractaccount");
+            $("#hdndeleteacc").val(contractAcc);
+        });
+
+        $('.m39-m12-no').on('click', function () {
+            var contractAcc = $(this).data("contractaccount");
+            $("#idRPValidation_" + contractAcc).removeClass('m39-modal__container--active')
+            $('body').removeClass('unscrollable').css('position', 'initial')
+            $('.mask').removeClass('mask-show');
+        });
+
+        @*$(".lnkGenerateReferance").attr("disabled", false);
+        $(document).on('click', '.lnkGenerateReferance', function (e) {
+            $(".lnkGenerateReferance").attr("disabled", true);
+            $("#idAddnewaccount").attr("disabled", true).val("@Translate.Text("Submitting")...");
+        });*@
+
+        $("#drpEmailDropdown").change(function () {
+            var end = this.value;
+            if (end == "-2") {
+                $("#divEmailMobileNo").css("display", "inline");
+                $("input[name=mobilenumber]").attr("required", "required");
+                $("input[name=mobilecode]").attr("required", "required");
+                $("input[name=emailaddress]").attr("required", "required");
+                $("#drpEmailDropdown").removeAttr('required');
+            }
+            else {
+                $("#divEmailMobileNo").css("display", "none");
+                $("input[name=mobilenumber]").removeAttr('required');
+                $("input[name=mobilecode]").removeAttr('required');
+                $("input[name=emailaddress]").removeAttr('required');
+                $("#drpEmailDropdown").attr("required", "required");
+            }
+        });
+
+        $(document).on('click', '.lnkDeleteFU', function (e) {
+            try {
+                e.preventDefault();
+                var contractAcc = $("#hdndeleteacc").val();
+                data = { ContractAccountNo: contractAcc };
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/sitecore/Tayseer/TayseerDeleteReviewPayment",
+                    data: AddForgeryToken(data, "TayseerReviewPayment"),
+                    cache: false,
+                    success: function (response) {
+                        $(".m39-m12-no").click();
+                        if (response.status == true) {
+                            window.location.reload();
+                        }
+                        else {
+                            $("#divTableMessageRP").show();
+                            $("#divErrortextmsgRP").html(response.Message);
+                        }
+                        $("#idRPValidation").removeClass('m39-modal__container--active')
+                        $('body').removeClass('unscrollable').css('position', 'initial')
+                        $('.mask').removeClass('mask-show');
+                    },
+                    error: function (error) {
+                        //console.log("Error:" + error);
+                    }
+                });
+
+            } catch (e) {
+            }
+        });
+
+        //Pagination
+        var pageSize = @Translate.Text("PageSize");
+        var pageCount = $(".line-content").length / pageSize;
+
+        jQuery('.m49-list-filter--input').on('keypress', function (e) {
+            if (e.charCode == 13) {
+                jQuery('.m49-list-filter-reset-button').removeClass('hidden');
+                jQuery('.m49-list-filter--button').click();
+            }
+        });
+
+        jQuery('.m49-list-filter--button').on('click', function (e) {
+            jQuery('.m49-list-filter-reset-button').removeClass('hidden');
+            setTimeout(function () {
+                setSearchPagination();
+            }, 500);
+
+        });
+
+        jQuery('.m49-list-filter-reset-button').on('click', function (e) {
+            //debugger;
+            jQuery('.j102-tayseer-service--chckbx').removeClass('line-search-content');
+            if (!(jQuery('.m49-list-filter-reset-button').hasClass('hidden'))) {
+
+                jQuery('.m49-list-filter-reset-button').addClass('hidden');
+            }
+            jQuery("#m49-list-filter--input").val('');
+            setTimeout(function () {
+                pageCount = $(".line-content").length / pageSize;
+                $(".total-page-of-num").html(Math.ceil(pageCount));
+                $(".pagin").html('');
+                setPagination();
+                $(".total-page-num").html(1);
+            }, 400);
+        });
+        setPagination();
+        function setSearchPagination() {
+            $(".line-content:visible").each(function (n) {
+                $(this).addClass('line-search-content');
+            });
+            pageCount = $(".line-search-content").length / pageSize;
+            if (pageCount > 1) {
+                $(".head-actions").show();
+            }
+            else {
+                $(".head-actions").hide();
+            }
+            $(".pagin").html('');
+            $(".total-page-num").html(1);
+            $(".total-page-of-num").html(Math.ceil(pageCount));
+            for (var i = 0; i < pageCount; i++) {
+                if (pageCount > 1) {
+                    if (i == 0) {
+                        $(".pagin").append('<li class="active"><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                    else {
+                        $(".pagin").append('<li><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                }
+            }
+            $(".pagin li").first().find("li").addClass("active");
+            showSearchPage = function (page) {
+                $(".line-search-content").hide();
+                $(".line-search-content").each(function (n) {
+                    if (n >= pageSize * (page - 1) && n < pageSize * page)
+                        $(this).show();
+                });
+            }
+            showSearchPage(1);
+            $(".pagin li a").click(function () {
+                var _this = this;
+                $(".pagin li").removeClass("active");
+                $(".pagin li a").each(function () {
+                    if ($(this).html() == $(_this).html()) {
+                        $(this).parent().addClass("active");
+                    }
+                });
+                showSearchPage(parseInt($(this).text()));
+                $(".total-page-num").html(Math.ceil($(this).text()));
+            });
+        }
+        function setPagination() {
+            if (pageCount > 1) {
+                $(".head-actions").show();
+            }
+            else {
+                $(".head-actions").hide();
+            }
+            $(".total-page-of-num").html(Math.ceil(pageCount));
+            for (var i = 0; i < pageCount; i++) {
+                if (pageCount > 1) {
+                    if (i == 0) {
+                        $(".pagin").append('<li class="active"><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                    else {
+                        $(".pagin").append('<li><a href="#" onclick="return false;">' + (i + 1) + '</a></li> ');
+                    }
+                }
+            }
+            $(".pagin li").first().find("li").addClass("active");
+            showPage = function (page) {
+                $(".line-content").hide();
+                $(".line-content").each(function (n) {
+                    if (n >= pageSize * (page - 1) && n < pageSize * page)
+                        $(this).show();
+                });
+            }
+
+            showPage(1);
+
+            $(".pagin li a").click(function () {
+                var _this = this;
+
+                $(".pagin li").removeClass("active");
+                $(".pagin li a").each(function () {
+                    if ($(this).html() == $(_this).html()) {
+                        $(this).parent().addClass("active");
+                    }
+                });
+                //$(this).parent().addClass("active");
+                showPage(parseInt($(this).text()));
+                $(".total-page-num").html(Math.ceil($(this).text()));
+            });
+        }
+    });
+
+    $('.j102-tayseer-service--outstanding').digits();
+    //$('.j102-tayseer-service--amount').digits();
+</script>
+<style>
+    .current {
+        color: green;
+    }
+
+    .pagin li {
+        display: inline-block;
+    }
+
+    .payment-list {
+        margin-top: 12px !important;
+    }
+
+        .payment-list:first-child {
+            margin-top: 0px;
+        }
+
+    ul.pagination li a {
+        border: 0px solid #ddd;
+    }
+
+    .pagin li a {
+        color: black;
+        float: left;
+        padding: 5px 7px;
+        text-decoration: none;
+        font-weight: bold;
+        /*transition: background-color 0.3s;*/
+        /*border: 1px solid #ddd;*/
+    }
+
+
+    .pagination-container .active a {
+        /*background-color: #4CAF50;*/
+        color: #007560 !important;
+        font-weight: bold;
+        /*border: 1px solid #4CAF50;*/
+    }
+</style>

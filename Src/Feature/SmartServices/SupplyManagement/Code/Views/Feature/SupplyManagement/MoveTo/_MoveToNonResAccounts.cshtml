@@ -1,0 +1,905 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers.Extensions
+@model DEWAXP.Feature.SupplyManagement.Models.MoveTo.MoveToAccountDetailsViewModel
+
+
+<div class="j103-move-in" data-journey="j103-move-in">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j18/m26-page-title")
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="formtwo" data-cont="true">
+                    <div class="journey-intro">
+                        <p class="journey-intro__text">
+                            @Translate.Text("moveto.nonresheader1")
+                        </p>
+                    </div>
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", data_form = "true", @id = "movetononaccountregister", @data_submit_validate = "enabled", @name = "movetononaccountregister", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                    {
+                        @Html.Sitecore().FormHandler()
+                        @Html.AntiForgeryToken()
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                        @Html.HiddenFor(m => m.CustomerCategory)
+                        @Html.HiddenFor(m => m.MovoutAccountnumber)
+                        @Html.HiddenFor(m => m.MoveoutAccountDate)
+                        <fieldset class="fieldset ">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--select form-field--select-single">
+                                <label for="form-field-nonbusinesspartner" class="form-field__label">
+                                    @Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Account.BusinessPartnerLabel)
+                                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+
+                                    <input class="form-field__input form-field__input--select form-field__input--select-full"
+                                           id="form-field-nonbusinesspartner"
+                                           name="businesspartner"
+                                           placeholder="@Translate.Text(" moveto.accountregister.businesspartnerplaceholder")"
+                                           aria-describedby="description-for-businesspartner"
+                                           data-parsley-errors-container="#description-for-businesspartner"
+                                           readonly
+                                           data-parsley-required-message="This field is required"
+                                           data_parsley_error_message=@Translate.Text("moveto.accountregister.nonresbusinesserrormessage")
+                                           value="@Model.BusinessPartner" />
+                                </span>
+
+                                <div id="description-for-nonbusinesspartner" class="form-field__messages"></div>
+                            </div>
+                        </fieldset>
+                        @Html.HiddenFor(m => m.SelectedIDType)
+                        @Html.HiddenFor(m => m.Moveinindicator)
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-noncusttype" class="form-field__label">
+                                @Translate.Text("moveto.accountregister.nonrescustomertype")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.CustomerType, (IEnumerable<SelectListItem>)ViewBag.CustomerTypes, Translate.Text("Select from dropdown"),
+                     new
+                     {
+                         @class = "form-field__input form-field__input--select form-field__input--select-full",
+                         @id = "form-field-noncusttype",
+                         @name = "customer_type",
+                         aria_describedby = "description-for-noncusttype",
+                         aria_required = "true",
+                         @required = "",
+                         data_parsley_error_message = Translate.Text("moveto.accountregister.nonrescustomererrormessage"),
+                         data_parsley_errors_container = "#description-for-noncusttype",
+                         data_parsley_id = "111"
+                     })
+                            </span>
+                            <div id="description-for-noncusttype" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.CustomerType, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                        <div id="nonresidtypediv" class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-nonidtype" class="form-field__label">
+                                @Translate.Text("moveto.accountregister.nonresidentialtype")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.IdType, (IEnumerable<SelectListItem>)ViewBag.IdTypes, Translate.Text("Select from dropdown"),
+                     new
+                     {
+                         @class = "form-field__input form-field__input--select form-field__input--select-full",
+                         @id = "form-field-nonidtype",
+                         @name = "id_type",
+                         aria_describedby = "description-for-nonidtype",
+                         aria_required = "true",
+                         @required = "",
+                         data_parsley_error_message = Translate.Text("moveto.accountregister.nonresidtypeerrormessage"),
+                         data_parsley_errors_container = "#description-for-nonidtype",
+                         data_parsley_id = "111"
+                     })
+                            </span>
+                            <div id="description-for-nonidtype" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.IdType, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                        <div id="nonresidnumberdiv" class="form-field form-field--text ">
+                            <label for="form-field-nonidnumber" id="nonresidnumber" class="form-field__label">
+                                @Translate.Text("moveto.accountregister.nonresidnumber")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <label for="form-field-nonidnumber" id="nonresejarinumber" class="form-field__label hidden">
+                                @Translate.Text("moveto.accountregister.nonresejarinumber")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <label for="form-field-nonidnumber" id="nonresinitialapproval" class="form-field__label hidden">
+                                @Translate.Text("moveto.accountregister.nonresinitialapproval")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <label for="form-field-nonidnumber" id="nonrestradelicence" class="form-field__label hidden">
+                                @Translate.Text("moveto.accountregister.nonrestradelicense")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-nonidnumber"
+                                       name="IdNumber"
+                                       placeholder="@Translate.Text("moveto.accountregister.nonresidtypeerrormessage")"
+                                       aria-describedby="description-for-nonidnumber"
+                                       data-parsley-errors-container="#description-for-nonidnumber"
+                                       required
+                                       data-parsley-required-message="@Translate.Text("moveto.accountregister.nonresidtyperequiredmessage")"
+                                       value="@Model.IdNumber" />
+                            </span>
+                            <div id="description-for-nonidnumber" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.IdNumber, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+                        @*<div id="datepicker-container-start-date" class="form-field form-field--text ">
+                       <label for="form-field-nonexpiry-date" class="form-field__label">
+                           @Translate.Text("moveto.accountregister.nonresexpirydate")
+                           <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                       </label>
+                       <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                           @Html.TextBoxFor(x => x.DocumentExpiryDate,
+            new
+            {
+                @class = "form-field__input form-field__input--text form-field__input--datepicker",
+                @id = "form-field-nonexpiry-date",
+                @name = "text-date",
+                @placeholder = @Translate.Text("moveto.accountregister.nonresexpiryplaceholder"),
+                @type = "text",
+                @data_parsley_error_message = @Translate.Text("moveto.accountregister.nonresexpiryerrormessage"),
+                @data_parsley_errors_container = "#description-for-nonExpiry-Date",
+                @aria_describedby = "description-for-nonExpiry-date",
+                @data_el = "datepicker",
+                @data_picker_options = "true",
+                @data_parsley_id = "8",
+                @readonly = "",
+                @aria_haspopup = "true",
+                @aria_expanded = "false",
+                @aria_readonly = "false",
+                @aria_owns = "form-field-start-date_root",
+                @data_ref = "start_date",
+                @data_initial_date = Model.DocumentExpiryDate.HasValue ? Model.DocumentExpiryDate.Value.Date.ToString("MMMM dd, yyyy") : string.Empty
+            })
+                       </span>
+                       <div id="description-for-nonExpiry-Date" class="form-field__messages">
+                       </div>
+                   </div>*@
+
+
+
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-nonpremiseNo" class="form-field__label">
+                                @Translate.Text("moveto.accountregister.nonrespremisenumber")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-nonpremiseNo"
+                                       name="premiseNo"
+                                       type="number"
+                                       placeholder="@Translate.Text("moveto.accountregister.nonrespremiseplaceholder")"
+                                       aria-describedby="description-for-nonpremiseNo"
+                                       data-parsley-errors-container="#description-for-nonpremiseNo"
+                                       required
+                                       data-parsley-required-message="@Translate.Text("moveto.accountregister.nonrespremiserequiredmessage")"
+                                       data-parsley-error-message="@Translate.Text(DictionaryKeys.MoveIn.PleaseEnterPremiseNumber)"
+                                       value="@Model.PremiseNo" />
+                            </span>
+
+                            <div id="description-for-nonpremiseNo" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.PremiseNo, "", new { @class = "parsley-errors-list" })
+                            </div>
+                            <div id="errormessagepremise" class="form-field__messages" style="color:#ff0000;cursor:pointer;">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text" id="vatnumberdiv">
+                            <label for="form-field-vatnumber" id="vatnumber" class="form-field__label">
+                                @Translate.Text("movein.accountregister.vatnumber")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-vatnumber"
+                                       name="vatnumber"
+                                       placeholder="@Translate.Text("movein.accountregister.vatnumbererrormessage")"
+                                       aria-describedby="description-for-vatnumber"
+                                       data-parsley-errors-container="#description-for-vatnumber"
+                                       value="@Model.VatNumber" />
+                            </span>
+                            <div id="description-for-vatnumber" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.VatNumber, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+                        <fieldset class="fieldset" id="vatdocumentdiv">
+                            <legend class="legend">@Translate.Text("movein.vatdocument")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="vatdocument">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-vatdocument" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.VatDocument,
+                                        new
+                                        {
+                                            type = "file",
+                                            @class = "form-field__input form-field__input--upload",
+                                            @id = "form-field-vatdocument",
+                                            @name = @Translate.Text("upload"),
+                                            @aria_describedby = "description-for-vatdocument",
+                                            @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                            @data_parsley_required_message = @Translate.Text("movein.vatdocumentrequiredmessage"),
+                                            @data_parsley_errors_container = "#errors-for-vatdocument",
+                                            @data_uploader_field = "vatdocument",
+                                            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            @data_parsley_id = "16"
+                                        })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="vatdocument"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="vatdocument">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-vatdocument" class="form-field__messages">
+                                    <div id="errors-for-vatdocument">
+                                        @Html.ValidationMessageFor(x => x.VatDocument, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        @*<div id="datepicker-container-nonstart-date" class="form-field form-field--text ">
+                       <label for="form-field-nonstart-date" class="form-field__label">
+                           @Translate.Text("moveto.accountregister.nonresmoveindate")
+                           <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                       </label>
+                       <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                           @Html.TextBoxFor(x => x.MoveinStartDate,
+            new
+            {
+                @class = "form-field__input form-field__input--text form-field__input--datepicker",
+                @id = "form-field-nonstart-date",
+                @name = "text-date",
+                @placeholder = @Translate.Text("moveto.accountregister.nonresmoveinplaceholder"),
+                @type = "text",
+                @data_parsley_error_message = @Translate.Text("moveto.accountregister.nonreserrormessage"),
+                @data_parsley_errors_container = "#description-for-nonstart-date",
+                @aria_describedby = "description-for-nonstart-date",
+                @data_el = "datepicker",
+                @data_picker_options = "true",
+                @data_parsley_id = "8",
+                @readonly = "",
+                @required = "",
+                @aria_haspopup = "true",
+                @aria_expanded = "false",
+                @aria_readonly = "false",
+                @aria_owns = "form-field-nonstart-date_root",
+                @data_ref = "start_date",
+                @data_min_date = DateTime.Now.Date.ToString("MMMM dd, yyyy"),
+                @data_initial_date = Model.MoveinStartDate.HasValue ? Model.MoveinStartDate.Value.Date.ToString("MMMM dd, yyyy") : string.Empty
+            })
+                       </span>
+                       <div id="description-for-nonstart-date" class="form-field__messages">
+                       </div>
+                   </div>*@
+
+
+                        <fieldset class="fieldset " id="purchaseagreementdiv">
+                            <legend class="legend">@Translate.Text("moveto.contact.purchaseagreement")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="purchaseagreement">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-purchaseagreement" class="form-field__label">
+                                            <strong class="form-field__label-description">@Model.PurchaseAgreementLabel</strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.PurchaseAgreement,
+                                        new
+                                        {
+                                            type = "file",
+                                            @class = "form-field__input form-field__input--upload",
+                                            @id = "form-field-purchaseagreement",
+                                            @name = @Translate.Text("upload"),
+                                            @aria_describedby = "description-for-purchaseagreement",
+                                            @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                            @data_parsley_errors_container = "#errors-for-purchaseagreement",
+                                            @data_uploader_field = "purchaseagreement",
+                                            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            @data_parsley_id = "16"
+                                        })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="purchaseagreement"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="purchaseagreement">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-purchaseagreement" class="form-field__messages">
+                                    <div id="errors-for-purchaseagreement">
+                                        @Html.ValidationMessageFor(x => x.PurchaseAgreement, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset " id="tradelicensediv">
+                            <legend class="legend">@Translate.Text("movein.contact.tradelicense")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="tradelicense">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-tradelicense" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.TradeLicense,
+                                        new
+                                        {
+                                            type = "file",
+                                            @class = "form-field__input form-field__input--upload",
+                                            @id = "form-field-tradelicense",
+                                            @name = @Translate.Text("upload"),
+                                            @aria_describedby = "description-for-tradelicense",
+                                            @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                            @data_parsley_errors_container = "#errors-for-tradelicense",
+                                            @data_uploader_field = "tradelicense",
+                                            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            @data_parsley_id = "16"
+                                        })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="tradelicense"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="tradelicense">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-tradelicense" class="form-field__messages">
+                                    <div id="errors-for-tradelicense">
+                                        @Html.ValidationMessageFor(x => x.TradeLicense, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <span>@Translate.Text("moveto.disclaimer")</span>
+                        </fieldset>
+                        <fieldset class="fieldset" id="Termsandconditions">
+                            <legend class="legend-color">.</legend>
+                            @Html.Sitecore().Placeholder("Termsandconditions")
+                        </fieldset>
+                        <br />
+                        <div id="nonmove-in-register-error" class="form-field__messages" style="color:#ff0000;cursor:pointer;">
+                        </div>
+                        @Html.HiddenFor(x => x.SecurityDeposit, new { @id = "Security_Dep" })
+                        @Html.HiddenFor(x => x.OutstandingBalance, new { @id = "Outstanding_Balance" })
+                        @Html.HiddenFor(x => x.MoveoutPayment, new { @id = "MoveoutPayment" })
+
+                        <img id="load_img" src="/images/ajax_loader_green_512.gif" width="50" style="display:none" />
+
+                        <div id="nonpremise-cost-summery" class="form-field form-field--account-details hidden">
+                            <!-- m42-key-value-start -->
+                            <div class="m42-keyvalue">
+                                <dl>
+
+                                    <dt class="m42-keyvalue__key" id="nonres-outstanding-key">@Translate.Text("moveto.accountregister.outstandingbalance")</dt>
+                                    <dd class="m42-keyvalue__value " id="nonoutstanding-label"></dd>
+
+                                    <dt class="m42-keyvalue__key" id="nonres-nonrecon-dep-key">@Translate.Text("moveto.accountregister.securitydeposit")</dt>
+                                    <dd class="m42-keyvalue__value" id="nonsec-dep-label"></dd>
+
+                                </dl>
+                            </div>
+                            <!-- m42-key-value-end -->
+                        </div>
+                        @* Payment Type Popup module *@
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+                        <div class="form-field__button">
+                            <button id="CalcBtn" type="button" class="button button--primary button--calculate">@Translate.Text("moveto.accountregister.calculate")</button>
+                            <button id="moveooutsubmit" type="submit" class="button button--primary button--next hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveto.accountregister.submit")</button>
+                            <button id="subBtnOutStanding" type="submit" class="button button--primary button--next hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Pay")</button>
+                            <button id="movetocontinue" type="submit" class="button button--primary button--next hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveto.accountregister.continue")</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+        jQuery('#subBtnOutStanding').on('click', function () {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            require(['parsley'], function () {
+                jQuery("#movetononaccountregister").parsley();
+                var validate = jQuery("#movetononaccountregister").parsley().validate();
+                if (validate) {
+                    
+                    if (!jQuery('#subBtnOutStanding').parent().hasClass('disabled')) {
+                        var outstandingFees = jQuery('#Outstanding_Balance').val();
+                        var securityDeposit = jQuery('#Security_Dep').val();
+                        var total = numeral(outstandingFees) + numeral(securityDeposit);
+
+                        jQuery('#divPaymentAmountVal').attr('data-value', total);
+                        jQuery('#divPaymentAmountVal').data('value', total);
+
+                        if (total > 0) {
+                            //Set payment method based on paid amount
+                            setPaymentMethod(total);
+
+                            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + ' @Translate.Text("AED")');
+                            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                            jQuery('.btnmodaltrigger').trigger('click');
+                        }
+                    }
+                }
+            });
+    });
+        @*jQuery('#subBtnOutStanding').on('click', handleSubmission);
+
+        function handleSubmission() {
+            require(['parsley'], function () {
+                jQuery("#movetononaccountregister").parsley();
+                var validate = jQuery("#movetononaccountregister").parsley().validate();
+                if (validate) {
+                     event.preventDefault();
+                    event.stopImmediatePropagation();
+                    if (!jQuery('#subBtnOutStanding').parent().hasClass('disabled')) {
+                        var outstandingFees = jQuery('#Outstanding_Balance').val();
+                        var securityDeposit = jQuery('#Security_Dep').val();
+                        var total = numeral(outstandingFees) + numeral(securityDeposit);
+
+                        jQuery('#divPaymentAmountVal').attr('data-value', total);
+                        jQuery('#divPaymentAmountVal').data('value', total);
+
+                        if(total > 0) {
+                            //Set payment method based on paid amount
+                            setPaymentMethod(total);
+
+                            jQuery("#continue-button").html(numeral(total).format('0,0.00') + " " + ' @Translate.Text("AED")');
+                            jQuery('.btnmodaltrigger').trigger('click');
+                        }
+                    }
+                    //    jQuery.ajax(
+                    //jQuery('#movetononaccountregister').prop('action'),
+                    //{
+                    //    dataType: 'json',
+                    //    method: 'POST'
+                    //});
+                }
+            });
+
+        }*@
+        var $subBtnOutStanding = jQuery('#subBtnOutStanding');
+        var $submitBtn = jQuery('#moveooutsubmit');
+        var $movetocontinue = jQuery('#movetocontinue');
+        var $paymentflag = jQuery('#MoveoutPayment');
+
+        var getvatid = function (businesspartnerinput) {
+            var url = "/api/BusinessPartnerEmiratesSelection/Get";
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: {
+                    id: "00" + businesspartnerinput,
+                },
+                dataType: 'json',
+                type: 'GET',
+                success:function (response) {
+                    if (response.vatdetails != null && response.vatdetails.vatNumber != "" && response.vatdetails.vatNumber != undefined) {
+                        jQuery('#form-field-vatnumber').val(response.vatdetails.vatNumber);
+                    }
+                    else {
+                        jQuery('#form-field-vatnumber').val("");
+                    }
+                }
+            });
+        }
+
+        var $businesspartner = jQuery('#form-field-nonbusinesspartner');
+        var businesspartnerinput = $businesspartner.val();
+        if (businesspartnerinput != "") {
+            getvatid(businesspartnerinput);
+        }
+        else {
+            jQuery('#form-field-vatnumber').val("");
+        }
+        jQuery('#form-field-noncusttype').change(function () {
+            jQuery('#CalcBtn').removeAttr('disabled');
+            $submitBtn.addClass('hidden');
+            $subBtnOutStanding.addClass('hidden');
+            $movetocontinue.addClass('hidden');
+            var val1 = $('#form-field-noncusttype option:selected').val();
+            if (val1 === "12" || val1 === "13" || val1 === "01") {
+                jQuery('#nonresidnumberdiv').show();
+                jQuery('#nonresidtypediv').show();
+                jQuery('#form-field-nonidtype').val("");
+                jQuery('#form-field-nonidnumber').val("");
+                jQuery('#form-field-nonidtype').val("EJ");
+                jQuery('input[name="SelectedIDType"]').val("EJ");
+                jQuery('#form-field-nonidtype').attr("disabled", true);
+                jQuery('#nonresinitialapproval').hide();
+                jQuery('#nonresidnumber').hide();
+                jQuery('#nonrestradelicence').hide();
+                jQuery('#nonresejarinumber').show();
+                jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("movein.accountregister.nonresejarinumberplaceholder")";
+
+		        jQuery('input[name="SelectedIDType"]').val("EJ");
+		        jQuery('#purchaseagreementdiv').hide();
+		        jQuery('#tradelicensediv').hide();
+		        jQuery('#vatdocumentdiv').hide();
+		        //jQuery('#vatnumberdiv').hide();
+		        //jQuery('#form-field-vatnumber').val("");
+            }
+            else if (val1 === "05" || val1 === "06" || val1 === "04") {
+                jQuery('#nonresidnumberdiv').hide();
+                jQuery('#nonresidtypediv').hide();
+                jQuery('#form-field-nonidtype').val("");
+                jQuery('#form-field-nonidnumber').val("");
+
+		        jQuery('#purchaseagreementdiv').show();
+                jQuery('#tradelicensediv').show();
+                jQuery('input[name="SelectedIDType"]').val("");
+               // jQuery('#vatdocumentdiv').show();
+                //jQuery('#vatnumberdiv').show();
+                //var businesspartnerinput = $businesspartner.val();
+                //if (businesspartnerinput != "") {
+                //    getvatid(businesspartnerinput);
+                //}
+            }
+            else {
+                jQuery('#nonresidnumberdiv').show();
+                jQuery('#nonresidtypediv').show();
+                jQuery('#nonresidnumber').show();
+                jQuery('#nonresinitialapproval').hide();
+                jQuery('#nonrestradelicence').hide();
+                jQuery('#nonresejarinumber').hide();
+                jQuery('#form-field-nonidtype option[value="EJ"]').show();
+                jQuery('#form-field-nonidtype option[value="IA"]').show();
+                jQuery('#form-field-nonidtype option[value="TN"]').show();
+                jQuery('#form-field-nonidtype option[value="TO"]').show();
+                jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("movein.accountregister.nonresidnumber")";
+                jQuery('#form-field-nonidtype').val("");
+                jQuery('input[name="SelectedIDType"]').val("");
+                jQuery('#form-field-nonidtype').attr("disabled", false);
+		        jQuery('#purchaseagreementdiv').show();
+                jQuery('#tradelicensediv').show();
+                jQuery('input[name="SelectedIDType"]').val("");
+                jQuery('#vatdocumentdiv').hide();
+                //jQuery('#vatnumberdiv').hide();
+                //jQuery('#form-field-vatnumber').val("");
+            }
+        });
+        jQuery('#form-field-nonidtype').change(function () {
+            jQuery('#CalcBtn').removeAttr('disabled');
+            $submitBtn.addClass('hidden');
+            $movetocontinue.addClass('hidden');
+            $subBtnOutStanding.addClass('hidden');
+            var val2 = $('#form-field-noncusttype option:selected').val();
+            var val1 = $('#form-field-nonidtype option:selected').val();
+            jQuery('#form-field-nonidnumber')[0].value = "";
+            jQuery('input[name="SelectedIDType"]').val(val1);
+            if (val1 === 'EJ') {
+                jQuery('#nonresinitialapproval').hide();
+                jQuery('#nonresidnumber').hide();
+                jQuery('#nonrestradelicence').hide();
+                jQuery('#nonresejarinumber').show();
+                jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("moveto.accountregister.nonresejarinumberplaceholder")";
+                jQuery('#purchaseagreementdiv').hide();
+                jQuery('#tradelicensediv').hide();
+            }
+            else if (val1 === 'IA') {
+                jQuery('#nonrestradelicence').hide();
+                jQuery('#nonresidnumber').hide();
+                jQuery('#nonresejarinumber').hide();
+                jQuery('#nonresinitialapproval').show();
+                if (val2 == "01")
+                {
+                    jQuery('#purchaseagreementdiv').hide();
+                }
+                else
+                {
+                    jQuery('#purchaseagreementdiv').show();
+                }
+
+                jQuery('#tradelicensediv').show();
+                jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("moveto.accountregister.nonresinitialapproveplaceholder")";
+            }
+            else if (val1 === 'TN' || val1 === 'TO') {
+                jQuery('#nonresejarinumber').hide();
+                jQuery('#nonresidnumber').hide();
+                jQuery('#nonresinitialapproval').hide();
+                jQuery('#nonrestradelicence').show();
+                if (val2 == "01") {
+                    jQuery('#purchaseagreementdiv').hide();
+                }
+                else {
+                    jQuery('#purchaseagreementdiv').show();
+                }
+                jQuery('#tradelicensediv').show();
+                jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("moveto.accountregister.nonrestradelicenseplaceholder")";
+            }
+            else {
+                jQuery('#nonresidnumber').show();
+                jQuery('#purchaseagreementdiv').show();
+                jQuery('#tradelicensediv').show();
+            }
+
+        });
+        jQuery('#form-field-nonpremiseNo').change(function () {
+            jQuery('#CalcBtn').removeAttr('disabled');
+            $submitBtn.addClass('hidden');
+            $movetocontinue.addClass('hidden');
+            $subBtnOutStanding.addClass('hidden');
+        });
+        jQuery('#form-field-nonidnumber').change(function () {
+            jQuery('#CalcBtn').removeAttr('disabled');
+            $submitBtn.addClass('hidden');
+            $movetocontinue.addClass('hidden');
+            $subBtnOutStanding.addClass('hidden');
+        });
+
+        jQuery('#CalcBtn').click(getpremisedetails);
+
+        var $premise = jQuery('#form-field-nonpremiseNo');
+        var $idnumber = jQuery('#form-field-nonidnumber');
+        var $vatnumber = jQuery('#form-field-vatnumber');
+        var $premisePane = jQuery('#nonpremise-cost-summery');
+
+        var $custtype = jQuery('#form-field-noncusttype');
+        var $idtype = jQuery('#form-field-nonidtype');
+        function getpremisedetails() {
+            //if ($vatnumber.val() != "") {
+            //    jQuery('#form-field-vatdocument').attr("required", "");
+            //}
+            //else {
+            //    jQuery('#form-field-vatdocument').removeAttr("required", "");
+            //}
+            require(['parsley'], function () {
+                jQuery("#movetononaccountregister").parsley();
+                var validate = jQuery("#movetononaccountregister").parsley().validate();
+                if (validate) {
+                    getPricesForPremise();
+                }
+            });
+        }
+        function getPricesForPremise() {
+            $premisePane.addClass('hidden');
+            $submitBtn.attr('disabled', true);
+
+            var url = "/api/moveTo/Get";
+
+            var $customerType = jQuery('#form-field-noncusttype');
+            var $content = jQuery('#load_img');
+
+            var $securityTxt = jQuery('#Security_Dep');
+            var $reconText = jQuery('#Recon_Fee');
+            var $outstandText = jQuery('#Outstanding_Balance');
+            var $knowledgeText = jQuery('#Knowledge_Fee');
+            var $innovationText = jQuery('#Innovation_Fee');
+            var $ContractAccountText = jQuery('#ContractAccount');
+            //labels
+            var $secDep = jQuery('#nonsec-dep-label');
+            var $reconFee = jQuery('#nonrecon-label');
+            var $outstandingBalance = jQuery('#nonoutstanding-label');
+
+            var $secDepkey = jQuery('#nonres-nonrecon-dep-key');
+            var $reconFeekey = jQuery('#nonres-nonrecon-key');
+            var $outstandingBalancekey = jQuery('#nonres-outstanding-key');
+            var $knowledgeFeekey = jQuery('#nonres-nonknowledge-key');
+            var $refField = jQuery('input[name="Reference"]');
+
+            var selection = [];
+            selection.push($premise.val());
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: {
+                    idtype: $("#form-field-nonidtype option:selected").val(),
+                    businesspartner: $businesspartner.val(),
+                    idnumber: $idnumber.val(),
+                    customerCategory: 'O',
+                    customerType:$("#form-field-noncusttype option:selected").val(),
+                    moveoutaccount: jQuery('input[name="MovoutAccountnumber"]').val(),
+                    moveoutdate:jQuery('input[name="MoveoutAccountDate"]').val(),
+                    premiselist: selection
+                },
+                beforeSend: function () {
+                    jQuery('#description-for-nonpremiseNo').children().remove();
+                    $content.show();
+                    $submitBtn.attr('disabled', true);
+                    jQuery('#nonmove-in-register-error').hide();
+                    jQuery('#errormessagepremise').hide();
+                },
+                complete: function () {
+                    $content.hide();
+                },
+                dataType: 'json',
+                type: 'GET',
+                success:function (response) {
+                if (response.ResponseCode === 0) {
+                    jQuery('#CalcBtn').attr('disabled', true);
+                    $submitBtn.addClass('hidden');
+                    $movetocontinue.addClass('hidden');
+                    $subBtnOutStanding.addClass('hidden');
+                    jQuery('#nonmove-in-register-error').hide();
+                    jQuery('#errormessagepremise').hide();
+                    $premisePane.removeClass('hidden'); //Show the payment summmery pane
+
+                    var securityDeposit = response.moveinEjari.securityDepositAmount;
+                    var outstandingFees = response.moveinEjari.outStandingAmount;
+
+                    if (numeral(securityDeposit) > 0) {
+                        //Set payment values
+                        $secDep.show();
+                        $secDepkey.show();
+                        $secDep.html(numeral(securityDeposit).format('0,0.00') + " " + ' @Translate.Text("AED")');
+                        if (response.moveinEjari.moveInIndicator == "111111") {
+                            $secDepkey.html('@Translate.Text("moveto.accountregisterres.securitydepositdis")');
+                        }
+                        else {
+                             $secDepkey.html('@Translate.Text("moveto.accountregisterres.securitydeposit")');
+                        }
+                    }
+                    else {
+                        $secDep.hide();
+                        $secDepkey.hide();
+                    }
+
+                    if (numeral(outstandingFees) > 0) {
+                        $outstandingBalance.html(numeral(outstandingFees).format('0,0.00') + " " + ' @Translate.Text("AED")');
+                    }
+                    else {
+                        $outstandingBalance.hide();
+                        $outstandingBalancekey.hide();
+                    }
+
+                    $securityTxt.val(securityDeposit);
+                    $outstandText.val(outstandingFees);
+
+                    if ($('#form-field-noncusttype option:selected').val() == "01" && $('#form-field-nonidtype option:selected').val() !="EJ")
+                    {
+                        $movetocontinue.removeClass('hidden');
+                        $paymentflag[0].value = false;
+                    }
+                else
+                {
+
+                    if (numeral(outstandingFees) == 0 && numeral(securityDeposit) == 0) {
+                        $submitBtn.removeAttr('disabled');
+                        $submitBtn.removeClass('hidden');
+                        $subBtnOutStanding.addClass('hidden');
+                        jQuery('#CalcBtn').attr('disabled', true);
+                        $paymentflag[0].value = false;
+                    }
+                    else {
+                        var total = numeral(outstandingFees) + numeral(securityDeposit);
+                        $subBtnOutStanding.html(' @Translate.Text("moveto.paypreviousoutstanding")' + numeral(total).format('0,0.00') + " " + ' @Translate.Text("AED")');
+                        $submitBtn.addClass('hidden');
+                        $subBtnOutStanding.addClass('hidden');
+                        $movetocontinue.addClass('hidden');
+                        $submitBtn.attr('disabled', true);
+                        $subBtnOutStanding.removeClass('hidden');
+
+                        // $outstandText.val(total);
+                        $paymentflag[0].value = true;
+                    }
+                }
+
+                }
+                else {
+                    jQuery('input[name="Moveinindicator"]').val("False");
+                    if (response.moveinEjari.moveInIndicator != undefined && response.moveinEjari.moveInIndicator == "000010")
+                    {
+                        jQuery('input[name="Moveinindicator"]').val("True");
+                        jQuery('#nonresidnumber').show();
+                        jQuery('#nonresinitialapproval').hide();
+                        jQuery('#nonrestradelicence').hide();
+                        jQuery('#nonresejarinumber').hide();
+                        jQuery('#form-field-nonidtype option[value="EJ"]').hide();
+                        jQuery('#form-field-nonidtype option[value="IA"]').show();
+                        jQuery('#form-field-nonidtype option[value="TN"]').show();
+                        jQuery('#form-field-nonidtype option[value="TO"]').show();
+                        jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("movein.accountregister.nonresidnumber")";
+                        if (jQuery('#form-field-nonidtype option:selected').val() === jQuery('#form-field-nonidtype option[value="EJ"]').val()) {
+                            jQuery('#form-field-nonidtype').val("");
+                            jQuery('input[name="SelectedIDType"]').val("");
+                        }
+                        jQuery('#form-field-nonidtype').attr("disabled", false);
+                        jQuery('#form-field-nonidnumber').val("");
+                    }
+                    jQuery('#nonmove-in-register-error').show();
+                    var $registererror = jQuery('#nonmove-in-register-error');
+                    $registererror.html(response.Description);
+                    if (response.moveinEjari != null && response.moveinEjari.premiseErrorList != null && response.moveinEjari.premiseErrorList.length > 0) {
+                        var $premieseerror = jQuery('#errormessagepremise');
+                        $premieseerror.html(response.moveinEjari.premiseErrorList[0].premiseError);
+                        jQuery('#errormessagepremise').show();
+                    }
+                }
+
+            },error:function (xhr) {
+                if (xhr.responseJSON) {
+                    $servError.text(xhr.responseJSON.Message);
+                    $servErrorPane.removeClass('hidden');
+                }
+            }
+            });
+        }
+    });
+
+</script>
+<script type="text/javascript">
+    docReady(function () {
+            if ("@Model.CustomerType" == "12" || "@Model.CustomerType" == "13") {
+                jQuery('#form-field-nonidtype').attr("disabled", true);
+            }
+            else {
+                jQuery('#form-field-nonidtype').attr("disabled", false);
+                jQuery('#form-field-nonidtype option[value="EJ"]').hide();
+            }
+        @*if ("@Model.CustomerType" === "05" || "@Model.CustomerType" === "06" || "@Model.CustomerType" === "04") {
+            jQuery('#vatdocumentdiv').show();
+            jQuery('#vatnumberdiv').show();
+        }*@
+        
+        if("@Model.Moveinindicator"=="True")
+        {
+            jQuery('#nonresidnumber').show();
+            jQuery('#nonresinitialapproval').hide();
+            jQuery('#nonrestradelicence').hide();
+            jQuery('#nonresejarinumber').hide();
+            jQuery('#form-field-nonidtype option[value="EJ"]').hide();
+            jQuery('#form-field-nonidtype option[value="IA"]').show();
+            jQuery('#form-field-nonidtype option[value="TN"]').show();
+            jQuery('#form-field-nonidtype option[value="TO"]').show();
+            jQuery('#form-field-nonidnumber')[0].placeholder = "@Translate.Text("movein.accountregister.nonresidnumber")";
+            if (jQuery('#form-field-nonidtype option:selected').val() === jQuery('#form-field-nonidtype option[value="EJ"]').val()) {
+                jQuery('#form-field-nonidtype').val("");
+                jQuery('input[name="SelectedIDType"]').val("");
+            }
+            if ("@Model.SelectedIDType" != "") {
+                jQuery('#form-field-nonidtype').val("@Model.SelectedIDType");
+                jQuery('input[name="SelectedIDType"]').val("@Model.SelectedIDType");
+            }
+            if ("@Model.IdNumber" != "") {
+                jQuery('#form-field-nonidnumber').val("@Model.IdNumber");
+            }
+            jQuery('#form-field-nonidtype').attr("disabled", false);
+        }
+        if ("@Model.CustomerType" == "01" && "@Model.SelectedIDType" != "EJ") {
+            jQuery('#purchaseagreementdiv').hide();
+        }
+    });
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

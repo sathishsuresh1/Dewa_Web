@@ -1,0 +1,54 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using DEWAXP.Feature.CommonComponents.Models.ImageMap
+
+@model ImageMapTabs
+
+@if (Model != null && Model.Children != null && Model.Children.Count() > 0)
+{
+
+<div class="grid__row" style="margin-top:20px;">
+    <div id="m41-tabs-box-bill" class="m41-tabs-box m41-tabs-box--scripted" data-component="m41-tabs-box">
+
+        <div class="m41-tabs-box__tabs m41-tabs-box--desktop">
+
+            <ul class="m41-tabs-box__tab-items">
+                @{ int i = 0;
+                    foreach (ImageMapDetail item in Model.Children)
+                    {
+                        <li class="m41-tabs-box__tab-item" data-index="@(i)">
+                            <a href="" class="m41-tabs-box__tab-link@(i==0?" m41-tabs-box__tab-link--active":"")">@(item.Header)</a>
+                        </li>
+                        i++;
+                    }
+                }
+            </ul>
+            <div class="m41-tabs-box__tab-panels">
+                @{ int j = 0;
+                    foreach (ImageMapDetail item in Model.Children)
+                    {
+                        <div class="m41-tabs-box__tab-panel" data-index="@(j)">
+                            <div class="m77-understand-bill" data-component="m77-understand-bill" data-map='@Html.Raw(Model.GetImageCoordJson(item))' data-dimension='@Html.Raw(Model.GetImageDimensionJson(item))'>
+                                @Html.Glass().RenderImage(item, x => x.ImageMap, new { @class = "m77-understand-bill--img", @usemap = "#map" + j })
+                                <map class="m77-understand-bill--map" name="map@(j)"></map>
+                            </div>
+                        </div>
+                        j++;
+                    }
+                }
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+    <script>
+        docReady(function () {
+            setTimeout(function () {
+                jQuery(window).trigger('resize');
+            }, 250);
+        });
+    </script>
+}

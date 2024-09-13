@@ -1,0 +1,243 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Foundation.Content.Models.EVCharger.EVReplaceCard
+
+@{
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ltr" : "rtl";
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Sitecore().Placeholder("j18/m26-page-title")
+            @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+            @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+        </div>
+    </div>
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="form-field form-field--account-details">
+                <!-- m43-account-selector-start -->
+                <fieldset class="fieldset ">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--account-details">
+                        <form id="form-account-selector" data-form="true" action="#" method="POST" form-skipvalidation="true">
+                            @Html.AntiForgeryToken()
+                            @Html.Sitecore().Placeholder("EV/m43-account-selector")
+                        </form>
+                    </div>
+                </fieldset>
+                <!-- m42-account-selector-end -->
+            </div>
+            <div class="mt24" id="listofcard-placeholder"></div>
+            <br />
+            <div id="EVCharger-error" dir="@direction" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;">
+            </div>
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "evreplacecardform", @class = "form", @data_form = "true", @data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.TotalAmount)
+                @Html.HiddenFor(m => m.TaxAmount)
+                @Html.HiddenFor(m => m.TaxRate)
+                @Html.HiddenFor(m => m.CardFee)
+                @Html.HiddenFor(m => m.AccountNumber)
+                @Html.HiddenFor(m => m.CardNumber)
+                <div id="personal-details-placeholder" class="grid__row">
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-EVReason" class="form-field__label">@Translate.Text("EV.ChooseReason") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.Reason, Enumerable.Empty<SelectListItem>(),
+                 Sitecore.Globalization.Translate.Text("EV.Select"),
+                 new
+                 {
+                     @class = "form-field__input form-field__input--select form-field__input--select-full",
+                     @id = "form-field-EVReason",
+                     @name = "select_EVReason",
+                     @aria_describedby = "description-for-EVReason",
+                     @required = "",
+                     @data_parsley_error_message = @Translate.Text("EV.Reason_ErrorMessage"),
+                     @data_parsley_errors_container = "#description-for-EVReason",
+                     @data_parsley_id = "15"
+                 })
+                        </span>
+                        <div id="description-for-EVReason" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.Reason, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <fieldset class="fieldset" id="divpaymentdetails">
+                        <legend class="legend">@Translate.Text("EV.Payment Details")</legend>
+
+                        <div class="form-field form-field--text">
+                            <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-charges">
+                                @Translate.Text("EV.CostPerCard")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                                <input type="text"
+                                       value="0.00 @Translate.Text("AED")"
+                                       name="charges"
+                                       id="form-field-charges"
+                                       readonly=""
+                                       class="form-field__input form-field__input--readonly form-field__input--amount"
+                                       data-parsley-id="25" />
+                            </div>
+                            <div class="form-field__messages" id="description-for-charges"></div>
+
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-courierfee">
+                                @Translate.Text("EV.Courier Charges")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                                <input type="text"
+                                       value="0.00 @Translate.Text("AED")"
+                                       name="CourierFee"
+                                       id="form-field-courierfee"
+                                       readonly=""
+                                       class="form-field__input form-field__input--readonly form-field__input--amount"
+                                       data-parsley-id="25" />
+                            </div>
+                            <div class="form-field__messages" id="description-for-charges"></div>
+
+                        </div>
+
+
+                        <div class="form-field form-field--text">
+                            <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-VATamount">
+                                @Translate.Text("EV.VATlabel")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                                <input type="text"
+                                       value="0.00 @Translate.Text("AED")"
+                                       name="VATamount"
+                                       id="form-field-VATamount"
+                                       readonly=""
+                                       class="form-field__input form-field__input--readonly form-field__input--amount"
+                                       data-parsley-id="25" />
+                            </div>
+                            <div class="form-field__messages" id="description-for-VATamount"></div>
+                        </div>
+                    </fieldset>
+
+
+
+                    <div class="form-field__button" id="btnPayEV" style="display:none;">
+                        <a id="paynow-popup" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">
+                            @Translate.Text("Pay"):
+                            <span class="amount_label" id="spantotalAmountPay"></span>
+                        </a>
+                    </div>
+                </div>
+
+                @* Payment Type Popup module *@
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            }
+        </div>
+    </div>
+</div>
+@Html.Partial("~/Views/Feature/EV/EVCharger/ListofEVCards.cshtml")
+<script type="text/javascript">
+    docReady(function () {
+        jQuery("#form-account-selector").submit(handleAccountSelection);
+        jQuery('#form-account-selector').submit();
+            require(['parsley'], function () {
+                jQuery("#paynow-popup").on("click", function () {
+                    if (jQuery("#evreplacecardform").parsley().validate()) {
+
+                        var total = jQuery("#TotalAmount").val();
+                        var currency = '@Translate.Text("AED")';
+
+                        jQuery('#divPaymentAmountVal').attr('data-value', total);
+                        jQuery('#divPaymentAmountVal').data('value', total);
+
+                        if (numeral(total) > 0)
+                        {
+                            //Set payment method based on paid amount
+                            setPaymentMethod(total);
+
+                            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+                            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                            jQuery('.btnmodaltrigger').trigger('click');
+                        }
+                    }
+                })
+            });
+
+    });
+
+    // Open Payment Method popup
+
+    function handleAccountSelection() {
+        firstTime = true;
+        _listofevcardsHandler();
+        return false;
+    }
+    function fnAfterEVCardSelected() {
+        var accountNumber = jQuery("input[name='SelectedAccountNumber']:checked").val();
+        var cardno = jQuery(".evcardnumber_value").attr('data-cardnumber');
+        if (accountNumber && cardno) {
+            $("#personal-details-placeholder").show();
+            jQuery('input[name="AccountNumber"]').val(accountNumber);
+            jQuery('input[name="CardNumber"]').val(cardno);
+            var url = '/api/sitecore/evcharger/getEVReplaceDetails';
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                dataType: 'json',
+                type: "POST",
+                data: AddForgeryToken({
+                    id: accountNumber,
+                    cardno: cardno
+                }, "form-account-selector"),
+                beforeSend: function () {
+                    window.attachSpinner('#personal-details-placeholder', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                },
+                complete: function (response) {
+                    window.detachSpinner('#personal-details-placeholder', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                },
+                success: function (response) {
+                    if (response != null && response.status == true && response.Data != null) {
+                        var result = JSON.parse(response.Data);
+                        $("#evreplacecardform").show();
+                        $("#EVCharger-error").hide();
+                        $("#form-field-charges").val(result.cardFee + " @Translate.Text("AED")");
+                        $("#form-field-VATamount").val(result.taxAmount + " @Translate.Text("AED")");
+                        $("#CardFee").val(result.cardFee);
+                        $("#form-field-courierfee").val(result.courierFee + " @Translate.Text("AED")");
+                        $("#TaxAmount").val(result.taxAmount);
+                        $("#TaxRate").val(result.taxRate);
+                        $("#TotalAmount").val(result.totalAmount);
+                        $("#spantotalAmountPay").text(result.totalAmount + " @Translate.Text("AED")");
+                        $("#spantotalAmountPay-popup").text(result.totalAmount + " @Translate.Text("AED")");
+                        $("#btnPayEV").show();
+                        $("#btnPayEV-popup").show();
+                        $("#form-field-EVReason").empty();
+                        $("#form-field-EVReason").append($("<option     />").val("").text("@Translate.Text("EV.Select")"));
+                        $.each(result.replaceReasonList, function () {
+
+                            $("#form-field-EVReason").append($("<option/>").val(this.code).text(this.description));
+                        });
+                    }
+                    else {
+                        $("#EVCharger-error").show();
+                        $("#EVCharger-error").html(response.Message);
+                        $("#evreplacecardform").hide();
+                        $("#btnPayEV").hide();
+                        $("#btnPayEV-popup").hide();
+                        $("#form-field-charges").text("0.00 @Translate.Text("AED")");
+                        $("#form-field-VATamount").text("0.00 @Translate.Text("AED")");
+                    }
+                }
+            });
+        }
+        else {
+            $("#personal-details-placeholder").hide();
+        }
+        return false;
+    }
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

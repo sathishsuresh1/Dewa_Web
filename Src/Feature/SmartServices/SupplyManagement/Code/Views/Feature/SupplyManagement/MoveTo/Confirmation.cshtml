@@ -1,0 +1,86 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Foundation.Content.Models.Payment.ServiceActivationPaymentCompletionModel
+
+@Html.Sitecore().Placeholder("j25/page-title")
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+
+@if (Model.Succeeded)
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message " data-component="m40-status-message">
+                <div class="m40-status-message__title icon--success">@Translate.Text("Payment completed")</div>
+
+                @*<div class="m40-status-message__referance">@Translate.Text("Reference_Number"): <strong>@Model.DewaTransactionId</strong></div>*@
+
+                <div class="m40-status-message__text">@Translate.Text("movein.SuccessPaid")</div>
+                <p>
+                    <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <h2 class="text__section-title success-subtitle__h2">@Translate.Text("Transaction_Details")</h2>
+
+            <div class="m42-keyvalue success-page">
+                <dl>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("payment date and time label")</dt>
+                    @if (Language.Current.Name.ToLowerInvariant() == "ar-ae")
+                    {
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "ss:" + timeFix + "mm:" + timeFix + "HH", Sitecore.Context.Culture)</dd>
+                    }
+                    else
+                    {
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+                    }
+
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("DEWA Premise No")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.PremiseNo</dd>
+
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total Amount")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.PaymentAmount</dd>
+                </dl>
+
+            </div>
+        </div>
+    </div>
+
+}
+else
+{
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+}
+
+<div class="grid__row noprint">
+    <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+        <h2 class="text__section-title">@Translate.Text("WhatNext")</h2>
+
+        @Html.Raw(Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.J10_SUPPLIMENTARY).Fields["Confirmation Blurb"])
+
+        <div class="button-container--single">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" class="button button--primary button--next" role="button">@Translate.Text(DictionaryKeys.Global.Home)</a>
+        </div>
+
+
+    </div>
+</div>

@@ -1,0 +1,135 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@{
+    var _progress = Model.SurveyResponses.Select(x => x.Progress).FirstOrDefault().ToString();
+    var _IsFirstAttemptCompleted = Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted;
+    var _IsSecondAttemptCompleted = Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted && Model.VideoResponses.FirstOrDefault().IsCompleted;
+    var _IsFinalAttemptCompleted = _IsSecondAttemptCompleted && (Model.SurveyResponses.FirstOrDefault().Marks == 100 || (Model.SurveyResponses.LastOrDefault().IsSecondAttemptCompleted && Model.SurveyResponses.LastOrDefault().Marks >= 90));
+    var _totalVideosWatched = Model.VideoResponses.Select(x => x.NameValue.AllKeys.Count()).FirstOrDefault();
+    var _totalVideos = (Model.Videos != null && Model.Videos.VideoGallery.Count() > 0) ? Model.Videos.VideoGallery.Count() : 10;
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m26-page-title ">
+            <div class="m26-page-title__links">
+                <!-- m30-share start -->
+                <div class="m26-page-title__share user-widget">
+                    <ul class="user-widget__links">
+                        <li class="user-widget__link-item">
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMWCONSUMER_USER_PROFILE)" class="user-widget__link user-widget__link--profile">@Translate.Text("J106.MyProfile")</a>
+                        </li>
+                        <li class="user-widget__link-item">
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_LOGOFF)" class="user-widget__link">@Translate.Text("P106.LogOff")</a>
+                        </li>
+                    </ul>
+                    <!-- m30-share end -->
+                </div>
+                <h2 class="text__page-title">@Html.Sitecore().Field("Header")</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="j143-ideal-home-dashboard-profile j143-ideal-home-box">
+            <div class="grid__column grid__column--7">
+                <div class="m14-richtext">
+                    <h4><strong>@Translate.Text("IDH_SummHeader")</strong></h4>
+                    <p>@Html.Raw(Translate.Text("IDH_SummSubHeader"))</p>
+                    @*<p><a href="#" class="link">@Translate.Text("IDH_SummReadmore")</a></p>*@
+                </div>
+            </div>
+            <div class="grid__column grid__column--5">
+                <div class="m42-keyvalue">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">
+                            @Translate.Text("IDH_SummHeader1")
+                            @if (_progress == "100")
+                            {
+                                <span class="status-green">
+                                    @Translate.Text("J106.CompletedLabel")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-green"> @string.Format(Translate.Text("IDH_Percentage"), _progress) @Translate.Text("J106.CompletedLabel")</span>
+                            }
+                        </dt>
+                        <dd class="m42-keyvalue__value--stacked">@*@Translate.Text("IDH_SummComplete")*@ @Translate.Text("J106.Self-assessment")</dd>
+                        <dt class="m42-keyvalue__key--stacked @(_IsFirstAttemptCompleted ? "" : "disable")">
+                            @Translate.Text("IDH_SummHeader2")
+                            @if (_IsFirstAttemptCompleted)
+                            {
+                                if (Model.VideoResponses.FirstOrDefault().IsCompleted)
+                                {
+                                    <span class="status-green">
+                                        @Translate.Text("J106.CompletedLabel")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-blue">
+                                        @_totalVideosWatched/@_totalVideos @Translate.Text("J106.CompletedLabel")
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="status-blue">
+                                    @_totalVideosWatched/@_totalVideos @Translate.Text("J106.CompletedLabel")
+                                </span>
+                            }
+                        </dt>
+                        <dd class="m42-keyvalue__value--stacked @(_IsFirstAttemptCompleted ? "" : "disable")">@Translate.Text("IDH_SummAwarenessVideos")</dd>
+                        <dt class="m42-keyvalue__key--stacked @(_IsSecondAttemptCompleted ? "" : "disable")">
+                            @Translate.Text("IDH_SummHeader3")
+                            @if (_IsSecondAttemptCompleted)
+                            {
+                                if (Model.SurveyResponses.Select(x => x.Progress).LastOrDefault().ToString() == "100")
+                                {
+                                    <span class="status-green">
+                                        @Translate.Text("J106.CompletedLabel")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-green">
+                                        @string.Format(Translate.Text("IDH_Percentage"), Model.SurveyResponses.Select(x => x.Progress).LastOrDefault().ToString()) @Translate.Text("J106.CompletedLabel")
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="status-blue">
+                                    <strong>@Translate.Text("IDH_CompletedPercentage")</strong> @Translate.Text("J106.CompletedLabel")
+                                </span>
+                            }
+                        </dt>
+                        <dd class="m42-keyvalue__value--stacked @(_IsSecondAttemptCompleted ? "" : "disable")">@Translate.Text("IDH_SummCompleteFinal")</dd>
+                        <dt class="m42-keyvalue__key--stacked @(_IsFinalAttemptCompleted ? "" : "disable")">
+                            @Translate.Text("IDH_SummHeader4")
+                            @if (_IsFinalAttemptCompleted)
+                            {
+                                <span class="status-green">
+                                    @Translate.Text("J106.CompletedLabel")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-blue">
+                                    <strong>@Translate.Text("IDH_CompletedPercentage")</strong> @Translate.Text("J106.CompletedLabel")
+                                </span>
+                            }
+                        </dt>
+                        <dd class="m42-keyvalue__value--stacked @(_IsFinalAttemptCompleted ? "" : "disable")">@Translate.Text("IDH_SummCompleteCertificate")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

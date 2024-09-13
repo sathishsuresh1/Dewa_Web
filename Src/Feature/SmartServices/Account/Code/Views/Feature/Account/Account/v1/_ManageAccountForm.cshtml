@@ -1,0 +1,775 @@
+﻿@using DEWAXP.Feature.Account.Models
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+@model DEWAXP.Foundation.Content.Models.AccountModel.ManageAccountInfo
+
+
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "manageaccountform", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Sitecore().FormHandler("Account", "ManageAccountV1")
+
+    <div class="form-field form-field--toggles" id="setprimaryaccountdiv">
+        <fieldset class="fieldset">
+            <legend class="legend-color">.</legend>
+            <div class="form-field__checkbox   first">
+                <label for="form-field-checkbox_1_1">
+                    <input class="form-field__input form-field__input--checkbox"
+                           id="form-field-checkbox_1_1"
+                           name="IsPrimaryAccount" type="checkbox"
+                           aria-describedby="description-for-primaryaccount"
+                           value="true" @(Model.IsPrimaryAccount ? "checked=\"checked\"" : "")
+                           data-parsley-errors-container="#description-for-primaryaccount"
+                           data-parsley-multiple="checkbox_1_1" data-parsley-id="45">
+                    <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("manageaccount.setaprimaryaccount")</span>
+                </label>
+            </div>
+            <div id="description-for-primaryaccount" class="form-field__messages mb24 mt24">
+                <p class="form-field__description">@Translate.Text("manageaccount.primaryaccountdesc")</p>
+            </div>
+        </fieldset>
+    </div>
+    @Html.HiddenFor(m => m.MultipleAccountNumberSelected)
+    @Html.HiddenFor(m => m.AccountNumberSelected)
+    @Html.HiddenFor(m => m.SelectedBusinessPartnerNumber)
+    @Html.HiddenFor(m => m.OtpRequestId)
+    @Html.HiddenFor(m => m.RequestType)
+    <fieldset class="fieldset">
+        <legend class="legend">@Translate.Text("manageaccount.UpdateAccountInfoFormTitle")</legend>
+        <div class="form-field form-field--text">
+            <label for="form-field-nickname" class="form-field__label">
+                @Translate.Text("manageaccount.accountnickname")
+            </label>
+            <span class="form-field__input-wrapper">
+                <input class="form-field__input form-field__input--text"
+                       id="form-field-nickname"
+                       name="NickName"
+                       type="text"
+                       maxlength="35"
+                       value="@Model.NickName"
+                       placeholder="@Translate.Text("manageaccount.nicknameplaceholder")"
+                       aria-describedby="description-for-nickname"
+                       data-parsley-errors-container="#description-for-nickname"
+                       data-parsley-required-message="@Translate.Text("manageaccount.nicknamerequirederror")"
+                       data-parsley-trigger="focusout">
+            </span>
+
+            <div id="description-for-nickname" class="form-field__messages">
+                @*<p class="form-field__description">@Translate.Text("manageaccount.nicknameerror")</p>*@
+                <p class="form-field__description">@Translate.Text("manageaccount.nickname.note")</p>
+            </div>
+        </div>
+
+        <div class="form-field form-field--text ">
+            <label for="form-field-emailaddress" class="form-field__label">
+                @Translate.Text("Email address")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                @*@if (Model.IsVerifyEmail)
+                    {
+                        <span class="form-field__label--tooltip icon-new-announcement tooltipstered"
+                              tooltip-text="@Translate.Text("manageaccount.emailtooltip")">
+                            @Translate.Text("manageaccount.pendingverification")
+                        </span>
+                    }*@
+                <span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("manageaccount.email.note")"></span>
+            </label>
+            <span class="form-field__input-wrapper">
+                <input id="form-field-emailaddress"
+                       type="email"
+                       name="EmailAddress"
+                       value="@Model.EmailAddress"
+                       required
+                       readonly
+                       placeholder="@Translate.Text("Email address placeholder")"
+                       aria-describedby="description-for-emailaddress"
+                       data-parsley-error-message="@Translate.Text("Please enter a valid email address")"
+                       data-parsley-trigger="focusout" data-parsley-errors-container="#description-for-emailaddress"
+                       class="form-field__input form-field__input--text" />
+            </span>
+            <div id="description-for-emailaddress" class="form-field__messages">
+                <p class="form-field__description">
+                    @Translate.Text("cust.not.my.emailaddress")
+                    <a href="#" id="lnkUpdateEmail" class="link">@Translate.Text("cust.profile.Update.Email.Address")</a>
+                </p>
+                @*@Html.ValidationMessageFor(x => x.EmailAddress, string.Empty, new { @class = "parsley-errors-list" })*@
+                @*<p class="form-field__description" data-dtext="UCI_EmailAddressHelptext">@Translate.Text("manageaccount.emailerror")</p>*@
+            </div>
+        </div>
+        <div class="form-field form-field--text ">
+            <label for="form-field-mobilenumber" class="form-field__label">
+                @Translate.Text("Mobile number")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span><span class="form-field__label--tooltip icon-new-announcement" tooltip-text="@Translate.Text("manageaccount.mobile.note")"></span>
+            </label>
+            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                <input id="form-field-mobilenumber"
+                       type="tel"
+                       name="MobileNumber"
+                       value="@Model.MobileNumber"
+                       aria-describedby="description-for-mobilenumber"
+                       required=""
+                       placeholder="@Translate.Text("Mobile number placeholder")"
+                       data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                       data-parsley-type="digits"
+                       data-parsley-trigger="focusout"
+                       data-parsley-mobile_number=""
+                       readonly
+                       data-parsley-errors-container="#description-for-mobilenumber"
+                       class="form-field__input form-field__input--text form-field__input--prefixed" />
+            </span>
+            <div id="description-for-mobilenumber" class="form-field__messages">
+                <p class="form-field__description">
+                    @Translate.Text("cust.not.my.mobilenumber")
+                    <a href="#" id="lnkUpdateMobile" class="link">@Translate.Text("cust.profile.Update.Mobile")</a>
+                </p>
+                @*@Html.ValidationMessageFor(x => x.MobileNumber, string.Empty, new { @class = "parsley-errors-list" })*@
+                @*<p class="form-field__description" data-dtext="UCI_MobileNumberHelptext">@Translate.Text("manageaccount.mobilenumbererror")</p>*@
+            </div>
+        </div>
+
+        @if ((!string.IsNullOrWhiteSpace(Model.Street) && !string.IsNullOrWhiteSpace(Model.Location)) || (!string.IsNullOrWhiteSpace(Model.XCordinate) && !string.IsNullOrWhiteSpace(Model.YCordinate)))
+        {
+            <div class="form-field form-field--text">
+                <label for="form-field-2ly58uq1v" class="form-field__label">
+                    @Translate.Text("manageaccount.Premise Location")
+                </label>
+                @if (!string.IsNullOrWhiteSpace(Model.Street) && !string.IsNullOrWhiteSpace(Model.Location))
+                {
+                    <div id="description-for-2ly58uq1v" class="form-field__messages">
+                        <p class="form-field__description">
+                            @Model.Street, @Model.Location
+                        </p>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.XCordinate) && !string.IsNullOrWhiteSpace(Model.YCordinate))
+                {
+                    <div class="m88-dashboard-map" data-component="m88-dashboard-map" data-coord='{"lat":@Model.XCordinate,"lng":@Model.YCordinate}'>
+                        <div id="map"></div>
+                    </div>
+                }
+            </div>
+        }
+        @*@if (Model.CommunicationList != null)
+            {
+                <fieldset class="fieldset mt56">
+                    <legend class="legend">@Translate.Text("manageaccount.managecommunication")</legend>
+                    @{
+                        var counter = 0;
+                    }
+                    @foreach (ManageAccountCommunication communication in Model.CommunicationList)
+                    {
+                        if (communication != null)
+                        {
+                            <div class="form-field form-field--fakecbox2">
+                                <div class="form-field__label">
+                                    @Translate.Text("manageaccount.billingcommunication")
+                                </div>
+                                <div class="form-field--fakecbox2_wrap mb12">
+
+                                </div>
+                                <div class="form-field__label">
+                                    @(!string.IsNullOrWhiteSpace(communication.CommunicationType) ?
+                                                                                                                                                                        (communication.CommunicationType.Equals("03") ? Translate.Text("manageaccount.sustainablelivingprogram") :
+                                                                                                                                                                        (communication.CommunicationType.Equals("01") ? Translate.Text("manageaccount.generalcommunication") :
+                                                                                                                                                                        (communication.CommunicationType.Equals("02") ? Translate.Text("manageaccount.shamsdubai") : string.Empty)))
+                                                                                                                                                                        : string.Empty )
+                                </div>
+                                <div class="form-field--fakecbox2_wrap">
+                                    <span class="form-field--fakecbox2_desc">@Translate.Text("manageaccount.subscribethrough")</span>
+                                    @Html.Hidden("CommunicationList[" + counter + "].CommunicationType", communication.CommunicationType)
+                                    <div class="form-field--fakecbox2_input @(communication.IsEmail ? "form-field--fakecbox2_input--active" : "")">
+                                        @Translate.Text("manageaccount.emailsubscribe")
+                                        <input class="hidden"
+                                               name="CommunicationList[@(counter)].IsEmail"
+                                               type="checkbox"
+                                               value="true" @(communication.IsEmail ? "checked=\"checked\"" : "")
+                                               data-parsley-multiple="gen_com_@(counter)">
+                                    </div>
+                                    <div class="form-field--fakecbox2_input @(communication.IsSMS ? "form-field--fakecbox2_input--active" : "")">
+                                        @Translate.Text("manageaccount.smssubscribe")
+                                        <input class="hidden"
+                                               name="CommunicationList[@(counter)].IsSMS"
+                                               type="checkbox"
+                                               value="true" @(communication.IsSMS ? "checked=\"checked\"" : "")
+                                               data-parsley-multiple="gen_com_@(counter)">
+                                    </div>
+                                </div>
+                            </div>
+                            { counter++; }
+                        }
+
+                    }
+                </fieldset>
+
+            }*@
+        <fieldset class="fieldset">
+            <legend class="legend">@Translate.Text("manageaccount.profilepictitle")</legend>
+            <div class="form-field form-field--upload" id="profilepic">
+                <div class="form-field__input-wrapper">
+                    <div class="form-field__preview-wrapper">
+                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="profilepic">
+                    </div>
+                    <div class="form-field__uploader-details">
+                        <label for="form-field-profilepic" class="form-field__label">
+                        </label>
+                        <div>
+                            <label>
+                                @Html.TextBoxFor(m => m.ProfilePictureUploader,
+                                 new
+                                 {
+                                     type = "file",
+                                     @class = "form-field__input form-field__input--upload",
+                                     @id = "form-field-profilepic",
+                                     @aria_describedby = "description-for-profilepic",
+                                     @data_parsley_error_message = @Translate.Text("manageaccount.errorprofilepic"),
+                                     @data_parsley_errors_container = "#errors-for-profilepic",
+                                     @data_uploader_field = "profilepic",
+                                     @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\"",
+                                     @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif",
+                                     @data_size = @AttachmentValidation.maximumFileSize,
+                                     @data_parsley_id = "16"
+                                 })
+                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                            </label>
+                        </div>
+                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                        <p class="form-field__input--upload-filename" data-uploader-filename="profilepic"></p>
+                        <p>
+                            <button class="button button--text button--remove hidden" data-uploader-remove="profilepic">@Translate.Text("Remove")</button>
+                        </p>
+                    </div>
+                </div>
+                <div id="description-for-profilepic" class="form-field__messages">
+                    <div id="errors-for-profilepic">
+                        @Html.ValidationMessageFor(x => x.ProfilePictureUploader, "", new { @class = "parsley-errors-list" })
+                    </div>
+                    <p class="form-field__description">@Translate.Text("manageaccount.profilepicfileupload")</p>
+                </div>
+            </div>
+
+            <div class="form-field__button">
+                <button class="button button--primary button--next" id="manageaccountsubmitbutton" type="submit" data-submission-text="@Translate.Text("Updating")...">@Translate.Text("manageaccount.Update")</button>
+            </div>
+
+        </fieldset>
+    </fieldset>
+
+
+}
+
+<div class="m39-modal m39-modal--profile m39-modal--nofocus" data-component="m39-modal" id="modal_true">
+    <button data-trigger="true" class="m39-modal__trigger optpopuptrigger hidden">OTP Trigger</button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+        <div class="m39-modal__dialog otp">
+            <div class="m39-modal__header">
+                <button data-close="true" class="m39-modal__button--close">
+                    <span class="aria-only">@Translate.Text("Close")</span>
+                </button>
+            </div>
+            <div class="m39-modal__content flex-center">
+                <div class="otp--modalcontent">
+                    <div class="otp_inputdisplay_screen hidden">
+                        <img src="/images/customer_care.png">
+                        <div class="otp--modalcontent-title">
+                            <span class="otp-title"></span>
+                        </div>
+                        <div class="otp--modalcontent-details">
+                            <span class="otp_inputdisplay_screen_error red">
+
+                            </span>
+                            <span class="otp_inputdisplay_screen_success">
+
+                            </span>
+                        </div>
+                        <div class="otp--modalcontent-text hidden">
+                            @Html.Raw(Translate.Text("cust.care.info.note"))
+                        </div>
+                    </div>
+                    <div class="otp_input_screen hidden">
+                        <img class="otp_chatcheck hidden" src="/images/chatcheck.png">
+                        <img class="otp_mailcheck hidden" src="/images/mailcheck.png">
+                        <div class="otp--modalcontent-title">
+                            <span class="otp-title"></span>
+                        </div>
+                        <div class="otp--modalcontent-details">
+                            <span class="otp-message"></span>
+                        </div>
+                        <form id="otpform" class="form1 mt24 input-otp-textbox" method="post" data-form>
+                            @Html.AntiForgeryToken()
+                            <div class="form-field form-field--otp centered">
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp"
+                                           id="form-field-otpnumber" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="1"
+                                           data-parsley-errors-container="#description-for-mobiotpnumber"
+                                           required="" autofocus=""
+                                           data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="6"
+                                           aria-invalid="false">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp"
+                                           id="form-field-otpnumber" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="1"
+                                           data-parsley-errors-container="#description-for-otpnumber"
+                                           required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="8"
+                                           aria-invalid="false">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp"
+                                           id="form-field-otpnumber" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="1"
+                                           data-parsley-errors-container="#description-for-otpnumber"
+                                           required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="10"
+                                           aria-invalid="false">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp"
+                                           id="form-field-otpnumber" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="1"
+                                           data-parsley-errors-container="#description-for-otpnumber"
+                                           required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="12"
+                                           aria-invalid="false">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp"
+                                           id="form-field-otpnumber" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="1"
+                                           data-parsley-errors-container="#description-for-otpnumber"
+                                           required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="14"
+                                           aria-invalid="false">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp"
+                                           id="form-field-otpnumber" name="text" type="number"
+                                           aria-describedby="description-for-otpnumber"
+                                           data-parsley-maxnumber="1"
+                                           data-parsley-errors-container="#description-for-otpnumber"
+                                           required="" data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                           data-parsley-trigger="focusout" data-parsley-id="16"
+                                           aria-invalid="false">
+                                </span>
+                                <input class="form-field__input form-field__input--otp_main"
+                                       id="form-field-otpnumbermain" name="text" type="number"
+                                       aria-describedby="description-for-otpnumber"
+                                       data-parsley-maxnumber="6"
+                                       data-parsley-errors-container="#description-for-otpnumber"
+                                       data-parsley-required-message="@Translate.Text("cust.required.field")"
+                                       data-parsley-trigger="focusout" data-parsley-id="33">
+                                <div id="description-for-otpnumber" class="form-field__messages"></div>
+                            </div>
+                            <div class="form-field mt0 otp_inputdisplay_screen_error red hidden">
+                            </div>
+                            <div class="form-field">
+                                <div class="button button--timer timer-button--outline"
+                                     data-component="m78-timer" id="timerbutton"
+                                     timer-labels="{&quot;before&quot;:&quot;@Translate.Text("cust.resend.button.text")&quot;, &quot;after&quot;:&quot;@Translate.Text("cust.resend.button.text") (&quot;}"
+                                     timer-time="{&quot;seconds&quot;:300}">
+                                    <span class="m78-timer--button_text">@Translate.Text("cust.send.button.text")</span>
+                                    <span class="m78-timer--button_time"></span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal__overlay"> </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+         // Update email address
+        var selected = null;
+        jQuery("#lnkUpdateEmail").on("click", function () {
+            selected = "email";
+            CrudOtp(GetReadRequestData(selected), function (rdata) {
+                var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                $(".m66-preloader-fullpage").fadeOut();
+                $(".otp_inputdisplay_screen").hide();
+                $(".otp--modalcontent-text").hide();
+                $(".otp-title").html(title);
+
+                if (rdata.status) {
+                    $(".otp_chatcheck").show();
+                    $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-mobilenumber").val()));
+                    $("#OtpRequestId").val(rdata.data.otprequestid);
+                    $(".otp_input_screen").show();
+                    $(".otp_inputdisplay_screen_error").hide();
+                    $(".otp_inputdisplay_screen_success").show();
+                    $(".optpopuptrigger").trigger('click');
+                    resetTimer();
+                }
+                else {
+                    $(".optpopuptrigger").trigger('click');
+                    $(".otp_input_screen").hide();
+                    $(".otp_inputdisplay_screen").show();
+                    $(".otp_inputdisplay_screen_error").show();
+                    $(".otp_inputdisplay_screen_success").hide();
+                    $(".otp--modalcontent-text").show();
+                    $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                }
+            });
+        });
+        // Update email address
+        var selected = null;
+        jQuery("#lnkUpdateEmail").on("click", function () {
+            selected = "email";
+            CrudOtp(GetReadRequestData(selected), function (rdata) {
+                var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                $(".m66-preloader-fullpage").fadeOut();
+                $(".otp_inputdisplay_screen").hide();
+                $(".otp--modalcontent-text").hide();
+                $(".otp-title").html(title);
+
+                if (rdata.status) {
+                    $(".otp_chatcheck").show();
+                    $(".otp_mailcheck").hide();
+                    $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-mobilenumber").val()));
+                    $("#OtpRequestId").val(rdata.data.otprequestid);
+                    $(".otp_input_screen").show();
+                    $(".otp_inputdisplay_screen_error").hide();
+                    $(".otp_inputdisplay_screen_success").show();
+                    
+                    resetTimer();
+                    $(".optpopuptrigger").trigger('click');
+                }
+                else {
+                    $(".otp-title").html('@Translate.Text("Update Email ID")');
+                        $(".optpopuptrigger").trigger('click');
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        $(".otp_inputdisplay_screen_success").hide();
+                        $(".otp--modalcontent-text").show();
+                        if (jQuery("#form-field-mobilenumber").val() != "")
+                            $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                }
+            });
+        });
+        // Update Mobile Number
+        jQuery("#lnkUpdateMobile").on("click", function () {
+            selected = "mobile";
+            CrudOtp(GetReadRequestData(selected), function (rdata) {
+                var title = '@Html.Raw(Translate.Text("cust.email.otp.screen.title"))';
+                var msg = '@Html.Raw(Translate.Text("cust.email.otp.screen.msg"))';
+                $(".m66-preloader-fullpage").fadeOut();
+                $(".otp_inputdisplay_screen").hide();
+                $(".otp--modalcontent-text").hide();
+                $(".otp-title").html(title);
+
+                if (rdata.status) {
+                    $(".otp_mailcheck").show();
+                    $(".otp_chatcheck").hide();
+                    $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-emailaddress").val()));
+                    $("#OtpRequestId").val(rdata.data.otprequestid);
+                    $(".otp_input_screen").show();
+                    $(".otp_inputdisplay_screen_error").hide();
+                    $(".otp_inputdisplay_screen_success").show();
+                    
+                    resetTimer();
+                    $(".optpopuptrigger").trigger('click');
+                }
+                else {
+                    $(".otp-title").html('@Translate.Text("Update Mobile Number")');
+                        $(".optpopuptrigger").trigger('click');
+                        $(".otp_input_screen").hide();
+                        $(".otp_inputdisplay_screen").show();
+                        $(".otp_inputdisplay_screen_error").show();
+                        $(".otp_inputdisplay_screen_success").hide();
+                        $(".otp--modalcontent-text").show();
+                        if (jQuery("#form-field-emailaddress").val() != "")
+                            $(".otp_inputdisplay_screen_error").html(rdata.desc);
+                }
+            });
+        });
+        setTimeout(function () {
+            $(".form-field__input--otp").on('keyup blur', function () {
+                var otp = jQuery(".form-field__input--otp_main").val();
+                if (otp.length >= 6) {
+                    $(".form-field__input--otp").val('');
+                    CrudOtp(fnVerifyOtpData(selected, otp), function (rdata) {
+                        $(".m66-preloader-fullpage").fadeOut();
+                        if (rdata.status) {
+                            $(".otp-message").removeClass("red");
+                            $(".otp_input_screen").hide();
+                            $(".m39-modal__button--close").trigger('click');
+                            jQuery("#RequestType").val(selected);
+                            if (selected == "mobile") {
+                                $("#form-field-mobilenumber").attr("readonly", false);
+                                $("#form-field-mobilenumber").focus().select();
+                            }
+                            else {
+                                $("#form-field-emailaddress").attr("readonly", false);
+                                $("#form-field-emailaddress").focus().select();
+                                jQuery("#lnkUpdateMobile").hide();
+                            }
+                            jQuery("#lnkUpdateEmail").hide();
+                            jQuery("#lnkUpdateMobile").hide();
+                        }
+                        else {
+                            $(".optpopuptrigger").trigger('click');
+                            $(".otp_input_screen").show();
+                            $(".otp_inputdisplay_screen_error").show();
+                            $(".otp_inputdisplay_screen_success").hide();
+                            $(".otp_inputdisplay_screen_error").html(rdata.desc);
+
+                            if (selected == "mobile")
+                                $("#form-field-emailaddress").attr("readonly", true);
+                            else
+                                $("#form-field-mobilenumber").attr("readonly", true);
+                        }
+                    });
+                }
+            });
+        }, 500);
+        
+        function fnVerifyOtpData(selected, otp) {
+            var requestData = GetReadRequestData();
+            requestData.type = selected;
+            requestData.Otp = otp;
+            requestData.bpno = jQuery("#form-field-businesspartnerlist").val();
+            requestData.mode = "V";
+            requestData.reqId = jQuery("#OtpRequestId").val()
+            return requestData;
+        }
+        function fnSendOtpRequestData(selected) {
+            var requestData = GetReadRequestData();
+            requestData.type = selected;
+            requestData.bpno = jQuery("#form-field-businesspartnerlist").val();
+            requestData.mode = "S";
+            return requestData;
+        }
+        function GetReadRequestData(type) {
+            var mobile = null;
+            var email = null;
+            var bpno = jQuery("#form-field-businesspartnerlist").val();
+            var type = type;
+            var otp = null;
+            var prtype = "CUPD";
+            var requestData = {
+                mobile: mobile,
+                email: email,
+                bpno: bpno,
+                type: type,
+                Otp: otp,
+                prtype: prtype
+            }
+            requestData.mode = "S";
+            return requestData;
+        }
+        function CrudOtp(requestData, onSuccess) {
+            var _postUrl = '@Url.Content("~/api/sitecore/Account/CrudOtpAccount")';
+            requestData = AddCustomForgeryToken(requestData, "#otpform");
+            $.ajax({
+                url: _postUrl,
+                type: 'POST',
+                data: requestData,
+                beforeSend: function () {
+                    $(".m39-modal__button--close").trigger('click');
+                    $(".m66-preloader-fullpage").show();
+                    $(".otp_inputdisplay_screen").hide();
+                    $(".otp_input_screen").hide();
+                    $(".otp_inputdisplay_screen_error").hide();
+                    $(".otp_inputdisplay_screen_success").hide();
+
+                },
+                success: onSuccess,
+                error: function (er) {
+                    console.log(er)
+                },
+                complete: function (x) {
+                    $(".m66-preloader-fullpage").fadeOut()
+                    console.log(x)
+                }
+            })
+        }
+        AddCustomForgeryToken = function (data, elementId) {
+            data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+            return data;
+        };
+        jQuery("#timerbutton").on("click", function () {
+            if (!jQuery("#timerbutton").hasClass("timer-button--outline")) {
+
+                CrudOtp(fnSendOtpRequestData(selected), function (rdata) {
+                    $(".m66-preloader-fullpage").fadeOut();
+                    $(".otp_inputdisplay_screen").hide();
+                    if (selected == 'mobile') {
+                        var title = '@Html.Raw(Translate.Text("cust.email.otp.screen.title"))';
+                        var msg = '@Html.Raw(Translate.Text("cust.email.otp.screen.msg"))';
+                        $(".otp_mailcheck").show();
+                        $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-emailaddress").val()));
+                        $(".otp-title").html(title);
+                    }
+                    else {
+                        var title = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.title"))';
+                        var msg = '@Html.Raw(Translate.Text("cust.mobile.otp.screen.msg"))';
+                        $(".otp-message").html(msg.replace("{0}", jQuery("#form-field-mobilenumber").val()));
+                        $(".otp-title").html(title);
+                    }
+                    if (rdata.status) {
+                        $("#OtpRequestId").val(rdata.data.otprequestid);
+                        $(".otp-message").removeClass("red");
+                        $(".input-otp-textbox").show();
+                        resetTimer();
+                    } else {
+                        $(".otp-message").addClass("red");
+                        $(".input-otp-textbox").hide();
+                        $(".otp-message").html(rdata.desc);
+                    }
+
+                    $(".otp_input_screen").show();
+                    $(".optpopuptrigger").trigger('click');
+                });
+            }
+        });
+        
+        function resetTimer() {
+            $("#otpform").find('.form-field__input--otp').attr('disabled', false);
+            $("#otpform").find('.form-field--otp').removeClass('form-field-disabled');
+            setTimeout(function () {
+                jQuery('.form-field--otp').find('.form-field__input--otp')[0].focus()
+            }, 500);
+            setTimeout(function () {
+                jQuery('.button--timer').trigger('start.timer');
+            }, 500);
+        }
+    });
+</script>
+@if (Model.Accounts != null && Model.Accounts.Length > 0)
+{
+    @Html.Partial("~/Views/Feature/Account/Account/v1/_ModalAccounts.cshtml", new DEWAXP.Foundation.Content.Models.AccountModel.ModalaccountList { Accounts = Model.Accounts, BusinessPartnerNumber = Model.SelectedBusinessPartnerNumber })
+<script type="text/javascript">
+    docReady(function () {
+        jQuery('.m44-bill-selector__deselect').off('click.select').on('click.select', function () {
+            var $this = jQuery(this),
+                $checkbox = $this.closest('.m39-modal__content').find('.form-field__input--checkbox');
+
+            if (!$this.hasClass('selected')) {
+                $checkbox.each(function () {
+                    jQuery(this).prop('checked', true);
+                });
+                $this.html('De-select All');
+                $this.addClass('selected');
+            } else {
+                $checkbox.each(function () {
+                    jQuery(this).prop('checked', false);
+                });
+                $this.html('Select All');
+                $this.removeClass('selected');
+            }
+        });
+        jQuery('#manageaccountsubmitbutton').on('click', (handleManageaccountSelection));
+        function handleManageaccountSelection(e) {
+            if (jQuery("#modal_manageprofile") != undefined) {
+                var errors = 0;;;
+                var accArray = [];
+                e.preventDefault();
+                e.stopPropagation();
+                require(['parsley'], function () {
+                    jQuery('#manageaccountform').parsley().validate();
+                    jQuery('#manageaccountform').find('.form-field__input').each(function () {
+                        if (!jQuery(this).parsley().isValid()) {
+                            errors = + 1;
+                        }
+                    });
+                    if (errors == 0) {
+                        if (('@Model.MobileNumber' != jQuery("#form-field-mobilenumber").val()) || ('@Model.EmailAddress' != jQuery("#form-field-emailaddress").val())) {
+                            var accCnt = '@Model.Accounts.Length';
+                            if (parseInt(accCnt) > 0)
+                                jQuery('#modal_manageprofile').find('.m39-modal__trigger').trigger('click');
+                            else {
+                                submitwithloader();
+                            }
+
+
+                            jQuery('#skipthisstep').off('click.step').on('click.step', function () {
+                                if (accArray.length > 0)
+                                    jQuery('#MultipleAccountNumberSelected').val(accArray.join(", "));
+                                submitwithloader();
+                            })
+                            jQuery('#updateSelectedAccountbutton').off('click.step').on('click.step', function () {
+                                var checkbxs = jQuery('.m44-bill-selector-list-placeholder').find('.form-field__input'),
+                                    checked = 0;
+
+                                accArray = [];
+                                checkbxs.each(function () {
+                                    if (jQuery(this).prop('checked')) {
+                                        checked = + 1;
+                                        accArray.push(jQuery(this).val())
+                                    }
+                                    jQuery(this).on('click', function () {
+                                        if (jQuery(this).prop('checked')) {
+                                            jQuery('#accselectonemsg').hide();
+                                        }
+                                    })
+                                })
+
+                                if (checked > 0) {
+                                    jQuery('#skipthisstep').trigger('click')
+                                } else {
+                                    jQuery('#accselectonemsg').show();
+                                }
+                            })
+                        }
+                        else {
+                            submitwithloader();
+                        }
+                    }
+                });
+            }
+            else {
+                submitwithloader();
+            }
+
+
+            return false;
+        }
+
+       
+    });
+    function submitwithloader() {
+        jQuery('.j105-drrg--loader').show();
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+        jQuery('#manageaccountform').submit();
+    }
+
+</script>
+
+}
+
+<script type="text/javascript">
+    docReady(function () {
+        function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('.m21-avatar__image').attr('style', "background-image : url(" + e.target.result + ")");
+                $('.m21-avatar__image--control').html("@Translate.Text("Change photo label")");
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+        $("#accountPic").change(function () {
+        readURL(this);
+    });
+    });
+</script>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+@Scripts.Render("~/bundles/standard")

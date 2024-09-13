@@ -1,0 +1,289 @@
+﻿@using DEWAXP.Feature.SupplyManagement.Models.Complaints
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@model DEWAXP.Foundation.Content.Models.Common.GenericPageWithIntro
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    @Html.Sitecore().Placeholder("j22/m26-page-title")
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form text__content-copy--small">
+            @Html.Glass().Editable(x => x.Intro)
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <form id="form-account-selector" action="/api/trackcomplaints/Account?id={id}&o={o}" data-form="true" method="POST" form-skipvalidation="true">
+                @Html.Sitecore().Placeholder("j1/m43-account-selector")
+            </form>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div id="track-requests-placeholder" class="ajax-placeholder"></div>
+    </div>
+</div>
+
+<script id="track-requests-template" type="text/x-handlebars-template">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="m37-expander" data-component="m37-expander">
+            <button data-toggle="true" class="m37-expander__trigger">@Sitecore.Globalization.Translate.Text("Contact Details")</button>
+            <div data-content="true" class="m37-expander__content" aria-expanded="true">
+                {{#contactDetails}}
+                <div class="m42-keyvalue">
+                    <dl>
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Sitecore.Globalization.Translate.Text("NOC_MobileNumber")</dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">{{Mobile}}</dd>
+                    </dl>
+                    <dl>
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Sitecore.Globalization.Translate.Text("Email")</dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">{{Email}}</dd>
+                    </dl>
+                </div>
+                {{/contactDetails}}
+            </div>
+        </div>
+
+        <div class="request-tracker toggle-menu--active" data-helper="toggle-menu" data-toggle-breakpoint="l" data-toggle-auto-open="true">
+            <div class="request-tracker__items">
+                {{#if trackRequests.length}}
+                {{#trackRequests}}
+                <div class="toggle-menu__item request-tracker__item">
+                    {{#ifCond CodeGroup}}
+					<div class="request_links_noc">
+                        <div class="request-tracker__type" style="max-width:100%;white-space: normal;float:none;padding-bottom:10px;">{{RequestType}}</div>
+                        <div class="request-tracker__date" style="float:none;">
+                            @Sitecore.Globalization.Translate.Text("Requested") {{RequestDate}}
+                        </div>
+                        <div class="request-tracker__summary p0">
+                            {{Status}}
+                        </div>
+                        <br />
+                    </div>
+                    <div class="request_links_noc">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.INFRASTRUCTURE_NOC_VIEW_REQUEST)?id={{Reference}}">@Translate.Text("NOC_View")</a>
+                        {{#ifCondnoc NocEdit}}
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.INFRASTRUCTURE_NOC_REQUEST)?id={{Reference}}">@Translate.Text("NOC_Edit")</a>
+                        {{/ifCondnoc}}
+                        <a class="status_modal" href="#" data-tab="comment" data-edit="{{NocEdit}}" data-transactionid="{{Reference}}">@Translate.Text("NOC_ViewComment")</a>
+                        <a class="status_modal" href="#" data-tab="status" data-edit="{{NocEdit}}" data-transactionid="{{Reference}}">@Translate.Text("NOC_ViewStatus")</a>
+                    </div>
+                    {{else}}
+                    <button class="toggle-menu__trigger  request-tracker__trigger" data-toggle-trigger="true">
+                        <p class="request-tracker__type">{{RequestType}}</p>
+                        <br />    <br />
+                        <p>
+
+                            <span class="request-tracker__date">
+                                @Sitecore.Globalization.Translate.Text("Requested") {{RequestDate}}
+                            </span>
+                        </p>
+                    </button>
+                    <div class="toggle-menu__content request-tracker__content" data-toggle-content="true" style="display: none;">
+                        <div class="request-tracker__summary">{{Status}}</div>
+                    </div>
+                    {{/ifCond}}
+                </div>
+                {{/trackRequests}}
+                {{else}}
+                <div class="parsley-errors-list">
+                    @Sitecore.Globalization.Translate.Text("Complaint does not exist")
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    <!-- View Status/Comments Modal Popup -->
+    <form id="__AjaxAntiForgeryForm" action="#" method="post">
+        @Html.AntiForgeryToken()
+    </form>
+    <div data-journey="j134-infrastructure-noc">
+        <div class="m39-modal m39-modal--new j134-infrastructure-noc-tab-modal" data-component="m39-modal" id="modal_true">
+            <button data-trigger="true" class="m39-modal__trigger hidden status_modal__trigger" id="_sm7xs93q5a_trigger" type="button" aria-controls="_sm7xs93q5a_content">MODAL TRIGGER FOR VIEW</button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_sm7xs93q5a_content" aria-labelledby="_sm7xs93q5a_trigger">
+                <div class="m39-modal__dialog">
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title">@Translate.Text("NOC_ApplicationDetails")</div>
+                        <a data-close="true" class="m39-modal__button--close" id="_sm7xs93q5a_close" aria-controls="_sm7xs93q5a_content">@Translate.Text("NOC_Close")</a>
+                        <div class="m39-modal__subtitle">@Translate.Text("NOC_ApplicationNumber") <span id="transactionid"></span></div>
+                    </div>
+                    <div class="m39-modal__content" id="viewstatus">
+                        <div class="m39-modal__tabs">
+                            <ul>
+                                <li class="tab-status" data-tab="status">@Translate.Text("NOC_Status")</li>
+                                <li class="tab-comment status-text padding p-t-10" data-tab="comment">@Translate.Text("NOC_Comments")</li>
+                            </ul>
+                        </div>
+                        <div id="viewcomment_content">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m39-modal__overlay" style="display: block;"> </div>
+        </div>
+    </div>
+    <!-- End -->
+</script>
+
+
+<script>
+    var otherpar = null;
+    docReady(function () {
+        var qParam = getUrlParams(window.location.href);
+
+        if (qParam != null && qParam.hasOwnProperty('o')) {
+
+            otherpar = qParam.o;
+        }
+        Handlebars.registerHelper('ifCond', function (v1, options) {
+            if (v1 == 'NP') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifCondnoc', function (v1, options) {
+            if (v1 == 'X') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        jQuery('#form-account-selector').off("submit").submit(handleAccountSelection);
+        jQuery('#form-account-selector').submit();
+
+
+    });
+
+    function handleAccountSelection(e) {
+        var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+        if (accountNumber) {
+            jQuery('#track-requests-placeholder').empty();
+
+            var url = jQuery(e.target).attr('action').replace("{id}", accountNumber);
+
+            if (otherpar != null) {
+                url = url.replace("{o}", otherpar);
+            } else {
+
+                url = url.replace("&o={o}", "");
+            }
+            jQuery.ajax(url, {
+                beforeSend: function () {
+                    window.attachSpinner('#track-requests-placeholder', { zIndex: 1 });
+                },
+                complete: function () {
+                    window.detachSpinner('#track-requests-placeholder');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success: function (response) {
+                    var context = {
+                        contactDetails: response.ContactDetails,
+                        trackRequests: response.Requests
+                    };
+                    render(context);
+                }
+            });
+        }
+        return false;
+    }
+
+    function render(context) {
+        var markup = jQuery('#track-requests-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#track-requests-placeholder').html(rendering);
+        jQuery(".ajax-loader-overlay").remove();
+        window.initComponents('track-requests-placeholder');
+        jQuery(".status_modal").on("click", function (event) {
+            event.preventDefault();
+            var tab = $(this).attr("data-tab");
+            jQuery("#transactionid").html($(this).attr("data-transactionid"));
+            var formId = "__AjaxAntiForgeryForm";
+            var url = "/api/sitecore/InfrastructureNoc/GetStatusComment";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                traditional: true,
+                data: AddForgeryToken({ transactionId: $(this).attr("data-transactionid") }, formId),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    jQuery("#viewcomment_content").html('');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                jQuery("#viewcomment_content").html(response);
+                jQuery(".status_modal__trigger").trigger("click");
+                if (tab == "comment") {
+                    jQuery(".tab-comment").removeClass("hidden");
+                    jQuery(".tab-comment").addClass("active");
+                    jQuery(".tab-status").removeClass("active");
+                    jQuery(".tab-status").addClass("hidden");
+                }
+                else {
+                    jQuery(".tab-status").removeClass("hidden");
+                    jQuery(".tab-status").addClass("active");
+                    jQuery(".tab-comment").removeClass("active");
+                    jQuery(".tab-comment").addClass("hidden");
+                }
+            });
+        });
+    }
+
+    /**
+    * Accepts either a URL or querystring and returns an object associating
+    * each querystring parameter to its value.
+    *
+    * Returns an empty object if no querystring parameters found.
+    */
+    function getUrlParams(urlOrQueryString) {
+        if ((i = urlOrQueryString.indexOf('?')) >= 0) {
+            const queryString = urlOrQueryString.substring(i + 1);
+            if (queryString) {
+                return _mapUrlParams(queryString);
+            }
+        }
+
+        return {};
+    }
+
+    /**
+     * Helper function for `getUrlParams()`
+     * Builds the querystring parameter to value object map.
+     *
+     * param queryString {string} - The full querystring, without the leading '?'.
+     */
+    function _mapUrlParams(queryString) {
+        return queryString
+            .split('&')
+            .map(function (keyValueString) { return keyValueString.split('=') })
+            .reduce(function (urlParams, [key, value]) {
+                if (Number.isInteger(parseInt(value)) && parseInt(value) == value) {
+                    urlParams[key] = parseInt(value);
+                } else {
+                    urlParams[key] = decodeURI(value);
+                }
+                return urlParams;
+            }, {});
+    }
+</script>

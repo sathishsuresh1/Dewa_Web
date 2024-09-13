@@ -1,0 +1,39 @@
+﻿@using DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey
+@using Sitecore.Globalization
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+}
+
+<div class="form-field form-field--text form-field--textarea">
+    @if (!string.IsNullOrWhiteSpace(Model.Asheading) && Model.Asheading.Equals("X")) { }
+    else
+    {
+        <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)"  class="form-field__label @(displayonly ? " form-field__label--readonly" : string.Empty)">
+            @Model.Question
+        </label>
+    }
+    <span  class="form-field__input-wrapper @(displayonly?"form-field__input-wrapper--readonly":string.Empty)">
+        <textarea @(displayonly ? " disabled" : string.Empty) class="form-field__input form-field__input--text form-field__input--textarea @(displayonly ? " disabled" : string.Empty) @(displayonly?"form-field__input--readonly":string.Empty)"
+                  maxlength="500"
+                  data-textarea="group@(groupnumber)_question@(Model.Questionnumber)"
+                  id="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                  name="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                  type="textarea"
+                  placeholder="@Model.Questionplaceholder"
+                  aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                  data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                  @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                  data-parsley-required-message="@Model.Questionplaceholder"
+                  data-parsley-id="44">@(displayonly||(!string.IsNullOrWhiteSpace(Model.Backendvalue)&& Model.Backendvalue.Equals("X"))?Model.Surveyfeedback:string.Empty)</textarea>
+    </span>
+    <div id="description-for-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+        <p class="form-field__charcount">
+            @Translate.Text("EV Max")  <span data-charcount="group@(groupnumber)_question@(Model.Questionnumber)">0</span>/500
+            @Translate.Text("EV Characters")
+        </p>
+        <p class="form-field__description">@Model.Questionnote</p>
+    </div>
+</div>

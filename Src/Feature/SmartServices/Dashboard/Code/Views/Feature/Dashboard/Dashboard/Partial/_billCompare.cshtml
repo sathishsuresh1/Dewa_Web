@@ -1,0 +1,252 @@
+﻿@using DEWAXP.Foundation.Content.Models.Bills
+@using System.Linq
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+@model BillCompareViewModel
+
+
+<div class="m84-bills-compare--graph_wrapper">
+    <div class="m84-bills-compare--graph_inner m84-bills-compare--graph_inner--active m84-bills-compare--graph_billed" style="display: block; opacity: 1;">
+        <div class="m84-bills-compare--graph" id="m84-bills-compare--graph_bill"
+             data-chart-container="true"
+             data-x-axis-categories="@Model.BilledAmountXaxis"
+             data-y-axis-title-text=""
+             data-series='[{"data":[@Model.BilledAmountSeries],"name":"@Translate.Text("billComp.Billed Amount")","color":"#087232"}]'
+             data-water-series='[{"data":[@Model.BilledAmountWaterSeries],"name":"@Translate.Text("billComp.Billed Amount Water")","color":"#087232"}]'
+             data-electricity-series='[{"data":[@Model.BilledAmountElectricityseries],"name":"@Translate.Text("billComp.Billed Amount Electricity")","color":"#087232"}]'
+             data-tooltip-value-suffix=""
+             data-usagefor="@Translate.Text("billComp.Per 1000 IG")"
+             data-step="1"
+             data-x-axis-text="@Translate.Text("billComp.month")"
+             data-y-axis-text="@Translate.Text("billComp.Per kWh")"
+             data-legend="Showing: "
+             data-step-s="2"
+             data-currency="@Translate.Text("AED")"
+             data-highcharts-chart="1"
+             style="overflow: hidden;">
+        </div>
+        @if (Model.Invoices != null && Model.Invoices.Count > 0)
+        {
+            <div class="m84-bills-compare--graph_footer">
+                @foreach (InvoiceModel invoice in Model.Invoices)
+                {
+                    <div class="m84-bills-compare--graph_footerwrp @(!string.IsNullOrWhiteSpace(invoice.DegTransactionReference)?"":"no-visilibility")">
+                        @if (!string.IsNullOrWhiteSpace(invoice.DegTransactionReference))
+                        {
+                            <a class="" href="/api/billdownloads/account/@invoice.DegTransactionReference" target="_blank">
+                                <div class="m84-bills-compare--graph_footerimg">
+                                    <img src="/images/greenbill_logo.png" alt="">
+                                </div>
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="m84-bills-compare--graph_footerimg">
+                                <img src="/images/greenbill_logo.png" alt="">
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        <div class="m84-bills-compare--no-data">
+            @Translate.Text("billComp.No Data Available")
+        </div>
+    </div>
+
+
+    <div class="m84-bills-compare--graph_inner m84-bills-compare--graph_paid">
+        <div class="m84-bills-compare--graph" id="m84-bills-compare--graph_paid"
+             data-chart-container="true"
+             data-x-axis-categories="@Model.PaidAmountXaxis"
+             data-y-axis-title-text=""
+             data-series='[{"data":[@Model.PaidAmountSeries],"name":"@Translate.Text("billComp.Paid Amount")","color":"#087232"}]'
+             data-water-series=""
+             data-electricity-series=""
+             data-tooltip-value-suffix=""
+             data-usagefor="@Translate.Text("billComp.Per 1000 IG")"
+             data-step="1"
+             data-x-axis-text="@Translate.Text("billComp.month")"
+             data-y-axis-text="@Translate.Text("billComp.Per kWh")"
+             data-legend="Showing: "
+             data-step-s="2"
+             data-currency="@Translate.Text("AED")"
+             data-highcharts-chart="1"
+             style="overflow: hidden;">
+        </div>
+        @if (Model.GroupedReceipts != null && Model.GroupedReceipts.Count > 0)
+        {
+            <div class="m84-bills-compare--graph_footer">
+                @{
+                    int index = 1;
+                }
+                @foreach (var receipt in Model.GroupedReceipts)
+                {
+                    if (receipt.Receipts != null && receipt.Receipts.Count > 1)
+                    {
+                        <div class="m84-bills-compare--graph_footerwrp m84-bills-compare--graph_footerwrp-modal" modal-index="@index">
+                            <div class="m84-bills-compare--graph_footerimg">
+                                <img src="/images/paidbill_logo.png">
+                            </div>
+                        </div>
+                        index++;
+                    }
+                    else if (receipt.Receipts != null && receipt.Receipts.Count == 1)
+                    {
+                        <div class="m84-bills-compare--graph_footerwrp">
+
+                            @if (receipt.Receipts.FirstOrDefault().IsTransactionId)
+                            {
+                                <a class="" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_RECEIPT)?id=@receipt.Receipts.FirstOrDefault().DegTransactionReference&date=@receipt.Receipts.FirstOrDefault().NonFormattedDate&type=@receipt.Receipts.FirstOrDefault().paymenttype">
+                                    <div class="m84-bills-compare--graph_footerimg">
+                                        <img src="/images/paidbill_logo.png">
+                                    </div>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_RECEIPT)?docnumber=@receipt.Receipts.FirstOrDefault().documentnumber">
+                                    <div class="m84-bills-compare--graph_footerimg">
+                                        <img src="/images/paidbill_logo.png">
+                                    </div>
+                                </a>
+                            }
+
+                        </div>
+                    }
+                }
+            </div>
+        }
+        <div class="m84-bills-compare--no-data">
+            @Translate.Text("billComp.No Data Available")
+        </div>
+    </div>
+
+</div>
+
+<div class="m84-bills-compare--footer_wrapper">
+    <div class="m84-bills-compare--footer_graphicwrpouter">
+        <div class="m84-bills-compare--footer_graphicwrp">
+            @if (!string.IsNullOrWhiteSpace(Model.Lastyeartext))
+            {
+                <div class="m84-bills-compare--footer_graphic">
+                    @*@if (Model.Lastyearflag || (!Model.Lastyearflag && double.Parse(Model.Lastyearpercentage) < 10.0))
+                        {
+                        <div class="icon-new-arrow-right @(Model.Lastyearflag ? "green" : "red")"></div>
+                        <div class="m84-bills-compare--footer_rate">@Model.Lastyearpercentage%</div>
+                        }*@
+                    <div>
+                        @Model.Lastyeartext
+                    </div>
+                </div>
+            }
+        </div>
+
+
+        <div class="m84-bills-compare--footer_graphicwrp">
+            @if (!string.IsNullOrWhiteSpace(Model.Previousmonthtext))
+            {
+                <div class="m84-bills-compare--footer_graphic">
+                    @*@if (Model.Previousmonthflag || (!Model.Previousmonthflag && double.Parse(Model.Previousmonthpercentage) < 10.0))
+                        {
+                        <div class="icon-new-arrow-right @(Model.Previousmonthflag ? "green" : "red")"></div>
+                        <div class="m84-bills-compare--footer_rate">@Model.Previousmonthpercentage%</div>
+                        }*@
+                    <div>
+                        @Model.Previousmonthtext
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    @*<div class="m84-bills-compare--footer_btns">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.MYSAVINGSTIPSPAGE)" class="button button--senary button--fullwidth BES-grid BES-grid-billcomparebutton" style="display:none">
+                @Translate.Text("billComp.savingsplanbutton")
+            </a>
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)#m85-dstore-items" class="button button--senary button--fullwidth">
+                @Translate.Text("billComp.dewastorebutton")
+            </a>
+        </div>*@
+</div>
+@if (Model.GroupedReceipts != null && Model.GroupedReceipts.Count > 0)
+{
+    int indexmodal = 1;
+    <div id="receiptmodalslist">
+        @foreach (GroupedReceiptModel receipt in Model.GroupedReceipts)
+        {
+            if (receipt != null && receipt.Receipts != null && receipt.Receipts.Count > 1)
+            {
+
+                <div class="m39-modal m39-modal--new m84-bills-compare-modal m39-modal--nofocus" modal-index="@indexmodal" data-component="m39-modal" id="modal_true">
+                    <div data-trigger="true" class="m39-modal__trigger hidden"></div>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                        <div class="m39-modal__dialog ">
+                            <div class="m39-modal__header">
+                                <div class="m39-modal__title">@Translate.Text("billComp.Select Receipt to view")</div>
+                                <button data-close="true" class="m39-modal__button--close"></button>
+                            </div>
+                            <div class="m39-modal__content">
+                                @foreach (var individualreceipt in receipt.Receipts)
+                                {
+                                    <div class="m84-bills-compare-modal--item">
+                                        <div class="m84-bills-compare-modal--text">
+                                            <div class="m84-bills-compare-modal--date">
+                                                @individualreceipt.FormattedDate
+                                            </div>
+                                            <div class="m84-bills-compare-modal--details">
+                                                <div class="m84-bills-compare-modal--id">
+                                                    @Translate.Text("billComp.Receipt ID")
+                                                    @if (individualreceipt.IsTransactionId)
+                                                    {
+                                                        @individualreceipt.DegTransactionReference
+                                                    }
+                                                    else
+                                                    {
+                                                        @individualreceipt.documentnumber
+                                                    }
+                                                </div>
+
+                                                <div class="m84-bills-compare-modal--amount">
+                                                    @individualreceipt.Amount.ToString("N2") @Translate.Text("AED")
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if (individualreceipt.IsTransactionId)
+                                        {
+                                            <a class="m84-bills-compare-modal--link" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_RECEIPT)?id=@individualreceipt.DegTransactionReference&date=@individualreceipt.NonFormattedDate&type=@individualreceipt.paymenttype">
+                                                <img src="/images/paidbill_logo.png">
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a class="m84-bills-compare-modal--link" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_RECEIPT)?docnumber=@individualreceipt.documentnumber">
+                                                <img src="/images/paidbill_logo.png">
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="m39-modal__footer">
+                                <div class="m84-bills-compare-modal--totaltext">@Translate.Text("billcomp.Paid Amount")</div>
+                                <div class="m84-bills-compare-modal--totalamount">@receipt.TotalAmount.ToString("N2") @Translate.Text("AED")</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+                {
+                    indexmodal++;
+                }
+            }
+        }
+    </div>
+}
+@*<script type="text/javascript">
+        docReady(function () {
+            if (jQuery('.BES-grid:first').css('display') != 'none') {
+                jQuery('.BES-grid-billcomparebutton').show();
+            }
+        });
+    </script>*@

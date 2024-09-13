@@ -1,0 +1,54 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Resources.Media;
+@using Sitecore.Globalization;
+@using Sitecore.Links.UrlBuilders;
+@using DEWAXP.Foundation.Helpers.Extensions;
+@using System.Web.Optimization
+@using DEWAXP.Foundation.Helpers.MetaTags
+@using DEWAXP.Foundation.Content
+@using Sitecore.ExperienceForms.Mvc.Html
+@using Sitecore.Mvc.Analytics.Extensions
+@model RenderingModel
+@{
+    var currentItem = Html.Sitecore().CurrentItem;
+    var textDirection = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var lang = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<!doctype html>
+<html lang="@Model.Item.Language.Name" dir="@textDirection">
+<head>
+    @*@Html.GetMetaTags()*@
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/MetaTags.cshtml", Sitecore.Context.Item)
+    @Html.GetSeoTagsForPage(Sitecore.Context.Item)
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/_FaviconRendering.cshtml")
+    @Styles.Render("~/Styles/DRRG/" + lang)
+    @Scripts.Render("~/bundles/DRRGheadjs")
+    <script src='https://www.google.com/recaptcha/api.js?hl=@(lang)'></script>
+
+    @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+    {
+        @Html.Sitecore().Rendering(SitecoreRenderingIds.GOOGLE_ANALYTICS_CONFIG_HEAD)
+    }
+   <!--Visitor-->
+	@Html.Sitecore().VisitorIdentification()
+	<!--Visitor-->
+</head>
+<body id="page">
+    <h1 style="display: none;">@Html.Sitecore().Field("Browser Title", new { DisableWebEdit = true })</h1> <!--This H1 tag is a guideline for Bing Search Engine -->
+    <div class="rs_area">
+        <div class="rs_preserve">
+            @Html.Sitecore().Placeholder("main")
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/DRRGbodyjs")
+    <script type="text/javascript" src="~/Scripts/hayak/HtmlSanitizer.js"></script>
+    @Html.Partial("~/Views/Website/SubLayouts/ReadSpeaker/_ReadSpeaker.cshtml")
+
+    @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+    {
+        @Html.Sitecore().Rendering(SitecoreRenderingIds.GOOGLE_ANALYTICS)
+    }
+    	<script src="https://mindrockets.app/web/client/MoroDewa/integrator.all.min.js"></script>
+</body>
+</html>

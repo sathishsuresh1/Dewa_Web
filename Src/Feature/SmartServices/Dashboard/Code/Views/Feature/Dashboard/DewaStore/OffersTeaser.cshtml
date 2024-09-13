@@ -1,0 +1,66 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc
+@using Sitecore.Globalization
+
+@model DEWAXP.Foundation.Content.Models.DewaStore.OfferConfig
+
+<form id="dstore-teaser-form">
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id ,new { id = "renderingid"})
+</form>
+<div id="m86-dstore-teaser-items" data-component="m85-dstore-carousel" class="m86-dstore-teaser-items relative">
+
+</div>
+
+<script type="text/javascript">
+    var _fndewaoffers = function (accountNumber) {
+        if (accountNumber) {
+            var url = "/api/sitecore/DewaStore/GetWebOffers";
+            jQuery.ajax({
+                type: 'POST',
+                url: url,
+                async:true,
+                traditional: true,
+                contentType: 'application/json',
+                data: AddForgeryToken({
+                    account: accountNumber,
+                    renderingid: jQuery('#renderingid').val()
+                }, "dstore-teaser-form"),
+                beforeSend: function (jqXHR) {
+                xhrPool.push(jqXHR);
+                jQuery('#m86-dstore-teaser-items').empty();
+                window.attachSpinner('#m86-dstore-teaser-items', { bgColor: '#fff', opacity: 0.6, minHeight: 600 });
+                },
+                complete: function () {
+                    jQuery(window).trigger('resize');
+                    getGaguageLoadSettting("_dewaoffers").isComplete = 1;
+                    window.detachSpinner('#m86-dstore-teaser-items');
+                },
+                success: function (result) {
+                    if (result != null && result != "") {
+                        jQuery('#m86-dstore-teaser-items').append(result);
+                    }
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                }
+            });
+        }
+    }
+    </script>

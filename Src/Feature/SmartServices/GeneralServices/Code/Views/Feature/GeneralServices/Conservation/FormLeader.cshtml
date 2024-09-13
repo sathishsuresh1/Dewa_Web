@@ -1,0 +1,1272 @@
+﻿@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GeneralServices.Models.Conservation.FormLeaderModel
+
+@using Sitecore.Globalization;
+@{
+    int i = 0;
+}
+<style>
+    .conservationsection .ticks-inner-subtext {
+        position: absolute;
+        width: 100px;
+        right: -50px;
+        top: 70px;
+        font-size: 0.8em;
+        color: #3d3d3d;
+    }
+</style>
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid j130-conservation-award" data-journey="j130-conservation-award">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+        FormMethod.Post, new
+        {
+            @class = "scfForm",
+            @id = "FormCL",
+            data_form = "true",
+            data_parsley_focus = "none",
+            @data_submit_validate = "enabled",
+            enctype = "multipart/form-data",
+            @autocomplete = "off"
+        }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-field">
+                    @*<div class="form-introduction"><p style="text-align: justify;">@Translate.Text("FLE_SubTitle")</p></div>*@
+                    <div class="form-introduction">
+                        <p style="text-align: justify;">
+                            @Translate.Text("Cons_Lead_Header")<br /><br />
+                            @Translate.Text("Cons_Lead_Eligibility") @Translate.Text("Cons_Lead_SubHeader")
+                        </p>
+                    </div>
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    }
+                    <!-- step tracker-->
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12 grid__column--form">
+                            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="" data-current-step="" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="true">
+                                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- step 1 -->
+                    <div id="divstep_1" class="conservationsection">
+                        <legend class="legend hidden" id="legend1">@Translate.Text("Cons_Edu_General_Info")</legend>
+
+                        <!--Sector-->
+                        <fieldset class="fieldset border-legend">
+                            <legend class="legend">@Translate.Text("Cons_Edu_Type_of_Inst")</legend>
+                            <div class="legend-title">@Translate.Text("Cons_Edu_Type_of_Inst")</div>
+                            <div class="form-field">
+                                <fieldset class="fieldset">
+                                    <legend class="form-field__label">
+                                        @Translate.Text("FG_SectorLbl")
+                                    </legend>
+                                    @{
+                                        foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormTypeofInstitution)
+                                        {
+                                            <p class="form-field__radio ">
+                                                <label for="Sector_1_@(i)">
+                                                    <input class="form-field__input form-field__input--radio" id="Sector_1_@(i)"
+                                                           name="Sector"
+                                                           type="radio"
+                                                           required=""
+                                                           data-parsley-required-message="@Translate.Text("FEI_sector_Error_Message")"
+                                                           @*value="@item.Value" @(Model.Sector == item.Value || (item.Value == "2" && string.IsNullOrWhiteSpace(Model.Sector)) ? "checked" : "")*@
+                                                           value="@item.fieldkey"
+                                                           aria-describedby="description-for-sector"
+                                                           data-parsley-errors-container="#description-for-sector">
+
+                                                    <span class="form-field__fakeradio focus-enabled">
+                                                        @item.fieldvalue
+                                                    </span>
+                                                </label>
+                                            </p>
+                                            i++;
+                                        }
+                                    }
+                                    <div id="description-for-sector" class="form-field__messages">
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </fieldset>
+
+                        <!--Instruction-->
+                        <fieldset class="fieldset border-legend">
+                            <legend class="legend">@Translate.Text("FEI_Section1Heading")</legend>
+                            <div class="legend-title">@Translate.Text("FEI_Section1Heading")</div>
+                            <fieldset class="display-section-fieldset">
+                                <legend class="display-section-legend">@Translate.Text("FLE_Section1Heading")</legend>
+                                <div class="form-field form-field--text">
+                                    <label for="InstitutionDetails_Name" class="form-field__label">
+                                        @Translate.Text("FG_InstituteNameLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.InstitutionDetails.Name,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_InstituteNameRequired"),
+        @data_parsley_trigger = "focusout",
+       // @data_parsley_name = "",
+        @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+        @required = "",
+        @data_parsley_errors_container = "#description-for-institutiondetails_name"
+    })
+                                    </span>
+                                    <div id="description-for-institutiondetails_name" class="form-field__messages">
+                                    </div>
+                                </div>
+                                @*<div class="form-field form-field--text">
+                                        <label for="InstitutionDetails_ContactNo" class="form-field__label">
+                                            @Translate.Text("FG_LandLineLbl")
+                                        </label>
+                                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                                   id="InstitutionDetails_ContactNo"
+                                                   name="InstitutionDetails.ContactNo"
+                                                   type="tel"
+                                                   aria-describedby="description-for-institutiondetails_contactno"
+                                                   data-parsley-errors-container="#description-for-institutiondetails_contactno"
+                                                   required
+                                                   data-parsley-required-message="@Translate.Text("FG_LandLineRequired")"
+                                                   data-parsley-telephone_number=""
+                                                   data-parsley-telephone_number-message="@Translate.Text("FG_LandLineInvalid")"
+                                                   value="@(!string.IsNullOrWhiteSpace(Model.InstitutionDetails.ContactNo)?Model.InstitutionDetails.ContactNo:"")" />
+                                        </span>
+
+                                        <div id="description-for-institutiondetails_contactno" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--text">
+                                        <label for="InstitutionDetails_EmailAddress" class="form-field__label">
+                                            @Translate.Text("FG_EmailAddressLbl")
+                                        </label>
+                                        <span class="form-field__input-wrapper">
+                                            @Html.TextBoxFor(m => m.InstitutionDetails.EmailAddress,
+                                           new { @class = "form-field__input form-field__input--text",
+                                               @data_parsley_required_message = Translate.Text("FG_EmailAddressRequired"),
+                                               @required="",
+                                               @type = "email",
+                                               @data_parsley_type_message = Translate.Text("FG_EmailAddressInvalids"),
+                                               @data_parsley_trigger = "focusout",
+                                               @aria_describedby = "description-for-institutiondetails_Email",
+                                               @data_parsley_errors_container = "#description-for-institutiondetails_Email"
+                                           })
+                                        </span>
+                                        <div id="description-for-institutiondetails_Email" class="form-field__messages">
+                                        </div>
+                                    </div>*@
+                            </fieldset>
+                        </fieldset>
+
+                        <!--Nominated Distinguished Conservation Leader Details-->
+                        <fieldset class="fieldset border-legend">
+                            <legend class="legend">@Translate.Text("FEI_Section2Heading")</legend>
+                            <div class="legend-title">@Translate.Text("FEI_Section2Heading")</div>
+                            <fieldset class="display-section-fieldset">
+                                <legend class="display-section-legend">@Translate.Text("FLE_SectionHeading")</legend>
+                                <div class="form-field form-field--text">
+                                    <label for="NominatedDistinguishedLeaderDetails_Name" class="form-field__label">
+                                        @Translate.Text("FG_NameLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.NominatedDistinguishedLeaderDetails.Name,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_NameRequired"),
+        @data_parsley_trigger = "focusout",
+      //  @data_parsley_name = "",
+        @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+        @required = "",
+        @data_parsley_errors_container = "#description-for-NominatedDistinguishedLeaderDetails_Name"
+    })
+                                    </span>
+                                    <div id="description-for-NominatedDistinguishedLeaderDetails_Name" class="form-field__messages">
+                                    </div>
+                                </div>
+
+
+                                <div class="form-field form-field--text">
+                                    <label for="NominatedDistinguishedLeaderDetails_ContactNo" class="form-field__label">
+                                        @Translate.Text("FG_MobileLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                               id="NominatedDistinguishedLeaderDetails_ContactNo"
+                                               name="NominatedDistinguishedLeaderDetails.ContactNo"
+                                               type="tel"
+                                               aria-describedby="description-for-NominatedDistinguishedLeaderDetails_ContactNo"
+                                               data-parsley-errors-container="#description-for-NominatedDistinguishedLeaderDetails_ContactNo"
+                                               required
+                                               data-parsley-required-message="@Translate.Text("FG_MobileNoRequired")"
+                                               data-parsley-mobile_number=""
+                                               data-parsley-mobile_number-message="@Translate.Text("FG_MobileNoInvalids")"
+                                               value="@(!string.IsNullOrWhiteSpace(Model.NominatedDistinguishedLeaderDetails.ContactNo) ? Model.NominatedDistinguishedLeaderDetails.ContactNo : "")" />
+                                    </span>
+                                    <div id="description-for-NominatedDistinguishedLeaderDetails_ContactNo" class="form-field__messages">
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--text">
+                                    <label for="NominatedDistinguishedLeaderDetails_EmailAddress" class="form-field__label">
+                                        @Translate.Text("FG_EmailAddressLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.NominatedDistinguishedLeaderDetails.EmailAddress,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_EmailAddressRequired"),
+        @data_parsley_trigger = "focusout",
+        @required = "",
+        @type = "email",
+        @data_parsley_type_message = Translate.Text("FG_EmailAddressInvalids"),
+        @data_parsley_errors_container = "#description-for-NominatedDistinguishedLeaderDetails_Email"
+    })
+                                    </span>
+                                    <div id="description-for-NominatedDistinguishedLeaderDetails_Email" class="form-field__messages">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </fieldset>
+
+                        <!--Conservation Leader Assistance Details-->
+                        <fieldset class="fieldset border-legend">
+                            <legend class="legend">@Translate.Text("FLE_Section2Heading")</legend>
+                            <div class="legend-title">@Translate.Text("FLE_Section2Heading")</div>
+                            <fieldset class="display-section-fieldset">
+                                <legend class="display-section-legend">@Translate.Text("FLE_Section2Heading")</legend>
+                                <div class="form-field form-field--text">
+                                    <label for="ConservationLeaderAssistanceDetails_FullName" class="form-field__label">
+                                        @Translate.Text("FG_NameLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.ConservationLeaderAssistanceDetails.FullName,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_NameRequired"),
+        @required = "",
+       // @data_parsley_name = "",
+        @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+        @data_parsley_trigger = "focusout",
+        @data_parsley_errors_container = "#description-for-ConservationLeaderAssistanceDetails_Name"
+    })
+                                    </span>
+                                    <div id="description-for-ConservationLeaderAssistanceDetails_Name" class="form-field__messages">
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--text">
+                                    <label for="ConservationLeaderAssistanceDetails_ContactNo" class="form-field__label">
+                                        @Translate.Text("FG_MobileLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                               id="ConservationLeaderAssistanceDetails_ContactNo"
+                                               name="ConservationLeaderAssistanceDetails.ContactNo"
+                                               type="tel"
+                                               aria-describedby="description-for-ConservationLeaderAssistanceDetails_ContactNo"
+                                               data-parsley-errors-container="#description-for-ConservationLeaderAssistanceDetails_ContactNo"
+                                               required
+                                               data-parsley-required-message="@Translate.Text("FG_MobileNoRequired")"
+                                               data-parsley-mobile_number=""
+                                               data-parsley-mobile_number-message="@Translate.Text("FG_MobileNoInvalids")"
+                                               value="@(!string.IsNullOrWhiteSpace(Model.ConservationLeaderAssistanceDetails.ContactNo) ? Model.ConservationLeaderAssistanceDetails.ContactNo : "")" />
+                                    </span>
+                                    <div id="description-for-ConservationLeaderAssistanceDetails_ContactNo" class="form-field__messages">
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--text">
+                                    <label for="ConservationLeaderAssistanceDetails_EmailAddress" class="form-field__label">
+                                        @Translate.Text("FG_EmailAddressLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.ConservationLeaderAssistanceDetails.EmailAddress,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_EmailAddressRequired"),
+        @data_parsley_type_message = @Translate.Text("FG_EmailAddressInvalids"),
+        @required = "",
+        @type = "email",
+        @data_parsley_trigger = "focusout",
+        @aria_describedby = "description-for-AwardCoordinatorDetails_Email",
+        @data_parsley_errors_container = "#description-for-ConservationLeaderAssistanceDetails_Email"
+    })
+                                    </span>
+                                    <div id="description-for-ConservationLeaderAssistanceDetails_Email" class="form-field__messages">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </fieldset>
+
+                        <!--Nominated Award Coordinator Details-->
+                        @*<fieldset class="fieldset border-legend">
+                                <fieldset class="display-section-fieldset">
+                                    <legend class="display-section-legend">@Translate.Text("FLE_Section3Heading")</legend>
+                                    <div class="form-field form-field--text">
+                                        <label for="NominatedAwardCoordinatorDetails_FullName" class="form-field__label">
+                                            @Translate.Text("FG_NameOptLbl")
+                                        </label>
+                                        <span class="form-field__input-wrapper">
+                                            @Html.TextBoxFor(m => m.NominatedAwardCoordinatorDetails.FullName,
+                                           new { @class = "form-field__input form-field__input--text",
+                                               @data_parsley_name = "",
+                                               @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+
+                                               @data_parsley_errors_container = "#description-for-NominatedAwardCoordinatorDetails_Name"
+                                           })
+                                        </span>
+                                        <div id="description-for-NominatedAwardCoordinatorDetails_Name" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--text">
+                                        <label for="NominatedAwardCoordinatorDetails_ContactNo" class="form-field__label">
+                                            @Translate.Text("FG_MobileOptLbl")
+                                        </label>
+                                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                                   id="NominatedAwardCoordinatorDetails_ContactNo"
+                                                   name="NominatedAwardCoordinatorDetails.ContactNo"
+                                                   type="tel"
+                                                   aria-describedby="description-for-NominatedAwardCoordinatorDetails_ContactNo"
+                                                   data-parsley-errors-container="#description-for-NominatedAwardCoordinatorDetails_ContactNo"
+                                                   data-parsley-required-message="@Translate.Text("FG_MobileNoRequired")"
+                                                   data-parsley-mobile_number=""
+                                                   data-parsley-mobile_number-message="@Translate.Text("FG_MobileNoInvalids")"
+                                                   value="@(!string.IsNullOrWhiteSpace(Model.NominatedAwardCoordinatorDetails.ContactNo)?Model.NominatedAwardCoordinatorDetails.ContactNo:"")" />
+                                        </span>
+                                        <div id="description-for-NominatedAwardCoordinatorDetails_ContactNo" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--text">
+                                        <label for="NominatedAwardCoordinatorDetails_EmailAddress" class="form-field__label">
+                                            @Translate.Text("FG_EmailAddressOptLbl")
+                                        </label>
+                                        <span class="form-field__input-wrapper">
+                                            @Html.TextBoxFor(m => m.NominatedAwardCoordinatorDetails.EmailAddress,
+                                           new { @class = "form-field__input form-field__input--text",
+                                               @type = "email",
+                                               @data_parsley_type_message = Translate.Text("FG_EmailAddressInvalids"),
+                                               @data_parsley_trigger = "focusout",
+                                               @aria_describedby = "description-for-NominatedAwardCoordinatorDetailss_Email",
+                                               @data_parsley_errors_container = "#description-for-NominatedAwardCoordinatorDetails_Email"
+                                           })
+                                        </span>
+                                        <div id="description-for-NominatedAwardCoordinatorDetails_Email" class="form-field__messages">
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </fieldset>*@
+
+                        <!--Nominated Parent Details (if eligible)-->
+                        <fieldset class="fieldset border-legend">
+                            <legend class="legend">@Translate.Text("FLE_Section4Heading")</legend>
+                            <div class="legend-title">@Translate.Text("FLE_Section4Heading")</div>
+                            <fieldset class="display-section-fieldset">
+                                <legend class="display-section-legend">@Translate.Text("FLE_Section4Heading")</legend>
+                                <div class="form-field form-field--text">
+                                    <label for="NominatedParentDetails_FullName" class="form-field__label">
+                                        @Translate.Text("FG_NameOptLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.NominatedParentDetails.FullName,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_NameRequired"),
+        @data_parsley_trigger = "focusout",
+       // @data_parsley_name = "",
+        @required = "",
+        @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+        @data_parsley_errors_container = "#description-for-NominatedParentDetails_Name"
+    })
+                                    </span>
+                                    <div id="description-for-NominatedParentDetails_Name" class="form-field__messages">
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--text">
+                                    <label for="NominatedParentDetails_ContactNo" class="form-field__label">
+                                        @Translate.Text("FG_MobileOptLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                        <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                               id="NominatedParentDetails_ContactNo"
+                                               name="NominatedParentDetails.ContactNo"
+                                               type="tel"
+                                               aria-describedby="description-for-NominatedParentDetails_ContactNo"
+                                               data-parsley-errors-container="#description-for-NominatedParentDetails_ContactNo"
+                                               required
+                                               data-parsley-required-message="@Translate.Text("FG_MobileNoRequired")"
+                                               data-parsley-mobile_number=""
+                                               data-parsley-mobile_number-message="@Translate.Text("FG_MobileNoInvalids")"
+                                               value="@(!string.IsNullOrWhiteSpace(Model.NominatedParentDetails.ContactNo) ? Model.NominatedParentDetails.ContactNo : "")" />
+                                    </span>
+                                    <div id="description-for-NominatedParentDetails_ContactNo" class="form-field__messages">
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--text">
+                                    <label for="NominatedParentDetails_EmailAddress" class="form-field__label">
+                                        @Translate.Text("FG_EmailAddressOptLbl")
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(m => m.NominatedParentDetails.EmailAddress,
+    new
+    {
+        @class = "form-field__input form-field__input--text",
+        @data_parsley_required_message = Translate.Text("FG_EmailAddressRequired"),
+        @type = "email",
+        @required = "",
+        @data_parsley_type_message = Translate.Text("FG_EmailAddressInvalids"),
+        @data_parsley_trigger = "focusout",
+        @aria_describedby = "description-for-NominatedAwardCoordinatorDetailss_Email",
+        @data_parsley_errors_container = "#description-for-NominatedParentDetails_Email"
+    })
+                                    </span>
+                                    <div id="description-for-NominatedParentDetails_Email" class="form-field__messages">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </fieldset>
+                        @*@if ((bool)ViewBag.Recaptcha)
+                            {
+                                <br />
+                                <div class="g-recaptcha" id="captcha" data-sitekey="@(ViewBag.SiteKey)"></div>
+                                <span id='errorContainer' class="parsley-errors-list"></span>
+                            }*@
+                    </div>
+                    <!--step 1 end-->
+                    <!-- step 2 -->
+                    <div id="divstep_2" class="conservationsection">
+                        <legend class="legend hidden" id="legend2">@Translate.Text("Cons_Lead_TechParam")</legend>
+                        <!--Technical Parameters-->
+                        <div class="grid__row">
+                            <div class="grid__column grid__column--12 grid__column--form">
+                                <fieldset class="fieldset border-legend">
+                                    <legend class="legend">@Translate.Text("Cons_Lead_TechParam_Saving")</legend>
+                                    <div class="legend-title">@Translate.Text("Cons_Lead_TechParam_Saving")</div>
+                                    <div class="form-field form-field--text form-field--textarea">
+                                        <label for="form-field-savingobjective" class="form-field__label">
+                                            @Translate.Text("Cons_Edu_TechParam_Objectives")
+                                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                        </label>
+                                        <span class="form-field__label-details">
+                                            @Translate.Text("Cons_Edu_TechParam_Objectives_Q1")
+                                            @Translate.Text("Cons_Edu_TechParam_Objectives_Q1_point")
+                                        </span>
+                                        <span class="form-field__input-wrapper">
+                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                      maxlength="100"
+                                                      data-textarea="savingobjective"
+                                                      id="form-field-savingobjective"
+                                                      name="conservationTechnicalParameter.SavingObjective"
+                                                      type="textarea"
+                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                      aria-describedby="description-for-savingobjective"
+                                                      data-parsley-errors-container="#description-for-savingobjective"
+                                                      required=""
+                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                        </span>
+                                        <div id="description-for-savingobjective" class="form-field__messages">
+                                            <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="savingobjective">0</span>/100 @Translate.Text("Characters")</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-field form-field--text form-field--textarea">
+                                        <label for="form-field-savingbehaviour" class="form-field__label">
+                                            @Translate.Text("Cons_Edu_TechParam_Objectives_Q2")
+                                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                        </label>
+                                        <span class="form-field__label-details">
+                                            @Translate.Text("Cons_Edu_TechParam_Objectives_Q2_Desc")
+                                        </span>
+                                        <span class="form-field__input-wrapper">
+                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                      maxlength="100"
+                                                      data-textarea="savingbehaviour"
+                                                      id="form-field-savingbehaviour"
+                                                      name="conservationTechnicalParameter.SavingBehaviour"
+                                                      type="textarea"
+                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                      aria-describedby="description-for-savingbehaviour"
+                                                      data-parsley-errors-container="#description-for-savingbehaviour"
+                                                      required=""
+                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                        </span>
+                                        <div id="description-for-savingbehaviour" class="form-field__messages">
+                                            <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="savingbehaviour">0</span>/100 @Translate.Text("Characters")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="fieldset border-legend label-group-legend">
+                                    <legend class="legend"> @Translate.Text("Cons_Lead_TechParam_Energy")</legend>
+                                    <div class="legend-title"> @Translate.Text("Cons_Lead_TechParam_Energy")</div>
+                                    <div class="form-field form-field--toggles">
+                                        <p class="form-field__label">
+                                            @Translate.Text("Cons_Edu_TechParam_Energy_Q1")
+                                        </p>
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_TechParam_Energy_Aircon")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormAirconditioning)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_aircondi_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_aircondi_1_@(i)"
+                                                                   @*name="conservationTechnicalParameter.TechAirconditioningSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedaircondition"
+                                                                   data-parsley-errors-container="#description-for-selectedaircondition">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">
+                                                            @Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")
+                                                        </span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedairconditiondetail"
+                                                                      id="form-field-selectedairconditiondetail_1_@(i)"
+                                                                      name="conservationTechnicalParameter.TechAirconditioningSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedairconditiondetail"
+                                                                      data-parsley-errors-container="#description-for-selectedairconditiondetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedairconditiondetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationTechnicalParameter.TechAirconditioningSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedaircondition" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_TechParam_Energy_Lighting")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormLighting)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_lighting_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_lighting_1_@(i)"
+                                                                   @*name="conservationTechnicalParameter.TechLightingSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedlighting"
+                                                                   data-parsley-errors-container="#description-for-selectedlighting">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedlightingdetail"
+                                                                      id="form-field-selectedlightingdetail_1_@(i)"
+                                                                      name="conservationTechnicalParameter.TechLightingSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedlightingdetail"
+                                                                      data-parsley-errors-container="#description-for-selectedlightingdetails"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedlightingdetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationTechnicalParameter.TechLightingSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedlighting" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_TechParam_Energy_OfficeEquip")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormOfficeEquipment)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_office_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_office_1_@(i)"
+                                                                   @*name="conservationTechnicalParameter.TechOfficeEquipmentSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedofficeequipment"
+                                                                   data-parsley-errors-container="#description-for-selectedofficeequipment">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedofficeequipmentdetail"
+                                                                      id="form-field-selectedofficeequipmentdetail_1_@(i)"
+                                                                      name="conservationTechnicalParameter.TechOfficeEquipmentSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedofficeequipmentdetail"
+                                                                      data-parsley-errors-container="#description-for-selectedofficeequipmentdetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedofficeequipmentdetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationTechnicalParameter.TechOfficeEquipmentSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedofficeequipment" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_TechParam_Energy_Water")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormWater)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_water_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_water_1_@(i)"
+                                                                   @*name="conservationTechnicalParameter.TechWaterSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedwater"
+                                                                   data-parsley-errors-container="#description-for-selectedwater">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedwaterdetail"
+                                                                      id="form-field-selectedwaterdetail_1_@(i)"
+                                                                      name="conservationTechnicalParameter.TechWaterSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedwaterdetail"
+                                                                      data-parsley-errors-container="#description-for-selectedwaterdetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedwaterdetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationTechnicalParameter.TechWaterSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedwater" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_TechParam_Energy_Other")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormOther)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_other_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_other_1_@(i)"
+                                                                   @*name="conservationTechnicalParameter.TechOtherSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedother"
+                                                                   data-parsley-errors-container="#description-for-selectedother">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedotherdetail"
+                                                                      id="form-field-selectedotherdetail_1_@(i)"
+                                                                      name="conservationTechnicalParameter.TechOtherSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedotherdetail"
+                                                                      data-parsley-errors-container="#description-for-selectedotherdetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedotherdetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationTechnicalParameter.TechOtherSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedother" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_TechParam_Energy_None")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormNone)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_none_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_none_1_@(i)"
+                                                                   @*name="conservationTechnicalParameter.TechNoneSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectednone"
+                                                                   data-parsley-errors-container="#description-for-selectednone">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectednonedetail"
+                                                                      id="form-field-selectednonedetail_1_@(i)"
+                                                                      name="conservationTechnicalParameter.TechNoneSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectednonedetail"
+                                                                      data-parsley-errors-container="#description-for-selectednonedetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectednonedetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationTechnicalParameter.TechNoneSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectednone" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <!--step 2 end-->
+                    <!-- step 3 -->
+                    <div id="divstep_3" class="conservationsection">
+                        <legend class="legend hidden" id="legend3">@Translate.Text("Cons_Lead_AwarParam")</legend>
+
+                        <!--Awareness Parameters-->
+                        <div class="grid__row">
+                            <div class="grid__column grid__column--12 grid__column--form">
+                                <fieldset class="fieldset border-legend">
+                                    <legend class="legend">@Translate.Text("Cons_Lead_AwarParam_Envir_Acti")</legend>
+                                    <div class="legend-title">@Translate.Text("Cons_Lead_AwarParam_Envir_Acti")</div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Edu_AwarParam_Envir_Acti_Q1")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormEnvironmentalActivites)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_envir_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_envir_1_@(i)"
+                                                                   @*name="conservationAwarenessParameter.AwarEnvironmentalSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedenvironment"
+                                                                   data-parsley-errors-container="#description-for-selectedenvironment">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_AwarParam_StudentNo")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-awarenvironmentalselectedstdno_1_@(i)"
+                                                                   name="conservationAwarenessParameter.AwarEnvironmentalSelectedStdno"
+                                                                   type="text"
+                                                                   required=""
+                                                                   maxlength="6"
+                                                                   data-parsley-type="number"
+                                                                   data-parsley-required-message="@Translate.Text("Please enter a value")"
+                                                                   aria-describedby="description-for-awarenvironmentalselectedstdno"
+                                                                   data-parsley-error-message="@Translate.Text("FG_EnterValidNumber")"
+                                                                   data-parsley-errors-container="#description-for-awarenvironmentalselectedstdno" />
+                                                        </span>
+                                                        <div id="description-for-awarenvironmentalselectedstdno_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedenvironmentaldetail"
+                                                                      id="form-field-selectedenvironmentaldetail_1_@(i)"
+                                                                      name="conservationAwarenessParameter.AwarEnvironmentalSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedenvironmentaldetail"
+                                                                      data-parsley-errors-container="#description-for-selectedenvironmentaldetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedenvironmentaldetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationAwarenessParameter.AwarEnvironmentalSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedenvironment" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="fieldset border-legend">
+                                    <legend class="legend">@Translate.Text("Cons_Lead_AwarParam_Lecture")</legend>
+                                    <div class="legend-title">@Translate.Text("Cons_Lead_AwarParam_Lecture")</div>
+                                    <div class="form-field form-field--toggles">
+                                        <fieldset class="fieldset">
+                                            <legend class="form-field__label">
+                                                @Translate.Text("Cons_Lead_AwarParam_Lecture_Q1")
+                                                @*<span class="form-field__label-optional">(@Translate.Text("optional"))</span>*@
+                                            </legend>
+                                            @{
+                                                i = 0;
+                                                foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster item in Model.conservationFormParameters.CoFormLecturesWorkshops)
+                                                {
+                                                    <div class="form-field__checkbox @(i == 0 ? "first" : "")">
+                                                        <label for="form-field-checkbox_lectures_1_@(i)">
+                                                            <input class="form-field__input form-field__input--checkbox"
+                                                                   id="form-field-checkbox_lectures_1_@(i)"
+                                                                   @*name="conservationAwarenessParameter.AwarLecturesSelectedValue"*@
+                                                                   type="checkbox"
+                                                                   value="@item.fieldkey"
+                                                                   @*data-parsley-required-message="@Translate.Text("FEI_Academics_Error_Message")"*@
+                                                                   aria-describedby="description-for-selectedlectures"
+                                                                   data-parsley-errors-container="#description-for-selectedlectures">
+                                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                                @item.fieldvalue
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_AwarParam_StudentNo")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <input class="form-field__input form-field__input--text"
+                                                                   id="form-field-awarlecturesselectedstdno_1_@(i)"
+                                                                   name="conservationAwarenessParameter.AwarLecturesSelectedStdno"
+                                                                   type="text"
+                                                                   required=""
+                                                                   maxlength="6"
+                                                                   data-parsley-type="number"
+                                                                   data-parsley-required-message="@Translate.Text("Please enter a value")"
+                                                                   aria-describedby="description-for-awarlecturesselectedstdno"
+                                                                   data-parsley-error-message="@Translate.Text("FG_EnterValidNumber")"
+                                                                   data-parsley-errors-container="#description-for-awarlecturesselectedstdno" />
+                                                        </span>
+                                                        <div id="description-for-awarlecturesselectedstdno_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-field form-field--text checkbox-text" style="display: none;">
+                                                        <span class="checkbox-text-label">@Translate.Text("Cons_Edu_TechParam_Energy_Aircon_Q1")</span>
+                                                        <span class="form-field__input-wrapper">
+                                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                                      maxlength="100"
+                                                                      data-textarea="selectedlecturesdetail"
+                                                                      id="form-field-selectedlecturesdetail_1_@(i)"
+                                                                      name="conservationAwarenessParameter.AwarLecturesSelectedDetail"
+                                                                      type="textarea"
+                                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                                      aria-describedby="description-for-selectedlecturesdetail"
+                                                                      data-parsley-errors-container="#description-for-selectedlecturesdetail"
+                                                                      required=""
+                                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                                        </span>
+                                                        <div id="description-for-selectedlecturesdetail_1_@(i)" class="form-field__messages">
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" value="@item.fieldkey" name="conservationAwarenessParameter.AwarLecturesSelectedValue" />
+                                                    i++;
+                                                }
+                                            }
+                                            <div id="description-for-selectedlectures" class="form-field__messages">
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="fieldset border-legend">
+                                    <legend class="legend">@Translate.Text("Cons_Lead_AwarParam_Social")</legend>
+                                    <div class="legend-title">@Translate.Text("Cons_Lead_AwarParam_Social")</div>
+                                    <div class="form-field form-field--text form-field--textarea">
+                                        <label for="form-field-socialmedia" class="form-field__label">
+                                            @Translate.Text("Cons_Edu_AwarParam_Social_Q1")
+                                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                        </label>
+                                        @*<span class="form-field__label-details">@Translate.Text("Cons_Edu_AwarParam_Social_Q1") </span>*@
+                                        <span class="form-field__input-wrapper">
+                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                      maxlength="100"
+                                                      data-textarea="socialmedia"
+                                                      id="form-field-socialmedia"
+                                                      name="conservationAwarenessParameter.SocialMediaChannel"
+                                                      type="textarea"
+                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                      aria-describedby="description-for-socialmedia"
+                                                      data-parsley-errors-container="#description-for-socialmedia"
+                                                      required=""
+                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                        </span>
+                                        <div id="description-for-socialmedia" class="form-field__messages">
+                                            <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="socialmedia">0</span>/100 @Translate.Text("Characters")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="fieldset border-legend">
+                                    <legend class="legend">
+                                        @Translate.Text("Cons_Lead_AwarParam_Distinguished_Parent")
+                                    </legend>
+                                    <div class="legend-title">@Translate.Text("Cons_Lead_AwarParam_Distinguished_Parent")</div>
+                                    <div class="form-field form-field--text form-field--textarea">
+                                        <label for="form-field-parenttarget" class="form-field__label">
+                                            @Translate.Text("Cons_Edu_TechParam_Objectives")
+                                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                        </label>
+                                        <span class="form-field__label-details">@Translate.Text("Cons_Lead_AwarParam_Objectives_Q1")</span>
+                                        <span class="form-field__input-wrapper">
+                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                      maxlength="100"
+                                                      data-textarea="parenttarget"
+                                                      id="form-field-parenttarget"
+                                                      name="conservationAwarenessParameter.ParentTarget"
+                                                      type="textarea"
+                                                      @*placeholder="Some placeholder text"*@
+                                                      aria-describedby="description-for-parenttarget"
+                                                      data-parsley-errors-container="#description-for-parenttarget"
+                                                      required=""
+                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                        </span>
+                                        <div id="description-for-parenttarget" class="form-field__messages">
+                                            <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="parenttarget">0</span>/100 @Translate.Text("Characters")</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-field form-field--text form-field--textarea">
+                                        <label for="form-field-parentachievement" class="form-field__label">
+                                            @Translate.Text("Cons_Lead_AwarParam_Achievements")
+                                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                        </label>
+                                        <span class="form-field__label-details"> @Translate.Text("Cons_Lead_AwarParam_Achievements_Q1")</span>
+                                        <span class="form-field__input-wrapper">
+                                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                      maxlength="100"
+                                                      data-textarea="parentachievement"
+                                                      id="form-field-parentachievement"
+                                                      name="conservationAwarenessParameter.ParentAchievement"
+                                                      type="textarea"
+                                                      @*placeholder="@Translate.Text("Some placeholder text")"*@
+                                                      aria-describedby="description-for-parentachievement"
+                                                      data-parsley-errors-container="#description-for-parentachievement"
+                                                      required
+                                                      data-parsley-required-message="@Translate.Text("Please enter a value")"></textarea>
+                                        </span>
+                                        <div id="description-for-parentachievement" class="form-field__messages">
+                                            <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="parentachievement">0</span>/100 @Translate.Text("Characters")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                                <fieldset class="fieldset border-legend">
+                                    <legend class="legend">@Translate.Text("Cons_Edu_AwarParam_Attachment")</legend>
+                                    <div class="legend-title">@Translate.Text("Cons_Edu_AwarParam_Attachment")</div>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="/images/preview@2x.png"
+                                                     data-src="/images/preview@2x.png"
+                                                     class="form-field__preview"
+                                                     aria-hidden="true"
+                                                     role="presentation"
+                                                     alt=""
+                                                     data-uploader-image="AttachedDocument">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                @*<label for="form-field-wpbf51txv" class="form-field__label">
+                                                        Military service status
+                                                        <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                                                    </label>*@
+                                                <div>
+                                                    <label>
+                                                        @Html.TextBoxFor(m => m.AttachedDocument,
+                                                 new
+                                                 {
+                                                     @type = "file",
+                                                     @class = "form-field__input form-field__input--upload",
+                                                     @id = "form-field-GAttachedDocument",
+                                                     //@name = @Translate.Text("upload"),
+                                                     @aria_describedby = "description-for-GAttachedDocument",
+                                                     @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                                     @data_parsley_required_message = @Translate.Text("EV.AttachedDocumentrequiredmessage"),
+                                                     @data_parsley_errors_container = "#errors-for-AttachedDocument",
+                                                     @data_uploader_field = "AttachedDocument",
+                                                     @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\"",
+                                                     @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf",
+                                                     @data_size = @AttachmentValidation.maximumFileSize,
+                                                     @data_parsley_id = "16"
+                                                 })
+
+                                                        <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="AttachedDocument"></p>
+                                                <p>
+                                                    <button class="button button--text button--remove hidden" data-uploader-remove="AttachedDocument">@Translate.Text("Remove")</button>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div id="description-for-GAttachedDocument" class="form-field__messages">
+                                            <div id="errors-for-GAttachedDocument">
+                                                @Html.ValidationMessageFor(x => x.AttachedDocument, "", new { @class = "parsley-errors-list" })
+                                            </div>
+                                            <p class="form-field__description">@Translate.Text(DictionaryKeys.EVCard.EVMaxFileSize)</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        @if ((bool)ViewBag.Recaptcha)
+                        {
+                            <br />
+                            <div class="g-recaptcha" id="captcha" data-sitekey="@(ViewBag.SiteKey)"></div>
+                            <span id='errorContainer' class="parsley-errors-list"></span>
+                        }
+                    </div>
+
+                    <!--step 3 end-->
+                    <div class="grid__column--centered form-navigation form-field__button">
+                        <a role="button" data-m51-next="" aria-label="@Translate.Text("Back")" class="button button--primary previous">@Translate.Text("Back")</a>
+                        <a role="button" data-m51-next="" aria-label="@Translate.Text("Next")" class="button button--primary next">@Translate.Text("Next")</a>
+                        <button type="submit" class="button button--primary button--submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script>
+    docReady(function () {
+        jQuery(".button--primary").on("click", function () {
+
+            setTimeout(function () {
+                var id = GetErrorMessageId();
+                if (id != "") {
+                    //var _url = window.location.href;
+                    //window.location.href = "#" + id;
+                    $('html, body').animate({ scrollTop: $('#' + id).offset().top - 200 }, 'slow');
+                    history.pushState({}, '', _url);
+                };
+            }, 100);
+
+        })
+        function GetErrorMessageId() {
+            var _Id = "";
+            $.each($(".parsley-errors-list"), function (i, obj) {
+                if (_Id == "" && $(obj).find("li").length > 0) {
+                    if (_Id == "") {
+                        _Id = jQuery(obj).prop("id");
+                    }
+                }
+            })
+            return _Id;
+        }
+
+        // Step tracker function
+        var total = parseInt(3);
+        var current = parseInt(1);
+        var txt = jQuery("#divstep_1").find('.legend').text();
+        steptracker(total, current, txt);
+        var $sections = jQuery('.conservationsection');
+        function steptracker(total, current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', total);
+            $('.m38-step-tracker').attr('data-current-step', current);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+            jQuery(window).trigger('reinit_m38');
+        }
+        function curIndex() {
+            // Return the current index by looking at which section has the class 'current'
+            return $sections.index($sections.filter('.current'));
+        }
+        function navigateTo(index) {
+            var txt = $sections.hide().eq(index).find('.legend').text();
+            steptracker(total, index + 1, txt);
+
+            // Mark the current section with the class 'current'
+            $sections
+                .removeClass('current')
+                .eq(index)
+                .addClass('current');
+            $sections
+                .hide()
+                .eq(index)
+                .show();
+
+
+            // Show only the navigation buttons that make sense for the current section:
+            jQuery('.form-navigation .previous').toggle(index > 0);
+            var atTheEnd = index >= $sections.length - 1;
+            jQuery('.form-navigation .next').toggle(!atTheEnd);
+            jQuery('.form-navigation [type=submit]').toggle(atTheEnd);
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+            if (atTheEnd) {
+            }
+        }
+
+        // Next button click event
+        jQuery('.form-navigation .next').click(function (e) {
+            require(['parsley'], function () {
+                if (jQuery('#FormCL').parsley().validate()) {
+                    e.preventDefault();
+                    navigateTo(curIndex() + 1);
+                };
+            });
+
+        });
+
+        // Previous button is easy, just go back
+        jQuery('.form-navigation .previous').click(function (e) {
+            e.preventDefault();
+            navigateTo(curIndex() - 1);
+        });
+
+        // submit button click event
+        jQuery('.button--submit').off('click.submit').on('click.submit', function (e) {
+            require(['parsley'], function () {
+                recaptchaCallback();
+                if (!jQuery('#FormCL').parsley().validate()) {
+                    e.preventDefault();
+                }
+                else {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                }
+            });
+        });
+        setTimeout(function () { navigateTo(0); }, 200);
+
+        //recaptcha callback function
+        function recaptchaCallback() {
+        var v = grecaptcha.getResponse();
+        if (v.length == 0) {
+            jQuery('#errorContainer').text('@Translate.Text("FG_Capatcha_Valid")');
+            return false;
+        }
+        else {
+            jQuery('#errorContainer').text("");
+            return true;
+        }
+    }
+    });
+</script>

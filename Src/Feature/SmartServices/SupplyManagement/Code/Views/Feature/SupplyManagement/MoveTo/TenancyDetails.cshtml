@@ -1,0 +1,201 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Mvc
+@using System.Web.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.SupplyManagement.Models.MoveIn.TenancyDetailsViewModel
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", data_form = "true", enctype = "multipart/form-data" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+            <fieldset class="fieldset ">
+                <legend class="legend">@Translate.Text("Tenancy details")</legend>
+                <div id="datepicker-container-start-date" class="form-field form-field--text ">
+                    <label for="form-field-start-date" class="form-field__label">
+                        @Translate.Text("Contract start date")
+                        @if (Model.CustomerType == "O")
+                        {
+                            <span class="form-field__label-optional">(@Translate.Text("optional")) </span>
+                        }
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        @Html.TextBoxFor(x => x.ContractStartDate,
+                        RouteValueDictionaryExtensions.CustomerTypeIndicatesRequired(Model.CustomerType, new
+                   {
+                       @class = "form-field__input form-field__input--text form-field__input--datepicker",
+                       @id = "form-field-start-date",
+                       @name = "text-date",
+                       @placeholder = @Translate.Text("Select date"),
+                        @type = "text",
+                       @data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidContractStartDate),
+                       @data_parsley_errors_container = "#description-for-start-date",
+                       @aria_describedby = "description-for-start-date",
+                       @data_el = "datepicker",
+                       @data_picker_options = "true",
+                       @data_parsley_id = "8",
+                       @readonly = "",
+                       @aria_haspopup = "true",
+                       @aria_expanded = "false",
+                      // @aria_readonly = "false",
+                       @data_ref = "start_date",
+                       @data_initial_date = Model.ContractStartDate.HasValue ? Model.ContractStartDate.Value.ToString("MMMM dd, yyyy") : string.Empty
+                   }))
+                    </span>
+                    <div id="description-for-start-date" class="form-field__messages"></div>
+                </div>
+                <div id="datepicker-container-end-date" class="form-field form-field--text ">
+                    <label for="form-field-end-date" class="form-field__label">
+                        @Translate.Text("Contract end date")
+                    @if (Model.CustomerType == "O")
+                    {
+                        <span class="form-field__label-optional">(@Translate.Text("optional")) </span>
+                    }
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    @Html.TextBoxFor(x => x.ContractEndDate,
+                    RouteValueDictionaryExtensions.CustomerTypeIndicatesRequired(Model.CustomerType, new
+               {
+                   @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                   @id = "form-field-end-date",
+                   @name = "text-end-date",
+                   @placeholder = @Translate.Text("Select date"),
+                   @data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidContractEndDate),
+                   @data_parsley_errors_container = "#description-for-end-date",
+                   @aria_describedby = "description-for-end-date",
+                   @data_el = "datepicker",
+                   @data_picker_options = "true",
+                   @data_parsley_id = "10",
+                   @readonly = "",
+                   @aria_haspopup = "true",
+                   @aria_expanded = "false",
+                  // @aria_readonly = "false",
+                   @aria_owns = "form-field-end-date_root",
+                   @data_mindate = "start_date",
+                   @data_maxdate = "start_date",
+                   @data_mindate_offset = "30",
+                   @data_maxdate_offset = "365",
+                   @type = "text",
+                   @data_initial_date = Model.ContractEndDate.HasValue ? Model.ContractEndDate.Value.ToString("MMMM dd, yyyy") : string.Empty
+               }))
+                </span>
+                <div id="description-for-end-date" class="form-field__messages"></div>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-paixbq29q" class="form-field__label">@Translate.Text("RoomNo")<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    @Html.DropDownListFor(x => x.NumberOfRooms, (IEnumerable<SelectListItem>)ViewBag.NumberOfRoomsBag,
+                            Sitecore.Globalization.Translate.Text("Select from dropdown"),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-paixbq29q",
+                                @name = "select_optgropus",
+                                aria_describedby = "description-for-paixbq29q",
+                                aria_required = "true",
+                                @required = "",
+                                data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidNumberOfRooms),
+                                data_parsley_errors_container = "#description-for-paixbq29q",
+                                data_parsley_id = "12"
+                            })
+                </span>
+                <div id="description-for-paixbq29q" class="form-field__messages"></div>
+            </div>
+            <div class="form-field form-field--text ">
+                <label for="form-field-contract-value" class="form-field__label">
+                    @Translate.Text("Contract value")
+                    @if (Model.CustomerType == "O")
+                    {
+                        <span class="form-field__label-optional">(@Translate.Text("optional")) </span>
+                    }
+                    else
+                    {
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    }
+
+                </label>
+                <label class="form-field__input-wrapper">
+                    @Html.TextBoxFor(x => x.ContractValue,
+                    RouteValueDictionaryExtensions.CustomerTypeIndicatesRequired(Model.CustomerType, new
+              {
+                  @class = "form-field__input form-field__input--text",
+                  @id = "form-field-contract-value",
+                  @placeholder = Translate.Text("Enter contract value"),
+                  @data_input_truncate = "16",
+                  @data_parsley_error_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidContractValue),
+                  @data_parsley_errors_container = "#description-for-contract-value",
+                  @aria_describedby = "description-for-contract-value",
+                  @data_parsley_contract_value = "",
+                  @data_parsley_id = "14",
+                  @step = "any"
+              }))
+                </label>
+                <div id="description-for-contract-value" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.ContractValue, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="fieldset ">
+            <legend class="legend">@Translate.Text("Provide documents")</legend>
+            <div class="form-field form-field--upload">
+                <div class="form-field__input-wrapper">
+                    <div class="form-field__preview-wrapper">
+                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="upload-contract">
+                    </div>
+                    <div class="form-field__uploader-details">
+                        <label for="form-field-upload-contract" class="form-field__label">
+                            <strong class="form-field__label-description">@Model.ContractLabel1</strong>
+                        </label>
+                        <div>
+                            <label>
+                                @Html.TextBoxFor(m => m.UploadContract,
+                                    new
+                                    {
+                                        type = "file",
+                                        @class = "form-field__input form-field__input--upload",
+                                        @id = "form-field-upload-contract",
+                                        @name = @Translate.Text("upload"),
+                                        @aria_describedby = "description-for-upload-contract",
+                                        @required = "",
+                                        @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                        @data_parsley_errors_container = "#errors-for-upload-contract",
+                                        @data_uploader_field = "upload-contract",
+                                        @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                        @data_parsley_id = "16"
+                                    })
+
+                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                            </label>
+                        </div>
+                        <p class="form-field__input--upload-filename" data-uploader-filename="upload-contract"></p>
+                        <p>
+                            <button class="button button--text button--remove hidden" data-uploader-remove="upload-contract">@Translate.Text("Remove")</button>
+                        </p>
+                    </div>
+                </div>
+                <div id="description-for-upload-contract" class="form-field__messages">
+                    <div id="errors-for-upload-contract">
+                        @Html.ValidationMessageFor(x => x.UploadContract, "", new { @class = "parsley-errors-list" })
+                    </div>
+                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="form-field__button">
+            <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")..."><span>@Translate.Text("Continue")</span></button>
+        </div>
+    }
+    </div>
+</div>

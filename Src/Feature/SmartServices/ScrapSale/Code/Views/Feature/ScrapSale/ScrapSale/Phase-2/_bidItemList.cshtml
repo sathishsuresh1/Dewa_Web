@@ -1,0 +1,224 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.ScrapSale.Models.ScrapSale.TenderBidingStep2Model
+@{
+    bool _IsExpiredbiditemDisplay = Convert.ToBoolean(ViewBag.IsExpiredbiditemDisplay);
+}
+<div class="m23-table 23-table-scrap-sale" data-component="m23-table" style="overflow:scroll; max-height:400px;">
+    <table class="m23-table__content-table" style="background-color: #fff">
+        <thead class="m23-table__content-table-header">
+            <tr class="m23-table__content-table-row" tabindex="0">
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDItemNumber")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDComponent")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDMaterialDescription")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDSerialNumber")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDComponentUnit")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDStorageLocation")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDOfferQuantity")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDUnitPrice")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDNetValue")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDVatAmount")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDTotalValue")</th>
+                <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BIDBondAmount")</th>
+            </tr>
+        </thead>
+        <tbody class="m23-table__content-table-body">
+
+            @if (Model != null && Model.BidItemList != null)
+            {
+                int i = 0;
+                foreach (var item in Model.BidItemList)
+                {
+                    <tr class="m23-table__content-table-row" tabindex="0">
+                        <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("SS_BIDItemNumber")">
+                            @(item.bomItemnumber)
+                            @Html.HiddenFor(m => m.BidItemList[i].bomItemnumber)
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDComponent")">
+                            @(item.bomComponent)
+                            @Html.HiddenFor(m => m.BidItemList[i].bomComponent)
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDMaterialDescription")">
+                            @(item.materialDescription)
+                            @Html.HiddenFor(m => m.BidItemList[i].materialDescription)
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDSerialNumber")">
+                            @(item.serialNumber)
+                            @Html.HiddenFor(m => m.BidItemList[i].serialNumber)
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDComponentUnit")">
+                            @(item.componentUnit)
+                            @Html.HiddenFor(m => m.BidItemList[i].componentUnit)
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDStorageLocation")">
+                            @(item.storageLocation)
+                            @Html.HiddenFor(m => m.BidItemList[i].storageLocation)
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDOfferQuantity")">
+                            <span class="bidQtyD">@(item.componentQuantity)</span>
+                            @Html.HiddenFor(m => m.BidItemList[i].componentQuantity, new { @class = "bidQty" })
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDUnitPrice")">
+                            @if (!_IsExpiredbiditemDisplay)
+                            {
+
+                                <div class="form-field form-field--text">
+                                    <span class="form-field__input-wrapper form-field__input-wrapper--small">
+                                        <input class="form-field__input form-field__input--text bidPrice"
+                                               type="number"
+                                               id="form-field-ssbidunitprice_@(i)"
+                                               min="0.00"
+                                               step="any"
+                                               max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                                               name="BidItemList[@(i)].netPrice"
+                                               value="@item.netPrice"
+                                               data-parsley-currency=""
+                                               data-input-truncate="9"
+                                               data-parsley-min="0"
+                                               data-parsley-max-message="@Translate.Text("Easy.payment amount", PaymentConstants.EasyMaximumAllowedPaymentAmount.ToString("0,0.00"))"
+                                               data-parsley-max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                                               data-parsley-trigger="focusout"
+                                               aria-describedby="description-for-ssbidunitprice"
+                                               data-parsley-errors-container="#description-for-ssbidunitprice"
+                                               data-parsley-required-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                                               data-parsley-currency-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                                               data-parsley-min-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                                               data-parsley-range-message
+                                               lang="en" />
+                                    </span>
+                                </div>
+                            }
+                            else
+                            { 
+                                <span class="bidNetValueD">
+                                    @(item.netPrice)
+                                </span>
+                                @Html.HiddenFor(m => m.BidItemList[i].netPrice, new { @class = "bidPrice" })
+                            }
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDNetValue")">
+                            <span class="bidNetValueD">
+                                @(item.netValue)
+                            </span>
+                            @Html.HiddenFor(m => m.BidItemList[i].netValue, new { @class = "bidNetValue" })
+                        </td>
+                        <td class="m23-table__content-table-cell " data-label="@Translate.Text("SS_BIDVatAmount")">
+                            <span class="bidVatAmountD">
+                                @(item.vatAmount)
+                            </span>
+                            @Html.HiddenFor(m => m.BidItemList[i].vatAmount, new { @class = "bidVatAmount" })
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDTotalValue")">
+                            <span class="bidTotalValueD">
+                                @(item.totalValue)
+                            </span>
+                            @Html.HiddenFor(m => m.BidItemList[i].totalValue, new { @class = "bidTotalValue" })
+                        </td>
+                        <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_BIDBondAmount")">
+                            @(item.bidBond)
+                            @Html.HiddenFor(m => m.BidItemList[i].bidBond)
+                        </td>
+                    </tr>
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!-- m34-pagination-start -->
+@if (Model.Pagination)
+{
+    <div class="grid__column grid__column--12 pagination-list" id="pagination-list" style="display:none">
+        <div class="m34-pagination">
+            <div class="m34-pagination__content">
+                @if (Model.Page > 1)
+                {
+                    <a onclick="PaginationClick(@(1));" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                        <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                        <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+                    </a>
+                    <a onclick="PaginationClick(@(Model.Page - 1));" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+                }
+                <ul class="m34-pagination__page-list">
+                    @if (Model.Pagenumbers != null && Model.Pagenumbers.Count() > 0)
+                    {
+                        foreach (int pagenumber in Model.Pagenumbers)
+                        {
+                            if (Model.Page.Equals(pagenumber))
+                            {
+                                <li data-index="@pagenumber" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                                    <a onclick="PaginationClick(@(pagenumber));" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pagenumber</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li data-index="@pagenumber" class="m34-pagination__page-list-item">
+                                    <a onclick="PaginationClick(@(pagenumber));" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">@pagenumber</a>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+
+                @if (Model.Page < Model.TotalPage)
+                {
+                    <a onclick="PaginationClick(@(Model.Page + 1));" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+                    <a onclick="PaginationClick(@(Model.TotalPage));" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                        <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                        <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+                    </a>
+                }
+            </div>
+        </div>
+        <!-- m34-pagination-end -->
+    </div>
+}
+<script type="text/javascript">
+
+    // Unit price on change
+    $(".bidPrice").on("change", function () {
+
+        var _unitPrice = parseFloat($(this).val());
+
+        if ($(this).val() != "") {
+            $(this).val(_unitPrice.toFixed(2));
+        } else {
+            $(this).val("0.00");
+            _unitPrice = "0.00";
+        }
+
+        var tr = $(this).closest("tr");
+
+        // offer qty
+        var _qtElement = $(tr).find(".bidQty");
+        var _vatElement = $(tr).find(".bidVatAmount");
+
+        var qnty = parseFloat($(_qtElement).val().replace(',', ''));
+
+        var UnitAmout = (_unitPrice * qnty);
+        var Vatcal = (UnitAmout * 5 / 100);
+        var totalAmount = UnitAmout + Vatcal;
+
+        var _VatValDisplayElement = $(tr).find(".bidVatAmountD");
+
+        // Vat amount
+        $(_vatElement).val(Vatcal.toFixed(2));
+        $(_VatValDisplayElement).html(numeral(Vatcal).format('0,0.00'));
+
+        // Total bid price
+        var _NetValElement = $(tr).find(".bidNetValue");
+        var _NetValDisplayElement = $(tr).find(".bidNetValueD");
+
+        $(_NetValElement).val(UnitAmout.toFixed(2));
+        $(_NetValDisplayElement).html(numeral(UnitAmout).format('0,0.00'));
+
+        //Final biil amount
+        var _totalValElement = $(tr).find(".bidTotalValue");
+        var _totalValDisplayElement = $(tr).find(".bidTotalValueD");
+
+        $(_totalValElement).val(totalAmount);
+        $(_totalValDisplayElement).html(numeral(totalAmount).format('0,0.00'));
+    });
+
+</script>

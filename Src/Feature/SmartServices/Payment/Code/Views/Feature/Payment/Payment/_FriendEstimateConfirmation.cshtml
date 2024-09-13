@@ -1,0 +1,88 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Integration.Responses
+@using Sitecore.Data
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWA.Website.Models.Estimates.EstimatePaymentCompletionModel
+
+@Html.Sitecore().Placeholder("j82/m26-page-title")
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+
+@if (Model != null && Model.Succeeded)
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                <div class="m40-status-message__title icon--success">@Translate.Text("Payment completed")</div>
+                <div class="m40-status-message__text">@Translate.Text("You have successfully paid your friends Estimate")</div>
+                <p><button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="grid__column grid__column--6 noprint">
+                <div class="m45-estimate-selector" data-component="m45-estimate-selector" data-selectable="">
+                    <p class="m45-estimate-selector-trigger__label" id="m45-bill_selector_label"></p>
+                    @Html.Partial("/Views/Renderings/M45 Estimate Selector.cshtml", Model.Estimate)
+                </div>
+            </div>
+
+            <div class="grid__column grid__column--6">
+                <!-- m42-key-value-start -->
+                <div class="m42-keyvalue success-page">
+                    <dl>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Payment Date")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.Date.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+
+                        @*<dt class="m42-keyvalue__key--stacked">@Translate.Text("Receipt ID")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.ReceiptIdentifiers</dd>*@
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("deg transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.AffectedAccounts))
+                        {
+                            <dt class="m42-keyvalue__key--stacked">@Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.AffectedAccounts</dd>
+                        }
+
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Total</dd>
+                    </dl>
+                </div>
+                <!-- m42-key-value-end -->
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @Html.Partial("~/Views/Error/_SubmissionError.cshtml")
+}
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        @Html.Sitecore().Placeholder("content-transreciept-placeholder")
+        <h2 class="summary-footer__title noprint">@Translate.Text("What's next?")</h2>
+        <ul class="summary-footer__buttons noprint">
+            <li class="summary-footer__button">
+                <a role="button" href="@Model.PayAnotherEstimateLink" class="button button--primary button--next">@Translate.Text("Pay another Estimate")</a>
+            </li>
+        </ul>
+    </div>
+</div>

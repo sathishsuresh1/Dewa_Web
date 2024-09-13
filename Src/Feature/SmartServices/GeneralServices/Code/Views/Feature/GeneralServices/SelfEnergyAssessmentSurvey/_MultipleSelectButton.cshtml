@@ -1,0 +1,65 @@
+﻿@using System.Linq
+@using DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey
+
+@model DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey.SurveyQuestionViewModel
+@{
+    string hasMax = Model.MaxSelection > 0 ? "hasMax" : "";
+    string hasMaxAttribute = Model.MaxSelection > 0 ? "data-cbox-max=\"" + Model.MaxSelection.ToString() + "\"" : "";
+    bool required = true;
+    
+}
+<div class="form-dynamic-section active">
+    <div class="form-dynamic-section_screen"></div>
+    <div class="form-dynamic-section_title">
+        @Html.Raw(Model.Description)
+    </div>
+    <div class="form-field form-field--toggles form-field--@(Model.IsIconImage ? "iconcbox" : "buttoncbox") @hasMax" @Html.Raw(hasMaxAttribute)>
+        <fieldset class="fieldset">
+            <legend class="form-field__label">
+                <span class="aria-only">@Html.Raw(Model.Description)</span>
+            </legend>
+            @foreach (SurveyAnswerViewModel vm in Model.Answers)
+            {
+                string requiredstr = required ? "required=\"required\"" : "";
+                required = false;
+                string check = vm.Selected ? "checked=\"checked\"" : "";
+                string dclass = vm.DynamicQuestions.Count > 0 ? "form-field__input--checkbox--toggle" : "";
+                string isClear = string.IsNullOrEmpty(dclass) ? "" : "is-clear=\"true\"";
+                <div class="form-field__checkbox">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox @dclass" id="ff_@vm.Number" name="@vm.GetKey(Model.GetKey())" type="checkbox" value="@vm.Number" aria-describedby="des_@Model.Number" data-parsley-errors-container="#des_@Model.Number" data-parsley-multiple="mg@(Model.GetKey())" @Html.Raw(vm.GetToggleAttribute(Model)) @Html.Raw(check) data-parsley-required-message="@Sitecore.Globalization.Translate.Text("j154_FR")" @Html.Raw(requiredstr) @Html.Raw(isClear)>
+                        <span class="form-field__@(Model.IsIconImage ? "fakeiconcheckbox" : "fakecheckbox") focus-enabled">
+                         @if (!string.IsNullOrEmpty(vm.ImageUrl))
+                         {
+                             <img src="@Html.Raw(vm.ImageUrl)" alt="@vm.Description">
+                         }
+                            @vm.Description
+                        </span>
+                    </label>
+                </div>
+            }
+            <div id="des_@Model.Number" class="form-field__messages">
+            </div>
+        </fieldset>
+    </div>   
+    @foreach (var ans in Model.Answers)
+    {
+        if (ans.DynamicQuestions != null && ans.DynamicQuestions.Count > 0)
+        {
+            foreach (var dq in ans.DynamicQuestions)
+            {
+                switch (dq.Type)
+                {
+                    case QuestionType.RadioButton:
+                    case QuestionType.CheckBox:
+                        Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_DynamicSingleSelectButton.cshtml", dq);
+                        break;
+                    case QuestionType.Rating:
+                        Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_Rating.cshtml", dq);
+                        break;
+                }
+            }
+        }
+    }
+
+</div>

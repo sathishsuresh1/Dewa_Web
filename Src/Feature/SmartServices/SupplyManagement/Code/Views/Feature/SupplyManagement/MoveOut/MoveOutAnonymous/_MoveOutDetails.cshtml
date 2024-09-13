@@ -1,0 +1,767 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using SitecoreX = Sitecore.Context;
+@model DEWAXP.Foundation.Content.Models.MoveOut.v3.MoveOutAnonymous
+
+@{
+    //var isCommericalOrIndustrial = Model.SelectedAccount.Type.Equals("commercial", StringComparison.InvariantCultureIgnoreCase) || Model.SelectedAccount.Type.Equals("industrial", StringComparison.InvariantCultureIgnoreCase);
+    var now = DateHelper.DubaiNow().AddMonths(-1);
+    var threeinfuture = now.AddMonths(3);
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    //string required = Model.attachmentflag ? "required" : string.Empty;
+    var disableDate = "";
+    var disconnectionTimeText = "";
+    if (Model.DisconnectionTimeOptions != null)
+    {
+        disconnectionTimeText = Model.DisconnectionTimeOptions[0].Text + " " + Translate.Text("moveout.to.text") + " " + Model.DisconnectionTimeOptions[Model.DisconnectionTimeOptions.Count - 1].Text;
+    }
+    if (Model.DisconnectionCurrentTimeOptions != null && Model.DisconnectionCurrentTimeOptions.Count == 0)
+    {
+        if (disableDate != "")
+        {
+            disableDate += ",";
+        }
+        disableDate += "[" + DateTime.Now.Year + "," + (DateTime.Now.Month - 1) + "," + DateTime.Now.Day + "]";
+    }
+
+    if (Model.HolidayList != null && Model.HolidayList.Count > 0)
+    {
+
+        foreach (var holidayItem in Model.HolidayList)
+        {
+            if (disableDate != "")
+            {
+                disableDate += ",";
+            }
+            DateTime dt = Convert.ToDateTime(holidayItem);
+            disableDate += "[" + dt.Year + "," + (dt.Month - 1) + "," + dt.Day + "]";
+        }
+    }
+}
+
+@{
+    ModelState ms;
+    List<ModelError> modelErrors;
+}
+
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+    </div>
+</div>
+@Html.Sitecore().Placeholder("mandatoryfields")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <h3 class="text__section-subtitle">@Translate.Text("Input details below")</h3>
+
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "move-out-details", @data_form = "true", @data_submit_validate = "enabled", @enctype = "multipart/form-data", @novalidate = string.Empty }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Sitecore().FormHandler()
+            <input type="hidden" value="@Model.attachmentflag.ToString().ToLower()" id="IsAttachmentMandatorycheck" />
+            if (!ViewData.ModelState.IsValid && ViewData.ModelState.TryGetValue(ViewData.TemplateInfo.HtmlFieldPrefix, out ms))
+            {
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                            <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                            <div class="m40-status-message__text">
+                                <div class="validation-summary-errors">
+
+                                    @if (ms.Errors != null && ms.Errors.Any() && ms.Errors.Where(x => !string.IsNullOrWhiteSpace(x.ErrorMessage)).Count() > 2)
+                                    {
+                                        modelErrors = ms.Errors.Where(x => !string.IsNullOrWhiteSpace(x.ErrorMessage)).ToList();
+
+                                        <ul>
+                                            <li>@modelErrors[0].ErrorMessage</li>
+                                            <li>@modelErrors[1].ErrorMessage</li>
+                                        </ul>
+
+                                        <div class="m37-expander" data-component="m37-expander">
+                                            <button data-toggle="true" class="m37-expander__trigger" id="_eptziyi6x_trigger" aria-controls="_eptziyi6x_content">@Translate.Text("more")</button>
+                                            <div data-content="true" class="m37-expander__content" aria-expanded="false" id="_eptziyi6x_content" aria-labelledby="_eptziyi6x_trigger">
+                                                <!-- m42-key-value--start -->
+                                                <ul>
+                                                    @foreach (var error in modelErrors.Skip(2))
+                                                    {
+                                                        <li>@error.ErrorMessage</li>
+                                                    }
+                                                </ul>
+
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <ul>
+                                            @foreach (var error in ms.Errors.Where(x => !string.IsNullOrWhiteSpace(x.ErrorMessage)))
+                                            {
+                                                <li>@Html.Raw(error.ErrorMessage)</li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                @*@Html.Raw(HttpUtility.HtmlDecode(Html.ValidationSummary(true).ToHtmlString()))*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <fieldset class="fieldset">
+                <legend class="legend-color">.</legend>
+                <div class="form-field form-field--text ">
+                    <label for="form-field-mobilenumber" class="form-field__label">
+                        @Translate.Text("moveout.mobilenumber")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <!--<span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                    <input type="tel" name="MobileNumber" id="form-field-mobilenumber"
+                           value="@Model.MobileNumber"-->
+                    @*aria-required="true"*@
+                    <!--aria-describedby="description-for-mobilenumber" required="required" placeholder="@Translate.Text("Mobile number placeholder")" data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                    </span>-->
+                    <div dir="ltr" class="form-field__input-wrapper form-field__input-wrapper--readonly ">
+                        <input class="form-field__input form-field__input--readonly form-field__input--dir-ltr"
+                               readonly="" id="MobileNumberinput"
+                               name="MobileNumber"
+                               type="text" value="@Model.MaskedMobileNumber"
+                               aria-describedby="description-for-mobilenumber"
+                               data-parsley-errors-container="#description-for-mobilenumber"
+                               data-parsley-trigger="focusout">
+                    </div>
+                    <div id="description-for-mobilenumber" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.MobileNumber)
+                    </div>
+                </div>
+
+                <div class="m43-accountsel form-field" data-component="m43-account-selector">
+                    <div class="m66-preloader small" style="display: none;">
+                        <div class="loader-small"></div>
+                    </div>
+                    <div class="m43-accountsel-hidden" style="">
+                        <!-- .account selection trigger -->
+                        <button class="m43-accountsel__selected" data-accountselector="acc-sel-ctrl" data-preventsubmit="false" data-minselection="1" data-maxselection="1" aria-haspopup="true" aria-expanded="false" type="button" id="_k4nht65c7_trigger" aria-controls="_k4nht65c7_content">
+                            <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                                <span class="m43-accountsel__header">
+                                    <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                        <span class="inline-block" dir="@direction">@Model.BusinessPartnerName</span>
+                                        <!--<span dir="@direction" class="m43-accountsel__status m43-accountsel__status--active">-->@*@Translate.Text("Active")*@<!--</span>-->
+                                    </span>
+                                    <span class="m43-accountsel__details">
+                                        <abbr title="Account">@Translate.Text("Acc")</abbr>:
+                                        <span data-acc-detail="acc_number" dir="@direction">@Model.AccountNumber</span>
+                                        <span class="aria-only"> | </span>
+                                    </span>
+                                </span>
+                            </span>
+                        </button>
+                        <!-- ./account selection trigger -->
+                        <!-- .expander for the selected account -->
+                        <div class="m37-expander" data-component="m37-expander">
+                            <button type="button" data-toggle="true" aria-haspopup="true" aria-expanded="false" class="m37-expander__trigger m37-expander__trigger--themed m37-expander__trigger--open" id="_71emeftj8_trigger" aria-controls="_71emeftj8_content">@Translate.Text("Account details") </button>
+
+                            <div data-content="true" class="m37-expander__content m37-expander__content--open" id="_71emeftj8_content" aria-labelledby="_71emeftj8_trigger" aria-expanded="true">
+                                <div class="m42-keyvalue">
+                                    <dl data-accountsel-additional-details="acc-sel-ctrl">
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="@direction">@Translate.Text("Premise")<span class="floatRight"> :</span></dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">@Model.PremiseNumber</dd>
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="@direction">@Translate.Text("Business Partner")<span class="floatRight"> :</span></dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_businesspartner">@Model.BusinessPartnerNumber</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ./expander for the selected account -->
+                    </div>
+                </div>
+                <div class="form-field form-field--text">
+                    <label for="form-field-Emailid" class="form-field__label form-field__label--readonly">
+                        @Translate.Text("updateiban.Emailid")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly" style="background: transparent;">
+                        @Html.TextBoxFor(x => x.MaskedEmailAddress,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--readonly",
+                            @id = "form-field-Emailid",
+                            @readonly = "",
+                            @type = "text",
+                            @aria_required = "true",
+                            @data_parsley_errors_container = "#description-for-Emailid",
+                            @aria_describedby = "description-for-Emailid",
+                            @data_parsley_id = "14",
+                            @step = "any",
+                        })
+                    </div>
+                    <div id="description-for-Emailid" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.MaskedEmailAddress)
+                    </div>
+                </div>
+
+                <div id="disconnections" class="form-field form-field--text form-field--6 relative">
+                    <label for="form-field-movedate" class="form-field__label">
+                        @Translate.Text("moveout.disconnect")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        @Html.TextBoxFor(x => x.DisconnectionDate, new
+                   {
+                       data_parsley_id = "6",
+                       @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                       id = "form-field-movedate",
+                       placeholder = Translate.Text("Select date"),
+                       required = "required",
+                       data_parsley_required_message = Translate.Text("moveout.pleaseenteravalue"),
+                       data_el = "datepicker-future",
+                       data_parsley_errors_container = "#description-for-movedate",
+                       data_parsley_cannotbebeforetoday_message = Translate.Text(DictionaryKeys.MoveOut.DisconnectDateNotInPast),
+                       data_parsley_cannotbeafterthreemonth_message = Translate.Text(DictionaryKeys.MoveOut.DisconnectDateNotthreemonths),
+                       data_picker_options = "{ \"max\": [" + threeinfuture.Year + "," + (threeinfuture.Month) + "," + threeinfuture.Day + "],\"disable\": [ " + disableDate + "] }",
+                       type = "text",
+                       @data_initial_date = Model.DiconnectionDateTime != null && Model.DiconnectionDateTime.HasValue ? Model.DiconnectionDateTime.Value.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en")) : string.Empty
+                   })
+                    </span>
+                    <div id="description-for-movedate" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.DiconnectionDateTime)
+                    </div>
+                </div>
+                <div id="datepicker-container-movetime" class="form-field form-field--select form-field--select-single form-field--6  nopadding">
+                    <label for="form-field-disconnectiontime" class="form-field__label">
+                        @Translate.Text("moveout.time")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full time_select"
+                                id="form-field-disconnectiontime"
+                                name="DisconnectionTime"
+                                required
+                                aria-describedby="description-for-disconnectiontime"
+                                data-parsley-errors-container="#description-for-disconnectiontime"
+                                data-parsley-required-message="@Translate.Text("moveout.selectdisconnectiontime")">
+                            <option value="" selected="">@Translate.Text("moveout.selecttime")</option>
+                            @if (Model.DisconnectionTimeOptions != null)
+                            {
+                                foreach (var item in Model.DisconnectionTimeOptions)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </span>
+                    <div id="description-for-disconnectiontime" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.DisconnectionTime)
+                    </div>
+                </div>
+                <div class="form-field form-field--text  form-field--12">
+                    @Html.Raw(Model.DisconnectionDateTimeNotes)
+                </div>
+                @if (Model.refund)
+                {
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-TransferTo" class="form-field__label">
+                            @Translate.Text("moveout.transferto")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.SelectedRefundOption, (IEnumerable<SelectListItem>)Model.RefundOptions,
+                                     @Translate.Text("moveout.selectrefundoptions"),
+                                      new
+                                      {
+                                          @class = "form-field__input form-field__input--select form-field__input--select-full form-field-TransferTo",
+                                          @id = "form-field-TransferTo",
+                                          @data_index = 0,
+                                          @aria_describedby = "description-for-TransferTo",
+                                          @required = "required",
+                                          @data_parsley_error_message = Translate.Text("moveout.selectrefundoptionserror"),
+                                          @data_parsley_errors_container = "#description-for-TransferTo",
+                                          @data_parsley_id = "22"
+
+                                      })
+                        </span>
+                        <div id="description-for-TransferTo" class="form-field__messages"></div>
+                    </div>
+                    <div id="oknorefundnote" class="form-field--text form-field--12 hidden">
+                        @Html.Raw(Translate.Text("oknorefund.note"))
+                    </div>
+                    @Html.HiddenFor(x => x.Ibanavailable)
+                    if (Model.Ibanavailable)
+                    {
+                        <fieldset class="fieldset fieldset--hidden" id="iban_details_select">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-selectibanlist" class="form-field__label">
+                                    @Translate.Text("updateiban.newiban")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.SelectedIban, Model.IbanList,
+                                   Translate.Text("selectiban.dropdown"),
+                                    new
+                                    {
+                                        @class = "form-field__input form-field__input--select form-field__input--select-full form-field-selectiban",
+                                        @id = "form-field-selectibanlist",
+                                        @aria_describedby = "description-for-selectIban",
+                                        @required = "required",
+                                        @data_parsley_error_message = Translate.Text("Please enter a value"),
+                                        @data_parsley_errors_container = "#description-for-selectIban",
+                                        @data_parsley_id = "22"
+                                    })
+                                </span>
+                                <div id="description-for-selectIban" class="form-field__messages"></div>
+                            </div>
+                            <div class="form-field form-field--text hidden" id="selectibannumber">
+                                <label for="form-field-ibannumber2" class="form-field__label">
+                                    @Translate.Text("updateiban.selectiban")
+                                    @* <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.IbanAccountNumber,
+                               new
+                               {
+                                   @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                                   @name = "IbanAccountNumber",
+                                   @type = "number",
+                                   @lang = "en",
+                                   @maxlength = 21,
+                                   @id = "form-field-ibannumber2",
+                                   @placeholder = Translate.Text("Enter 21 digit number"),
+                                   //@aria_required = "true",
+                                   @required = "required",
+                                   @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                                   @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                                   @data_parsley_errors_container = "#description-for-ibannumber2",
+                                   @aria_describedby = "description-for-ibannumber2",
+                                   @data_parsley_selectediban = "",
+                                   @bankcodes = Model.ValidBankCodes.Item1,
+                                   @data_parsley_equalto = "#form-field-ibannumber2"
+                               })
+                                </span>
+
+                                <div id="description-for-ibannumber2" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.IbanAccountNumber)
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text hidden " id="confirmibannumber">
+                                <label for="form-field-select-confirm-iban-number" class="form-field__label">
+                                    @Translate.Text("updateiban.confirmiban")
+                                    @*<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.ConfirmIbanAccountNumber,
+                               new
+                               {
+                                   @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                                   @name = "ConfirmIbanAccountNumber",
+                                   @type = "number",
+                                   @lang = "en",
+                                   @maxlength = 21,
+                                   @id = "form-field-select-confirm-iban-number",
+                                   @placeholder = Translate.Text("Enter 21 digit number"),
+                                   //@aria_required = "true",
+                                   @required = "required",
+                                   @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                                   @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                                   @data_parsley_equalto_message = Translate.Text("IBANNumberMisMatch"),
+                                   @data_parsley_errors_container = "#description-for-selectibanconfirm",
+                                   @aria_describedby = "description-for-selectibanconfirm",
+                                   @data_parsley_selectediban = "",
+                                   @bankcodes = Model.ValidBankCodes.Item1,
+                                   @data_iban_confirm = "",
+                                   @data_parsley_equalto = "#form-field-selectibanlist",
+                               })
+                                </span>
+
+                                <div id="description-for-selectibanconfirm" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.ConfirmIbanAccountNumber)
+                                    @if (!string.IsNullOrWhiteSpace(Model.ValidBankCodes.Item1) && !string.IsNullOrWhiteSpace(Model.ValidBankCodes.Item2))
+                                    {
+                                        <p class="form-field__description">@string.Format(Translate.Text("moveout.allowedbanks"), Model.ValidBankCodes.Item2)</p>
+                                    }
+                                </div>
+                            </div>
+                        </fieldset>
+                    }
+                    else
+                    {
+                        <fieldset class="fieldset fieldset--hidden" id="iban_details">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-ibannumber" class="form-field__label">
+                                    @Translate.Text("updateiban.editiban")
+                                    @* <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.IbanAccountNumber,
+                      new
+                      {
+                          @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                          @name = "IbanAccountNumber",
+                          @type = "number",
+                          @lang = "en",
+                          @maxlength = 21,
+                          @id = "form-field-ibannumber",
+                          @placeholder = Translate.Text("Enter 21 digit number"),
+                          //@aria_required = "true",
+                          @required = "required",
+                          @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                          @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                          @data_parsley_errors_container = "#description-for-ibannumber",
+                          @aria_describedby = "description-for-ibannumber",
+                          @data_parsley_selectediban = "",
+                          @bankcodes = Model.ValidBankCodes.Item1,
+                          @data_parsley_equalto = "#form-field-ibannumber"
+                      })
+                                </span>
+
+                                <div id="description-for-ibannumber" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.IbanAccountNumber)
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-confirm-iban-number" class="form-field__label">
+                                    @Translate.Text("updateiban.confirmiban")
+                                    @*<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.ConfirmIbanAccountNumber,
+                      new
+                      {
+                          @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                          @name = "ConfirmIbanAccountNumber",
+                          @type = "number",
+                          @lang = "en",
+                          @maxlength = 21,
+                          @id = "form-field-confirm-iban-number",
+                          @placeholder = Translate.Text("Enter 21 digit number"),
+                          //@aria_required = "true",
+                          @required = "required",
+                          @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                          @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                          @data_parsley_equalto_message = Translate.Text("IBANNumberMisMatch"),
+                          @data_parsley_errors_container = "#description-for-ibanconfirm",
+                          @aria_describedby = "description-for-ibanconfirm",
+                          @data_parsley_selectediban = "",
+                          @bankcodes = Model.ValidBankCodes.Item1,
+                          @data_iban_confirm = "",
+                          @data_parsley_equalto = "#form-field-ibannumber"
+                      })
+                                </span>
+
+                                <div id="description-for-ibanconfirm" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.ConfirmIbanAccountNumber)
+                                    @if (Model.ValidBankCodes != null && !string.IsNullOrWhiteSpace(Model.ValidBankCodes.Item1) && !string.IsNullOrWhiteSpace(Model.ValidBankCodes.Item2))
+                                    {
+                                        <p class="form-field__description">@string.Format(Translate.Text("moveout.allowedbanks"), Model.ValidBankCodes.Item2)</p>
+                                    }
+                                </div>
+                            </div>
+                        </fieldset>
+                    }
+                }
+            </fieldset>
+            if (Model.refund)
+            {
+                Model.attachmentflag = false;
+                <fieldset class="fieldset" id="attachment_details">
+                    @if (Model.attachmentflag)
+                    {
+                        <legend class="legend" id="documentname">
+                            @Translate.Text("updateiban.updatechequedocument")
+                        </legend>
+                    }
+                    else
+                    {
+                        <legend class="legend" id="documentname">
+                            @Translate.Text("updateiban.updatechequedocument")
+                        </legend>
+                    }
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="IbanRefundDocument">
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label for="form-field-IbanRefundDocument" class="form-field__label">
+                                    <strong class="form-field__label-description"></strong>
+                                </label>
+                                <div>
+                                    <label>
+                                        @if (Model.attachmentflag)
+                                        {
+                                            @Html.TextBoxFor(x => x.RefundDocument,
+                                             new
+                                             {
+                                                 @type = "file",
+                                                 @class = "form-field__input form-field__input--upload",
+                                                 @id = "form-field-IbanRefundDocument",
+                                                 @name = "IbanRefundDocument",
+                                                 @aria_describedby = "description-for-IbanRefundDocument",
+                                                 @required = "",
+                                                 @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                                 @data_parsley_errors_container = "#errors-for-IbanRefundDocument",
+                                                 @data_uploader_field = "IbanRefundDocument",
+                                                 @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                                 @data_size = @AttachmentValidation.maximumFileSize,
+                                                 @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                                 @data_parsley_id = "16"
+                                             })
+                                        }
+                                        else
+                                        {
+                                            @Html.TextBoxFor(x => x.RefundDocument,
+                                                 new
+                                                 {
+                                                     @type = "file",
+                                                     @class = "form-field__input form-field__input--upload",
+                                                     @id = "form-field-IbanRefundDocument",
+                                                     @name = "IbanRefundDocument",
+                                                     @aria_describedby = "description-for-IbanRefundDocument",
+                                                     @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                                     @data_parsley_errors_container = "#errors-for-IbanRefundDocument",
+                                                     @data_uploader_field = "IbanRefundDocument",
+                                                     @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                                     @data_size = @AttachmentValidation.maximumFileSize,
+                                                     @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                                     @data_parsley_id = "16"
+                                                 })
+                                        }
+                                        <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="IbanRefundDocument"></p>
+                                <p>
+                                    <button class="button button--text button--remove hidden" data-uploader-remove="IbanRefundDocument">@Translate.Text("Remove")</button>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="description-for-IbanRefundDocument" class="form-field__messages">
+                            <div id="errors-for-IbanRefundDocument">
+                                @Html.ValidationMessageFor(x => x.RefundDocument, "", new { @class = "parsley-errors-list" })
+                            </div>
+                            <p class="form-field__description">
+                                @Translate.Text("SetVAT.MaxSizeCopy")
+                            </p>
+                            <p class="form-field__description mt24"><strong id="ibnnote">.</strong></p>
+                        </div>
+                    </div>
+
+                    @*<legend class="legend" id="documentname">@Translate.Text("Moveout.RequestLetter")</legend>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="RequestLetter">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                <label for="form-field-RequestLetter" class="form-field__label">
+                                                    <strong class="form-field__label-description"></strong>
+                                                </label>
+                                                <div>
+                                                    <label>
+
+                                                        @Html.TextBoxFor(x => x.RequestLetter,
+                        new
+                        {
+                            @type = "file",
+                            @class = "form-field__input form-field__input--upload",
+                            @id = "form-field-RequestLetter",
+                            @name = "RequestLetter",
+                            @aria_describedby = "description-for-RequestLetter",
+                            @data_parsley_error_message = @Translate.Text("Please select a file"),
+                            @data_parsley_errors_container = "#errors-for-RequestLetter",
+                            @data_uploader_field = "RequestLetter",
+                            @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                            @data_size = @AttachmentValidation.maximumFileSize,
+                            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            @data_parsley_id = "16"
+                        })
+                                                        <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="RequestLetter"></p>
+                                                <p>
+                                                    <button class="button button--text button--remove hidden" data-uploader-remove="RequestLetter">@Translate.Text("Remove")</button>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div id="description-for-RequestLetter" class="form-field__messages">
+                                            <div id="errors-for-RequestLetter">
+                                                @Html.ValidationMessageFor(x => x.RequestLetter, "", new { @class = "parsley-errors-list" })
+                                            </div>
+                                            <p class="form-field__description">
+                                                @Translate.Text("Moveout.requestletterdescription")
+                                            </p>
+                                            <p class="form-field__description">
+                                                @Translate.Text("SetVAT.MaxSizeCopy")
+                                            </p>
+                                        </div>
+                                    </div>*@
+
+                    <div class="form-field form-field--toggles inline-terms" id="divTermsConditions">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1_terms" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="form-field-checkbox_1_1_terms" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                            </label>
+                        </div>
+                        <fieldset class="fieldset m39-modal__tnc">
+                            <legend class="legend-color">.</legend>
+                            <span class="text">@Translate.Text("updateiban.Iagree")</span>
+                            @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                        </fieldset>
+                        @*<fieldset class="fieldset ">
+
+                            </fieldset>*@
+                        <div id="description-for-accept-terms" class="form-field__messages"></div>
+                        <input type="hidden" name="AgreedToPayment" value="false" />
+                    </div>
+
+
+                </fieldset>
+            }
+            <input type="hidden" value="@Model.PremiseNumber" name="PremiseNumber" />
+            <input type="hidden" value="@Model.AccountNumber" name="AccountNumber" />
+            <input type="hidden" name="BusinessPartnerNumber" id="BusinessPartnerNumber" value="@Model.BusinessPartnerNumber" />
+            <input type="hidden" name="BusinessPartnerName" id="BusinessPartnerName" value="@Model.BusinessPartnerName" />
+
+
+            <div class="form-field__button">
+                <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveto.detailssubmit")</button>
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+          $('.m38-step-tracker').attr('data-total-steps', "5");
+        $('.m38-step-tracker').attr('data-current-step', "4");
+        $('.m38-step-tracker__progressbar').attr('aria-valuetext', '@Translate.Text("Moveout.Anonymous.Step4.Info")');
+        $('.m38-step-tracker').attr('data-hasinfo', "true");
+        jQuery(".m43-accountsel__details").find("abbr").css("text-decoration", "none");
+        jQuery(".shiftTime").append('@disconnectionTimeText');
+        @*if ($("#IsAttachmentMandatorycheck").val() == "true")
+        //    $("#form-field-IbanRefundDocument").attr("required", "");
+        if ('@Model.BusinessPartnerCatg' == '2')
+            $("#form-field-RequestLetter").attr("required", "");*@
+        setTimeout(function () {
+            jQuery('#form-field-movedate').off('focusout');
+        }, 250);
+
+        var disconnectionTime = '@Model.DisconnectionTime';
+        jQuery("#form-field-movedate").on('change', function () {
+            fillTimeOption();
+        });
+
+        function fillTimeOption() {
+            var currentdate = jQuery('#form-field-movedate').val();
+            currentdate = currentdate.replace("يناير", "January").replace("فبراير", "February").replace("مارس", "March").replace("أبريل", "April").replace("مايو", "May").replace("يونيو", "June").replace("يوليو", "July").replace("أغسطس", "August").replace("سبتمبر", "September").replace("أكتوبر", "October").replace("نوفمبر", "November").replace("ديسمبر", "December");
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (Date.parse(currentdate) == Date.parse(today)) {
+                // date is greater than today
+                var timeOptions = @Html.Raw(Json.Encode(Model.DisconnectionCurrentTimeOptions));
+                jQuery("#form-field-disconnectiontime").empty();
+                 jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val("").html('@Translate.Text("moveout.selecttime")'));
+                for (var i = 0; i < timeOptions.length; i++) {
+                    jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val(timeOptions[i].Value).html(timeOptions[i].Text));
+                }
+            }
+            else {
+                var timeOptions = @Html.Raw(Json.Encode(Model.DisconnectionTimeOptions));
+                jQuery("#form-field-disconnectiontime").empty();
+                 jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val("").html('@Translate.Text("moveout.selecttime")'));
+                for (var i = 0; i < timeOptions.length; i++) {
+                    jQuery("#form-field-disconnectiontime").append(jQuery("<option></option>").val(timeOptions[i].Value).html(timeOptions[i].Text));
+                }
+            }
+        }
+
+        $("#form-field-TransferTo").change(function () {
+            var selectedvalue = $('#form-field-TransferTo option:selected').val();
+            jQuery('#documentname').text('@Translate.Text("updateiban.updatechequedocument")');
+            //var ibanavailble = jQuery('input[name="Ibanavailable"]').val();
+            if (selectedvalue == "N") {
+                jQuery("#oknorefundnote").show();
+                if ($("#IsAttachmentMandatorycheck").val() == "false") {
+                    $("#form-field-IbanRefundDocument").removeAttr("required");
+                }
+                $("#iban_details_select").hide();
+                $("#iban_details").hide();
+                $('#ibnnote').html("");
+            }
+            else {
+                jQuery("#oknorefundnote").hide();
+            }
+            if (selectedvalue == "I") {
+                //if ($("#IsAttachmentMandatorycheck").val() == "false" && '@Model.BusinessPartnerCatg' == '2') {
+                    //$("#form-field-IbanRefundDocument").attr("required", "");
+                //}
+                //if ($("#IsAttachmentMandatorycheck").val() == "true") {
+                    //$("#form-field-IbanRefundDocument").attr("required", "");
+                //}
+                $('#ibnnote').html("@Translate.Text("updateiban.refundthroughIBANnote")");
+                jQuery('#documentname').text('@Translate.Text("updateiban.updatechequedocument")');
+                $("#form-field-IbanRefundDocument").removeAttr("required", "");
+                if ('@Model.Ibanavailable' == "True") {
+                    $("#iban_details_select").show();
+                }
+                else {
+                    $("#iban_details").show();
+                }
+            }
+            else if (selectedvalue == "C") {
+                if ($("#IsAttachmentMandatorycheck").val() == "false") {
+                    $("#form-field-IbanRefundDocument").removeAttr("required");
+                }
+                $("#iban_details_select").hide();
+                $("#iban_details").hide();
+                $('#ibnnote').html("");
+            }
+        });
+        if ('@Model.SelectedRefundOption' == 'I') {
+            if ('@Model.Ibanavailable' == "True") {
+                $("#iban_details_select").show();
+            }
+            else {
+                $("#iban_details").show();
+            }
+        }
+        else if ('@Model.SelectedRefundOption' == 'C') {
+            $("#iban_details_select").hide();
+            $("#iban_details").hide();
+            $('#ibnnote').html("");
+        }
+        $("#form-field-selectibanlist").change(function () {
+            var selectedvalue = $('#form-field-selectibanlist option:selected').val();
+            if (selectedvalue == "") {
+                jQuery('#selectibannumber').hide();
+                jQuery('#confirmibannumber').hide();
+                jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-selectibanlist');
+            } else
+                if (selectedvalue == "others") {
+                    jQuery('#selectibannumber').show();
+                    jQuery('#confirmibannumber').show();
+                    jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-ibannumber2');
+                }
+                else {
+                    jQuery('#selectibannumber').hide();
+                    jQuery('#confirmibannumber').show();
+                    jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-selectibanlist');
+                }
+        });
+    });
+</script>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

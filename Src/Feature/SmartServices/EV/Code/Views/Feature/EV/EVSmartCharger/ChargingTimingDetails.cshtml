@@ -1,0 +1,171 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Integration.Requests.SmartCustomer.EVSmartCharger
+@using DEWAXP.Feature.EV.Models.EVSmartCharger
+@model EVChargerPayment
+@{
+    /**/
+
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    string currency = string.Empty;
+}
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+
+
+<div class="j152-ev-smart-charge" data-journey="j152-ev-smart-charge" style="height: 125px;">
+    @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_form = "true", @id = "chargingdetailsform", @data_parsley_focus = "none", @class = "form j152-ev-smart-charge-form" }))
+    {
+        @Html.AntiForgeryToken()
+
+
+        <div class="grid j152-ev-smart-charge-content">
+            <div class="j152-ev-smart-charge-wrapper">
+                <div class="grid__row">
+                    @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+                </div>
+
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                        <p class="text__content-copy--small align-center"><strong>@Translate.Text("EVSmart.timingdetailstitle")</strong></p>
+                        <p class="text__content-copy--small align-center">@Translate.Text("EVSmart.timingdetailssubtitle")</p>
+                    </div>
+                </div>
+
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="form-field charge-time-select">
+                            <fieldset class="fieldset">
+                                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+                                @{
+                                    int i = 0;
+                                }
+                                @foreach (Otcpack otcpack in (List<Otcpack>)ViewBag.otcpacks)
+                                {
+                                    currency = otcpack.Currency;
+                                    <p class="form-field__radio">
+                                        <label>
+                                            <input class="form-field__input form-field__input--radio"
+                                                   id="form-field-radio_1_@i"
+                                                   aria-label="form-field-radio_1_@i"
+                                                   name="PackageList" type="radio"
+                                                   required="required"
+                                                   value="@otcpack.Packtype" aria-describedby="description-for-mid6gpwnb"
+                                                   data-parsley-errors-container="#description-for-mid6gpwnb"
+                                                   data-parsley-multiple="radios_group1"
+                                                   data-price="@otcpack.Packageamount"
+                                                   data-parsley-id="35">
+                                            <span class="form-field__fakeradio focus-enabled">
+                                                @otcpack.Packname
+                                            </span>
+                                        </label>
+                                        <span class="form-field__list-float" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@otcpack.Packageamount</span>
+                                    </p>
+                                }
+                                <div id="description-for-mid6gpwnb" class="form-field__messages">
+                                </div>
+                                <div id="charger-error" class="form-field__messages" style="color:#ff0000;cursor:pointer;">
+                                </div>
+                            </fieldset>
+                        </div>
+                        @*<div class="form-field form-field--toggles">
+            <div class="form-field__checkbox  last">
+                <label>
+                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                    <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("Terms Agreement")</span>
+                </label>
+            </div>
+            <fieldset class="fieldset ">
+                <legend class="legend-color">.</legend>
+                @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+            </fieldset>
+            <div id="description-for-accept-terms" class="form-field__messages"></div>
+            <input type="hidden" name="AgreedToPayment" value="false" />
+        </div>*@
+                        <div class="m40v2-status-message m40v2-status-message--security m40v2-status-message--fullwidth mt12">
+                            <div class="m40v2-status-message__text">
+                                <span class="m40v2-status-message-security-icon" style="background-image: url(/images/trinanleicon.png?v=1);">
+                                </span>
+                                @Translate.Text("EVSmart_amountwillnotrefund")
+                            </div> 
+                        </div>
+                        <div class="m14-richtext centered" style="margin-top: 12px;">@Html.Raw(@Translate.Text("EV_HelpText"))</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box j152-ev-smart-charge-fixbottom payment static-bottom hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+                        <div class="payment-section clearfix">
+                            <div class="payment-sum-title">@Translate.Text("EVSmart_totalamount")<span>@Translate.Text("EVSmart_includingvat")</span></div>
+
+                            <div class="payment-sum-amount">
+                                <span class="amount_label" data-price-place="" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")"></span>
+                            </div>
+                        </div>
+                        <div class="form-field__button">
+                            <a id="paynow-popup" class="button button--primary button--next">@Translate.Text("EVSmart.proceedtopayment")</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    docReady(function () {
+        jQuery('#paynow-popup').on('click', function () {
+            require(['parsley'], function () {
+                if (jQuery('#chargingdetailsform').parsley().validate()) {
+                    ValidateDetails();
+                };
+            });
+        });
+        $("form button[type=submit]").click(function () {
+            if (jQuery('#chargingdetailsform').parsley().validate()) {
+                beforesendfnc();
+                $("form button[type=submit]").submit();
+            }
+
+
+        });
+    });
+    function ValidateDetails() {
+        var url = "/api/Sitecore/EVSmartCharger/ValidateChargingTiming";
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            traditional: true,
+            data: AddForgeryToken({ package: jQuery('input[type=radio][name="PackageList"]:checked').val() }, "chargingdetailsform"),
+            beforeSend: function () {
+                beforesendfnc();
+            },
+            complete: function () {
+                completefunc();
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response != null && response != undefined) {
+                    if (response.status) {
+                        var value = jQuery('.payment-sum-amount .amount_label').text();
+                        jQuery("#continue-button").html(value);
+                        jQuery("#continue-button").attr("data-amount", numeral(parseFloat(value)).format('0,0.00'));
+                        jQuery('.btnmodaltrigger').trigger('click');
+                    }
+                    else if (response.Error != undefined) {
+                        jQuery("#charger-error").html(response.Error);
+                    }
+                    else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function () {
+            }
+        });
+        return false;
+    }
+</script>

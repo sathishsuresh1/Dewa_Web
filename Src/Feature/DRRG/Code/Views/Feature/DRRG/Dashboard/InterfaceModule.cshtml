@@ -1,0 +1,538 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Feature.DRRG.Models;
+@model DEWAXP.Feature.DRRG.Models.InterfaceModule
+@{
+    var disabledField = !string.IsNullOrWhiteSpace(Model.Interface_ID) && Model.Status.Equals("Approved") ? "disabled" : "";
+    var src_MODELDATASHEET = Model.FileList != null && Model.FileList.Count > 0 ?
+                          (Model.FileList.ContainsKey("MODELDATASHEET") ? (!Model.FileList["MODELDATASHEET"].fileName.Contains(".pdf") ? ("data:image;base64," + Convert.ToBase64String(Model.FileList["MODELDATASHEET"].content)) : "/images/upload_success@2x.png") : "/images/preview_pdf@2x.png")
+                          : "/images/preview_pdf@2x.png";
+    //IEC61850
+    var src_IEC61850 = Model.FileList != null && Model.FileList.Count > 0 ?
+                          (Model.FileList.ContainsKey("IEC61850") ? (!Model.FileList["IEC61850"].fileName.Contains(".pdf") ? ("data:image;base64," + Convert.ToBase64String(Model.FileList["IEC61850"].content)) : "/images/upload_success@2x.png") : "/images/preview_pdf@2x.png")
+                          : "/images/preview_pdf@2x.png";
+
+    //DEWADRRGSTANDARDS
+    var src_DEWADRRGSTANDARDS = Model.FileList != null && Model.FileList.Count > 0 ?
+                         (Model.FileList.ContainsKey("DEWADRRGSTANDARDS") ? (!Model.FileList["DEWADRRGSTANDARDS"].fileName.Contains(".pdf") ? ("data:image;base64," + Convert.ToBase64String(Model.FileList["DEWADRRGSTANDARDS"].content)) : "/images/upload_success@2x.png") : "/images/preview_pdf@2x.png")
+                         : "/images/preview_pdf@2x.png";
+
+    //IEC61010-1
+    var src_IEC61010_1 = Model.FileList != null && Model.FileList.Count > 0 ?
+                         (Model.FileList.ContainsKey("IEC61010-1") ? (!Model.FileList["IEC61010-1"].fileName.Contains(".pdf") ? ("data:image;base64," + Convert.ToBase64String(Model.FileList["IEC61010-1"].content)) : "/images/upload_success@2x.png") : "/images/preview_pdf@2x.png")
+                         : "/images/preview_pdf@2x.png";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j03-drrg-addnew" data-journey="j03-drrg-addnew">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "drrginterfaceform", @class = "form", data_form = "true", @data_submit_validate = "enabled", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionErrorV2.cshtml")
+                    <fieldset class="pageclass" data-page="0">
+
+                        <legend class="legend">
+                            <strong>@Translate.Text("DRRG_ProductDetails")</strong>
+                        </legend>
+
+                        <div class="text-block">
+                            @*<p class="text__content-copy">
+                                    @Translate.Text("All fields are mandatory, unless marked optional.")
+                                </p>*@
+                            <input type="hidden" name="Manufacturer_Code" id="Manufacturer_Code" value="@Model.Manufacturer_Code" />
+                            <input type="hidden" name="Interface_ID" id="Interface_ID" value="@Model.Interface_ID" />
+                            <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+                            <input type="hidden" name="Status" id="Status" value="@Model.Status" />
+                            <input type="hidden" name="signatureCopy" id="signatureCopy" value="" />
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-ModelName" class="form-field__label">
+                                @Translate.Text("Model of Interface protection (One Model Only Per Application)")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-ModelName"
+                                       name="ModelName"
+                                       value="@Model.ModelName"
+                                       type="text"
+                                       placeholder="@Translate.Text("Model of Interface protection Placeholder")"
+                                       aria-describedby="description-for-ModelName"
+                                       data-parsley-errors-container="#description-for-ModelName"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-ModelName" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-Application" class="form-field__label">
+                                @Translate.Text("Application")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-Application"
+                                        name="Application"
+                                        aria-describedby="description-for-Application"
+                                        data-parsley-errors-container="#description-for-Application"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstInterfaceApplications)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-Application" class="form-field__messages">
+                            </div>
+                        </div>
+
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-CommunicationProtocol" class="form-field__label">
+                                @Translate.Text("Communication Protocol")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-CommunicationProtocol"
+                                       name="CommunicationProtocol"
+                                       value="@Model.CommunicationProtocol"
+                                       type="text"
+                                       placeholder="@Translate.Text("Communication Protocol Placeholder")"
+                                       aria-describedby="description-for-CommunicationProtocol"
+                                       data-parsley-errors-container="#description-for-CommunicationProtocol"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-CommunicationProtocol" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-Compliance" class="form-field__label">
+                                @Translate.Text("Compliance Other National")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-Compliance"
+                                       name="Compliance"
+                                       value="@Model.Compliance"
+                                       type="text"
+                                       placeholder="@Translate.Text("Compliance to Other National Placeholder")"
+                                       aria-describedby="description-for-Compliance"
+                                       data-parsley-errors-container="#description-for-Compliance"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-Compliance" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@(src_MODELDATASHEET)"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@(Model.FileList != null && Model.FileList.Count > 0 ?
+                                              (Model.FileList.ContainsKey("MODELDATASHEET") ? (Model.FileList["MODELDATASHEET"].fileName) : "")
+                                              :"")"
+                                         data-uploader-image="ModelDataSheet">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-ModelDataSheet" class="form-field__label">
+                                        @Translate.Text("Model Data Sheet")<span class="required--asterisk">*</span>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-ModelDataSheet"
+                                                   name="ModelDataSheet" type="file"
+                                                   aria-describedby="description-for-ModelDataSheet"
+                                                   data-parsley-errors-container="#description-for-ModelDataSheet"
+                                                   data-parsley-required-message="This field is required"
+                                                   data-uploader-field="ModelDataSheet"
+                                                   @((Model.FileList != null && Model.FileList.Count == 0) ? "required=\"=\"" : (Model.FileList != null && Model.FileList.Count > 0 && Model.FileList["MODELDATASHEET"].fileName == null ? "required=\"=\"" : ""))
+                                                   accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="ModelDataSheet" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("MODELDATASHEET") ? (Model.FileList["MODELDATASHEET"].fileName) : "") : "")) ? "style=display:block !important" : "")>@(Model.FileList.ContainsKey("MODELDATASHEET") ? (Model.FileList["MODELDATASHEET"].fileName) : "")</p>
+                                    @if (string.IsNullOrWhiteSpace(Model.Interface_ID) || (!string.IsNullOrWhiteSpace(Model.Interface_ID) && Model.Status != null && Model.Status.Equals("ReviewerRejected")))
+                                    {
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="ModelDataSheet" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("MODELDATASHEET") ? (Model.FileList["MODELDATASHEET"].fileName) : "") : "")) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button></p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-ModelDataSheet" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field__button">
+                            <button class="button button--next button--primary nextbutton">Next</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="pageclass hidden" data-page="1">
+                        <legend class="legend">
+                            <strong>
+                                @Translate.Text("DRRG_ComplianceCertification")
+                            </strong>
+                        </legend>
+                        @Html.Sitecore().Placeholder("Compliancetext")
+
+                        <div class="form-field mt24">
+                            <div class="form-field__label">
+                                Fields marked with <span class="required--asterisk">*</span> are compulsory
+                            </div>
+                        </div>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@(src_IEC61850)"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@(Model.FileList != null && Model.FileList.Count > 0 ?
+                                              (Model.FileList.ContainsKey("IEC61850") ? (Model.FileList["IEC61850"].fileName) : "")
+                                              :"")"
+                                         data-uploader-image="Document61850">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document61850" class="form-field__label">
+                                        @Translate.Text("IEC 61850")<span class="required--asterisk">*</span>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-Document61850"
+                                                   name="Document61850" type="file"
+                                                   aria-describedby="description-for-Document61850"
+                                                   data-parsley-errors-container="#description-for-Document61850"
+                                                   data-parsley-required-message="This field is required"
+                                                   data-uploader-field="Document61850"
+                                                   @((Model.FileList != null && Model.FileList.Count == 0) ? "required=\"=\"" : (Model.FileList != null && Model.FileList.Count > 0 && Model.FileList["IEC61850"].fileName == null ? "required=\"=\"" : ""))
+                                                   accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document61850" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("IEC61850") ? (Model.FileList["IEC61850"].fileName) : "") : "")) ? "style=display:block !important" : "")>@(Model.FileList.ContainsKey("IEC61850") ? (Model.FileList["IEC61850"].fileName) : "")</p>
+                                    @if (string.IsNullOrWhiteSpace(Model.Interface_ID) || (!string.IsNullOrWhiteSpace(Model.Interface_ID) && Model.Status != null && Model.Status.Equals("ReviewerRejected")))
+                                    {
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="Document61850" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("IEC61850") ? (Model.FileList["IEC61850"].fileName) : "") : "")) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button></p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document61850" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__label">
+                                @Translate.Text("DEWA DRRG Standards")<span class="required--asterisk">*</span>  @Translate.Text("DEWA DRRG Standards Note 1")
+                            </div>
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@(src_DEWADRRGSTANDARDS)"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@(Model.FileList != null && Model.FileList.Count > 0 ?
+                                              (Model.FileList.ContainsKey("DEWADRRGSTANDARDS") ? (Model.FileList["DEWADRRGSTANDARDS"].fileName) : "")
+                                              :"")"
+                                         data-uploader-image="DocumentDEWAStandard">
+                                </div>
+
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-DocumentDEWAStandard" class="form-field__label">
+                                        @Translate.Text("DEWA DRRG Standards")
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-DocumentDEWAStandard"
+                                                   name="DocumentDEWAStandard" type="file"
+                                                   aria-describedby="description-for-DocumentDEWAStandard"
+                                                   data-parsley-errors-container="#description-for-DocumentDEWAStandard"
+                                                   data-parsley-required-message="This field is required"
+                                                   data-uploader-field="DocumentDEWAStandard"
+                                                   @((Model.FileList != null && Model.FileList.Count == 0) ? "required=\"=\"" : (Model.FileList != null && Model.FileList.Count > 0 && Model.FileList["DEWADRRGSTANDARDS"].fileName == null ? "required=\"=\"" : ""))
+                                                   accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="DocumentDEWAStandard" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("DEWADRRGSTANDARDS") ? (Model.FileList["DEWADRRGSTANDARDS"].fileName) : "") : "")) ? "style=display:block !important" : "")>@(Model.FileList.ContainsKey("DEWADRRGSTANDARDS") ? (Model.FileList["DEWADRRGSTANDARDS"].fileName) : "")</p>
+                                    @if (string.IsNullOrWhiteSpace(Model.Interface_ID) || (!string.IsNullOrWhiteSpace(Model.Interface_ID) && Model.Status != null && Model.Status.Equals("ReviewerRejected")))
+                                    {
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="DocumentDEWAStandard" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("DEWADRRGSTANDARDS") ? (Model.FileList["DEWADRRGSTANDARDS"].fileName) : "") : "")) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button></p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-DocumentDEWAStandard" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@(src_IEC61010_1)"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@(Model.FileList != null && Model.FileList.Count > 0 ?
+                                              (Model.FileList.ContainsKey("IEC61010-1") ? (Model.FileList["IEC61010-1"].fileName) : "")
+                                              :"")"
+                                         data-uploader-image="Document61010">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document61010" class="form-field__label">
+                                        @Translate.Text("IEC 61010-1")
+                                    </label>
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   id="form-field-Document61010"
+                                                   name="Document61010" type="file"
+                                                   aria-describedby="description-for-Document61010"
+                                                   data-parsley-errors-container="#description-for-Document61010"
+                                                   data-parsley-required-message="This field is required"
+                                                   data-uploader-field="Document61010"
+                                                   accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document61010" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("IEC61010-1") ? (Model.FileList["IEC61010-1"].fileName) : "") : "")) ? "style=display:block !important" : "")>@(Model.FileList.ContainsKey("IEC61010-1") ? (Model.FileList["IEC61010-1"].fileName) : "")</p>
+                                    @if (string.IsNullOrWhiteSpace(Model.Interface_ID) || (!string.IsNullOrWhiteSpace(Model.Interface_ID) && Model.Status != null && Model.Status.Equals("ReviewerRejected")))
+                                    {
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="Document61010" @(!string.IsNullOrWhiteSpace((Model.FileList != null && Model.FileList.Count > 0 ? (Model.FileList.ContainsKey("IEC61010-1") ? (Model.FileList["IEC61010-1"].fileName) : "") : "")) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button></p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document61010" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field__button">
+                            <button class="button button--outline button--back backbutton"
+                                    type="button">
+                                @Translate.Text("Back")
+                            </button>
+                            <button class="button button--next button--primary nextbutton">@Translate.Text("Next")</button>
+                        </div>
+                    </fieldset>
+                    <fieldset class="pageclass hidden" data-page="2">
+                        @Html.Sitecore().Placeholder("Declaration")
+                        <div class="j103-drrg-signature--outer mt24 mb12">
+                            <div class="j103-drrg-signature--label">
+                                Signature
+                            </div>
+                            <div data-signature data-labels='{"undo": "Undo Last Stroke"}' class="j103-drrg-signature"></div>
+                        </div>
+                        <div id="signature-error-message" class="hidden parsley-errors-list">
+                            <p>@Translate.Text("DRRG_SignatureRequired")</p>
+                        </div>
+                        <div class="form-field__button">
+                            <button class="button button--primary button--back backbutton"
+                                    type="button">
+                                @Translate.Text("Back")
+                            </button>
+                            <button class="button button--primary" id="btSubmit" type="button">@Translate.Text("DRRG_SignSubmit")</button>
+                        </div>
+                    </fieldset>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+@if (Model.Id > 0)
+{
+    var a = Model.LstInterfaceApplications.Find(e => e.Text == Model.Application);
+    <script type="text/javascript">
+        jQuery('#form-field-Application').val('@a.Value');
+    </script>
+}
+<script type="text/javascript">
+    docReady(function () {
+        var totalstep = 3;
+        var current = 1;
+        var txt = jQuery('.pageclass[data-page=0]').find('.legend').text();
+        //console.log(txt);
+        steptracker(current, txt);
+        var modelName = jQuery("#form-field-ModelName");
+        var errModelname = jQuery("#description-for-ModelName");
+        var $submitBtn = jQuery("#btSubmit");
+        function steptracker(current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', totalstep);
+            $('.m38-step-tracker').attr('data-current-step', current);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+            jQuery(window).trigger('reinit_m38');
+        }
+        jQuery('.nextbutton').click(function (e) {
+            e.preventDefault();
+            var pagenumber = parseInt(jQuery(this).closest('.pageclass').attr("data-page"));
+            require(['parsley'], function () {
+                jQuery('#drrginterfaceform').parsley().validate();
+                if (jQuery('#drrginterfaceform').parsley().isValid()) {
+                    nexpageload(pagenumber);
+                };
+            });
+        });
+        function nexpageload(pagenumber) {
+            jQuery('.pageclass[data-page=' + (pagenumber) + ']').addClass('hidden');
+            jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']').removeClass('hidden');
+            jQuery('.pageclass').not(jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']')).addClass('hidden');
+            var txt = jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']').find('.legend').text();
+            steptracker(pagenumber + 2, txt);
+            if (pagenumber == 1) {
+                jQuery('.modelname').html(HtmlSanitizer.SanitizeHtml(jQuery('#form-field-ModelName').val()));
+                jQuery(window).trigger('resize');
+            }
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+        }
+        jQuery('.backbutton').click(function (e) {
+            e.preventDefault();
+            var pagenumber = parseInt(jQuery(this).closest('.pageclass').attr("data-page"));
+            jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']').removeClass('hidden');
+            jQuery('.pageclass[data-page=' + (pagenumber) + ']').addClass('hidden');
+            jQuery('.pageclass').not(jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']')).addClass('hidden');
+            var txt = jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']').find('.legend').text();
+            steptracker(pagenumber, txt);
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+        });
+        jQuery("#btSubmit").attr("disabled", false);
+        $('#btSubmit').click(function (e) {
+            e.preventDefault();
+
+            if (jQuery("#drrginterfaceform").parsley().validate()) {
+                if (jQuery(".j103-drrg-signature").attr("sig-data") != '' && jQuery(".j103-drrg-signature").attr("sig-data") != undefined) {
+                    jQuery("#signature-error-message").hide();
+                    jQuery("#signatureCopy").val(jQuery(".j103-drrg-signature").attr("sig-data"));
+                    jQuery("#btSubmit").html("@Translate.Text("Submitting")...");
+                    jQuery("#btSubmit").attr("disabled", true);
+                    jQuery('#drrginterfaceform').submit();
+                    return true;
+                }
+                else {
+                    jQuery("#signature-error-message").show();
+                    jQuery("#btSubmit").attr("disabled", false);
+                    jQuery("#btSubmit").html("@Translate.Text("DRRG_SignSubmit")");
+                    return false;
+                }
+            }
+            return false;
+        });
+        modelName.on('focusout', function () {
+            if (modelName.val() != '') {
+                checkDuplicateModelName("@FileEntity.Interfacemodule");
+            }
+        });
+        function checkDuplicateModelName(equipment_type) {
+            var form = jQuery("#drrginterfaceform");
+            var token = $('input[name="__RequestVerificationToken"]', form).val();
+            var url = "/api/sitecore/DRRGDashboard/CheckDuplicateApplication";
+
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: {
+                    __RequestVerificationToken: token,
+                    equipmentType: equipment_type,
+                    modelname: modelName.val()
+                },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                    $submitBtn.attr('disabled', true);
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                dataType: 'json',
+                type: 'POST',
+                success: function (response) {
+                    if (response != null) {
+                        if (response.errorCode != "000") {
+                            valid = false;
+                            errModelname.html('');
+                            errModelname.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                            jQuery("#form-field-ModelName").removeClass("parsley-success");
+                            jQuery("#form-field-ModelName").addClass("form-field__input--error parsley-error");
+                            jQuery("#form-field-ModelName").parent('span').removeClass("form-field__input-wrapper--validated");
+                            jQuery("#form-field-ModelName").parent('span').addClass("form-field__input-wrapper--error");
+
+                        }
+                        else {
+                            errModelname.html('');
+                            valid = true;
+                            $submitBtn.attr('disabled', false);
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>

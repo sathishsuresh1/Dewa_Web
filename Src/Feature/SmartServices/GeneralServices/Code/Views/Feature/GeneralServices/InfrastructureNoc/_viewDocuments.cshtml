@@ -1,0 +1,51 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GeneralServices.Models.Infrastructure_Noc.InfrastructureNocReqModel
+
+
+
+@{
+    if (Model.nocReqAttachments != null)
+    {
+        foreach (var item in Model.nocReqAttachments)
+        {
+            int index = item.FileName.LastIndexOf('.');
+            var fileName = index == -1 ? item.FileName : item.FileName.Substring(0, index);
+            <div class="m39-modal__content--list">
+                <div class="m39-modal__content--list_text">
+                    <div class="m39-modal__content--list_texthead">@fileName</div>
+                    @if (!string.IsNullOrWhiteSpace(item.DocDate))
+                    {
+                        <div class="m39-modal__content--list_textdate">@item.DocDate</div>
+                    }
+                </div>
+                <a class="m39-modal__content--list_button button button--primary button--small downloadfile" data-transactionid="@Model.TransactionId" data-fileid="@item.FileId">@Translate.Text("NOC_Download")</a>
+            </div>
+        }
+    }
+    if (Model.nocReqDewaAttachments != null)
+    {
+        foreach (var item in Model.nocReqDewaAttachments)
+        {
+            int index = item.FileName.LastIndexOf('.');
+            var fileName = index == -1 ? item.FileName : item.FileName.Substring(0, index);
+            <div class="m39-modal__content--list">
+                <div class="m39-modal__content--list_text">
+                    <div class="m39-modal__content--list_texthead">@fileName</div>
+                </div>
+                <a class="m39-modal__content--list_button button button--primary button--small downloadfile" data-transactionid="@Model.TransactionId" data-fileid="@item.FileId">@Translate.Text("NOC_Download")</a>
+            </div>
+        }
+    }
+
+}
+<script type="text/javascript">
+    docReady(function () {
+        $(".downloadfile").click(function () {
+            var tId = $(this).attr("data-transactionid");
+            var fId = $(this).attr("data-fileid");
+            var win = window.open("/api/sitecore/InfrastructureNoc/DownloadAttachment?transactionid=" + tId + "&fileid=" + fId, '_blank');
+            win.focus();
+        });
+    });
+</script>

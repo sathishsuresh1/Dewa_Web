@@ -1,0 +1,49 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc.Web.Mvc;
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M9TeaserSet
+
+@{
+    var parameters = Html.Glass().GetRenderingParameters<DEWAXP.Feature.CommonComponents.Models.RenderingParameters.TeaserRenderingParameter>();
+    string cssClass = "";
+
+    if (parameters != null)
+    {
+        cssClass = parameters.EnableNewsTeaserStyle ? " m9-teaser--news" : "";
+    }
+}
+
+
+@if (!string.IsNullOrWhiteSpace(Model.Header))
+{
+    @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Generic/M17 Section Title.cshtml", Model)
+}
+
+@if (Model.RelatedArticles.HasAny())
+{
+    foreach (var group in Model.RelatedArticles.Batch(4))
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                @foreach (var item in group)
+                {
+                    //item.ContainerCssClass = cssClass;
+                    <div class="grid__column grid__column--4">
+                        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Teasers/M9 Teaser.cshtml", item)
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            @Translate.Text("There are no related articles.")
+        </div>
+    </div>
+}
+

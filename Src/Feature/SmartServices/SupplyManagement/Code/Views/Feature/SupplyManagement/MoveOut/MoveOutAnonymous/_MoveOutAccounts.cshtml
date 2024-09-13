@@ -1,0 +1,212 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using System.Web.Script.Serialization
+@model DEWAXP.Foundation.Content.Models.MoveOut.v3.MoveOutAnonymous
+
+@{
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+    </div>
+</div>
+@Html.Sitecore().Placeholder("j18/m14-formatted-text")
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form j104_1-move-out" id="moveouttotaljourney" data-journey="j104-move-out">
+
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "moveoutanonymousform", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="m43-accountsel" data-component="m43-account-selector">
+                    <div class="m66-preloader small" style="display: none;">
+                        <div class="loader-small"></div>
+                    </div>
+                    <div class="m43-accountsel-hidden" style="">
+                        <!-- .account selection trigger -->
+                        <button class="m43-accountsel__selected" data-accountselector="acc-sel-ctrl" data-preventsubmit="false" data-minselection="1" data-maxselection="1" aria-haspopup="true" aria-expanded="false" type="button" id="_k4nht65c7_trigger" aria-controls="_k4nht65c7_content">
+                            <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                                <span class="m43-accountsel__header">
+                                    <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                        <span class="inline-block" dir="ltr">@Model.BusinessPartnerName</span>
+                                    </span>
+                                    <span class="m43-accountsel__details">
+                                        <abbr title="Account">@Translate.Text("Acc")</abbr>:
+                                        <span data-acc-detail="acc_number" dir="@direction">@Model.AccountNumber</span>
+                                        <span class="aria-only"> | </span>
+                                    </span>
+                                </span>
+                            </span>
+                        </button>
+                        <!-- ./account selection trigger -->
+                        <!-- .expander for the selected account -->
+                        <div class="m37-expander" data-component="m37-expander">
+                            <button type="button" data-toggle="true" aria-haspopup="true" aria-expanded="false" class="m37-expander__trigger m37-expander__trigger--themed m37-expander__trigger--open" id="_71emeftj8_trigger" aria-controls="_71emeftj8_content">@Translate.Text("Account details")</button>
+
+                            <div data-content="true" class="m37-expander__content m37-expander__content--open" id="_71emeftj8_content" aria-labelledby="_71emeftj8_trigger" aria-expanded="true">
+                                <div class="m42-keyvalue">
+                                    <dl data-accountsel-additional-details="acc-sel-ctrl">
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="@direction">@Translate.Text("Premise")<span class="floatRight"> :</span></dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">@Model.PremiseNumber</dd>
+                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="@direction">@Translate.Text("Business Partner")<span class="floatRight"> :</span></dt>
+                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_businesspartner">@Model.BusinessPartnerNumber</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ./expander for the selected account -->
+                    </div>
+                </div>
+                if (Model.recoverylist != null && Model.recoverylist.Length > 0)
+                {
+                    <div class="m42-keyvalue mt12" id="totalPaymentDetails">
+                        <dl>
+                            @if (Model.PayAmount != null && Convert.ToDecimal(Model.PayAmount) > 0)
+                            {
+                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt totalAmountLabel"><strong>@Translate.Text("moveout.TotalAmount")</strong> @string.Format(@Translate.Text("moveout.activeAccounts"), 1)</dt>
+                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd totalAmount" data-acc-detail="">@Convert.ToDecimal(Model.PayAmount).ToString("0,0.00") @Translate.Text("AED")</dd>
+
+                            }
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt outstandingBalanceLabel"><strong>@Translate.Text("moveout.OutstandingDueBalance")</strong> @string.Format(Translate.Text("moveout.outstandingAccounts"), Model.recoverylist.Length)</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd outstandingBalance" data-acc-detail="">@Convert.ToDecimal(Model.TotalPendingBalance).ToString("0,0.00") @Translate.Text("AED")</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt viewdetails"><span class="link" style="cursor:pointer;" id="lnkViewdetails">@Translate.Text("moveout.ViewDetails")</span></dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail=""></dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--totalmovein m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("moveout.totalPayableAmount")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--totalmovein m42-keyvalue__value--secondary m42-keyvalue--justified-dd totalPayableAmount" data-acc-detail="">@Convert.ToDecimal(Convert.ToDecimal(Model.PayAmount) + Convert.ToDecimal(Model.TotalPendingBalance)).ToString("0,0.00")</dd>
+                        </dl>
+
+                        <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+                            <button data-trigger="true" class="m39-modal__trigger hidden btnviewdetails" type="button" id="_kz7biy3li_trigger" aria-controls="_kz7biy3li_content"></button>
+                            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_kz7biy3li_content" aria-labelledby="_kz7biy3li_trigger">
+                                <div class="m39-modal__dialog ">
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title green">@Translate.Text("moveout.OutstandingDueTitle")</div>
+                                        <button data-close="true" class="m39-modal__button--close" id="_kz7biy3li_close" aria-controls="_kz7biy3li_content">@Translate.Text("Close")</button>
+                                        @*<div class="m39-modal__subtitle">@Translate.Text("moveout.OutstandingDueSubTitle")</div>*@
+                                    </div>
+                                    <div class="m39-modal__content" id="outstandinglist-content" style="top: 123px;">
+
+                                    </div>
+                                    <div class="m39-modal__footer">
+                                        <div class="button button--primary" data-close="true" id="_kz7biy3li_close" aria-controls="_kz7biy3li_content">@Translate.Text("Refund.Done")</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay" style="display: none;"> </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="form-field__button">
+                    @*<button type="submit" id="moveoutfromnext" class="button button--primary hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveout.update")</button>*@
+                    <a id="continue-button-popup" name="continue-button" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@(Translate.Text("moveout.pay") + "\t" + Convert.ToDecimal(Convert.ToDecimal(Model.PayAmount) + Convert.ToDecimal(Model.TotalPendingBalance)).ToString("0,0.00") + "\t" + Translate.Text("AED"))</a>
+                </div>
+
+                @* Payment Type Popup module *@
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            }
+        </div>
+    </div>
+</div>
+<script id="outstandingrefund-item-template" type="text/x-handlebars-template">
+    {{#recoverylist}}
+    <div class="refund_detail-card" style="max-width:96%">
+        <div class="refund_detail-name">
+            {{name}}
+            {{#ifCond finalbill '==' 'X'}}
+            <span class="refund_detail-status">
+                @Translate.Text("moveout.FinalBiling")
+            </span>
+            {{/ifCond}}
+        </div>
+        <div class="refund_detail-details">
+            @Translate.Text("MoveOut.Account number") ({{contractaccount}})
+        </div>
+        <div class="refund_detail-details">
+            {{street}} {{location}}
+        </div>
+        <div class="refund_detail-details">
+            @Translate.Text("Premise Number") ( {{premise}} )
+        </div>
+        <div class="refund_detail-amount">
+            @if (direction == "rtl")
+            {
+                <span> {{total}} @Translate.Text("AED")</span>
+            }
+            else
+            {
+                <span>@Translate.Text("AED") {{total}}</span>
+            }
+        </div>
+    </div>
+    {{/recoverylist}}
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    docReady(function () {
+       $('.m38-step-tracker').attr('data-total-steps', "5");
+        $('.m38-step-tracker').attr('data-current-step', "4");
+        $('.m38-step-tracker__progressbar').attr('aria-valuetext', '@Translate.Text("moveout.step1Info")');
+        $('.m38-step-tracker').attr('data-hasinfo', "true");
+
+        Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+            switch (operator) {
+                case '==':
+                    return (v1 == v2) ? options.fn(this) : options.inverse(this);
+                case '===':
+                    return (v1 === v2) ? options.fn(this) : options.inverse(this);
+                case '!=':
+                    return (v1 != v2) ? options.fn(this) : options.inverse(this);
+                case '!==':
+                    return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+                case '<':
+                    return (v1 < v2) ? options.fn(this) : options.inverse(this);
+                case '<=':
+                    return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+                case '>':
+                    return (v1 > v2) ? options.fn(this) : options.inverse(this);
+                case '>=':
+                    return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+                case '&&':
+                    return (v1 && v2) ? options.fn(this) : options.inverse(this);
+                case '||':
+                    return (v1 || v2) ? options.fn(this) : options.inverse(this);
+                default:
+                    return options.inverse(this);
+            }
+        });
+        var template = Handlebars.compile(jQuery('#outstandingrefund-item-template').html());
+        var items = @Html.Raw(Json.Encode(Model));
+
+        $("#outstandinglist-content").empty().html(template(items));
+        jQuery("#lnkViewdetails").on("click", function () {
+            jQuery(".btnviewdetails").trigger("click");
+        });
+    });
+    // Open Payment method popup.
+    jQuery('#continue-button-popup').on('click', function () {
+        var total = @Convert.ToDecimal((Convert.ToDecimal(Model.PayAmount) + Convert.ToDecimal(Model.TotalPendingBalance)));
+        var currency = '@Translate.Text("AED")';
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (numeral(total) > 0)
+        {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        }
+    });
+</script>

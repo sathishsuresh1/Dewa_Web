@@ -1,0 +1,279 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Feature.Dashboard.Models.AwayMode
+@model CreateModel
+
+@{
+    var now = DateHelper.DubaiNow();
+    var maxDate = DateHelper.DubaiNow().AddDays(89);
+
+    string Type = Model.IsLoggedIn ? "L" : "A";
+}
+
+<div class="grid__row" data-rr="@now">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @*@Html.Raw(Translate.Text("AMW_description"+ Type))*@
+        @if (Model.IsLoggedIn)
+        {
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            <div class="form-field form-field--text non-company">
+                <label for="ContractAccount" class="form-field__label">
+                    @Translate.Text("AMW_ContractAccount")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                @Html.Sitecore().Placeholder("awaymode/account-selector")
+            </div>
+
+
+            <div id="description-for-ContractAccount" class="form-field__messages">
+                @Html.ValidationMessageFor(x => x.ContractAccount)
+            </div>
+
+            <script>
+                docReady(function () {
+                    jQuery(".m43-accountsel-hidden .m39-modal__footer .button--primary").on("click", onAccountSelection);
+                    onAccountSelection();
+                })
+
+                function onAccountSelection(e) {
+
+                    var SelectedAccountElement = $("input[name='SelectedAccountNumber']:checked");
+                    $(".ContractAccountVal").val($(SelectedAccountElement).val());
+                    var _bpNO = $(SelectedAccountElement).closest(".form-field__radio--accselector").find(".textBusinessPartnerNumber").val();
+
+
+
+                        var requestData = {
+                            b: _bpNO,
+                        }
+                        var _postUrl = '@Url.Content("~/api/sitecore/AwayMode/GetDetail")';
+                         requestData = AddCustomForgeryToken(requestData, "#AwayModeCreateFrom");
+                        $.ajax({
+                            url: _postUrl,
+                            type: 'POST',
+                            data: requestData,
+                            beforeSend: function () {
+
+                            },
+                            success: function (rdata) {
+                                $("#Email").val(rdata.e);
+                            },
+                            complete: function (x) {
+                                console.log(x)
+                            }
+
+                        })
+
+
+                }
+
+                var AddCustomForgeryToken = function (data, elementId) {
+                    data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                    return data;
+                };
+            </script>
+        }
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "AwayModeCreateFrom", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+        {
+
+            @Html.AntiForgeryToken()
+
+
+
+
+            if (!Model.IsLoggedIn)
+            {
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="form-field form-field--text">
+                    <label for="ContractAccount" class="form-field__label">
+                        @Translate.Text("AMW_ContractAccount")
+                        <span class="form-field__label-required aria-only">(required)</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="ContractAccount"
+                               name="ContractAccount"
+                               type="number" lang="@Translate.Text("lang")"
+                               placeholder="@Translate.Text("AMW_ContractAccountPlaceholder")"
+                               aria-describedby="description-for-contractaccount"
+                               required=""
+                               data-parsley-error-message="@Translate.Text("AMW_ContractAccountError")"
+                               data-parsley-required-message="@Translate.Text("AMW_ContractAccountRequired")"
+                               data-parsley-errors-container="#description-for-contractaccount"
+                               data-parsley-account_premise_number=""
+                               data-parsley-trigger="focusout"
+                               data-parsley-id="6"
+                               value="@Model.ContractAccount"
+                               aria-invalid="true">
+                    </span>
+                    <div id="description-for-contractaccount" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.ContractAccount)
+                    </div>
+                </div>
+
+                <p class="mb12 text-page__intro" style="padding:0px 0px !important">@Html.Raw(Translate.Text("AWM_OTPNote"))</p>
+
+
+
+            }
+            else
+            {
+                @Html.HiddenFor(m => m.ContractAccount, new
+                {
+                @placeholder = @Translate.Text("AMW_ContractAccountPlaceholder"),
+                @aria_describedby = "description-for-ContractAccount",
+                @data_parsley_errors_container = "#description-for-ContractAccount",
+                @required = "",
+                @data_parsley_required_message = Translate.Text("AMW_ContractAccountRequired"),
+                @class = "form-field__input form-field__input--text ContractAccountVal",
+                })
+            }
+
+            <div class="form-field form-field--text">
+                <label for="BeginDate" class="form-field__label">
+                    @Translate.Text("AMW_DateInfoText")
+                </label>
+            </div>
+            <div class="form-field form-field--6 form-field--6-mobile_full form-field--text">
+                <label for="BeginDate" class="form-field__label">
+                    @Translate.Text("AMW_FromDate")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    <input id="BeginDate"
+                           name="BeginDate"
+                           value="@Model.BeginDate"
+                           placeholder="@Translate.Text("AMW_DatePlaceholder")"
+                           data-parsley-required-message="@Translate.Text("AMW_FromDateRequired")"
+                           aria-describedby="description-for-BeginDate"
+                           data-parsley-errors-container="#description-for-BeginDate"
+                           class="form-field__input form-field__input--datepicker-binded form-field__input--text form-field__input--datepicker"
+                           data-el-to=".enddate" type="text" data-el-to_min="1" data-el-to_max="90"
+                           data-el="datepicker"
+                           required=""
+                           data-picker-options='{"min": ["@(now.Year)","@(now.Month-1)","@((now.Day))"],"max": ["@(maxDate.Year)","@(maxDate.Month-1)","@((maxDate.Day))"]}' />
+                </span>
+                <div id="description-for-BeginDate" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.BeginDate)
+                </div>
+            </div>
+            <div class="form-field form-field--6 form-field--6-mobile_full form-field--text">
+                <label for="EndDate" class="form-field__label">
+                    @Translate.Text("AMW_EndDate")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    <input id="EndDate"
+                           name="EndDate"
+                           value="@Model.EndDate"
+                           placeholder="@Translate.Text("AMW_DatePlaceholder")"
+                           data-parsley-required-message="@Translate.Text("AMW_EndDateRequired")"
+                           aria-describedby="description-for-EndDate"
+                           data-parsley-errors-container="#description-for-EndDate"
+                           class="enddate form-field__input form-field__input--text form-field__input--datepicker"
+                           data-el="datepicker"
+                           required=""
+                           data-picker-options='{}' />
+                </span>
+                <div id="description-for-EndDate" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.EndDate)
+                </div>
+            </div>
+
+            <div class="form-field form-field--select form-field--select-single clear_both">
+                <label for="Frequency" class="form-field__label">
+                    @Translate.Text("AMW_Frequency")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    @Html.DropDownListFor(model => model.Frequency, Model.FrequencyList, new
+               {
+                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                   @aria_required = "true",
+                   @required = "required",
+                   @data_parsley_required_message = Translate.Text("AMW_FrequencyRequired"),
+                   @data_parsley_errors_container = "#description-for-Frequency",
+                   @aria_describedby = "description-for-Frequency",
+
+               })
+                </span>
+                <div id="description-for-Region" class="form-field__messages">
+
+                </div>
+            </div>
+
+            <div class="form-field form-field--text non-company">
+                <label for="Email" class="form-field__label">
+                    @Translate.Text("AMW_EmailID")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    @Html.TextBoxFor(m => m.Email, new
+               {
+                   @placeholder = @Translate.Text("AMW_EmailIDPlaceholder"),
+                   @aria_describedby = "description-for-EmailID",
+                   @data_parsley_errors_container = "#description-for-EmailID",
+                   @required = "",
+                   @autocomplete = "off",
+                   @type="email",
+                   @data_parsley_required_message = Translate.Text("AMW_EmailIDRequired"),
+                   @data_parsley_error_message = Translate.Text("AMW_EmailIDError"),
+                   @class = "form-field__input form-field__input--text",
+               })
+                </span>
+                <div id="description-for-EmailID" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.Email)
+                </div>
+            </div>
+            <p class="mb12 mt12">@Html.Raw(Translate.Text("AWM_EmailNote"))</p>
+            @Html.HiddenFor(x => x.key)
+            <div class="form-field__button">
+                @if (Model.IsLoggedIn)
+                {
+                    <div class="m39-modal m39-modal--new away-mode-modal" data-component="m39-modal" id="modal_true">
+                        <button data-trigger="true" class="m39-modal__trigger hidden view_modal__trigger confrimModal" id="_3f0pdyqee_trigger" type="button" aria-controls="_3f0pdyqee_content">MODAL TRIGGER FOR VIEW</button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_3f0pdyqee_content" aria-labelledby="_3f0pdyqee_trigger">
+                            <div class="m39-modal__dialog">
+                                <div class="m39-modal__header">
+                                    <button data-close="acc-sel-1" class="m39-modal__button--close" id="_3f0pdyqee_close" aria-controls="_3f0pdyqee_content" style="display:block;color:#fff">@Translate.Text("Close")</button>
+                                    <div class="m39-modal__subtitle" style="text-align: center;">@Translate.Text("AWM_Disclaimer")</div>
+                                </div>
+                                <div class="m39-modal__content">
+                                    @Html.Sitecore().Placeholder("AWM_DisclaimerDetail_placeholder")
+                                </div>
+                                <div class="m39-modal__footer">                                   
+                                    <button type="submit" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("AWM_AcknowledgeText")</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"></div>
+                    </div>
+                    <button type="button" class="button button--primary button--fullwidth-mobile btnPreSubmit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    <script type="text/javascript">
+
+                        docReady(function () {
+                            require(['parsley'], function () {
+
+                                jQuery(".btnPreSubmit").on("click", function () {
+
+                                    if (jQuery("#AwayModeCreateFrom").parsley().validate()) {
+                                        $('.confrimModal').click();
+                                    }
+                                })
+                            });
+
+                        });                        
+
+                    </script>
+
+                }
+                else
+                {
+                    <button type="submit" name="ActionType" value="get_otp" class="button button--primary button--fullwidth-mobile" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                }
+            </div>
+            <script src="~/scripts/External/nml/form-submit-validate.js"></script>
+        }
+    </div>
+</div>

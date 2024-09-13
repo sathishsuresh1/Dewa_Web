@@ -1,0 +1,168 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using Roles = DEWAXP.Foundation.Content.Roles
+@model DEWAXP.Feature.GatePass.Models.ePass.ePassLogin
+
+
+<div class="j113-epass">
+    <div class="grid">
+        <div class="grid__row mb0">
+            <div class="grid__column grid__column--12">
+                <div class="j113-epass--title_wrapper">
+                    <div class="j113-epass--title_company">
+                        @Translate.Text("Epass.Welcome"), @Model.UserName
+                    </div>
+                    @*<div class="j113-epass--title_coordinator">
+                            John Simmons (Company Coordinator)
+                        </div>*@
+                    <a class="button button--text button--next" href="/api/sitecore/ePass/ePassAdminLogout">@Translate.Text("Epass.Logout")</a>
+                </div>
+                @if (Model.UserType == Roles.DewaSupplierAdmin)
+                {
+                    <div class="j113-epass--action_wrapper">
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)">@Translate.Text("Epass.Allpasses")</a>
+                        @if (Model.onedayinitiate)
+                        {
+                            <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ONEDAYINITIATOR)">@Translate.Text("Epass.onedaypass")</a>
+                        }
+
+                    </div>
+                }
+                else if (Model.UserType == Roles.DewaSupplierSecurity)
+                {
+                    <div class="j113-epass--action_wrapper">
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)">
+                            @Translate.Text("Epass.Allpasses")
+                        </a>
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ADMINALLPASSESS)">@Translate.Text("Epass.Track")</a>
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ONEDAYINITIATOR)">@Translate.Text("Epass.onedaypass")</a>
+                    </div>
+                }
+                else if (Model.UserType == Roles.DewaSupplierSecurity || Model.UserType == Roles.DewaonedayInitiator)
+                {
+                    <div class="j113-epass--action_wrapper">
+                        @if (Model.lstpassess != null && Model.lstpassess.Count > 0)
+                        {
+                            <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)">@Translate.Text("Epass.Allpasses")</a>
+                        }
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ONEDAYINITIATOR)">@Translate.Text("Epass.onedaypass")</a>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+    @if (Model.lstpassess != null)
+    {
+        <div class="box box--3">
+            <div class="grid">
+                <div class="grid__row">
+                    @if (Model.UserType == Roles.DewaSupplierAdmin || Model.UserType == Roles.DewaSupplierSecurity)
+                    {
+                        <div class="grid__column grid__column--3">
+                            <div class="j113-epass--card_wrapper">
+                                <div class="j113-epass--card_message">
+                                    @Translate.Text("Epass.Pendingapproval")
+                                </div>
+                                @if (Model.UserType == Roles.DewaSupplierAdmin)
+                                {
+                                    <div class="j113-epass--card_message-expire">
+                                        @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Initiated || x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator).Count()
+                                    </div>
+                                }
+                                @if (Model.UserType == Roles.DewaSupplierSecurity)
+                                {
+                                    <div class="j113-epass--card_message-expire">
+                                        @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity).Count()
+                                    </div>
+                                }
+                                <div class="j113-epass--card_message-passes">
+                                    @Translate.Text("Epass.Passes")
+                                </div>
+                                <a class="button button--primary button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)#pending">@Translate.Text("Epass.Review")</a>
+                            </div>
+                        </div>
+                        <div class="grid__column grid__column--3">
+                            <div class="j113-epass--card_wrapper">
+                                <div class="j113-epass--card_message">
+                                    @Translate.Text("Epass.Approved")
+                                </div>
+                                <div class="j113-epass--card_message-expire">
+                                    @Model.lstpassess.Where(x => (x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Approved)).Count()
+                                </div>
+
+                                <div class="j113-epass--card_message-passes">
+                                    @Translate.Text("Epass.Passes")
+                                </div>
+                                <a class="button button--primary button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)#approved">@Translate.Text("Epass.Review")</a>
+                            </div>
+                        </div>
+                        <div class="grid__column grid__column--3">
+                            <div class="j113-epass--card_wrapper">
+                                <div class="j113-epass--card_message">
+                                    @Translate.Text("Epass.Rejected")
+                                </div>
+                                <div class="j113-epass--card_message-expire">
+                                    @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Rejected).Count()
+                                </div>
+                                <div class="j113-epass--card_message-passes">
+                                    @Translate.Text("Epass.Passes")
+                                </div>
+                                <a class="button button--primary button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)#rejected">@Translate.Text("Epass.Review")</a>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.UserType == Roles.DewaonedayInitiator)
+                    {
+                        <div class="grid__column grid__column--3">
+                            <div class="j113-epass--card_wrapper">
+                                <div class="j113-epass--card_message">
+                                    @Translate.Text("Epass.Initiated")
+                                </div>
+                                <div class="j113-epass--card_message-expire">
+                                    @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Initiated).Count()
+                                </div>
+                                <div class="j113-epass--card_message-passes">
+                                    @Translate.Text("Epass.Passes")
+                                </div>
+                                <a class="button button--primary button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_ALLPASSES)">@Translate.Text("Epass.Review")</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    <div class="box">
+        <div class="m41-tabs-box__tab-panel" data-index="0" style="display: block;">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <div class="m26-page-title title_message">
+                            <h2 class="text__page-title">@Translate.Text("Epass.Recentpasses")</h2>
+                        </div>
+                    </div>
+                    <div class="grid__column grid__column--12">
+                        @Html.Sitecore().Placeholder("managementpasses")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid">
+        @Html.Sitecore().Placeholder("contactus")
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

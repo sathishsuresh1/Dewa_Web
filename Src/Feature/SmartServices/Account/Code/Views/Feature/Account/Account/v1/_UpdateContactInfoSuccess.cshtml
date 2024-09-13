@@ -1,0 +1,89 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@model DEWAXP.Foundation.Content.Models.AccountModel.UpdateContactInfoSuccessModel
+
+@if (Model != null && !string.IsNullOrWhiteSpace(Model.AccountNumberSelected))
+{
+<div class="grid">
+<div class="grid__row mt24">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="m40-status-message m40-status-message--success  icon icon-new-success-message " data-component="m40-status-message">
+            <div class="m40-status-message__title">@Translate.Text("cust.acc.success.msg")</div>
+            <div class="m40-status-message__text">@Translate.Text("cust.for.business.partner") @Model.SelectedBusinessPartnerNumber @Translate.Text("cust.and.accounts") @(!string.IsNullOrWhiteSpace(Model.MultipleAccountNumberSelected) ? Model.MultipleAccountNumberSelected + ", " + Model.AccountNumberSelected.TrimStart(new char[] { '0' }) : Model.AccountNumberSelected.TrimStart(new char[] { '0' }))</div>
+        </div>
+    </div>
+</div>
+<div class="grid__row mb24">
+    <div class="grid__column grid__column--12">
+        <!-- m42-key-value-start -->
+        <div class="m42-keyvalue">
+            <dl>
+                @if (!string.IsNullOrWhiteSpace(Model.SelectedAccountName))
+                {
+                <dt class="m42-keyvalue__key"><strong>@Translate.Text("cust.profile.name")</strong></dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.SelectedAccountName</dd>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.MobileNumber))
+                {
+                <dt class="m42-keyvalue__key"><strong>@Translate.Text("cust.profile.mobileno.label")</strong></dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.MobileNumber</dd>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.EmailAddress))
+                {
+                <dt class="m42-keyvalue__key"><strong>@Translate.Text("cust.profile.email")</strong></dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.EmailAddress</dd>
+                }
+            </dl>
+        </div>
+        <!-- m42-key-value-end -->
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="form-field__button centered">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.myprofile)?a=@Model.AccountNumberSelected.TrimStart(new char[] { '0' })" class="button button--primary">@Translate.Text("cust.profile.backtoprofile")</a>
+        </div>
+    </div>
+</div>
+<script>
+	docReady(function () {
+		var hasNoNickName = '@string.IsNullOrWhiteSpace(Model.NickName)';
+
+		if (hasNoNickName === 'False') {
+			var nickName = '@Model.NickName';
+			jQuery('.user-widget__name').text(nickName);
+		}
+	});
+</script>
+@{
+    string _happinexUrl = Url.Action("PostData", "HappinessIndicator", new
+    {
+        type = DEWAXP.Foundation.Content.Models.HappinessIndicator.IndicatorType.Transaction,
+        language = Sitecore.Context.Language.Name,
+        transactionId = Guid.NewGuid(),
+        serviceCode = "3995",
+        islocal = true,
+        ServiceDescription = "UpdateContactInfo"
+    });
+}
+<input type="hidden" id="happinexUrl" value='@_happinexUrl' />
+<script type="text/javascript">
+    var _happinexUrl = '';
+    docReady(function () {
+        jQuery(".component-tigger").hide();
+        _happinexUrl = jQuery("#happinexUrl").val();
+        if (_happinexUrl != null && _happinexUrl != "") {
+            jQuery("#hitrigger").attr("href", _happinexUrl);
+            setTimeout(function () {
+                jQuery("#hitrigger").trigger('click');
+            }, 50);
+        }
+    });
+</script>
+</div>
+    }

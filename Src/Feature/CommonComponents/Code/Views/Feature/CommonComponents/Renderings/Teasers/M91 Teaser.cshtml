@@ -1,0 +1,78 @@
+﻿@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M6TeaserSet
+@using Sitecore.Globalization
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers.Extensions
+@using Glass.Mapper.Sc.Web.Mvc
+@using DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers;
+
+
+@{
+    string hasSqure = (!string.IsNullOrWhiteSpace(Html.Sitecore().CurrentRendering.Parameters["m91_teaser_pos"])) ? Html.Sitecore().CurrentRendering.Parameters["m91_teaser_pos"] : "";
+}
+@if (Model.Children.Any())
+{
+    var i = 0;
+    <div class="j139-noor-hayat">
+        <div class="grid">
+            @foreach (var teaser in Model.Children)
+            {
+                if (teaser != null)
+                {
+                    var cls = (i % 2 == 1 ? " m91-teaser-rtl" : "");
+                    hasSqure = !string.IsNullOrWhiteSpace(hasSqure) ? " " + hasSqure.Trim() : "";
+                    string _teaserImg = "";
+
+                    if (teaser != null && teaser.BackgroundImage != null && !string.IsNullOrWhiteSpace(teaser.BackgroundImage.Src))
+                    {
+                        _teaserImg = teaser.BackgroundImage.Src;
+                    }
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+
+                            <!-- m91-teaser-start -->
+                            <div class="m91-teaser m91-teaser-pos-v2@(cls)@(hasSqure)" style="background-image: url('@(_teaserImg)') ">
+                                <div class="m91-teaser__content m91-teaser__content--image stock">
+                                    <div>
+                                        <h2 class="teaser__title @teaser.ClassName">@Html.Glass().Editable(teaser, x => x.Header)</h2>
+                                        <p class="teaser__copy">@Html.Raw(teaser.Description)</p>
+                                        @if (teaser.Link != null && !string.IsNullOrWhiteSpace(teaser.Link.Url))
+                                        {
+                                            <p class="teaser__copy">
+                                                <a href="@teaser.Link.Url" class="button--text button--nextNEW green">@teaser.LinkText</a>
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- m91-teaser-end -->
+
+
+
+                        </div>
+                    </div>
+                }
+                i++;
+            }
+        </div>
+        @Html.Sitecore().Placeholder("boxbanner")
+        <div class="grid">
+            @Html.Sitecore().Placeholder("boxcomponent")
+        </div>
+    </div>
+}
+else
+{
+    <div class="j139-noor-hayat">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    @Translate.Text("There are no related articles.")
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+

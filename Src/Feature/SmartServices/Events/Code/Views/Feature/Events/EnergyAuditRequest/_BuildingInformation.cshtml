@@ -1,0 +1,336 @@
+﻿@using Sitecore.Mvc
+@using System.Web.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Feature.Events.Models.EnergyAudit.EnergyAuditViewModel
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+
+<div class="grid__row">
+    <div id="buildings-container" class="grid__column grid__column--12 grid__column--form"></div>
+</div>
+
+<form id="building-detail-form" method="POST" action="#" data-form="true" novalidate="novalidate">
+    @Html.AntiForgeryToken()
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div data-component="m37-expander" class="m37-expander">
+                <button class="m37-expander__trigger m37-expander__trigger--themed" data-toggle="true" id="_building-form-expander_trigger" aria-controls="_building-form-expander_content">@Translate.Text("J85.AddAnotherBuilding")</button>
+                <div aria-expanded="false" role="region" class="m37-expander__content" data-content="true" id="_building-form-expander_content" aria-labelledby="_building-form-expander_trigger">
+
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-ca-number">
+                            @Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input type="number" lang="en"
+                                   name="ContractAccountNumber"
+                                   id="form-field-ca-number"
+                                   class="form-field__input form-field__input--text"
+                                   required="required"
+                                   @*aria-required="true"*@
+                                   aria-describedby="description-for-ca-number"
+                                   placeholder="@Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)"
+                                   data-parsley-errors-container="#description-for-ca-number"
+                                   data-parsley-error-message="@Translate.Text(DictionaryKeys.BuildingAudit.ContractAccountNumberValidationMessage)"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-account_number="" />
+                        </span>
+                        <div class="form-field__messages" id="description-for-ca-number"></div>
+                        <div class="form-field__messages" id="invalidca-number">
+                            <ul class="parsley-errors-list filled" id="parsley-id-8">
+                                <li class="parsley-custom-error-message">@Translate.Text(DictionaryKeys.BuildingAudit.ContractAccountNotEligible)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-building-name">
+                            @Translate.Text("J85.BuildingName")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input type="text"
+                                   name="BuildingName"
+                                   id="form-field-building-name"
+                                   class="form-field__input form-field__input--text"
+                                   required="required"
+                                   @*aria-required="true"*@
+                                   aria-describedby="description-for-building-name"
+                                   placeholder="@Translate.Text("Please enter a value")"
+                                   data-parsley-errors-container="#description-for-building-name"
+                                   data-parsley-error-message="@Translate.Text("Please enter a value")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div class="form-field__messages" id="description-for-building-name"></div>
+                    </div>
+
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-floor-area">
+                            @Translate.Text("J85.FloorArea")
+                            <span class="form-field__label-optional">(@Translate.Text("optional"))</span>
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input type="number" lang="en"
+                                   name="FloorArea"
+                                   id="form-field-floor-area"
+                                   class="form-field__input form-field__input--text"
+                                   aria-describedby="description-for-floor-area"
+                                   placeholder="@Translate.Text("Please enter a value")"
+                                   min="1"
+                                   max="999999"
+                                   data-parsley-error-message="@Translate.Text("J85.PosNumberVal")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-grossfloorarea="" />
+                        </span>
+
+                        <div class="form-field__messages" id="description-for-floor-area"></div>
+                    </div>
+
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-num-buildings">
+                            @Translate.Text("J85.NumBuildings")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input type="number" lang="en"
+                                   class="form-field__input form-field__input--text"
+                                   id="form-field-num-buildings"
+                                   name="NumberOfBuildingsToBeAudited"
+                                   placeholder="@Translate.Text("J85.PosNumberVal")"
+                                   required="required"
+                                   @*aria-required="true"*@
+                                   aria-describedby="description-for-num-buildings"
+                                   min="1"
+                                   max="35"
+                                   value="1"
+                                   data-input-truncate="2"
+                                   data-parsley-errors-container="#description-for-num-buildings"
+                                   data-parsley-error-message="@Translate.Text("J85.PosNumberVal")"
+                                   data-parsley-trigger="focusout" />
+                        </span>
+
+                        <div class="form-field__messages" id="description-for-num-buildings">
+                            <p class="form-field__description">@Translate.Text("J85.MaxBuildings")</p>
+                        </div>
+                    </div>
+
+                    <div class="form-field__button">
+                        <button id="add-building" class="button button--primary" type="submit">@Translate.Text("J85.AddBuilding")</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form id="continue-form" method="POST" action="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J85_BUILDING_INFO)" novalidate="novalidate">
+    @Html.AntiForgeryToken()
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div id="form-data-placeholder"></div>
+            <div class="form-field__button">
+                <button type="submit" class="button button--primary">@Translate.Text("Next")</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script id="building-summary-template" type="text/x-handlebars-template">
+    <div class="building-detail" data-building-name="{{name}}" data-building-account="{{account}}" data-building-area="{{floorArea}}" data-building-count="{{num}}">
+        <div class="building-detail__name">{{name}}</div>
+
+        <div class="building-detail__account">
+            <div class="building-detail__key">@Translate.Text("Account")</div>
+            <div class="building-detail__divider"></div>
+            <div class="building-detail__value">{{account}}</div>
+        </div>
+
+        <div class="building-detail__area">
+            <div class="building-detail__key">@Translate.Text("J85.FloorArea")</div>
+            <div class="building-detail__divider"></div>
+            <div class="building-detail__value">{{floorArea}}</div>
+        </div>
+
+        <div class="building-detail__area">
+            <div class="building-detail__key">@Translate.Text("J85.NumBuildings")</div>
+            <div class="building-detail__divider"></div>
+            <div class="building-detail__value">{{num}}</div>
+        </div>
+
+        <div class="building-detail__fuel">@Translate.Text("J85.ElectWater")</div>
+
+        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J85_INITIAL_BUILDING_INFO)" class="button button--next button--primary remove-building" aria-label="Remove" role="button">@Translate.Text("Remove")</a>
+    </div>
+</script>
+
+<script id="building-input-set-template" type="text/x-handlebars-template">
+    <div class="building-input-set">
+        <input type="hidden" name="Buildings[{{index}}].ContractAccountNumber" value="{{account}}" />
+        <input type="hidden" name="Buildings[{{index}}].BuildingName" value="{{name}}" />
+        <input type="hidden" name="Buildings[{{index}}].FloorArea" value="{{floorArea}}" />
+        <input type="hidden" name="Buildings[{{index}}].NumberOfBuildingsToBeAudited" value="{{num}}" />
+    </div>
+</script>
+
+<script type="text/javascript">
+    docReady(function () {
+        jQuery('#invalidca-number').hide();
+        var renderSummary = function (building) {
+            //console.log("rendersumm");
+            var markup = jQuery('#building-summary-template').html();
+            var template = Handlebars.compile(markup);
+            //console.log(template);
+            var rendering = template(building);
+            //console.log(rendering);
+            jQuery('#buildings-container').append(rendering);
+        };
+
+        var renderFormElements = function (building) {
+            var markup = jQuery('#building-input-set-template').html();
+            var template = Handlebars.compile(markup);
+
+            var rendering = template(building);
+            jQuery('#form-data-placeholder').append(rendering);
+        }
+
+        var initialSet = @Html.Raw(Json.Encode(Model.Buildings));
+
+        //console.log(initialSet);
+        jQuery.each( initialSet, function( key, b ) {
+            renderSummary({
+                account: b.ContractAccountNumber,
+                floorArea: b.FloorArea,
+                name: b.BuildingName,
+                num: b.NumberOfBuildingsToBeAudited
+            });
+        });
+
+        //    .each(dataObj, function (b) {
+        //    console.log(b);
+        //    console.log(b.ContractAccountNumber);
+
+        //	renderSummary({
+        //		account: b.ContractAccountNumber,
+        //		floorArea: b.FloorArea,
+        //		name: b.BuildingName,
+        //		num: b.NumberOfBuildingsToBeAudited
+        //	});
+        //});
+
+        jQuery('#buildings-container').on('click', 'a.remove-building', function (e) {
+            jQuery(this).closest('.building-detail').remove();
+            if (jQuery('#buildings-container').children('.building-detail').length === 0) {
+                return true;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+
+        jQuery('#building-detail-form').off("submit").submit(function (e) {
+            //console.log(jQuery('#building-detail-form').data('submitted'));
+
+            if (jQuery('#building-detail-form').data('submitted') === true) {
+                // Previously submitted - don't submit again
+                e.preventDefault();
+                return;
+            }
+
+            if (jQuery('form#building-detail-form').parsley().validationResult===true) {
+                jQuery('#building-detail-form').data('submitted', true);
+                var account = jQuery('input[name="ContractAccountNumber"]').val();
+                var name = jQuery('input[name="BuildingName"]').val();
+                var area = jQuery('input[name="FloorArea"]').val();
+                var num = jQuery('input[name="NumberOfBuildingsToBeAudited"]').val();
+
+                jQuery('#invalidca-number').hide();
+                if (account) {
+                    jQuery.ajax("/api/energyaudit/get?contractaccountnumber=" + account, {
+                        beforeSend: function () {
+                            window.attachSpinner('.bill-placeholder', { bgColor: '#fff', opacity: 0.6 });
+                        },
+                        complete: function () {
+                            window.detachSpinner('.bill-placeholder');
+                        },
+                        dataType: 'json',
+                        method: 'GET',
+                        statusCode: {
+                            500:function() {
+                                jQuery('input[name="ContractAccountNumber"]').attr( 'aria-invalid', true );
+                                jQuery('input[name="ContractAccountNumber"]').addClass( 'form-field__input--error' );
+                                jQuery('input[name="ContractAccountNumber"]').parents( '.form-field__input-wrapper' ).removeClass( 'form-field__input-wrapper--validated' ).addClass( 'form-field__input-wrapper--error' );
+                                jQuery('#invalidca-number').show();
+                                jQuery('input[name="ContractAccountNumber"]').focus();
+                                jQuery('#building-detail-form').data('submitted', false);
+                                jQuery('html, body').animate({
+                                    scrollTop: jQuery('input[name="ContractAccountNumber"]').offset().top - 100
+                                }, 2500);
+                            },
+                            200:function() {
+
+                                renderSummary({
+                                    account: account,
+                                    floorArea: area,
+                                    name: name,
+                                    num: num
+                                });
+                                e.target.reset();
+
+                                var theform = jQuery('form#building-detail-form');
+
+                                theform.parsley().reset();
+
+                                theform.find('.form-field__input-wrapper--validated').removeClass('form-field__input-wrapper--validated');
+                                jQuery('#building-detail-form').data('submitted', false);
+                            }
+                        }
+                    });
+                }
+
+
+
+
+            }
+
+            e.preventDefault();
+            return false;
+        });
+
+        jQuery('form#continue-form').on('submit', function (e) {
+            var $buildings = jQuery('.building-detail');
+            if ($buildings.length > 0) {
+                jQuery('#form-data-placeholder').empty();
+
+                var data = _.map($buildings, function (building, index) {
+                    return {
+                        account: jQuery(building).data('building-name'),
+                        name: jQuery(building).data('building-account'),
+                        floorArea: jQuery(building).data('building-area'),
+                        num: jQuery(building).data('building-count'),
+                        index: index
+                    };
+                });
+
+                jQuery.each( data, function( key, b ) {
+                    renderFormElements(b);
+                });
+
+                return true;
+            }
+            e.target.reset();
+            e.preventDefault();
+            return false;
+        });
+    });
+</script>

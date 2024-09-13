@@ -1,0 +1,51 @@
+﻿@using System.Linq
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content.Repositories
+
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.MultipleTargetTabs
+
+@{
+    var additionalBoxCssClasses = Model.InModal ? "m41-tabs-box__tabs--modal" : string.Empty;
+    var pageUrl = LinkManager.GetItemUrl(Sitecore.Context.Item);
+    var _cache = DependencyResolver.Current.GetService<ICacheProvider>();
+    string _responseData = string.Empty;
+    _cache.TryGet("return_URI", out _responseData);
+
+    var _addcl = !string.IsNullOrEmpty(_responseData) ? "m41-tabs-box--variant4_masar" : string.Empty;
+}
+@if (string.IsNullOrEmpty(_responseData) && Model.Children != null && Model.Children.Count() > 0 || (Model.Children != null && Model.Children.Count() > 0 && !string.IsNullOrEmpty(_responseData) && _responseData.ToLower().Contains(DEWAXP.Foundation.Integration.APIHandler.Impl.MasarConfig.ScrapSaleDashboardURL)))
+{
+
+    <div class="m41-tabs-box m41-tabs-box--variant @_addcl" data-component="m41-tabs-box">
+        <div class="m41-tabs-box__tabs">
+            <div class="m41-tabs-box__tab-items--wrapper">
+                <ul class="m41-tabs-box__tab-items">
+                    @foreach (var tab in Model.Children)
+                    {
+                        var index = Model.Children.ToList().IndexOf(tab);
+
+                        var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                        var tabSecondTargetUrl = tab.SecondTarget != null ? LinkManager.GetItemUrl(tab.SecondTarget) : null;
+                        var active = Convert.ToBoolean(tab.ActivePageList != null && tab.ActivePageList.Where(x => x.Url.Equals(pageUrl)).Count() > 0) ? true : pageUrl.Equals(tabTargetUrl) || pageUrl.Equals(tabSecondTargetUrl) || (Model.InModal && index == 0);
+                        var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+                        <li class="m41-tabs-box__tab-item @(!string.IsNullOrWhiteSpace(tab.ClassName)?tab.ClassName : string.Empty)" @(tab.Hidebydefault ? "style=display:none" : string.Empty) data-index="@index">
+                            <a href="@(active?"#":tabTargetUrl)" class="m41-tabs-box__tab-link @additionalCssClasses">@tab.Title</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        @*<script>
+                docReady(function () {
+
+                    if ($(".m41-tabs-box--variant").next("#rs_area").length > 0) {
+                        $(".m41-tabs-box--variant").next("#rs_area").addClass("box--news")
+                    }
+                })
+            </script>*@
+    </div>
+
+
+}

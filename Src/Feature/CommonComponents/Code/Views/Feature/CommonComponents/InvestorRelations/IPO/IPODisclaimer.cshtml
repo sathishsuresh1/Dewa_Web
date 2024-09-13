@@ -1,0 +1,80 @@
+﻿@using Sitecore.Mvc
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content.Models.Common
+@using DEWAXP.Foundation.Helpers
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@model RenderingModel
+@{
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    var Nationalities = _contentRepository.GetItem<ListDataSources>(new GetItemByPathOptions("/sitecore/content/Global References/List Data Sources/IPO/IPO Countries")).Items;
+}
+<div class="m39-modal m39-modal--nofocus m39-modal--disclaimer" data-component="m39-modal">
+    <button data-trigger="true" class="m39-modal__trigger hidden">Modal Trigger</button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+        <div class="m39-modal__dialog ">
+            <div class="m39-modal__content">
+                <div class="align_right mb12">
+                    @Html.Action("Languages", "Renderings")
+                    @*<a href="#" class="button button--very_small button--outline">العربية</a>*@
+                </div>
+                <div class="m39-modal__content--inner active">
+                    <strong>
+                        @Translate.Text("IPO.DisclaimerTitle")
+                    </strong>
+                    <div class="form-field form-field--select form-field--select-single mt24">
+                        <label for="form-field-nationality" class="form-field__label">
+                            @Translate.Text("IPO.DisclaimerCountrytitle")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                    id="form-field-nationality" name="select"
+                                    aria-describedby="description-for-nationality"
+                                    data-parsley-error-message="@Translate.Text("ipo.NationalityErrorMessage")"
+                                    data-parsley-errors-container="#description-for-nationality" required>
+                                <option value="" selected>@Translate.Text("ipo.chooseanoption")</option>
+                                @foreach (DataSourceItems item in Nationalities)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </span>
+                        <div id="description-for-nationality" class="form-field__messages">
+                        </div>
+                    </div>
+                </div>
+                @Html.Sitecore().Placeholder("disclaimer")
+            </div>
+            <div class="m39-modal__footer">
+                <div class="m39-modal__footer--inner active">
+                    <div class="button button--fullwidth-mobile button--primary m39-modal--disclaimer_next expandModal">
+                        @Translate.Text("IPO.Proceed")
+                    </div>
+                </div>
+                <div class="m39-modal__footer--inner">
+                    <div class="button button--fullwidth-mobile button--primary" data-close="true">
+                        @Translate.Text("IPO.YesAgreee")
+                    </div>
+                    <div class="button button--fullwidth-mobile button--outline m39-modal--disclaimer_next">
+                        @Translate.Text("IPO.NoAgreee")
+                    </div>
+                </div>
+                <div class="m39-modal__footer--inner">
+                    <a href="@LinkHelper.GetItemUrl("{E310D596-ABDB-495D-863F-1A0E5E2B0756}")" class="button button--fullwidth-mobile button--primary">
+                        @Translate.Text("IPO.BacktoHomepage")
+                    </a>
+                </div>
+                <div class="m39-modal__footer--inner restricted">
+                    <a href="@LinkHelper.GetItemUrl("{E310D596-ABDB-495D-863F-1A0E5E2B0756}")" class="button button--fullwidth-mobile button--primary">
+                        @Translate.Text("IPO.BacktoHomepage")
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal__overlay"> </div>
+</div>

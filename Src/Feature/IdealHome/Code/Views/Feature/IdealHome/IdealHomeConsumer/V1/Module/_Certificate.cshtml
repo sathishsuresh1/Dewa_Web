@@ -1,0 +1,136 @@
+﻿@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+
+@{
+
+    var btntext = Translate.Text("J106.SendtoMail");
+    var _progress = Model.SurveyResponses.Select(x => x.Progress).LastOrDefault().ToString();
+    if (Request.QueryString["emailsent"] != null)
+    {
+        btntext = Translate.Text("J106.EmailSent");
+    }
+    else
+    {
+        btntext = Translate.Text("J106.SendtoMail");
+    }
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+            <div class="m17-sectiontitle__colors">
+                <span class="title-colors-green"></span>
+                <span class="title-colors-red"></span>
+                <span class="title-colors-blue"></span>
+                <span class="title-colors-purple"></span>
+                <span class="title-colors-brown"></span>
+            </div>
+            <h3 class="m17-sectiontitle__title  text__section-title">
+                @Translate.Text("IDH_Step4") @Translate.Text("IDH_CertificateHeader")
+                @if (_progress == "100")
+                {<span class="icon-new-success-message"></span>}
+            </h3>
+        </div>
+    </div>
+</div>
+
+@if (Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted && Model.VideoResponses.FirstOrDefault().IsCompleted && (Model.SurveyResponses.FirstOrDefault().Marks == 100 || (Model.SurveyResponses.LastOrDefault().IsSecondAttemptCompleted && Model.SurveyResponses.LastOrDefault().Marks >= 90)))
+{
+    using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { returnUrl = "" }, FormMethod.Post,
+        new
+        {
+            @data_parsley_focus = "true",
+            @id = "idealhomedisplay",
+            @data_form = "true",
+            @class = "form",
+            @data_submit_validate = "enabled",
+            @novalidate = true,
+            @autocomplete = "off"
+        }))
+    {
+        @Html.Sitecore().FormHandler("IdealHomeConsumer", "DownloadPDF")
+        @Html.AntiForgeryToken()
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column-toggle grid__column-active">
+                @*<span class="grid__column-toggle-button"> Show Result</span>*@
+                <div class="m14-richtext text-large">
+                    <p>
+                        @Translate.Text("IDH_CertificateComplete")
+                    <p>
+                </div>
+                <div class="certificate" style="background-image:url('@Html.Raw(ViewBag.HtmlTemplate)')">
+                    <div class="certificate_name">
+                        <span class="certificate_name_align" style="font-weight:bold">@Model.FullName</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 download-buttons">
+                @*<button class="button button--primary button--small">Download Certificate</button>
+                    <button class="button button--quaternary">Send to Email</button>*@
+                <a href="javascript:void(0)" data-filename="@Model.FullName" class="button button--primary button--small DisplayPDF">@Translate.Text("J106.ExportPDF")</a>
+
+                @Html.ActionLink(btntext, "EmailPDF", new { }, new { @class = "button button--quaternary button-long" })
+            </div>
+        </div>
+
+    }
+
+    <form action="/api/sitecore/IdealHomeConsumer/DownloadPDF" method="post" id="DisplayPFDFrom">
+        <input type="hidden" name="test" />
+    </form>
+    <script type="text/javascript">
+        docReady(function () {
+            setTimeout(function () {
+                $(".DisplayPDF").on("click", function () {
+                    $('#DisplayPFDFrom').html("");
+                    //$('#DisplayPFDFrom').append('<input type="hidden" name="fileName" value="' + $(this).data("filename") + '"/>');
+                    $('#DisplayPFDFrom').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('#idealhomedisplay input[name=__RequestVerificationToken]').val() + '">');
+                    $('#DisplayPFDFrom').submit();
+                    triggerDownload();
+                    $('#DisplayPFDFrom').html('<input type="hidden" name="test" />');
+                    return false;
+                })
+            }, 500);
+        });
+        function triggerDownload() {
+            jQuery('.j105-drrg--loader').show();
+            jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+            jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+            setTimeout(function () {
+                jQuery('.j105-drrg--loader').hide();
+                jQuery('body').removeClass('unscrollable');
+            }, 500);
+        }
+    </script>
+}
+else
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column-toggle grid__column-active">
+            <div class="m14-richtext text-large">
+                <p>
+                    @Translate.Text("IDH_CertificateInitiate")
+                <p>
+            </div>
+        </div>
+    </div>
+}
+

@@ -1,0 +1,214 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.ClearanceCertificate.VerifyCertificateModel
+
+<div class="grid">
+    @Html.Sitecore().Placeholder("j26/m26-page-title")
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="2" data-current-step="2">
+                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="Verify Document">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rs_area">
+        <div class="grid">
+            @*If the response is successfull with 000*@
+            @if (ViewBag.Message != null && ViewBag.Message == "valid")
+            {
+                if (Model.ContractAccountNumber == null || string.IsNullOrEmpty(Model.ContractAccountNumber))
+                {
+                    //For Non DEWA Customer
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12 grid__column--form">
+                            <div class="m67-confirmation-message m67-confirmation-message--success">
+                                <div class="m67-confirmation-message__title">
+                                    @Translate.Text("CC.Document.Verification.Details")
+                                </div>
+                                <div class="m67-confirmation-message__content">
+
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("CC.Verification.RequesterName")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.RequesterName
+                                        </div>
+                                    </div>
+
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("Verification.ReferenceNumber")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.ReferenceNumber
+                                        </div>
+                                    </div>
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("Verification.PINNumber")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.PinNumber
+                                        </div>
+                                    </div>
+                                    <div class="m67-confirmation-message__message">@Model.CertificateNote</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    //For DEWA Customer
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12 grid__column--form">
+                            <div class="m67-confirmation-message m67-confirmation-message--success">
+                                <div class="m67-confirmation-message__title">
+                                    @Translate.Text("CC.Document.Verification.Details")
+                                </div>
+                                <div class="m67-confirmation-message__content">
+
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("CC.Verification.CustomerName")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.RequesterName
+                                        </div>
+                                    </div>
+
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("CC.Verification.AccountNumber")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.ContractAccountNumber
+                                        </div>
+                                    </div>
+
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("Verification.ReferenceNumber")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.ReferenceNumber
+                                        </div>
+                                    </div>
+                                    <div class="m67-confirmation-message__detail--wrapper">
+                                        <div class="m67-confirmation-message__detail--detail">
+                                            @Translate.Text("Verification.PINNumber")
+                                        </div>
+                                        <div class="m67-confirmation-message__detail--value">
+                                            @Model.PinNumber
+                                        </div>
+                                    </div>
+                                    <div class="m67-confirmation-message__message">@Model.CertificateNote</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> }
+            }
+            else if (ViewBag.Message != null && ViewBag.Message == "invalid")
+            {
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="m67-confirmation-message m67-confirmation-message--error">
+                            <div class="m67-confirmation-message__title">
+                                @Translate.Text("CC.Document.Reference.Invalid")
+                            </div>
+                            <div class="m67-confirmation-message__content">
+                                <div class="m67-confirmation-message__message">
+                                    @ViewBag.MessageDesc
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>}
+            else if (ViewBag.Message != null && ViewBag.Message == "expired")
+            {
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="m67-confirmation-message m67-confirmation-message--expired">
+                            <div class="m67-confirmation-message__title">
+                                @Translate.Text("CC.document.reference.expired")
+                            </div>
+                            <div class="m67-confirmation-message__content">
+                                <div class="m67-confirmation-message__message">
+                                    @ViewBag.MessageDesc
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>}
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--centered test">
+                    <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.VERIFY_CLEARANCE_CERTIFICATE)" class="button button--primary">@Translate.Text("CC.Check.another.document")</a>
+
+                </div>
+            </div>
+            @if (ViewBag.Message != null && ViewBag.Message == "valid")
+            {
+                <div class="grid__row grid__column--centered">
+
+                    <a href="#" class="button button--text link j108-np" onclick='DownloadFile(); return false;'>@Translate.Text("CC.Verfication.DownloadCertificate")</a>
+
+                </div>}
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.Message != null && ViewBag.Message == "valid")
+{
+    <script type="text/javascript">
+        function DownloadFile() {
+            var data = '@Convert.ToBase64String(Model.pdfData)';
+            var fileName = "@Model.ReferenceNumber" + ".pdf";
+            if (window.navigator && window.navigator.msSaveOrOpenBlob) { // IE workaround
+                var byteCharacters = atob(data);
+                var byteNumbers = new Array(byteCharacters.length);
+                for (var i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], { type: 'application/pdf' });
+                window.navigator.msSaveOrOpenBlob(blob, fileName);
+            }
+            else { // much easier if not IE
+                openPdfInNewTab(data);
+            }
+            return false;
+        }
+		function base64ToBlob(base64String) {
+    const sliceSize = 1024;
+    const byteCharacters = atob(base64String);
+    const bytesLength = byteCharacters.length;
+    const slicesCount = Math.ceil(bytesLength / sliceSize);
+    const byteArrays = new Array(slicesCount);
+    for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+        const begin = sliceIndex * sliceSize;
+        const end = Math.min(begin + sliceSize, bytesLength);
+        const bytes = new Array(end - begin);
+        for (let offset = begin, i = 0; offset < end; ++i, ++offset) {
+            bytes[i] = byteCharacters[offset].charCodeAt(0);
+        }
+        byteArrays[sliceIndex] = new Uint8Array(bytes);
+    }
+    return new Blob(byteArrays, { type: 'application/pdf' });
+}
+function openPdfInNewTab(base64String) {
+    const blob = base64ToBlob(base64String);
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.target = '_blank';
+    a.href = objectUrl;
+    document.body.appendChild(a);
+    a.click();
+}
+    </script>
+}

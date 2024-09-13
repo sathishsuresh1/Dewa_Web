@@ -1,0 +1,58 @@
+﻿
+@using DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint;
+@using Sitecore.Globalization;
+@model ConsumptionInsightData
+@using Sitecore.Mvc
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using smConfig = DEWAXP.Foundation.Content.ConsumptionComplaintResponseCofig;
+@using System.Linq
+@if (Model.ConsumptionGraphDataShowSetting != null && Model.ConsumptionGraphData != null)
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+
+            <div class="m29v4-chart smart-response-title-component component-border" data-cookie-id="1" data-component="m29v4-chart" 
+                 data-status="@Html.Raw(Model.ConsumptionGraphData.AbnormalJsonString)"
+                 data-x-axis-categories="@Html.Raw(Model.ConsumptionGraphData.x_axis_jsonString)"
+                 data-y-axis-title-text="" data-series='[{"data":[@Html.Raw(Model.ConsumptionGraphData.y_axis_jsonString)]}]' 
+                 data-tooltip-value-suffix=" @_commonHelper.GetSMTranslation("IG")" data-usagefor="@_commonHelper.GetSMTranslation("Usage per day")" data-step="1" 
+                 data-x-axis-text="@_commonHelper.GetSMTranslation("Month")"
+                 data-y-axis-text="@_commonHelper.GetSMTranslation("IG")" data-legend="@_commonHelper.GetSMTranslation("Showing: ")" data-step-s="2" data-high-value="100">
+                <div class="m29v4-chart--wrapper">
+
+                    <div class="m29v4-chart--header">
+                        <div class="m29v4-chart--title electricity">@_commonHelper.GetSMTranslation(Model.ConsumptionGraphDataShowSetting.Btntitle)</div>
+                        @{ 
+
+                            bool isAbnormal = Convert.ToBoolean(Model.ConsumptionGraphData.AbnormalCount > 0);
+                        }
+                        <div class="m29v4-chart--type @Html.Raw(isAbnormal?"red":"")">
+                            @Html.Raw(isAbnormal ? "<span class='icon-new-arrow-right'></span>":"")
+                            @_commonHelper.GetSMTranslation("{{count}} Days with abnormal consumption").Replace("{{count}}", Convert.ToString(Model.ConsumptionGraphData.AbnormalCount))
+                        </div>
+                    </div>
+                    <div class="m29v4-chart__container m29v4-chart__container--nolegend" data-chart-container="true">
+                    </div>
+                    <div class="m29v4-chart--controls" data-index="1">
+                        <div class="text_copy" style="font-size: 15px;color: #8f908f;"> @_commonHelper.GetSMTranslation("*The displayed consumption is only for information purposes and not to infer as billing consumption.")</div>
+                    </div>
+                    <div class="m29v4-chart__nodata-container">
+                        <div class="m29v4-chart__nodata">
+                            @_commonHelper.GetSMTranslation("No data available")
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        docReady(function () {
+            setTimeout(function () {
+                jQuery('.m29v4-chart').trigger('m29v4-chart-init');
+            }, 500)
+        })
+    </script>
+}

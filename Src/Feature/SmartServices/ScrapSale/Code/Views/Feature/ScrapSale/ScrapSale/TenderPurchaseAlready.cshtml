@@ -1,0 +1,143 @@
+﻿@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Foundation.Content.Models.ScrapSale.ScrapeTenderPaymentModel
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+
+            @if (Model.PaymentStatus)
+            {
+                <div class="m40-status-message__title">@Translate.Text("SS_P_paidAlready")</div>
+            }
+
+            @if (Model.IsJustPaid && Model.IsOnline)
+            {
+                <div class="m40-status-message__title">@Translate.Text("SS_P_PaidSuccess")</div>
+            }
+
+            <div class="m40-status-message__text">
+
+                @if (!string.IsNullOrWhiteSpace(Model.referencenumber))
+                {
+                    @Html.Raw(string.Format("{0}<br/>{1}", Translate.Text("Reference Number"), Model.referencenumber))
+                }
+
+                @if (Model.IsOnline)
+                {
+                    <p style="display:none;">
+                        Tender No: @(Model.transactionNumber) <br />
+                        Epay No: @(Model.Epnumber)<br />
+                        Ept ype: @(Model.Eptype)<br />
+                        Refrence No: @(Model.ReferenceNo)<br />
+                        Deg TransactionId: @(Model.DegTransactionId)<br />
+                        Dewa TransactionId: @(Model.DewaTransactionId)<br />
+                        @Html.Raw(string.Format("<br/>{0}<br/>{1}", Translate.Text("Receipt"), Model.ReceiptIdentifiers))
+                    </p>
+                }
+            </div>
+            @*<p>
+                    <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("SS_Print")</button>
+                </p>*@
+        </div>
+
+    </div>
+</div>
+
+@if (Model.IsOnline)
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="success-summery">
+                <h2 class="summery-title">@Translate.Text("TH.Total amount")s</h2>
+                <h2 class="summery-value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Model.PaidAmount +Model.PaidSuqiaAmount)</h2>
+            </div>
+        </div>
+    </div>
+    if (Model.PaidSuqiaAmount > 0)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content grid__column--centered">
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.PaidSuqiaAmount)
+            </div>
+        </div>
+    }
+}
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+        <h2 class="text__section-title">@Translate.Text("SS_P_BottomTitle")</h2>
+        <div class="m14-richtext mb0">
+            <p class="text__content-copy">
+
+                @if (!Model.IsJustPaid)
+                {
+
+                    @Html.Raw(Translate.Text("SS_P_AlreadypaidDesc"));
+                }
+                else if (Model.IsOnline)
+                {
+                    @Html.Raw(Translate.Text("SS_P_OnlinepaidDesc"));
+                }
+                else
+                {
+                    @Html.Raw(Translate.Text("SS_P_OffilneDesc"));
+                }
+            </p>
+        </div>
+        @if (!(Model.IsJustPaid && !Model.IsOnline))
+        {
+
+            <ul class="summary-footer__buttons">
+                <li class="summary-footer__button" style="padding-top:8px;">
+                    <a role="button" href="javascript: $('.btn-download').click()" onclick='' class="button button--primary">@Translate.Text("SS_P_Download")</a>
+                </li>
+            </ul>
+
+
+        }
+    </div>
+
+</div>
+@if (!(Model.IsJustPaid && !Model.IsOnline))
+{
+    <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+        <button data-trigger="true" class="m39-modal__trigger btn-download" id="_vl45qz455_trigger" type="button" aria-controls="_vl45qz455_content"></button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_vl45qz455_content" aria-labelledby="_vl45qz455_trigger">
+            <div class="m39-modal__dialog">
+                <div class="m39-modal__header">
+                    <div class="m39-modal__title">@Translate.Text("SS_Pay_PurchaseTender"): @Model.transactionNumber</div>
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_PORTAL_DASHBOARD)" class="m39-modal__button--close" id="_vl45qz455_close" aria-controls="_vl45qz455_content">@Translate.Text("TH.Close")</a>
+                    <div class="m39-modal__subtitle">@Translate.Text("SS_P_Doc")</div>
+                </div>
+                <div class="m39-modal__content">
+                    @if (!string.IsNullOrWhiteSpace(Model.referencenumber))
+                    {
+                        <div class="m39-modal__content--list">
+                            <form id="scrap-reciept-form" action="/api/sitecore/ScrapSale/ViewTenderReciept" method="post">
+                                @Html.AntiForgeryToken()
+                                <span>@Translate.Text("SS_P_ReceiptLbl")</span>
+                                <button type="submit" name="tno" value="@Model.referencenumber" class="button button--primary button--very_small floatRight">@Translate.Text("SS_P_Download")</button>
+                            </form>
+                        </div>
+                    }
+                    <div class="m39-modal__content--list">
+                        <form id="scrap-doc-form" action="/api/sitecore/ScrapSale/DownloadTenderDocument" method="post">
+                            @Html.AntiForgeryToken()
+                            <span>@Translate.Text("SS_P_DocLbl")</span>
+                            <button type="submit" name="tno" value="@Model.transactionNumber" class="button button--primary button--very_small floatRight">@Translate.Text("SS_P_Download")</button>
+                        </form>
+                    </div>
+                    <div class="m39-modal__content--list">
+                        <form id="scrap-advt-form" action="/api/sitecore/ScrapSale/DownloadTenderAdvertisement" method="post">
+                            @Html.AntiForgeryToken()
+                            <span>@Translate.Text("SS_P_Advertise")</span>
+                            <button type="submit" name="tno" value="@Model.transactionNumber" class="button button--primary button--very_small floatRight">@Translate.Text("SS_P_Download")</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+}

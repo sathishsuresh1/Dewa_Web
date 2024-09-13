@@ -1,0 +1,77 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using Sitecore.Data.Items
+@using DEWAXP.Foundation.Content.Repositories
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    var currentitem = _contextRepository.GetCurrentItem<Item>();
+    var lang = currentitem.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    var voice = currentitem.Language.CultureInfo.TextInfo.IsRightToLeft ? "Faris" : "en_gb_amy";
+    bool isRtl = currentitem.Language.CultureInfo.TextInfo.IsRightToLeft;
+    string siteUrl = Convert.ToString(HttpContext.Current.Request.Url);//.Split('?')[0];
+}
+
+<div class="m11-tools--accessibility_container">
+    <div class="m11-accessibility--title">
+        @Translate.Text("Accessibility")
+    </div>
+    <div class="m11-accessibility--close icon-cancel">
+    </div>
+    <div class="m11-accessibility--grid">
+        <div class="m11-accessibility--column">
+            <div class="m11-accessibility--columntitle">
+                @Translate.Text("Text resize"):
+            </div>
+            <div class="m11-accessibility--desc">
+                @Translate.Text("Use the buttons below to increase or decrease the text size")
+            </div>
+            <a href="" class="button button--quaternary button__label--centered button__label--smaller m11-accessibility__text-smaller selected">
+                Aa
+            </a>
+            <a href="" class="button button--quaternary button__label--centered button__label--larger m11-accessibility__text-larger">
+                Aa
+            </a>
+        </div>
+        <div class="m11-accessibility--column">
+            <div class="m11-accessibility--columntitle">
+                @Translate.Text("Read Speaker"):
+            </div>
+            <div class="m11-accessibility--desc">
+                @Translate.Text("Listen to the contents of the page by clicking on the player below")
+            </div>
+            @*<div class="rsplayer">
+                    <div id="readspeaker_button" class="readspeaker__button">
+                        <a rel="nofollow" class="readspeaker-link" accesskey="L" title="@Translate.Text("Readspeaker.Listentothispage")" href="https://app.readspeaker.com/cgi-bin/rsent?customerid=7358&amp;lang=@lang&amp;voice=@voice&amp;readid=rs_area&amp;url=@HttpContext.Current.Request.Url" data-rsevent-id="rs_533086" role="button">
+                            <img alt="Listen to this page" src="/images/ReadSpeaker.png" style="border-style: none;" class="tooltipstered">
+                        </a>
+                    </div>
+                </div>*@
+            @{
+                string _rlang = "ar_ar";
+                string _rVoice = "Faris";
+                if (!isRtl)
+                {
+                    _rlang = "en_uk";
+                    _rVoice = "en_gb_amy";
+                }
+            }
+            <div class="rsplayer">
+                <div id="readspeaker_button1" class="rs_skip rsbtn rs_preserve readspeaker__button">
+                    <a class="rsbtn_play" accesskey="L" title="Listen to this page using ReadSpeaker" href='https://app-eu.readspeaker.com/cgi-bin/rsent?customerid=7358&lang=@(_rlang)&readid=rs_area&url=@(siteUrl)'>
+                        <span class="rsbtn_left rsimg rspart">
+                            <span class="rsbtn_text"><span>@Translate.Text("Readspeaker.Listentothispage")</span></span>
+                        </span>
+                        <span class="rsbtn_right rsimg rsplay rspart"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

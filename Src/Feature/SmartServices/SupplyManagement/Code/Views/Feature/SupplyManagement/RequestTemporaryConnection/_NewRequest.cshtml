@@ -1,0 +1,187 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content.Models.Common
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.SupplyManagement.Models.RequestTempConnection
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model RequestTempConnectionPage
+@{
+    var page = (RequestTempConnectionPage)ViewBag.Page;
+    var now = DateHelper.DubaiNow().AddMonths(-1);  // Remove month for JS equivalent
+    var nextMonth = now.AddMonths(1);
+    var modal = ViewBag.Modal as ModalOverlay;
+}
+<div class="box box--1">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                @Html.Sitecore().Placeholder("j75/m26-page-title")
+            </div>
+        </div>
+    </div>
+</div>
+<div class="m41-tabs-box" data-component="m41-tabs-box">
+    <div class="m41-tabs-box__tabs">
+        <ul class="m41-tabs-box__tab-items">
+            <li class="m41-tabs-box__tab-item">
+                <a href="#" class="m41-tabs-box__tab-link m41-tabs-box__tab-link--active">@Translate.Text("j75.NewRequest")</a>
+            </li>
+            <li class="m41-tabs-box__tab-item">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J75_SEARCH_REQUEST)" class="m41-tabs-box__tab-link">@Translate.Text("j75.TrackOrPayRequest")</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--6 grid__column--text">
+            <h2 class="text__section-subtitle">@Translate.Text("Please note")</h2>
+            <p class="text__content-copy">@Html.Glass().Editable(page, x => x.Content)</p>
+        </div>
+        <div class="grid__column grid__column--6">
+            <h2 class="form__title">@Translate.Text("Application Details")</h2>
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @data_journey = "j75-request-temp-connection" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                <fieldset class="fieldset ">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-accountnumber" class="form-field__label">
+                            @Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)
+                            <span class="form-field__label-optional">(@Translate.Text("optional"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+							<input class="form-field__input form-field__input--text" id="form-field-accountnumber" name="AccountNumber" type="text"
+								   placeholder="@Translate.Text("Enter account number")" 
+								   data-parsley-account_number=""
+								   data-parsley-error-message="@Translate.Text(DictionaryKeys.RequestTemporary.PleaseEnterAccountNumber)"
+								   data-parsley-errors-container="#description-for-accountnumber" 
+								   aria-describedby="description-for-accountnumber" 
+								   data-parsley-id="6">
+                        </span>
+                        <div id="description-for-accountnumber" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-mobilenumber" class="form-field__label">
+                            @Translate.Text("Mobile Number")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+							<input class="form-field__input form-field__input--text form-field__input--prefixed"
+								   id="form-field-mobilenumber" name="MobileNumber" type="tel" placeholder="@Translate.Text("Enter a mobile number")"
+								   aria-describedby="description-for-mobilenumber" required="" data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+								   data-parsley-errors-container="#description-for-mobilenumber" data-parsley-mobile_number="" data-parsley-type="digits" />
+                        </span>
+                        <div id="description-for-mobilenumber" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-city" class="form-field__label">
+                            @Translate.Text("Location")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownList("Location", (IEnumerable<SelectListItem>)ViewBag.Cities, Translate.Text("Select from dropdown"), new { @aria_describedby = "description-for-city", aria_required = "true", @required = "", data_parsley_error_message = @Translate.Text("Please enter a value"), data_parsley_errors_container = "#description-for-city", @class = "form-field__input form-field__input--select form-field__input--select-full", @id = "form-field-city" })
+                        </span>
+                        <div id="description-for-city" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-eventtype" class="form-field__label">
+                            @Translate.Text("Event type")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-eventtype" name="eventType" @*aria-required="true"*@ required="required" data-parsley-error-message="@Translate.Text("generic validation message")" data-parsley-errors-container="#description-for-eventtype" aria-describedby="description-for-eventtype">
+                                <option value="" selected>@Translate.Text("Select from dropdown")</option>
+                                <option value="@EventType.Death">@Translate.Text("Mourning")</option>
+                                <option value="@EventType.Wedding">@Translate.Text("Wedding")</option>
+                            </select>
+                        </span>
+                        <div id="description-for-eventtype" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div id="datepicker-container-picker_start_date" class="form-field form-field--text ">
+                        <label for="form-field-picker_start_date" class="form-field__label">
+                            @Translate.Text("Event Start Date")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            <input class="form-field__input form-field__input--text form-field__input--datepicker"
+                                   id="form-field-picker_start_date" name="EventStartDate" type="text"
+                                   placeholder="@Translate.Text("Select date")"
+                                   aria-describedby="description-for-picker_start_date"
+                                   required data-parsley-error-message="@Translate.Text("Please enter a value")"
+                                   data-parsley-errors-container="#description-for-picker_start_date"
+                                   data-el="datepicker"
+                                   data-ref="start_date"
+                                   data-picker-options='{ &quot;min&quot;: [@now.Year,@now.Month,@(now.Day)], &quot;max&quot;: [@nextMonth.Year,@nextMonth.Month,@nextMonth.Day] }' />
+                        </span>
+                        <div id="description-for-picker_start_date" class="form-field__messages"></div>
+                    </div>
+                    <div id="datepicker-container-picker_end_date" class="form-field form-field--text ">
+                        <label for="form-field-picker_end_date" class="form-field__label">
+                            @Translate.Text("Event End Date")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            <input class="form-field__input form-field__input--text form-field__input--datepicker"
+                                   id="form-field-picker_end_date" name="EventEndDate" type="text"
+                                   placeholder="@Translate.Text("Select date")" aria-describedby="description-for-picker_end_date"
+                                   required data-parsley-error-message="@Translate.Text("The end date must be after or equal to the start date")"
+                                   data-parsley-errors-container="#description-for-picker_end_date"
+                                   data-picker-options='{ &quot;min&quot;: [@now.Year,@now.Month,@(now.Day)], &quot;max&quot;: [@nextMonth.Year,@nextMonth.Month,@nextMonth.Day] }'
+                                   data-el="datepicker"
+                                    />
+                        </span>
+                        <div id="description-for-picker_end_date" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field form-field--text form-field--textarea">
+                        <label for="form-field-description" class="form-field__label">
+                            @Translate.Text("Description") / @Translate.Text("j75.NearestLocation")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <textarea class="form-field__input form-field__input--text form-field__input--textarea" maxlength="500" data-textarea="description" id="form-field-description" name="Description" type="textarea" @*aria-required="true"*@ required="required" data-parsley-error-message="@Translate.Text("Please enter a value")" data-parsley-errors-container="#description-for-description" aria-describedby="description-for-description" data-parsley-id="18"></textarea>
+                        </span>
+	                    <div id="description-for-description" class="form-field__messages">
+							<p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="description">0</span>/500 @Translate.Text("Characters")</p>
+	                    </div>
+                    </div>
+                    <div class="form-field form-field--toggles">
+                        <div class="form-field__checkbox last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" aria-label="form-field-checkbox_1_1" name="TermsConditions" type="checkbox" value="true" aria-describedby="description-for-terms" required="" data-parsley-error-message="@Translate.Text("You must accept terms and conditions to continue")" data-parsley-errors-container="#description-for-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled">
+                                    @Translate.Text("I have read and understood the")
+                                    <span id="tncspan">@Html.Partial("~/Views/Feature/CommonComponents/Renderings/ModalOverlay/M39 Modal Overlay With Trigger.cshtml", modal)</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div id="description-for-terms" class="form-field__messages"></div>
+                        <input type="hidden" name="TermsConditions" value="false" />
+                    </div>
+                </fieldset>
+                <div class="form-field__button">
+                    <button class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")..." type="submit">@Translate.Text("Submit")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<style>
+    #tncspan .m39-modal {
+        display: inline;
+    }
+
+    #tncspan .m39-modal__trigger {
+        font-size: 14px;
+    }
+</style>

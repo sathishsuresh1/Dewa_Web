@@ -1,0 +1,1399 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.ClearanceCertificate.AnonymousClearanceCertificateModel
+
+@Html.Sitecore().Placeholder("j26/m26-page-title")
+
+@*<div class="grid j112-clearance-certificate" data-journey="j112-clearance-certificate-NDC"
+    data-labels='{"eid": {"label": "Emirates ID","placeholder": "Emirates ID","validation": "Please enter a valid Emirates ID","uploadLabel1": "Emirates ID (Page 1)","uploadLabel2": "Emirates ID (Page 1)"},"pp": {"label": "Passport","placeholder": "Enter Passport Number","validation": "Please enter a valid passport number","uploadLabel1": "Passport (Page 1)","uploadLabel2": "Passport (Page 2)"},"tl": {"label": "Trade License Number","placeholder": "Enter trade license number","validation": "Please enter a valid TL number","uploadLabel1": "Trade License (Page 1)","uploadLabel2": "Trade License (Page 2)"}}'>*@
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+        <p class="intro-text">
+            @Html.Sitecore().Placeholder("j26/m14-formatted-text-intro")
+        </p>
+
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form form--inline", @id = "CCNONDEWA", enctype = "multipart/form-data", @data_form = "true", @data_submit_validate = "enabled" }))
+        {
+            @*@Html.Sitecore().FormHandler("ClearanceCertificate", "RequestNonDEWA")*@
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(m => m.CertificateCost)
+            @Html.HiddenFor(m => m.VATamount)
+            @Html.HiddenFor(m => m.TaxRate)
+
+
+            <fieldset class="fieldset ">
+                <legend class="legend">@Translate.Text("Customer details")</legend>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-customer-type" class="form-field__label">
+                        @Translate.Text("clearancecertificate.customertype")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.CustomerType, Model.CustomerTypes,
+                            Translate.Text(DictionaryKeys.ClearanceCertificates.SelectCustomerType),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-customer-type",
+                                @name = "select_optgropus",
+                                @aria_describedby = "description-for-customer-type",
+                                @required = "required",
+                                @data_parsley_error_message = Translate.Text("Select Customer Type"),
+                                @data_parsley_errors_container = "#description-for-customer-type",
+                                @data_parsley_id = "14"
+                            })
+                    </span>
+                    <div id="description-for-customer-type" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.CustomerType, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-purpose" class="form-field__label">
+                        @Translate.Text("Purpose")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select aria-describedby="description-for-purpose"
+                                @*aria-required="true"*@
+                                class="form-field__input form-field__input--select form-field__input--select-full"
+                                data-parsley-error-message="@Translate.Text("Select Purpose")"
+                                data-parsley-errors-container="#description-for-purpose"
+                                data-parsley-id="8" id="form-field-purpose"
+                                name="Purpose"
+                                required="required"
+                                data-parsley-trigger="change">
+                            <option value="">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Forms.PurposeSelectionPlaceholder)</option>
+                            @foreach (DEWAXP.Foundation.Integration.DewaSvc.clearanceMaster master in Model.NonDEWAPurposes)
+                            {
+                                <option value="@master.fieldkey" data-param1="@(master.parameter1)" data-param2="@(master.parameter2)">@master.fieldvalue</option>
+                            }
+                        </select>
+                        @*@Html.DropDownListFor(x => x.Purpose, Model.Purposes.ToList(),
+                            Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Forms.PurposeSelectionPlaceholder),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-purpose",
+                                @aria_describedby = "description-for-purpose",
+                                @aria_required = "true",
+                                @required = "required",
+                                @data_parsley_error_message = Translate.Text("Select Purpose"),
+                                @data_parsley_errors_container = "#description-for-purpose",
+                                @data_parsley_id = "22"
+                            })*@
+                    </span>
+                    <div id="description-for-purpose" class="form-field__messages"></div>
+                </div>
+
+                <div class="form-field">
+                    <fieldset class="fieldset">
+                        <legend class="form-field__label">
+                            @Translate.Text("CC_LangLabel")
+                            <span class="form-field__label-optional"></span>
+                        </legend>
+                        <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="form-field-radio_languague_1"
+                                       name="Languague"
+                                       type="radio"
+                                       value="EN"
+                                       aria-label="form-field-radio_languague_1"
+                                       aria-describedby="description-for-languague"
+                                       data-parsley-errors-container="#description-for-languague"
+                                       @((Model.Languague == "EN" || string.IsNullOrWhiteSpace(Model.Languague)) ? "checked" : "")>
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("CC_eng")
+                                </span>
+                            </label>
+                        </p>
+                        <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="form-field-radio_languague_2"
+                                       name="Languague"
+                                       type="radio"
+                                       value="AR"
+                                       aria-describedby="description-for-languague"
+                                       aria-label="form-field-radio_languague_2"
+                                       data-parsley-errors-container="#description-for-languague"
+                                       @(Model.Languague == "AR" ? "checked" : "")>
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("CC_Ar")
+                                </span>
+                            </label>
+                        </p>
+                        <div id="description-for-languague" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                </div>
+                @{
+                    bool isCARequired = false;
+                    if (Model.CA_Setting != null)
+                    {
+                        isCARequired = Convert.ToBoolean(Model.CA_Setting.parameter4 == "X");
+                        if (Model.CA_Setting.parameter3 == "X")
+                        {
+                            <div class="form-field">
+                                <fieldset class="fieldset">
+                                    <legend class="form-field__label">
+                                        @Translate.Text("CC_IsAC_Available")
+                                        <span class="form-field__label-optional"></span>
+                                    </legend>
+                                    <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                                        <label>
+                                            <input class="form-field__input form-field__input--radio IsAccountNORdbtn" id="form-field-radio_isaccountno_1"
+                                                   name="IsAccountNO"
+                                                   type="radio"
+                                                   value="true"
+                                                   aria-describedby="description-for-isaccountno"
+                                                   data-parsley-errors-container="#description-for-isaccountno"
+                                                   aria-label="form-field-radio_isaccountno_1"
+                                                   @((Model.IsAccountNO == "true" || string.IsNullOrWhiteSpace(Model.Languague)) ? "checked" : "")>
+                                            <span class="form-field__fakeradio focus-enabled">
+                                                @Translate.Text("Yes")
+                                            </span>
+                                        </label>
+                                    </p>
+                                    <p class="form-field__radio form-field--6 form-field--6-mobile_full p0 mt12">
+                                        <label>
+                                            <input class="form-field__input form-field__input--radio IsAccountNORdbtn" id="form-field-radio_isaccountno_2"
+                                                   name="IsAccountNO"
+                                                   type="radio"
+                                                   value="false"
+                                                   aria-describedby="description-for-isaccountno"
+                                                   aria-label="form-field-radio_isaccountno_2"
+                                                   @(Model.IsAccountNO == "false" ? "checked" : "")
+                                                   data-parsley-errors-container="#description-for-isaccountno">
+                                            <span class="form-field__fakeradio focus-enabled">
+                                                @Translate.Text("No")
+                                            </span>
+                                        </label>
+                                    </p>
+                                    <div id="description-for-isaccountno" class="form-field__messages">
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="form-field form-field--text accountno_container">
+                                <label for="form-field-AccountNO" class="form-field__label">
+                                    @Translate.Text("CC_AC_Label")
+                                    <span class="form-field__label-required aria-only">(required)</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           id="form-field-AccountNO"
+                                           name="ContractAccountNumber"
+                                           maxlength="10" data-parsley-maxlength="10"
+                                           type="text"
+                                           value="@Model.ContractAccountNumber"
+                                           placeholder="@Translate.Text("CC_AC_placeholder")"
+                                           aria-describedby="description-for-AccountNO"
+                                           data-parsley-errors-container="#description-for-AccountNO"
+                                           required
+                                           data-parsley-required-message="@Translate.Text("CC_AC_Required")"
+                                           data-parsley-account_number=""
+                                           data-parsley-account_number-message="@Translate.Text("CC_AC_ErrorMsg")" />
+                                </span>
+                                <div id="description-for-AccountNO" class="form-field__messages">
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+
+
+
+
+                <div class="form-field form-field--text " id="divCourtReference" hidden="hidden">
+                    <label for="form-field-purpose-court" class="form-field__label">
+                        @Translate.Text(DictionaryKeys.Global.Forms.CourtLabel)
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-court" name="CourtReference"
+                               type="text"
+                               placeholder="@Translate.Text(DictionaryKeys.Global.Forms.CourtPlaceholder)"
+                               data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.CourtValidationMessage)"
+                               data-parsley-errors-container="#description-for-court"
+                               aria-describedby="description-for-court"
+                               data-parsley-id="18"
+                               data-parsley-court=""
+                               value="@Model.CourtReference">
+                    </span>
+                    <div id="description-for-court" class="form-field__messages"></div>
+                </div>
+
+                <div id="divIdType" class="form-field form-field--select form-field--select-single hidden">
+                    <label for="form-field-id-type" class="form-field__label" id="id-type" name="id-type">
+                        @Translate.Text("ID type")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.IdentityType, Model.IdentityTypes,
+                            Translate.Text(DictionaryKeys.Global.Forms.IdTypePlaceholder),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-id-type",
+                                @name = "select_optgropus",
+                                @aria_describedby = "description-for-id-type",
+                                @required = "required",
+                                @data_parsley_error_message = Translate.Text("Please enter a value"),
+                                @data_parsley_errors_container = "#description-for-id-type",
+                                @data_parsley_id = "14"
+                            })
+                    </span>
+                    <div id="description-for-id-type" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.IdentityType, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div id="divLoader" class="form-field hidden" style="text-align:center;">
+                    <img src="~/images/ajax-loader.gif" alt="" />
+                </div>
+
+                <div id="divIdentityNumber" class="form-field form-field--text hidden">
+                    <label for="form-field-eid" class="form-field__label">
+                        @Translate.Text(DictionaryKeys.Global.Forms.EmiratesIdLabel)
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-eid" name="IdentityNumber" maxlength="15"
+                               data-parsley-maxlength="15" type="text"
+                               placeholder="@Translate.Text(DictionaryKeys.Global.Forms.EmiratesIdPlaceholder)"
+                               aria-describedby="#description-for-eid"
+                               data-parsley-errors-container="#description-for-eid"
+                               required="required"
+                               data-parsley-required-message="@Translate.Text(DictionaryKeys.MoveIn.InvalidEmiratesId)"
+                               data-parsley-emiratesid=""
+                               data-parsley-emiratesid-message="@Translate.Text(DictionaryKeys.MoveIn.InvalidEmiratesId)"
+                               data-parsley-trigger="focusout"
+                               data-parsley-group="first"
+                               data-parsley-id="8"
+                               value="@Model.IdentityNumber"
+                               @*aria-required="true"*@>
+
+
+                    </span>
+                    <div id="description-for-2yjwizoqv" class="form-field__messages"></div>
+                    <div id="description-for-eid" class="form-field__messages"></div>
+
+                    <div id="eidregistration-error" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;padding-bottom:15px;">
+                    </div>
+                </div>
+
+
+
+                <div id="divOrganizationname" class="form-field form-field--text hidden">
+                    <label for="form-field-organization" class="form-field__label">
+                        @Translate.Text("CC.Organzation")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-organization"
+                               name="Organization"
+                               type="text"
+                               placeholder="@Translate.Text("CC.Enter.Organization.name")"
+                               @*aria-required="true"*@
+                               required="required"
+                               data-parsley-error-message="@Translate.Text("CC.Enter.Organization.name")"
+                               data-parsley-errors-container="#description-for-organization"
+                               aria-describedby="description-for-organization"
+                               data-parsley-id="10"
+                               value="@Model.Organization">
+                    </span>
+                    <div id="description-for-organization" class="form-field__messages"></div>
+                </div>
+
+
+                <div id="divFirstname" class="form-field form-field--text hidden">
+                    <label for="form-field-firstname" class="form-field__label">
+                        @Translate.Text("J85.CustName")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-firstname"
+                               name="FirstName"
+                               type="text"
+                               placeholder="@Translate.Text("Enter first name")"
+                               @*aria-required="true"*@
+                               required="required"
+                               data-parsley-error-message="@Translate.Text("Enter first name")"
+                               data-parsley-errors-container="#description-for-firstname"
+                               aria-describedby="description-for-firstname"
+                               data-parsley-id="10"
+                               value="@Model.FirstName">
+                    </span>
+                    <div id="description-for-firstname" class="form-field__messages"></div>
+                </div>
+
+                <div id="divLastname" class="form-field form-field--text hidden">
+                    <label for="form-field-lastname" class="form-field__label">
+                        @Translate.Text("Last name")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-lastname"
+                               name="LastName"
+                               type="text"
+                               placeholder="@Translate.Text("Enter last name")"
+                               aria-required="true"
+                               data-parsley-error-message="@Translate.Text("Enter last name")"
+                               data-parsley-errors-container="#description-for-lastname"
+                               aria-describedby="description-for-lastname"
+                               data-parsley-id="12"
+                               value="@Model.LastName">
+                    </span>
+                    <div id="description-for-lastname" class="form-field__messages"></div>
+                </div>
+
+                <div class="form-field form-field--text ">
+                    <label for="form-field-email" class="form-field__label">
+                        @Translate.Text("Email address")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-email"
+                               name="EmailAddress"
+                               type="email"
+                               placeholder="@Translate.Text("CC.Email.Placeholder")"
+                               @*aria-required="true"*@
+                               required="required"
+                               data-parsley-error-message="@Translate.Text("CC.Email.Validation")"
+                               data-parsley-errors-container="#description-for-email"
+                               aria-describedby="description-for-email"
+                               data-parsley-id="14"
+                               value="@Model.EmailAddress" />
+                    </span>
+                    <div id="description-for-email" class="form-field__messages"></div>
+                </div>
+
+                <div class="form-field form-field--text ">
+                    <label for="form-field-mobile" class="form-field__label">
+                        @Translate.Text("Mobile number")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                        <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                               id="form-field-mobile"
+                               name="MobileNumber"
+                               type="tel"
+                               placeholder="@Translate.Text("Enter UAE mobile number")"
+                               aria-describedby="description-for-mobile"
+                               required=""
+                               data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                               data-parsley-errors-container="#description-for-mobile"
+                               data-parsley-mobile_number=""
+                               data-parsley-id="16"
+                               data-parsley-type="digits"
+                               value="@Model.MobileNumber">
+                    </span>
+                    <div id="description-for-mobile" class="form-field__messages"></div>
+                </div>
+
+                <div class="form-field form-field--text ">
+                    <label for="form-field-pobox" class="form-field__label">
+                        @Translate.Text(DictionaryKeys.Global.Forms.PoBoxLabel)
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-pobox" name="PoBox"
+                               type="text"
+                               placeholder="@Translate.Text(DictionaryKeys.Global.Forms.PoBoxPlaceholder)"
+                               @*aria-required="true"*@
+                               required="required"
+                               data-parsley-error-message="@Translate.Text("CC.POBOX.Validation")"
+                               data-parsley-errors-container="#description-for-pobox"
+                               aria-describedby="description-for-pobox"
+                               data-parsley-id="18"
+                               data-parsley-pobox=""
+                               value="@Model.PoBox">
+                    </span>
+                    <div id="description-for-pobox" class="form-field__messages"></div>
+                </div>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-emirate" class="form-field__label">
+                        @Translate.Text("Emirate")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                    </label>
+                    <span id="emirate-rd-label" class="hidden"></span>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select emirate-select">
+
+                        @Html.DropDownListFor(x => x.Emirate, Model.Emirates,
+                            Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Forms.EmirateSelectionPlaceholder),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-emirate",
+                                @name = "select_optgropus",
+                                @aria_describedby = "description-for-emirate",
+                                @required = "required",
+                                @data_parsley_error_message = Translate.Text(DictionaryKeys.Global.Forms.EmirateSelectionPlaceholder),
+                                @data_parsley_errors_container = "#description-for-emirate",
+                                @data_parsley_id = "14"
+                            })
+                    </span>
+                    <div id="description-for-emirate" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Emirate, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+
+            </fieldset>
+
+            @*<fieldset class="fieldset ">
+                <legend class="legend">@Translate.Text("Payment details")</legend>
+
+                <div class="form-field form-field--text">
+                    <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-charges">
+                        @Translate.Text("Clearance certificate charges")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                        <input type="text"
+                               value="@Model.CertificateCost.ToString("N") @Translate.Text("AED")"
+                               name="charges"
+                               id="form-field-charges"
+                               readonly=""
+                               class="form-field__input form-field__input--readonly form-field__input--amount"
+                               data-parsley-id="25" />
+                    </div>
+                    <div class="form-field__messages" id="description-for-charges"></div>
+
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.TaxRate) && Model.VATamount > 0)
+                {
+                <div class="form-field form-field--text">
+                    <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-VATamount">
+                        @Translate.Text("moveout.vatamount", "{vat}").Replace("{vat}", Model.TaxRate)
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                        <input type="text"
+                               value="@Model.VATamount.ToString("N") @Translate.Text("AED")"
+                               name="VATamount"
+                               id="form-field-VATamount"
+                               readonly=""
+                               class="form-field__input form-field__input--readonly form-field__input--amount"
+                               data-parsley-id="25" />
+                    </div>
+                    <div class="form-field__messages" id="description-for-VATamount"></div>
+                </div>
+                }
+                @*<div class="form-field form-field--text">
+                        <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-TotalClearanceCharges">
+                            @Translate.Text("Total clearance certificate charges")
+                        </label>
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                            <input type="text"
+                                   value="@Model.TotalClearanceCharges.ToString("N") @Translate.Text("AED")"
+                                   name="TotalClearanceCharges"
+                                   id="form-field-TotalClearanceCharges"
+                                   readonly=""
+                                   class="form-field__input form-field__input--readonly form-field__input--amount"
+                                   data-parsley-id="25" />
+                        </div>
+                        <div class="form-field__messages" id="description-for-TotalClearanceCharges"></div>
+                    </div>*@
+
+            @*<div class="form-field form-field--text">
+                    <label class="form-field__label form-field__label--readonly form-field__label--amount" for="form-field-outstanding">
+                        @Translate.Text("Outstanding account bill")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                        <input class="form-field__input form-field__input--readonly form-field__input--amount"
+                               readonly=""
+                               id="form-field-outstanding"
+                               name="OutstandingAccountBill"
+                               type="text"
+                               value="@Model._OutstandingBill.ToString("N") @Translate.Text("AED")"
+                               aria-describedby="description-for-outstanding"
+                               data-parsley-trigger="focusout" />
+                    </div>
+                    <div class="form-field__messages" id="description-for-outstanding"></div>
+                </div>*@
+
+
+            @*<div class="form-field form-field--text">
+                    <label class="form-field__label form-field__label--readonly form-field__label--total" for="form-field-total">
+                        @Translate.Text("Total to pay")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly form-field__input-wrapper--amount">
+                        <input type="text"
+                               value="@Model.TotalClearanceCharges.ToString("N") @Translate.Text("AED")"
+                               name="total"
+                               id="form-field-total"
+                               readonly=""
+                               class="form-field__input form-field__input--readonly form-field__input--amount"
+                               data-parsley-id="25" />
+                    </div>
+                    <div class="form-field__messages" id="description-for-total"></div>
+                </div>*@
+            @*<div class="form-field__messages">
+                        <p class="form-field__description form-field__description--emphasize">
+                            @Html.Sitecore().Placeholder("j26/m14-formatted-text-note")
+                        </p>
+                    </div>
+                </fieldset>*@
+
+            <fieldset id="divCommercial" class="fieldset hidden">
+                <legend class="legend">@Translate.Text("clearancecertificate.documentuploads")</legend>
+
+                @*<div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+                                <img data-uploader-image="eid-copy" alt="" role="presentation" aria-hidden="true" class="form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" />
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label class="form-field__label" for="form-field-eid-copy">
+                                    <strong class="form-field__label-description">@Translate.Text("Trade License") (1/2)</strong>
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <div>
+                                    <label>
+                                        <input class="form-field__input form-field__input--upload"
+                                               id="form-field-eid-copy"
+                                               name="uploads"
+                                               type="file"
+                                               aria-describedby="description-for-eid-copy"
+                                               required="required"
+                                               data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.DocumentUploadValidationMessage)"
+                                               data-parsley-errors-container="#errors-for-eid-copy"
+                                               data-uploader-field="eid-copy"
+                                               data-accepts='@AttachmentValidation.acceptedFileTypesClientSide'
+                                               data-size="@AttachmentValidation.maximumFileSize"
+                                               accept="image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                               data-parsley-id="24" />
+                                        <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="eid-copy"></p>
+                                <p>
+                                    <button data-uploader-remove="eid-copy" class="button button--text button--remove hidden">@Translate.Text("Remove")</button>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-field__messages" id="description-for-eid-copy">
+                            <div id="errors-for-eid-copy"></div>
+                            <p class="form-field__description">
+                                @Html.Sitecore().Placeholder("j26/m14-formatted-text-max-file-size")
+                            </p>
+                        </div>
+                    </div>*@
+
+                <div class="form-field form-field--upload form-field-tradelicense-uploaddiv">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img data-uploader-image="tradelicense" alt="" role="presentation" aria-hidden="true" class="form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" />
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label class="form-field__label" for="form-field-tradelicense">
+                                <strong class="form-field__label-description">@Translate.Text("clearancecertificate.tradelicense")</strong>
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <div>
+                                <label>
+                                    <input class="form-field__input form-field__input--upload"
+                                           id="form-field-tradelicense"
+                                           name="uploads"
+                                           type="file"
+                                           aria-describedby="description-for-tradelicense"
+                                           data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.DocumentUploadValidationMessage)"
+                                           data-parsley-errors-container="#errors-for-tradelicense"
+                                           data-uploader-field="tradelicense"
+                                           data-accepts='@AttachmentValidation.acceptedFileTypesClientSide'
+                                           data-size="@AttachmentValidation.maximumFileSize"
+                                           accept="image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                           data-parsley-id="24" />
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="tradelicense"></p>
+                            <p>
+                                <button data-uploader-remove="tradelicense" class="button button--text button--remove hidden">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-field__messages" id="description-for-tradelicense">
+                        <div id="errors-for-tradelicense"></div>
+                        <p class="form-field__description">
+                            @Html.Sitecore().Placeholder("j26/m14-formatted-text-max-file-size")
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-field form-field--upload form-field-letterdiv">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img data-uploader-image="letter" alt="" role="presentation" aria-hidden="true" class="form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" />
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label class="form-field__label" for="form-field-trade-letter">
+                                <strong class="form-field__label-description form-field-letterlbl" data-label1="@Translate.Text("clearancecertificate.supportingdocument")" data-label2="@Translate.Text("Court Supporting Document")">@Translate.Text("clearancecertificate.supportingdocument")</strong>
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <div>
+                                <label>
+                                    <input class="form-field__input form-field__input--upload"
+                                           id="form-field-trade-letter"
+                                           name="uploads"
+                                           type="file"
+                                           aria-describedby="description-for-trade-letter"
+                                           data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.DocumentUploadValidationMessage)"
+                                           data-parsley-errors-container="#errors-for-trade-letter"
+                                           data-uploader-field="letter"
+                                           data-accepts='@AttachmentValidation.acceptedFileTypesClientSide'
+                                           data-size="@AttachmentValidation.maximumFileSize"
+                                           accept="image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                           data-parsley-id="24" />
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="letter"></p>
+                            <p>
+                                <button data-uploader-remove="letter" class="button button--text button--remove hidden">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field__messages" id="description-for-trade-letter">
+                        <div id="errors-for-trade-letter"></div>
+                        <p class="form-field__description">
+                            @Html.Sitecore().Placeholder("j26/m14-formatted-text-max-file-size")
+                        </p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset id="divIndividual" class="fieldset hidden">
+                <legend class="legend">@Translate.Text("clearancecertificate.documentuploads")</legend>
+
+                <div class="form-field form-field--upload form-field-eid-copy-uploaddiv">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img data-uploader-image="eid-copy" alt="" role="presentation" aria-hidden="true" class="form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" />
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label class="form-field__label" for="form-field-eid-copy">
+                                <strong id="lblIndividualDoc1" class="form-field__label-description">@Translate.Text("clearancecertificate.emiratesidpage1")</strong>
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <div>
+                                <label>
+                                    <input class="form-field__input form-field__input--upload"
+                                           id="form-field-eid-copy"
+                                           name="uploads"
+                                           type="file"
+                                           aria-describedby="description-for-eid-copy"
+                                           data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.DocumentUploadValidationMessage)"
+                                           data-parsley-errors-container="#errors-for-eid-copy"
+                                           data-uploader-field="eid-copy"
+                                           data-accepts='@AttachmentValidation.acceptedFileTypesClientSide'
+                                           data-size="@AttachmentValidation.maximumFileSize"
+                                           accept="image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                           data-parsley-id="24" />
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="eid-copy"></p>
+                            <p>
+                                <button data-uploader-remove="eid-copy" class="button button--text button--remove hidden">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-field__messages" id="description-for-eid-copy">
+                        <div id="errors-for-eid-copy"></div>
+                        <p class="form-field__description">
+                            @Html.Sitecore().Placeholder("j26/m14-formatted-text-max-file-size")
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-field form-field--upload form-field-eid-copy-2-uploaddiv">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img data-uploader-image="eid-copy-2" alt="" role="presentation" aria-hidden="true" class="form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" />
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label class="form-field__label" for="form-field-eid-copy-2">
+                                <strong id="lblIndividualDoc2" class="form-field__label-description">@Translate.Text("clearancecertificate.emiratesidpage2")</strong>
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <div>
+                                <label>
+                                    <input class="form-field__input form-field__input--upload"
+                                           id="form-field-eid-copy-2"
+                                           name="uploads"
+                                           type="file"
+                                           aria-describedby="description-for-eid-copy-2"
+                                           data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.DocumentUploadValidationMessage)"
+                                           data-parsley-errors-container="#errors-for-eid-copy-2"
+                                           data-uploader-field="eid-copy-2"
+                                           data-accepts='@AttachmentValidation.acceptedFileTypesClientSide'
+                                           data-size="@AttachmentValidation.maximumFileSize"
+                                           accept="image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                           data-parsley-id="24" />
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="tradelicense"></p>
+                            <p>
+                                <button data-uploader-remove="eid-copy-2" class="button button--text button--remove hidden">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-field__messages" id="description-for-eid-copy-2">
+                        <div id="errors-for-eid-copy-2"></div>
+                        <p class="form-field__description">
+                            @Html.Sitecore().Placeholder("j26/m14-formatted-text-max-file-size")
+                        </p>
+                    </div>
+                </div>
+
+                <div class="form-field form-field--upload form-field-letterdiv">
+                    <div class="form-field__input-wrapper">
+                        <div class="form-field__preview-wrapper">
+                            <img data-uploader-image="letter" alt="" role="presentation" aria-hidden="true" class="form-field__preview" src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" />
+                        </div>
+                        <div class="form-field__uploader-details">
+                            <label class="form-field__label" for="form-field-letter">
+                                <strong class="form-field__label-description form-field-letterlbl" data-label1="@Translate.Text("clearancecertificate.supportingdocument")" data-label2="@Translate.Text("Court Supporting Document")">@Translate.Text("clearancecertificate.supportingdocument")</strong>
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <div>
+                                <label>
+                                    <input class="form-field__input form-field__input--upload"
+                                           id="form-field-letter"
+                                           name="uploads"
+                                           type="file"
+                                           aria-describedby="description-for-letter"
+                                           data-parsley-error-message="@Translate.Text(DictionaryKeys.Global.Forms.DocumentUploadValidationMessage)"
+                                           data-parsley-errors-container="#errors-for-letter"
+                                           data-uploader-field="letter"
+                                           data-accepts='@AttachmentValidation.acceptedFileTypesClientSide'
+                                           data-size="@AttachmentValidation.maximumFileSize"
+                                           accept="image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                           data-parsley-id="24" />
+                                    <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                </label>
+                            </div>
+                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                            <p class="form-field__input--upload-filename" data-uploader-filename="letter"></p>
+                            <p>
+                                <button data-uploader-remove="letter" class="button button--text button--remove hidden">@Translate.Text("Remove")</button>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-field__messages" id="description-for-letter">
+                        <div id="errors-for-letter"></div>
+                        <p class="form-field__description">
+                            @Html.Sitecore().Placeholder("j26/m14-formatted-text-max-file-size")
+                        </p>
+                    </div>
+                </div>
+            </fieldset>
+
+            <br />
+            <div class="form-field form-field--toggles inline-terms" id="divTermsConditions">
+                <div class="form-field__checkbox  last">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                        <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("updateiban.Iagree")</span>
+                        @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                    </label>
+                </div>
+
+                <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                <input type="hidden" name="AgreedToPayment" value="false" />
+            </div>
+
+            <div class="form-field__button">
+                <button class="button button--primary" id="clearancecertificatebutton" type="submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("J87 Submit")</button>
+
+                @*<button type="submit" id="continue-button" name="continue-button" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveout.pay") @Model.TotalClearanceCharges.ToString("N") @Translate.Text("AED")</button>*@
+            </div>
+        }
+    </div>
+</div>
+@*</div>*@
+
+<script type="text/javascript">
+    var _purpose = '@Model.Purpose';
+    docReady(function () {
+
+
+        require(['parsley'], function () {
+
+
+
+        var labelSets = {
+            eid: {
+                label: '@Translate.Text(DictionaryKeys.Global.Forms.EmiratesIdLabel)',
+                placeholder: '@Translate.Text(DictionaryKeys.Global.Forms.EmiratesIdPlaceholder)',
+                validation: '@Translate.Text(DictionaryKeys.Global.Forms.EmiratesIdValidationMessage)',
+                uploadLabel1: '@Translate.Text("clearancecertificate.emiratesidpage1")',
+                uploadLabel2: '@Translate.Text("clearancecertificate.emiratesidpage2")'
+            },
+            pp: {
+                label: '@Translate.Text(DictionaryKeys.Global.Forms.PassportLabel)',
+                placeholder: '@Translate.Text(DictionaryKeys.Global.Forms.PassportPlaceholder)',
+                validation: '@Translate.Text(DictionaryKeys.Global.Forms.PassportValidationMessage)',
+                uploadLabel1: '@Translate.Text("clearancecertificate.passportpage1")',
+                uploadLabel2: '@Translate.Text("clearancecertificate.passportpage2")'
+            },
+            tl: {
+                label: '@Translate.Text(DictionaryKeys.Global.Forms.TradeLicenseNumberLabel)',
+                placeholder: '@Translate.Text(DictionaryKeys.Global.Forms.TradeLicenseNumberPlaceholder)',
+                validation: '@Translate.Text(DictionaryKeys.Global.Forms.TradeLicenseNumberPlaceholder)'
+            }
+        };
+
+        jQuery('select[name="IdentityType"]').on('change', function () {
+            var selectedOption = jQuery(this).val();
+            IdTypeselect(selectedOption);
+        });
+        if ("@Model.IdentityType" != "") {
+            IdTypeselect('@Model.IdentityType');
+        }
+        function IdTypeselect(selectedOption) {
+            var $input = jQuery('input[name="IdentityNumber"]');
+            var $label = $input.closest('.form-field').find('label');
+            var $divIdentityNumber = jQuery('#divIdentityNumber');
+
+            $input.removeClass('form-field__input--error parsley-error');
+            $input.removeAttr('aria-invalid');
+
+            jQuery('#description-for-eid').empty();
+            ResetAttachements();
+            if (selectedOption === 'TN' || selectedOption === 'TO') {
+                $divIdentityNumber.show();
+                $input.attr('placeholder', labelSets.tl.placeholder);
+                $input.attr('data-parsley-error-message', labelSets.tl.validation);
+                $input.removeAttr('data-parsley-emiratesid');
+                $input.val('');
+                $label.text(labelSets.tl.label);
+
+                jQuery('#form-field-eid-copy').removeAttr('required');
+                jQuery('#form-field-eid-copy-2').removeAttr('required');
+                jQuery('#form-field-letter').removeAttr('required');
+
+                jQuery('#form-field-tradelicense').attr('required', 'required');
+                jQuery('#form-field-trade-letter').attr('required', 'required');
+                return;
+            }
+            else if (selectedOption === 'PP') {
+                $divIdentityNumber.show();
+                $input.attr('placeholder', labelSets.pp.placeholder);
+                $input.attr('data-parsley-error-message', labelSets.pp.validation);
+                $input.removeAttr('data-parsley-emiratesid');
+                $input.val('');
+                $label.text(labelSets.pp.label);
+
+                jQuery('#lblIndividualDoc1').text(labelSets.pp.uploadLabel1);
+                jQuery('#lblIndividualDoc2').text(labelSets.pp.uploadLabel2);
+
+                jQuery('#form-field-tradelicense').removeAttr('required');
+                jQuery('#form-field-trade-letter').removeAttr('required');
+
+                jQuery('#form-field-eid-copy').attr('required', 'required');
+                jQuery('#form-field-eid-copy-2').attr('required', 'required');
+                jQuery('#form-field-letter').attr('required', 'required');
+
+                return;
+            }
+            else if (selectedOption == 'ED') {
+                $divIdentityNumber.show();
+                $input.attr('placeholder', labelSets.eid.placeholder);
+                $input.attr('data-parsley-error-message', labelSets.eid.validation);
+                $input.attr('data-parsley-emiratesid', '');
+                $input.val('');
+                $label.text(labelSets.eid.label);
+
+                jQuery('#lblIndividualDoc1').text(labelSets.eid.uploadLabel1);
+                jQuery('#lblIndividualDoc2').text(labelSets.eid.uploadLabel2);
+
+                jQuery('#form-field-tradelicense').removeAttr('required');
+                jQuery('#form-field-trade-letter').removeAttr('required');
+
+                jQuery('#form-field-eid-copy').attr('required', 'required');
+                jQuery('#form-field-eid-copy-2').attr('required', 'required');
+                jQuery('#form-field-letter').attr('required', 'required');
+            }
+            else {
+                $divIdentityNumber.hide();
+            }
+        }
+
+        jQuery('select[name="CustomerType"]').on('change', function () {
+            var selectedOption = jQuery(this).prop('selectedIndex');
+            CustomerTypeselect(selectedOption);
+        });
+        var selectedcustomerindex = "";
+        if ("@Model.CustomerType" != "") {
+            $(function () {
+                $("#form-field-customer-type").each(function (i) {
+                  //  alert($(this).text() + " : " + $(this).val());
+                    if ($(this).val() == '@Model.CustomerType') {
+                        selectedcustomerindex = $(this).prop('selectedIndex');
+                        CustomerTypeselect(selectedcustomerindex);
+                    }
+                });
+            });
+        }
+        function CustomerTypeselect(selectedOption) {
+            jQuery('select[name="Purpose"]').val('');
+            if (selectedOption == 1) {
+                jQuery('#divIdType').show();
+                jQuery('#form-field-id-type option[value="ED"]').show().attr('disabled', false);
+                jQuery('#form-field-id-type option[value="PP"]').show().attr('disabled', false);
+                jQuery('#form-field-id-type option[value="TN"]').hide().attr('disabled', true);
+                jQuery('#form-field-id-type option[value="TO"]').hide().attr('disabled', true);
+
+                //jQuery('select[name="IdentityType"]').children('option[value^="ED"]').show();
+                //jQuery('select[name="IdentityType"]').children('option[value^="PP"]').show();
+                //jQuery('select[name="IdentityType"]').children('option[value^="TN"]').hide();
+                //jQuery('select[name="IdentityType"]').children('option[value^="TO"]').hide();
+                if (selectedcustomerindex != "" && selectedcustomerindex == selectedOption && "@Model.IdentityType" != "") {
+                    jQuery('select[name="IdentityType"]').val('@Model.IdentityType');
+                    jQuery('select[name="IdentityType"]').trigger('change');
+                    jQuery('#form-field-eid').val('@Model.IdentityNumber');
+                }
+                else {
+                    jQuery('select[name="IdentityType"]').val('ED');
+                    jQuery('select[name="IdentityType"]').trigger('change');
+                }
+
+                jQuery('#divCommercial').hide();
+                jQuery('#divIndividual').show();
+                jQuery("#divOrganizationname").hide();
+                jQuery("#divFirstname").show();
+                jQuery("#divLastname").hide();
+
+                $('#divIdType label').text('@Translate.Text("ID type")');
+
+                jQuery('#form-field-purpose option[data-param1="X"]').show();
+                 jQuery('#form-field-purpose option[data-param1=""]').hide();
+
+            }
+            else if (selectedOption == 2) {
+                jQuery('#divIdType').show();
+
+                jQuery('#form-field-id-type option[value="ED"]').hide().attr('disabled', true);
+                jQuery('#form-field-id-type option[value="PP"]').hide().attr('disabled', true);
+                jQuery('#form-field-id-type option[value="TN"]').show().attr('disabled', false);
+                jQuery('#form-field-id-type option[value="TO"]').show().attr('disabled', false);
+                //jQuery('select[name="IdentityType"]').children('option[value^="ED"]').hide();
+                //jQuery('select[name="IdentityType"]').children('option[value^="PP"]').hide();
+                //jQuery('select[name="IdentityType"]').children('option[value^="TN"]').show();
+                //jQuery('select[name="IdentityType"]').children('option[value^="TO"]').show();
+                if (selectedcustomerindex != "" && selectedcustomerindex == selectedOption && "@Model.IdentityType" != "")  {
+                    jQuery('select[name="IdentityType"]').val('@Model.IdentityType');
+                    jQuery('select[name="IdentityType"]').trigger('change');
+                    jQuery('#form-field-eid').val('@Model.IdentityNumber');
+                }
+                else {
+                    jQuery('select[name="IdentityType"]').val('TN');
+                    jQuery('select[name="IdentityType"]').val('TO');
+                    jQuery('select[name="IdentityType"]').trigger('change');
+                }
+
+
+                jQuery('#divCommercial').show();
+                jQuery('#divIndividual').hide();
+                jQuery("#divOrganizationname").show();
+                jQuery("#divFirstname").hide();
+                jQuery("#divLastname").hide();
+
+                $('#divIdType label').text('@Translate.Text("CC.Trade.Licence.Authority")');
+
+                jQuery('#form-field-purpose option[data-param2="X"]').show();
+                 jQuery('#form-field-purpose option[data-param2=""]').hide();
+
+            }
+            else {
+                jQuery('#divIdType').hide();
+                jQuery('select[name="IdentityType"]').val('');
+                jQuery('select[name="IdentityType"]').trigger('change');
+
+                jQuery('#divCommercial').hide();
+                jQuery('#divIndividual').hide();
+                jQuery("#divOrganizationname").hide();
+                jQuery("#divFirstname").show();
+                jQuery("#divLastname").show();
+            }
+        }
+
+        jQuery('select[name="Purpose"]').on('change', function () {
+            var selectedOption = jQuery(this).val();
+            purposeselect(selectedOption);
+        });
+        if ("@Model.Purpose" != "") {
+            purposeselect('@Model.Purpose');
+        }
+            function purposeselect(selectedOption) {
+
+                var attachLabel = jQuery(".form-field-letterlbl").data("label" + selectedOption);
+                jQuery('.form-field-letterlbl').html(attachLabel);
+                jQuery('.form-field-letterdiv').hide();
+
+            if (selectedOption == '2') {
+                jQuery('#divCourtReference').show();
+                jQuery('#form-field-court').attr('required', 'required');
+                jQuery('#form-field-court').attr('aria-required', true);
+
+
+                jQuery('.form-field-letterdiv').show();
+                jQuery('#form-field-trade-letter').attr('required', 'required');
+                jQuery('#form-field-trade-letter').attr('aria-required', true);
+
+                jQuery('#form-field-letter').attr('required', 'required');
+                jQuery('#form-field-letter').attr('aria-required', true);
+
+            }
+            else {
+                jQuery('#divCourtReference').hide();
+                jQuery('#form-field-court').removeAttr('required');
+                jQuery('#form-field-court').removeAttr('aria-required');
+
+                jQuery('#form-field-trade-letter').removeAttr('required');
+                jQuery('#form-field-letter').removeAttr('required');
+            }
+            if (selectedOption != '') {
+                jQuery('input[name="IdentityNumber"]').trigger('blur');
+            }
+        }
+
+
+
+        //AddForgeryToken = function(data) {
+        //    data.__RequestVerificationToken = $('#CCNONDEWA input[name=__RequestVerificationToken]').val();
+        //    return data;
+        //};
+
+        jQuery('#form-field-pobox').on('keyup', function (e) {
+            var myLength = $("#form-field-pobox").val().length;
+            if (myLength == 1) //To check only when entering first character.
+            {
+                if ($(this).val() === '0') {
+                    $(this).val('');
+                }
+            }
+        });
+        jQuery('#form-field-mobile').on('keyup', function (e) {
+            //console.log('mobile number changed...' + e.keyCode + ' ' + $("#form-field-mobile").val().length);
+            if ((e.keyCode == 8 || e.keyCode == 46) && ($("#form-field-mobile").val().length < 9) && !($("#form-field-mobile").attr("type") == "tel")) {
+                $("#form-field-mobile").attr("type", "tel");
+                $("#form-field-mobile").attr("data-parsley-type", "digits");
+                $("#form-field-mobile").attr('data-parsley-mobile_number', "");
+            }
+        });
+
+        jQuery(".IsAccountNORdbtn").on("change", function () {
+
+            var isAccountShow = jQuery(this).val() == 'true';
+            jQuery("#form-field-AccountNO").val("");
+            jQuery('#form-field-AccountNO').parsley().reset();
+            if (isAccountShow) {
+                jQuery(".accountno_container").show();
+                jQuery("#form-field-AccountNO").attr("required","");
+            } else {
+                jQuery(".accountno_container").hide();
+                jQuery("#form-field-AccountNO").removeAttr("required");
+            }
+
+            })
+
+            setTimeout(function () {
+                if (_purpose != '' && _purpose != undefined) {
+                    jQuery('#form-field-purpose').val(_purpose);
+                }
+            }, 100)
+
+
+            jQuery("#form-field-mobile").on("keyup", function (e) {
+                if ((e.keyCode == 8 || e.keyCode == 46) && (jQuery(this).val().length < 9) && !(jQuery(this).attr("type") == "tel")) {
+                    SetOrRemoveValidation("uaeno", false);
+                }
+            });
+
+            jQuery("#form-field-email").on("keyup", function (e) {
+                if ((e.keyCode == 8 || e.keyCode == 46)) {
+                    SetOrRemoveValidation("email", false);
+                }
+            });
+
+        });
+    });
+
+    jQuery('input[name="IdentityNumber"]').on('change', function () {
+
+        jQuery('input[name="IdentityNumber"]').parsley().validate("first");
+        //console.log(jQuery('input[name = "IdentityNumber"]').parsley().isValid());
+        jQuery("#divLastname").hide();
+        if (jQuery('input[name = "IdentityNumber"]').parsley().isValid()) {
+            if (jQuery(this).val() && jQuery('select[name="IdentityType"]').val()) {
+
+
+                var identityType = jQuery('select[name="IdentityType"]').val();
+                var identityNumber = jQuery(this).val();
+                var purpose = jQuery('select[name="Purpose"] option:selected').val();
+                var CourtReference = jQuery('input[name="CourtReference"]').val();
+                var ContractAccountNumber = jQuery('input[name="ContractAccountNumber"]').val();
+                var selectedOption = jQuery('#form-field-customer-type').find(":selected").index();
+                if (jQuery('select[name="Purpose"] option:selected').val() == "") {
+                    jQuery('select[name="Purpose"]').trigger('change');
+                }
+                else {
+                    var url = "/api/ClearanceCertificateV2/GetIdentityDetails";
+                    jQuery.ajax({
+                        url: url,
+                        traditional: true,
+                        type: "POST",
+                        data: AddForgeryToken({
+                            identityType: identityType,
+                            identityNumber: identityNumber,
+                            purpose: purpose,
+                            courtReference: CourtReference,
+                            ca: ContractAccountNumber
+                        }, "CCNONDEWA"),
+                        beforeSend: function () {
+                            jQuery('#divLoader').show();
+                            jQuery('#clearancecertificatebutton').removeAttr("disabled");
+                            jQuery('#clearancecertificatebutton').show();
+                            jQuery('#divIndividual').show();
+                            SetOrRemoveValidation("uaeno", false);
+                            SetOrRemoveValidation("email", false);
+                            jQuery("#emirate-rd-label").hide();
+                            jQuery('.emirate-select').show();
+                        },
+                        complete: function (response) {
+                            jQuery('#divLoader').hide();
+                            if (selectedOption == 1) {
+                                jQuery("#divFirstname").show();
+                            } else if (selectedOption == 2) {
+                                jQuery("#divOrganizationname").show();
+                            }
+
+                        },
+                        success: function (response) {
+
+                            //console.log(response);
+                            if (response.return) {
+                                if (response.return.description == "Success") {
+                                    var info = response.return;
+                                    jQuery('#eidregistration-error').hide();
+
+
+
+                                    jQuery("#divFirstname").hide();
+                                    jQuery("#divOrganizationname").hide();
+                                    if (selectedOption == 1) {
+                                        if (info.firstName) {
+                                            jQuery('#form-field-firstname').val(info.firstName);
+                                            jQuery('#form-field-firstname').attr("readonly", true);
+                                        } else {
+                                            jQuery('#form-field-firstname').removeAttr("readonly");
+                                        }
+
+
+
+                                        if (info.lastName) {
+                                            jQuery('#form-field-lastname').val(info.lastName);
+                                            jQuery('#form-field-lastname').attr("readonly", true);
+                                            jQuery("#divLastname").show();
+                                        }
+
+
+                                    }
+                                    else if (selectedOption == 2) {
+
+                                        if (info.firstName) {
+                                            jQuery('#form-field-organization').val(info.firstName);
+                                            jQuery('#form-field-organization').attr("readonly", true);
+                                        } else {
+                                            jQuery('#form-field-organization').removeAttr("readonly");
+                                        }
+
+
+                                    }
+
+                                    if (info.email) {
+                                        jQuery('#form-field-email').val(info.email);
+                                        SetOrRemoveValidation("email", true);
+                                    }
+
+
+
+                                    if (info.mobile) {
+                                        var mobileNum = info.mobile;
+                                        //console.log('here in mobile');
+                                        mobileNum = mobileNum.indexOf('0') == 0 ? mobileNum.substring(1) : mobileNum;
+                                        jQuery('#form-field-mobile').val(mobileNum);
+
+                                        SetOrRemoveValidation("uaeno", true);
+                                    }
+
+                                    if (info.poBox) {
+                                        jQuery('#form-field-pobox').val(info.poBox);
+                                        jQuery('#form-field-pobox').attr("readonly", true);
+                                    }
+
+                                    jQuery('#form-field-emirate').removeAttr("readonly");
+                                    if (info.region) {
+                                        jQuery('#form-field-emirate').val(info.region);
+                                        jQuery('#form-field-emirate').attr("readonly", true);
+
+                                        if (info.region == "DXB") {
+                                            jQuery("#emirate-rd-label").show();
+                                            jQuery("#emirate-rd-label").html($("#form-field-emirate option:selected").text());
+                                            jQuery('.emirate-select').hide();
+                                        }
+                                    }
+
+                                    if (info.firstName) {
+                                        jQuery('#form-field-tradelicense').removeAttr('required');
+                                        jQuery('.form-field-tradelicense-uploaddiv').hide();
+                                        jQuery('#form-field-trade-letter').removeAttr('required');
+
+                                        jQuery('#form-field-eid-copy').removeAttr('required');
+                                        jQuery('.form-field-eid-copy-uploaddiv').hide();
+                                        jQuery('#form-field-eid-copy-2').removeAttr('required');
+                                        jQuery('.form-field-eid-copy-2-uploaddiv').hide();
+                                        jQuery('#form-field-letter').removeAttr('required');
+                                        jQuery('#divIndividual').hide();
+                                    }
+                                    jQuery("#CCNONDEWA").parsley().validate();
+                                }
+                                else if (response.return.description.indexOf('account exists') !== -1) {
+                                    //console.log('account exists');
+                                    jQuery('#eidregistration-error').hide();
+                                    var message = response.return.description;
+                                    jQuery.ajax({
+                                        url: '/api/sitecore/ClearanceCertificate/RedirectNonDewaToLogin',
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        cache: false,
+                                        traditional: true,
+                                        data: AddForgeryToken({
+                                            message: message
+                                        }, "CCNONDEWA"),
+                                        success: function (resp) {
+                                            if (resp) {
+                                                window.location.href = resp;
+                                            }
+                                        },
+                                        error: function (resp) {
+                                            //console.log('error ' + resp);
+                                        }
+                                    });
+                                }
+                                else {
+                                    jQuery('#eidregistration-error').html(response.return.description);
+                                    jQuery('#eidregistration-error').show();
+                                    jQuery('#form-field-firstname').val('');
+                                    jQuery('#form-field-lastname').val('');
+                                    jQuery('#form-field-pobox').val('');
+                                    jQuery('#form-field-firstname').attr("readonly", false);
+                                    jQuery('#form-field-lastname').attr("readonly", false);
+                                    jQuery('#form-field-pobox').attr("readonly", false);
+                                }
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.status == 429) {
+                                jQuery('#eidregistration-error').html(jqXHR.statusText);
+                                jQuery('#eidregistration-error').show();
+                                jQuery('#clearancecertificatebutton').attr("disabled", true);
+                                jQuery('#clearancecertificatebutton').hide();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+
+    });
+
+    function ResetAttachements() {
+
+        jQuery('#form-field-tradelicense').attr('required', 'required');
+        jQuery('.form-field-tradelicense-uploaddiv').show();
+        jQuery('#form-field-trade-letter').attr('required', 'required');
+
+        jQuery('#form-field-eid-copy').attr('required', 'required');
+        jQuery('.form-field-eid-copy-uploaddiv').show();
+        jQuery('#form-field-eid-copy-2').attr('required', 'required');
+        jQuery('.form-field-eid-copy-2-uploaddiv').show();
+        jQuery('#form-field-letter').attr('required', 'required');
+        jQuery('#divIndividual').show();
+    }
+
+
+
+    function SetOrRemoveValidation(elementType, isDisabled) {
+
+        if (!(isDisabled == true || isDisabled == false)) {
+            return false;
+        }
+        var email = jQuery("#form-field-email");
+        var mobile = jQuery("#form-field-mobile");
+
+
+        if (elementType == "email") {
+            if (isDisabled) {
+                if (email.val() != "" && email.val().indexOf('*') != -1) {
+                    email.removeAttr("data-parsley-email");
+                    email.attr("type", "text");
+                }
+
+            } else {
+				if (email.val() != "" && email.val().indexOf('*') != -1) {
+					email.val('');
+				}
+                email.attr('data-parsley-email', "");
+                email.attr("type", "email");
+            }
+        }
+        if (elementType == "uaeno") {
+            if (isDisabled) {
+                if (mobile.val() != "" && mobile.val().indexOf('*') != -1) {
+                    mobile.attr("type", "text");
+                    mobile.removeAttr("data-parsley-type");
+                    mobile.removeAttr('data-parsley-mobile_number');
+                }
+            } else {
+				if (mobile.val() != "" && mobile.val().indexOf('*') != -1) {
+				    mobile.val('');
+				}
+                mobile.attr("type", "tel");
+                mobile.attr("data-parsley-type", "digits");
+                mobile.attr('data-parsley-mobile_number', "");
+            }
+        }
+    }
+</script>

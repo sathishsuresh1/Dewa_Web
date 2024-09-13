@@ -1,0 +1,522 @@
+﻿@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr"; }
+
+<div class="box box--1">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j31/page-title")
+    </div>
+</div>
+
+@Html.Sitecore().Placeholder("j31/tabs")
+
+<!-- .account selector -->
+<form id="form-account-selector" action="#" method="POST" form-skipvalidation="true">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Sitecore().Placeholder("j31/account-selector")
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <p class="form-field__checkbox ">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="compareNeighbourhood" type="checkbox" value="true">
+                        <span class="form-field__fakecheckbox focus-enabled" id="fakecheckbox">@Translate.Text("Compare to neighbourhood")</span>
+                        <input type="hidden" name="compareNeighbourhood" value="false" />
+                    </label>
+                </p>
+            </div>
+            <a name="Electricity"></a>
+        </div>
+    </div>
+</form>
+<!-- ./account selector -->
+<!-- .electricity consumption graph -->
+<div class="box box--5">
+    <div class="grid">
+        <div class="grid__row">
+            <div id="electricity-consumption-graph-placeholder" class="grid__column grid__column--12 graph-placeholder ajax-placeholder"></div>
+        </div>
+    </div>
+</div>
+<!-- ./electricity consumption graph -->
+<!-- .carbon footprint -->
+<div class="grid">
+    <div class="grid__row">
+        <div id="carbon-footprint-placeholder" class="grid__column grid__column--12 ajax-placeholder"></div>
+        <a name="Water"></a>
+    </div>
+</div>
+<!-- ./carbon footprint -->
+<!-- .water consumption graph -->
+<div class="box box--5">
+    <div class="grid">
+        <div class="grid__row">
+            <div id="water-consumption-graph-placeholder" class="grid__column grid__column--12 graph-placeholder ajax-placeholder"></div>
+        </div>
+    </div>
+</div>
+<!-- ./water consumption graph -->
+<!-- .teaser set -->
+<div class="grid">
+    @Html.Sitecore().Placeholder("j31/teaser")
+</div>
+<!-- ./teaser set -->
+<!-- .templates -->
+<script id="consumption-graph-template" type="text/x-handlebars-template">
+    <div class="m29-chart" data-component="m29-chart" data-chart-type="consumption" dir="{{dir}}" data-x-axis-categories="{{xAxis}}" data-series='[{{series}}]' data-y-axis-title-text="{{xAxisTitle}}" data-tooltip-value-suffix="{{unit}}" data-step-s="2" data-usagefor="{{xAxisTitle}}">
+        <div class="chart-header">
+            {{#if hasData}}
+            <h3 class="chart-header__title {{headingClass}}">{{utilityLabel}}</h3>
+            {{else}}
+            <h3 class="chart-header__title {{headingClass}}">{{utilityLabel}}: {{NoUsageMessage}}</h3>
+            {{/if}}
+        </div>
+
+        {{#if hasData}}
+        <div class="m29-chart__key">
+            <div class="m29-chart__label">{{xAxisTitle}}</div>
+            <div class="m29-chart__legend">
+                {{#each legend}}
+                <div class="m29-chart__legend--item" data-color="{{color}}">
+                    <span class="m29-chart__legend--item-icon"></span>
+                    <span class="m29-chart__legend--item-text">{{name}}</span>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="m29-chart__container" data-chart-container="true"></div>
+        <p><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TARIFFS)" class="button button--text button--next">@Translate.Text("bands based on tariff link")</a></p>
+        {{/if}}
+    </div>
+</script>
+
+<script id="carbon-footprint-template" type="text/x-handlebars-template">
+    <div class="footprint">
+        <div class="chart-header">
+            <h3 class="chart-header__title chart-header__title--footprint">@Translate.Text("carbon footprint indicator title")</h3>
+        </div>
+        <p class="footprint__result">
+            <span class="footprint__key {{indicatorClass}}">
+                <span class="aria-only">{{indicatorText}}:</span>
+            </span>
+            {{footprint}} @Translate.Text("Kg") @Translate.Text("co2 emissions label")
+        </p>
+
+        <p class="footprint__summary">
+            @Translate.Text("carbon footprint indicator blurb")
+        </p>
+
+        <ul class="footprint__keys">
+            {{#bands}}
+            <li>
+                <span class="footprint__key {{cssClass}}"><span class="aria-only">{{description}}:</span></span>
+                <span class="footprint__key-value">{{comparer}} {{ceilingF}}</span>
+            </li>
+            {{/bands}}
+        </ul>
+    </div>
+</script>
+<!-- ./templates -->
+
+<script type="text/javascript">
+
+    //var isIndicator = "@Session["X"]";
+    var isIndicator = "@Request.QueryString["IsBI"]";
+    var behaviourIndicator = null;
+
+     @{Session["X"] = "";};
+
+
+
+    if (isIndicator == "Y") {
+        jQuery("input[name='compareNeighbourhood']").prop('checked', true);
+        behaviourIndicator = "X";
+    }
+    else {
+        behaviourIndicator = "";
+    }
+
+    docReady(function () {
+
+
+        function handleAccountSelection(e) {
+
+
+            e.preventDefault();
+
+            jQuery('.ajax-placeholder').empty();
+
+            var accountNumber = jQuery("input[name='SelectedAccountNumber']:checked").val(); //"2016274298"; //jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+            //var accountNumber = jQuery('[ data-form ]').find('input[name="SelectedAccountNumber"]:checked').val();
+
+            var cat = jQuery("input[name='SelectedAccountNumber']:checked").attr("data-acc-cat");
+
+            var flag = cat.substr(0, 1);
+
+            if (flag == "Y")
+            {
+                behaviourIndicator = "X";
+
+            } else {
+                behaviourIndicator = "";
+
+            }
+
+
+            if (!accountNumber) return false;
+
+            jQuery('a[href*="?a="]').each(function () {
+                var $a = jQuery(this);
+                var $href = $a.attr('href');
+                var $newHref = $href.replace(/(\?a=\d*)/g, '?a={accnum}'.replace('{accnum}', accountNumber));
+
+                $a.attr('href', $newHref);
+            });
+
+
+
+            if (jQuery('input[name="compareNeighbourhood"]').prop("checked")) {
+
+                //alert(jQuery('input[name="compareNeighbourhood"]').prop("checked"));
+
+
+
+                return drawNeighbourhoodComparison(accountNumber,behaviourIndicator);
+            }
+            return drawYearlyComparison(accountNumber);
+        };
+
+        var drawYearlyComparison = function (accountNumber) {
+            jQuery.ajax("/api/consumptionstatistics/" + accountNumber, {
+                beforeSend: function () {
+                    jQuery('.ajax-placeholder').empty();
+
+                    window.attachSpinner('#electricity-consumption-graph-placeholder');
+                    window.attachSpinner('#water-consumption-graph-placeholder');
+                    window.attachSpinner('#carbon-footprint-placeholder', { minHeight: 165 });
+                },
+                complete: function () {
+                    window.detachSpinner('#electricity-consumption-graph-placeholder');
+                    window.detachSpinner('#water-consumption-graph-placeholder');
+                    window.detachSpinner('#carbon-footprint-placeholder');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success:function(response) {
+                    renderConsumptionGraphs(response.series, false);
+                    renderCarbonRating(response.carbonFootprint);
+                }
+            });
+            return false;
+        };
+
+        var drawNeighbourhoodComparison = function (accountNumber, behaviourIndicator) {
+            //var premNumber = jQuery('form[id="form-account-selector"]').find('input[name="SelectedAccountNumber"]:checked').data('data-legacy-acc-number');
+
+            var premNumber = jQuery("input[name='SelectedAccountNumber']:checked").attr("data-legacy-acc-number");
+
+
+
+            jQuery.ajax("/api/neighbourhoodconsumptionstatistics/get/", {
+                beforeSend: function () {
+                    jQuery('.ajax-placeholder').empty();
+
+                    window.attachSpinner('#electricity-consumption-graph-placeholder');
+                    window.attachSpinner('#water-consumption-graph-placeholder');
+                    window.attachSpinner('#carbon-footprint-placeholder', { minHeight: 165 });
+                },
+                complete: function () {
+                    window.detachSpinner('#electricity-consumption-graph-placeholder');
+                    window.detachSpinner('#water-consumption-graph-placeholder');
+                    window.detachSpinner('#carbon-footprint-placeholder');
+                },
+                dataType: 'json',
+                data: {
+                    AccountNumber: accountNumber,
+                    PremiseNumber: premNumber,
+                    BehaviourIndicator: behaviourIndicator
+                },
+                method: 'GET',
+                success:function(response) {
+                    renderConsumptionGraphs(response.series, true);
+                    //renderCarbonRating(0);
+                }
+            });
+            return false;
+        }
+
+        var renderConsumptionGraphs = function (series, isNeighbourConsumption) {
+            var markup = jQuery('#consumption-graph-template').html();
+            var template = Handlebars.compile(markup);
+
+            var groupedSeries = _.chain(series)
+                .groupBy(function (s) {
+                    return s.Utility;
+                })
+                .map(function (group, key) {
+                    return {
+                        Utility: parseInt(key),
+                        Series: group
+                    };
+                }).value();
+
+
+            for (var i = 0; i < groupedSeries.length; i++) {
+                var seriesGroup = groupedSeries[i];
+                var placeholder = seriesGroup.Utility === 0 ? "#electricity-consumption-graph-placeholder" : "#water-consumption-graph-placeholder";
+                var context = buildGraphContext(seriesGroup, isNeighbourConsumption);
+
+                var rendering = template(context);
+                jQuery(placeholder).html(rendering);
+
+                window.initComponents(placeholder.substring(1));
+            }
+        };
+
+        var renderCarbonRating = function (footprint) {
+            var bands = getCarbonEmissionBands();
+            var markup = jQuery('#carbon-footprint-template').html();
+            var template = Handlebars.compile(markup);
+
+            var context = {
+                bands: bands,
+                footprint: footprint,
+                indicatorClass: function () {
+                    var match = _.find(bands, function (b) {
+                        return footprint < b.ceiling;
+                    });
+
+                    return (match || _.last(bands)).cssClass;
+                },
+                indicatorText: function () {
+                    var match = _.find(bands, function (b) {
+                        return footprint < b.ceiling;
+                    });
+
+                    return (match || _.last(bands)).description;
+                }
+            }
+
+            var rendering = template(context);
+            jQuery('#carbon-footprint-placeholder').html(rendering);
+        };
+
+        var buildGraphContext = function (seriesGroup, isNeighbourConsumption) {
+            var orderedSeries = seriesGroup.Series.reverse();
+
+            return {
+                legend: function () {
+                    var i = 0;
+                    var colours = getColoursForUtility(seriesGroup.Utility);
+
+                    return _.map(orderedSeries, function (s) {
+                        var selectedColour = colours[i];
+                        if (i++ >= colours.length) {
+                            i = 0;
+                        }
+                        if (isNeighbourConsumption && i == 1) {
+                            return { name: "@Translate.Text(DictionaryKeys.Global.Account.ConsumptionGraph.NeighbourhoodComparison)", color: selectedColour };
+                        } else {
+                            return { name: s.Legend, color: selectedColour };
+                        }
+
+                    });
+                },
+                series: function () {
+                    var legend = this.legend();
+
+                    var i = 0;
+                    var _this = this;
+
+                    var points = _.map(orderedSeries, function (s) {
+                        var data = {
+                            data: _this.getAlignedDataPoints(_.map(s.DataPoints, _.clone)),
+                            name: legend[i].name,
+                            color: legend[i].color
+                        };
+                        i++;
+
+                        return JSON.stringify(data);
+                    });
+
+                    return points.join(", ");
+                },
+                getAlignedDataPoints: function (dataPoints) {
+                    var range = this.getCategories(dataPoints);
+                    for (var i = 0; i < range.length; i++) {
+                        if (dataPoints.length < (i + 1) || dataPoints[i].Month !== range[i]) {
+                            dataPoints.splice(i, 0, {
+                                Month: range[i],
+                                Value: null
+                            });
+                        }
+                    }
+                    return _.pluck(dataPoints, 'Value');
+                },
+                hasData: function () {
+                    if (orderedSeries != null && orderedSeries.length > 0) {
+                        return _.some(orderedSeries, function (s) {
+                            return s.DataPoints.length > 0;
+                        });
+                    }
+                    return false;
+                },
+                headingClass: function () {
+                    return seriesGroup.Utility === 0 ? "chart-header__title--electricity" : "chart-header__title--water";
+                },
+                utility: function () {
+                    return seriesGroup.Utility === 0 ? '@Translate.Text("Electricity")' : '@Translate.Text("Water")';
+                },
+                utilityLabel: function () {
+                    return seriesGroup.Utility === 0 ? '@Translate.Text(DictionaryKeys.Consumption.ElectricityConsumption)' : '@Translate.Text(DictionaryKeys.Consumption.WaterComsumption)';
+                },
+                unit: function () {
+                    return seriesGroup.Utility === 0 ? '@Translate.Text("Kilowatt Hour unit")' : '@Translate.Text("Imperial Gallon unit")';
+                },
+                UsageFor: function () {
+                    return '@Translate.Text(DictionaryKeys.Global.Account.ConsumptionGraph.UsageFor)';
+                },
+                latestConsumptionFigure: function () {
+                    var last = _.chain(orderedSeries)
+                        .pluck('DataPoints')
+                        .flatten()
+                        .sortBy(function (dp) {
+                            return dp.Year + '/' + dp.Month;
+                        })
+                        .last()
+                        .value();
+
+                    if (!last) return numeral(0).format('0,0');
+
+                    return numeral(last.Value).format('0,0');
+                },
+                latestConsumptionPeriod: function () {
+                    var last = _.chain(orderedSeries)
+                        .pluck('DataPoints')
+                        .flatten()
+                        .sortBy(function (dp) {
+                            return dp.Year + '/' + dp.Month;
+                        })
+                        .last()
+                        .value();
+
+                    if (!last) return '';
+
+                    var s = last.Month + "/" + last.Year;
+
+                    return moment(s, 'MM/YYYY').format('MMMM YYYY');
+                },
+                xAxis: function () {
+                    var range = this.getCategories();
+
+                    return _.map(range, function (m) {
+                        return moment(m, 'M').format('MMM').toUpperCase();
+                    }).join(",");
+                },
+                xAxisTitle: function () {
+                    var fstring = '@Translate.Text("consumption.graph.xaxis.label", "{utility}", "{unit}")';
+                    var unit = this.unit();
+                    var utility = this.utility();
+                    fstring = fstring.replace("{utility}", utility);
+
+                    return fstring.replace("{unit}", unit);
+                },
+                getCategories: function () {
+                    var series = _.chain(orderedSeries)
+						.pluck('DataPoints')
+						.sortBy(function (dp) {
+						    return dp.Year + '/' + dp.Month;
+						}).value();
+
+                    var monthSets = _.chain(series)
+						.map(function (s) {
+						    return _.pluck(s, 'Month');
+						})
+						.sortBy(function (s) { return _.first(s); })
+						.value();
+
+                    var start = 100;
+                    for (var i = 0; i < monthSets.length; i++) {
+                        var f = _.first(monthSets[i]);
+                        if (f < start) {
+                            start = f;
+                        }
+                    }
+
+                    var merged = _.extend.apply(_, monthSets);
+
+                    var j = 0;
+                    while (merged[0] > start) {
+                        merged.splice(j, 0, start);
+                        start++;
+                    }
+                    if (isNeighbourConsumption)
+                    {
+                        return merged;
+                    } else
+                        {
+                        return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                    }
+                },
+                dir: '@direction',
+		    NoUsageMessage: isNeighbourConsumption ? '@Translate.Text(DictionaryKeys.Global.Account.ConsumptionGraph.AverageConsumptionNotAvailableArea )' : '@Translate.Text("no usage statistics notification")'
+            };
+        };
+
+        var getColoursForUtility = function (util) {
+            if (util === 0) {
+                return ["#B00020", "#34B233", "#008542"];
+            }
+            return ["#B00020", "#34B233", "#008542"];
+        };
+        var getCarbonEmissionBands = function () {
+            return [
+                {
+                    ceiling: 500,
+                    ceilingF: function () {
+                        return numeral(500).format('0,0');
+                    },
+                    comparer: '@Translate.Text("carbon band up to comparer label")',
+                    cssClass: 'footprint__key--1',
+                    description: '@Translate.Text("low footprint label")'
+                }, {
+                    ceiling: 1250,
+                    ceilingF: function () {
+                        return numeral(1250).format('0,0');
+                    },
+                    comparer: '@Translate.Text("carbon band up to comparer label")',
+                    cssClass: 'footprint__key--2',
+                    description: '@Translate.Text("average footprint label")'
+                }, {
+                    ceiling: 2000,
+                    ceilingF: function () {
+                        return numeral(2000).format('0,0');
+                    },
+                    comparer: '@Translate.Text("carbon band up to comparer label")',
+                    cssClass: 'footprint__key--3',
+                    description: '@Translate.Text("high footprint label")'
+                }, {
+                    ceiling: 2000,
+                    ceilingF: function () {
+                        return numeral(2000).format('0,0');
+                    },
+                    comparer: '@Translate.Text("carbon band above comparer label")',
+                    cssClass: 'footprint__key--4',
+                    description: '@Translate.Text("very high footprint label")'
+                }
+            ];
+        };
+
+        // initialization
+        jQuery('#form-account-selector').submit(handleAccountSelection);
+        jQuery('input[name="compareNeighbourhood"]').change(handleAccountSelection);
+        jQuery('#form-account-selector').submit();
+    });
+</script>

@@ -1,0 +1,99 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Integration.Responses
+@using DEWAXP.Foundation.Content.Models.RequestTempConnection
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.Payment.PaymentCompletionModel
+
+@{
+    var tempConnectionDetails = (TrackTempConnectionRequestItem)ViewBag.TempConnectionDetails;
+}
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+
+}
+<!--_TemporaryConnectionConfirmation.cshtml-->
+<div class="grid">
+    <div class="grid__row noprint">
+        <div class="grid__column grid__column--12">
+            <div class="m26-page-title">
+                <div class="m26-page-title__links"></div>
+                <h2 class="text__page-title">@Sitecore.Globalization.Translate.Text("Request Temporary Connection")</h2>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Succeeded)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                    <div class="m40-status-message__title icon-success">@Sitecore.Globalization.Translate.Text("Submission Successful")</div>
+                    <div class="m40-status-message__text">@Sitecore.Globalization.Translate.Text("Your payment has been completed")</div>
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Sitecore.Globalization.Translate.Text("Print this page")</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="m42-keyvalue success-page">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("payment date and time label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+
+                        @*<dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("receipt id label")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.ReceiptIdentifiers</dd>*@
+
+                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("deg transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("dewa transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                        @if (!string.IsNullOrEmpty(Model.BusinessPartners))
+                        {
+                            <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("business partner label")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.BusinessPartners</dd>
+                        }
+
+                        <dt class="m42-keyvalue__key--stacked noprint">@Sitecore.Globalization.Translate.Text("Event type")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details noprint">@tempConnectionDetails.EventType</dd>
+
+                        <dt class="m42-keyvalue__key--stacked noprint">@Sitecore.Globalization.Translate.Text("Event Start Date")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details noprint">@tempConnectionDetails.EventStartDate</dd>
+
+                        <dt class="m42-keyvalue__key--stacked noprint">@Sitecore.Globalization.Translate.Text("Event End Date")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details noprint">@tempConnectionDetails.EventEndDate</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Sitecore.Globalization.Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Sitecore.Globalization.Translate.Text("AED")">@(tempConnectionDetails.Amount+Model.SuqiaAmount)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    }
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+            @Html.Sitecore().Placeholder("content-transreciept-placeholder")
+            <div class="form-field__button noprint">
+                <a href="/" class="button button--primary button--next">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Home)</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--_TemporaryConnectionConfirmation.cshtml-->

@@ -1,0 +1,987 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.EV.Models.EVCharger
+@model DEWAXP.Feature.EV.Models.EVCharger.ApplyEVCard
+
+@{
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ltr" : "rtl";
+    var isreadonly = Model.processtFlag == "R" ? true : false;
+
+    if (string.IsNullOrWhiteSpace(Model.CarDetailJs))
+    {
+        Model.CarDetailJs = "[]";
+    }
+    string isCata = (Model.CarDetailJs == "[]" ? "false" : "true");
+}
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+<div class="grid__row mb24">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+        @* @Html.Sitecore().Placeholder("j18/m38-step-tracker")*@
+        <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="4" data-current-step="1">
+            <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="EV Login Card">
+            </div>
+        </div>
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+@*@Html.Sitecore().Placeholder("j87/m41-tab-box")*@
+<div class="grid j109-ev-charger j109-ev-charger" data-journey="j109-ev-charger">
+    <div class="grid__row mb24">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "applyEVCardForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+            {
+
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(x => x.CarDetailJs)
+                @Html.HiddenFor(m => m.RegistrationStage)
+                <div class="grid__row mb24">
+                    <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                        <div class="form-field j109-ev-charger-radiobuttons">
+                            <fieldset class="fieldset">
+                                <legend class="legend-color">.</legend>
+                                <p class="form-field__radio">
+                                    <label for="rdbPersonal">
+                                        @Html.RadioButtonFor(m => m.AccountType,(int)AccountType.Personal, new
+                                   {
+                                       @class = "form-field__input form-field__input--radio",
+                                       @aria_describedby = "description-for-radio_1_1",
+                                       @id = "rdbPersonal",
+                                       @name= "accounttype"
+                                   }.AddHtmlAttrItem("disabled","",isreadonly&&Model.AccountType!="1"))
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            <span class="verification--key">@Translate.Text("EV.Personal Account")</span>
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label for="rdbBusiness">
+                                        @Html.RadioButtonFor(m => m.AccountType, (int)AccountType.Business, new
+                                   {
+                                       @class = "form-field__input form-field__input--radio",
+                                       @aria_describedby = "description-for-radio_1_2",
+                                       @id = "rdbBusiness",
+                                       @name = "accounttype"
+                                   }.AddHtmlAttrItem("disabled", "", isreadonly && Model.AccountType != "2"))
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            <span class="verification--key">@Translate.Text("EV.Business Account")</span>
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio">
+                                    <label class="rdbGovernment">
+                                        @Html.RadioButtonFor(m => m.AccountType, (int)AccountType.Government, new
+                                   {
+                                       @class = "form-field__input form-field__input--radio",
+                                       @aria_describedby = "description-for-radio_1_2",
+                                       @id = "rdbGovernment",
+                                       @name = "accounttype"
+                                   }.AddHtmlAttrItem("disabled", "", isreadonly && Model.AccountType != "3"))
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            <span class="verification--key">@Translate.Text("EV.Government Account")</span>
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-43tapsgan" class="form-field__messages">
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid__row mb24">
+
+                    <div class="grid__column grid__column--12 grid__column--form">
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-businesspartner" class="form-field__label">@Translate.Text("EV.SelectBPNumberLabel") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.BusinessPartnerDetails, (IEnumerable<SelectListItem>)ViewBag.BusinessPartnerNum,
+                         new
+                         {
+                             @class = "form-field__input form-field__input--select form-field__input--select-full",
+                             @id = "form-field-businesspartner",
+                             @aria_describedby = "description-for-businesspartner",
+                             @required = "",
+                             @data_parsley_error_message = @Translate.Text("EV.errorMessage_BPNumber"),
+                             @data_parsley_errors_container = "#description-for-businesspartner",
+                             @data_parsley_id = "15",
+                             @data_postedvalue= Model.BusinessPartnerDetails
+                         })
+                            </span>
+                            <div id="description-for-businesspartner" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.BusinessPartnerNumber, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-location" class="form-field__label">@Translate.Text("EV Where Your Car Registered")</label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full " id="form-field-location" @(isreadonly ? "disabled" : "") name="CarRegisteredIn" aria-describedby="description-for-zg6ai090n" data-parsley-errors-container="#description-for-zg6ai090n" data-parsley-trigger="change" data-parsley-id="28">
+                                    <option value="1" @(string.IsNullOrEmpty(Model.CarRegisteredIn) ? "selected=\"selected\"" : "")>@Translate.Text("EV In UAE")</option>
+                                    <option value="2" @(!string.IsNullOrEmpty(Model.CarRegisteredIn) && Model.CarRegisteredIn == "2" ? "selected=\"selected\"" : "")>@Translate.Text("EV Outside UAE")</option>
+                                </select>
+                            </span>
+
+                            <div id="description-for-zg6ai090n" class="form-field__messages">
+                                <p class="form-field__description"></p>
+                            </div>
+                        </div>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-emirates" class="form-field__label">
+                                <span id="spEmirate"> @Translate.Text("EV Choose Emirate")</span>
+                                <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(model => model.EmirateOrCountry, Model.Emirates, Translate.Text("EV Select Emirate"), new
+                           {
+                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                               @id = "form-field-emirates",
+                               @required = "required",
+                               @data_parsley_required_message = Translate.Text("EV Select Emirate"),
+                               @data_parsley_errors_container = "#description-for-w1mfbetd3",
+                               @aria_describedby = "description-for-w1mfbetd3",
+                               @data_postedvalue = Model.EmirateOrCountry
+                           }.AddHtmlAttrItem("disabled", "", isreadonly))
+
+                            </span>
+                            <div id="description-for-w1mfbetd3" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.EmirateOrCountry, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text relative" id="dvTCNumber">
+                            <label for="form-field-TCNumber" class="form-field__label">
+                                @Translate.Text("EV.TCNumber")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--tc-number">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-TCNumber"
+                                       type="text"
+                                       placeholder="@Translate.Text("EV.TCNumber")"
+                                       aria-describedby="description-for-TCNumber"
+                                       required=""
+                                       name="TCNumber"
+                                       value="@Model.TCNumber"
+                                       maxlength="15"
+                                       data-postedvalue="@Model.TCNumber"
+                                       data-parsley-maxlength="15"
+                                       data-parsley-error-message="@Translate.Text("EV.errorMessage_TCNumber")"
+                                       data-parsley-errors-container="#description-for-TCNumber"
+                                       data-parsley-type="digits"
+                                       onkeyup="this.value=removeSpaces(this.value);" />
+                            </span>
+                            <div id="description-for-TCNumber" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.TCNumber)
+                            </div>
+                            <div class="onlyBussiness">
+                                <div class="form-field form-field--text">
+                                    <label for="form-field-0jcgbrpgj" class="form-field__label">hidden</label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text"
+                                               id="form-field-0jcgbrpgj"
+                                               name="hidden"
+                                               type="text"
+                                               placeholder="hidden"
+                                               aria-describedby="description-for-0jcgbrpgj"
+                                               data-parsley-errors-container="#description-for-0jcgbrpgj" />
+                                    </span>
+
+                                    <a class="button button--text add-plate-btn green" data-recall="@Html.Raw(isCata)" data-table='@Html.Raw(Model.CarDetailJs)'  data-message="@Translate.Text("EV.Maximum20")"
+                                        data-max="20">@Translate.Text("Ev Add Plate No Text")</a>
+                                    <div id="description-for-0jcgbrpgj" class="form-field__messages">
+                                    </div>
+                                </div>
+                                @*<input type="hidden" value="@Model.CarPlateNumberList" name="CarPlateNumberList" id="CarPlateNumberList" />*@
+                                @Html.HiddenFor(m => m.CarPlateNumberList)
+                                @Html.HiddenFor(m => m.CarPlateCodeList)
+                                @Html.HiddenFor(m => m.CarCategoryList)
+                            </div>
+                        </div>
+
+                        <div class="onlyIndividual">
+                            <div class="form-field form-field--select form-field--select-single onlydxb" id="divEVcategorycode">
+                                <label for="form-field-EVcategorycode" class="form-field__label">
+                                    @Translate.Text("EV.Category Code")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.CategoryCode, (List<SelectListItem>
+    )ViewBag.CategoryCode, Translate.Text("EV.SelectCategoryCode"),
+    new
+    {
+    @class = "form-field__input form-field__input--select form-field__input--select-full evcat",
+    @id = "form-field-EVcategorycode",
+    @aria_describedby = "description-for-EVcategorycode",
+    @required = "",
+    @data_parsley_error_message = @Translate.Text("EVcategorycodeErrorMessage"),
+    @data_parsley_errors_container = "#description-for-EVcategorycode",
+    @data_parsley_id = "15",
+    @data_postedvalue = Model.CategoryCode
+    })
+                                </span>
+                                <div id="description-for-EVcategorycode" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.CategoryCode, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+                            <div class="form-field form-field--select form-field--select-single onlydxb" id="divEVplatecode">
+                                <label for="form-field-EVplatecode" class="form-field__label">
+                                    @Translate.Text("EV.Plate Code")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.PlateCode, (List<SelectListItem>
+    )ViewBag.PlateCode, Translate.Text("EV.Select PlateCode"),
+    new
+    {
+    @class = "form-field__input form-field__input--select form-field__input--select-full evcode",
+    @id = "form-field-EVplatecode",
+    @aria_describedby = "description-for-EVplatecode",
+    @required = "",
+    @data_parsley_error_message = @Translate.Text("EVplatecodeErrorMessage"),
+    @data_parsley_errors_container = "#description-for-EVplatecode",
+    @data_parsley_id = "15",
+    @data_postedvalue = Model.PlateCode
+    })
+                                </span>
+                                <div id="description-for-EVplatecode" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.PlateCode, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text " id="divPlateNumber">
+                                <label for="form-field-PlateNumber" class="form-field__label">
+                                    @Translate.Text("EV.Car Plate Number")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("Required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--plate-number">
+                                    <input class="form-field__input form-field__input--text ct_platenumber"
+                                           id="form-field-PlateNumber"
+                                           name="PlateNumber"
+                                           type="text"
+                                           data-parsley-type="number"
+                                           placeholder="@Translate.Text("EV.Car Plate Number")"
+                                           aria-describedby="description-for-PlateNumber"
+                                           required=""
+                                           value="@Model.PlateNumber"
+                                           maxlength="20"
+                                           data-parsley-maxlength="20"
+                                           data-postedvalue="@Model.PlateNumber"
+                                           data-parsley-error-message="@Translate.Text("EV.errorMessage_PlateNumber")"
+                                           data-parsley-errors-container="#description-for-PlateNumber"
+                                           onkeyup="this.value=removeSpaces(this.value);"/>
+                                </span>
+                                <div id="description-for-PlateNumber" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.PlateNumber)
+                                </div>
+                            </div>
+                        </div>
+                        <fieldset class="fieldset" id="divIdDocument" style="display:none;">
+                            <legend class="legend" id="legendDocument">@Translate.Text("EV.Vehicle Registration Card")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="AttachedDocument">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.AttachedDocument,
+                                            new
+                                            {
+                                                type = "file",
+                                                @class = "form-field__input form-field__input--upload",
+                                                @id = "form-field-AttachedDocument",
+                                                @name = @Translate.Text("upload"),
+                                                @aria_describedby = "description-for-AttachedDocument",
+                                                @required = "",
+                                                @data_parsley_error_message = @Translate.Text("EV Vehicle Registration Card File Error Message"),
+                                                @data_parsley_required_message = @Translate.Text("EV Vehicle Registration Card File Error Message"),
+                                                @data_parsley_errors_container = "#errors-for-AttachedDocument",
+                                                @data_uploader_field = "AttachedDocument",
+                                                @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf",
+                                                @data_parsley_id = "16",
+                                                @data_size = "2048000"
+                                            })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="AttachedDocument"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="AttachedDocument">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-AttachedDocument" class="form-field__messages">
+                                    <div id="errors-for-AttachedDocument">
+                                        @Html.ValidationMessageFor(x => x.AttachedDocument, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.EVCard.EVMaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset" id="divGLetter" style="display:none;">
+                            <legend class="legend" id="legendDocument1">@Translate.Text("EV.Guarantee Letter")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="AttachedDocument">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.AttachedDocument2,
+                                            new
+                                            {
+                                                type = "file",
+                                                @class = "form-field__input form-field__input--upload",
+                                                @id = "form-field-GAttachedDocument",
+                                                //@name = @Translate.Text("upload"),
+                                                @aria_describedby = "description-for-GAttachedDocument",
+                                                @required = "",
+                                                @data_parsley_error_message = @Translate.Text("EV Vehicle Registration Card File Error Message"),
+                                                @data_parsley_required_message = @Translate.Text("EV Vehicle Registration Card File Error Message"),
+                                                @data_parsley_errors_container = "#errors-for-AttachedDocument",
+                                                @data_uploader_field = "AttachedDocument",
+                                                @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf",
+                                                @data_parsley_id = "16"
+                                            })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="AttachedDocument"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="AttachedDocument">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-GAttachedDocument" class="form-field__messages">
+                                    <div id="errors-for-GAttachedDocument">
+                                        @Html.ValidationMessageFor(x => x.AttachedDocument, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.EVCard.EVMaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="form-field__button">
+                            <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Continue")</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="grid__row mb24">
+        <div class="grid__column grid__column--12">
+            <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+                <button data-trigger="true" class="m39-modal__trigger j109-ev-charger-model__trigger" type="button" id="_rtnn76ncb_trigger" aria-controls="_rtnn76ncb_content"></button>
+                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_rtnn76ncb_content" aria-labelledby="_rtnn76ncb_trigger">
+                    <div class="m39-modal__dialog">
+                        <div class="m39-modal__header">
+                            <div class="m39-modal__title">@Translate.Text("EV.Add Car Details")</div>
+                            <div class="m39-modal__subtitle mt0">@Translate.Text("EV Add Car Details Subtitle")</div>
+                            <button data-close="true" class="m39-modal__button--close" id="_rtnn76ncb_close" aria-controls="_rtnn76ncb_content">@Translate.Text("EV Close")</button>
+                        </div>
+
+                        <div class="m39-modal__content add-plate-form" style="bottom:5px;">
+                            <div class="grid__column--content" style="text-align:initial">
+                                <form class="form" data-form="true" novalidate="">
+
+                                    <div class="ModalCtrlHolder" style="padding-bottom:14px">
+                                        <div class="form-field form-field--select form-field--select-single">
+                                            <label for="form-field-categorycodelist" class="form-field__label"> @Translate.Text("EV.Category Code") <span class="form-field__label-required aria-only">@Translate.Text("required")</span></label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                @Html.DropDownListFor(model => model.CategoryCode,(List<SelectListItem>) ViewBag.Categories, Translate.Text("EV Select categorycode"), new
+                                           {
+                                               @class = "form-field__input form-field__input--select form-field__input--select-full table__input",
+                                               @id = "form-field-categorycodelist",
+                                               @name= "form-field-categorycodelist",
+                                               @required = "required",
+                                               @data_title = Translate.Text("EV.Category Code"),
+                                               @data_title_pos = "2",
+                                               @data_delabel = "category",
+                                               @data_parsley_required_message = Translate.Text("EVcategorycodeErrorMessage"),
+                                               @data_parsley_errors_container = "#description-for-categorycodelist",
+                                               @aria_describedby = "description-for-categorycodelist",
+                                           }.AddHtmlAttrItem("disabled", "", isreadonly))
+                                            </span>
+                                            <div id="description-for-categorycodelist" class="form-field__messages"></div>
+                                        </div>
+                                        <div class="form-field form-field--select form-field--select-single">
+                                            <label for="form-field-platecodeList" class="form-field__label"> @Translate.Text("EV.Plate Code") <span class="form-field__label-required aria-only">@Translate.Text("required")</span></label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                @Html.DropDownListFor(model => model.PlateCode, (List<SelectListItem>)ViewBag.PlateCodes, Translate.Text("EV Select PlateCode"), new
+                                           {
+                                               @class = "form-field__input form-field__input--select form-field__input--select-full table__input ",
+                                               @id = "form-field-platecodeList",
+                                               @name = "form-field-platecodeList",
+                                               @required = "required",
+                                               @data_title = Translate.Text("EV.Plate Code"),
+                                               @data_title_pos = "3",
+                                               @data_delabel = "code",
+                                               @data_parsley_required_message = @Translate.Text("EVplatecodeErrorMessage"),
+                                               @data_parsley_errors_container = "#description-for-platecodelist",
+                                               @aria_describedby = "description-for-platecode",
+                                           }.AddHtmlAttrItem("disabled", "", isreadonly))
+                                            </span>
+                                            <div id="description-for-platecodelist" class="form-field__messages"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-field form-field--text ">
+                                        <label for="form-field-CarPlateNumberList" class="form-field__label">
+                                            @Translate.Text("EV.Car Plate Number")
+                                            <span class="form-field__label-required aria-only">@Translate.Text("required")</span>
+                                        </label><span class="form-field__input-wrapper ">
+
+                                            <input class="form-field__input table__input ct_platenumber @(isreadonly?"form-field__input--readonly":"form-field__input--text")"
+                                                   id="form-field-CarPlateNumberList"
+                                                   name="modal-CarPlateNumberList"
+                                                   data-title=" @Translate.Text("EV.Car Plate Number")"
+                                                   data-title-pos="1"
+                                                   data-delabel="platenum"
+                                                   data-parsley-type="number"
+                                                   type="text" aria-describedby="description-for-CarPlateNumberList"
+                                                   data-parsley-errors-container="#description-for-CarPlateNumberList"
+                                                   required="required" maxlength="20" data-parsley-maxlength="20"
+                                                   data-parsley-error-message="@Translate.Text("EV.errorMessage_PlateNumber")"
+                                                   data-parsley-trigger="focusout"
+                                                   data-parsley-id="20" value="@Model.CarPlateNumber" @(isreadonly ? "readonly" : "")
+                                                   placeholder="@Translate.Text("EV.Car Plate Number")"
+                                                   onkeyup="this.value=removeSpaces(this.value);">
+                                        </span>
+                                        <div class="form-field__messages re-error" style="display:none;color:#B00020;">@Translate.Text("Ev_PlateNo_Exit_Message")</div>
+                                        <div id="description-for-CarPlateNumberList" class="form-field__messages">
+                                        </div>
+                                    </div>
+
+                                    <div class="j109-ev-charger-action" data-title="@Translate.Text("EV Action")">
+                                        <span class="j109-ev-charger-actionBtn"><a class="button button--text edit">@Translate.Text("EV.Edit")</a></span>
+                                        <span class="j109-ev-charger-actionBtn"><a class="button button--text delete">@Translate.Text("EV.Delete")</a></span>
+                                    </div>
+                                </form>
+                            </div>
+                                <button class="button button--primary button--next add-plate-done">@Translate.Text("EV.Add")</button>
+                            </div>
+                        </div>
+                </div>
+                <div class="m39-modal__overlay"> </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    var emrt = '#form-field-emirates';
+    var bp = '#form-field-businesspartner';
+    var loc = '#form-field-location';
+    var acc_type = 'input[type="radio"][name="AccountType"]';
+    var att_div = '#divIdDocument';
+    var attg_div = '#divGLetter';
+    var tcn_div = '#dvTCNumber';
+    var onlydxb = ".onlydxb";
+    var catCode = "#form-field-EVcategorycode";
+    var plateCode = "#form-field-EVplatecode";
+    var onlyIndividual = ".onlyIndividual";
+    var onlyBusiness = ".onlyBussiness";
+    var firstLoad = true;
+    var firstBpLoad = true;
+    docReady(function () {
+
+        AccTypeChange($(acc_type + ":checked").val());
+
+        
+
+        var selectedloc = $(loc).val();
+        if (selectedloc === "1") { $(tcn_div).val('').show(); }
+        else {
+            $(tcn_div).hide();
+            var childSelect = $(emrt);
+            if (selectedloc.trim() === '') return;
+            populateChild(selectedloc, childSelect, '@Url.Action("GetCountries")');
+
+        }
+
+        $(acc_type).change(function () {
+            $(".error-html").remove();
+            jQuery(".j109-ev-charger-actionBtn .delete").click();
+            AccTypeChange($(acc_type + ':checked').val());
+        });
+
+        $(loc).change(function () {
+            var selectedVal = $(this).val();
+
+            var childSelect = $(emrt);
+            if (selectedVal.trim() === '') return;
+            populateChild(selectedVal, childSelect, '@Url.Action("GetCountries")');
+
+            if (selectedVal == "1") {
+                if ($(acc_type + ":checked").val() != "3") {
+                    $(att_div).hide();
+                }
+                $(tcn_div).val('').show();
+                $("#divEVcategorycode").show();
+                $("#divEVplatecode").show();
+                $("#form-field-TCNumber").prop("required", "required");
+            }
+            else {
+                $(tcn_div).hide();
+                $("#divEVcategorycode").hide();
+                $("#divEVplatecode").hide();
+                $(att_div).val('').show();
+                $("#form-field-TCNumber").removeProp("required");
+            }
+
+        });
+
+        $(emrt).change(function () {
+            OnEmrtChange();
+        });
+
+        // category change event for Personal
+        $(catCode).change(function () {
+            GetPlateCode($(this).val(), plateCode);
+        });
+
+        // category change event for business and government
+        $("#form-field-categorycodelist").change(function () {
+            GetPlateCode($(this).val(), "#form-field-platecodeList");
+        });
+
+        require(['parsley'], function () {
+            jQuery("#applyEVCardForm").submit(function (e) {
+                e.preventDefault();
+                $("#CarDetailJs").val(JSON.stringify(CreateJsonFromTable()));
+                UpdateFromValByAccType($(acc_type + ":checked").val());
+                var isValid = jQuery(this).parsley().isValid();
+                if (isValid) {
+                    $(loc).prop("disabled", false);
+                    $(emrt).prop("disabled", false);
+                    $(this).submit();
+                }
+                return isValid;
+            });
+        });
+
+        $(".add-plate-btn").click(function () {
+            $(".table__input").val("");
+        })
+
+        /* Update From Val By AccType */
+        function UpdateFromValByAccType(accType) {
+            if (accType != "1") {
+                $("#CarPlateNumberList").val(GetCVSDataByCtrl(".platenum"));
+                $("#CarPlateCodeList").val(GetCVSDataByCtrl(".code"));
+                $("#CarCategoryList").val(GetCVSDataByCtrl(".category"));
+            }
+        }
+        function GetCVSDataByCtrl(el) {
+            var d = [];
+            $(el).each(function (i, obj) {
+                d.push($(obj).data("value"));
+            });
+            return d.join(",");
+        }
+
+
+
+        /**/
+
+        // Account type change event
+        function AccTypeChange(v) {
+
+            $("#form-field-TCNumber").val("");
+            $("#form-field-PlateNumber").val("");
+            $(attg_div).hide();
+            $(".evcat").val("");
+            $(".evcode").val("");
+            if (v === "1") {
+                $(onlyBusiness).hide();
+                $(att_div).hide();
+                $(onlyIndividual).val('').show();
+                jQuery('#form-field-location option[value="2"]').show();
+                ResetEmirates('DXB');
+                GetBusinessPartnerListByCType(v, bp);
+            } if (v === "2") {
+                $(att_div).hide();
+                $(onlyBusiness).val('').show();
+                $(onlyIndividual).hide();
+                ResetLocation('1');
+                jQuery('#form-field-location option[value="2"]').hide();
+                ResetEmirates('DXB');
+                GetBusinessPartnerListByCType(v, bp);
+                $("#form-field-TCNumber").prop("required", "required");
+                $(".ModalCtrlHolder").show();
+                $(".ModalCtrlHolder select").addClass("table__input");
+            }
+            if (v === "3") {
+                $(onlyIndividual).hide();
+                $(onlyBusiness).val('').show();
+                $(att_div).val('').hide();
+                ResetLocation('1');
+                jQuery('#form-field-location option[value="2"]').hide();
+                ResetEmirates('DXB');
+                GetBusinessPartnerListByCType(v, bp);
+                $(attg_div).show();
+                //$("#legendDocument").text("@Translate.Text("EV.Guarantee Letter")");
+                //$("#form-field-TCNumber").removeProp("required");
+                $(".ModalCtrlHolder").show();
+                $(".ModalCtrlHolder select").addClass("table__input");
+                //jQuery(".j109-ev-charger-actionBtn .delete").click();
+            }
+        }
+    });
+
+    // reset emirates
+    function ResetEmirates(emira) {
+
+        var selVal = emira;
+        $(emrt).val(emira);
+            if (selVal === "DXB") {
+                if ($(acc_type + ":checked").val() != "3") {
+                    $(att_div).hide();
+                }
+                $(onlydxb).show();
+            } else {
+                $(att_div).val('').show();
+                $(onlydxb).hide();
+            }
+    }
+    // Emirate on change events
+    function OnEmrtChange() {
+        if (!firstLoad) {
+            jQuery(".j109-ev-charger-actionBtn .delete").click();
+        }
+        
+
+        var selVal = $(emrt).val();
+        var _acctype = $(acc_type + ":checked").val();
+
+        $(".ct_platenumber").attr("data-parsley-type","alphanum");
+
+        if (selVal === "DXB") {
+            $(".ct_platenumber").attr("data-parsley-type", "number");
+            $(att_div).hide();
+
+            if (_acctype == "1") {
+                $(att_div).hide();
+                $(onlydxb).show();
+                $("#form-field-TCNumber").removeProp("required");
+                $(".ModalCtrlHolder").hide();
+                $(".ModalCtrlHolder select").removeClass("table__input");
+              
+            }
+            if (_acctype == "2") {
+                $(att_div).hide();
+                $("#form-field-TCNumber").prop("required", "required");
+                $(".ModalCtrlHolder").show();
+                $(".ModalCtrlHolder select").addClass("table__input");
+            }
+            if (_acctype == "3") {
+                $(att_div).hide();
+                //$("#legendDocument").text("@Translate.Text("EV.Guarantee Letter")");
+                $("#form-field-TCNumber").removeProp("required");
+                $(".ModalCtrlHolder").show();
+                $(".ModalCtrlHolder select").addClass("table__input");
+                $(attg_div).show();
+            }
+                @*if ($(acc_type + ":checked").val() != "3") {
+                    $(att_div).hide();
+                    $("#form-field-TCNumber").prop("required", "required");
+                    $(".ModalCtrlHolder").show();
+                    $(".ModalCtrlHolder select").addClass("table__input");
+                }
+                else {
+                    $("#legendDocument").text("@Translate.Text("EV.Guarantee Letter")");
+                    $(onlydxb).show();
+                    $("#form-field-TCNumber").removeProp("required");
+                    $(".ModalCtrlHolder").hide();
+                    $(".ModalCtrlHolder select").removeClass("table__input");
+                }*@
+            } else {
+            $(att_div).val('').show();
+            $("#errors-for-AttachedDocument").empty();
+                $(onlydxb).hide();
+                    if (_acctype == "1") {
+                            $("#legendDocument").text("@Translate.Text("EV.Vehicle Registration Card")");
+                        $("#form-field-AttachedDocument").attr("data-parsley-error-message", "@Translate.Text("EV Vehicle Registration Card File Error Message")");
+                        $("#form-field-AttachedDocument").attr("data-parsley-required-message", "@Translate.Text("EV Vehicle Registration Card File Error Message")");
+                    }
+            if (_acctype == "2" || _acctype == "3") {
+                $("#legendDocument").text("@Translate.Text("EV.Vehicle Plate Number")");
+                $("#form-field-AttachedDocument").attr("data-parsley-error-message", "@Translate.Text("EV Vehicle Plate Number Upload Error Message")");
+                $("#form-field-AttachedDocument").attr("data-parsley-required-message", "@Translate.Text("EV Vehicle Plate Number Upload Error Message")");
+            }
+
+                    @*if (_acctype == "3") {
+                            $("#legendDocument").text("@Translate.Text("EV.Guarantee Letter")");
+                }*@
+                $("#form-field-TCNumber").removeProp("required");
+                $(".ModalCtrlHolder").hide();
+                $(".ModalCtrlHolder select").removeClass("table__input");
+            }
+        }
+
+    // reset location
+    function ResetLocation(loc) {
+        var selectedVal = loc;
+        $("#form-field-location").val(loc);
+            var childSelect = $(emrt);
+            if (selectedVal.trim() === '') return;
+            populateChild(selectedVal, childSelect, '@Url.Action("GetCountries")');
+
+            if (selectedVal == "1") {
+                if ($(acc_type + ":checked").val() != "3") {
+                    $(att_div).hide();
+                }
+                $(tcn_div).val('').show();
+                $("#divEVcategorycode").show();
+                $("#divEVplatecode").show();
+            }
+            else {
+                $(tcn_div).hide();
+                $("#divEVcategorycode").hide();
+                $("#divEVplatecode").hide();
+                $(att_div).val('').show();
+            }
+
+        }
+
+    function populateChild(selectedVal, childSelect, url) {
+        childSelect.empty();
+        if (selectedVal != null && selectedVal != '') {
+            var deflt = "";
+            if (selectedVal === "1") {
+                deflt = "@Translate.Text("EV Select Emirate")";
+                $("#spEmirate").html("@Translate.Text("EV Choose Emirate")");
+                childSelect.attr("data-parsley-required-message", "@Translate.Text("EV Select Emirate")");
+            } else {
+                deflt = "@Translate.Text("EV Select Country")";
+                $("#spEmirate").html("@Translate.Text("EV Choose Country")");
+                childSelect.attr("data-parsley-required-message", "@Translate.Text("EV Select Country")");
+            }
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                cache: false,
+                data: AddForgeryToken({
+                    emid: selectedVal
+                }, "applyEVCardForm"),
+                success: function (retList) {
+                    if (retList != null && !jQuery.isEmptyObject(retList)) {
+                        childSelect.append($('<option/>', {
+                            value: "",
+                            text: deflt
+                        }));
+                        $.each(retList, function (index, itm) {
+                            childSelect.append($('<option/>', {
+                                value: itm.Value,
+                                text: itm.Text
+                            }));
+                        });
+                        if (selectedVal === "1") { $(childSelect).val("DXB"); }
+                        else { $(childSelect).val("@Model.EmirateOrCountry"); }
+
+                        //setTimeout(function () {
+                        //    $(childSelect).val($(el).data("postedvalue"));
+                        //}, 100)
+
+                    };
+                }, error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+
+                }
+            });
+        }
+    }
+
+    // Get Plate Code
+    function GetPlateCode(catCode, el) {
+        jQuery.ajax({
+            url: '@Url.Action("GetCatOrCodeDetail")',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            data: AddForgeryToken({
+                catCode: catCode, isPlateCode: true, region: "DXB"
+            }, "applyEVCardForm"),
+            success: function (retList) {
+                $(el).empty();
+                     if (retList != null && !jQuery.isEmptyObject(retList)) {
+                         $(el).append($('<option/>', {
+                             value: "",
+                             text: "@Translate.Text("EV Select PlateCode")"
+                        }));
+                        $.each(retList, function (index, itm) {
+                            $(el).append($('<option/>', {
+                                value: itm.Value,
+                                text: itm.Text
+                            }));
+                         });
+
+
+                    };
+            }
+        });
+    }
+    // Get BusinessPartner number by customer type
+    function GetBusinessPartnerListByCType(ctype, el) {
+
+        if (firstBpLoad) {
+            firstBpLoad = false;
+            return false;
+        }
+
+            jQuery.ajax({
+                url: '@Url.Action("GetBusinessPartnerListByCType")',
+                type: 'POST',
+                dataType: 'json',
+                cache: false,
+                data: AddForgeryToken({
+                    ctype: ctype
+                }, "applyEVCardForm"),
+                success: function (retList) {
+                    $(el).empty();
+                     if (retList != null && !jQuery.isEmptyObject(retList)) {
+                         @*$(el).append($('<option/>', {
+                             value: "",
+                             text: "@Translate.Text("EV.SelectBPNumber")"
+                        }));*@
+                        $.each(retList, function (index, itm) {
+                            $(el).append($('<option/>', {
+                                value: itm.Value,
+                                text: itm.Text
+                            }));
+                         });
+                         if ($(el)[0].hasAttribute("data-postedvalue") && $(el).data("postedvalue") != "") {
+                             $(el).val($(el).data("postedvalue"));
+                             $(el).removeAttr("data-postedvalue")
+                         }
+                    };
+                },
+                 error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                }
+        });
+
+
+      
+    }
+    setTimeout(function () {
+
+
+        //triggeringCategory
+        //if ($(emrt)[0].hasAttribute("data-postedvalue")) {
+        //    $(emrt).val($(emrt).data("postedvalue"));
+        //    $(emrt).removeAttr("data-postedvalue");
+
+        //}
+        SetPostedValtoElement(emrt);
+        OnEmrtChange();
+        //triggeringCategory
+        SetPostedValtoElement(catCode);
+        GetPlateCode($(catCode).val(), plateCode);
+        SetPostedValtoElement("#form-field-TCNumber");
+        SetPostedValtoElement("#form-field-PlateNumber");
+        setTimeout(function () {
+            SetPostedValtoElement(plateCode);
+        }, 1000)
+
+
+        //if ($(acc_type + ":checked").val() != "3") {
+        //    if ($(emrt).val() === "DXB") {
+        //        $(att_div).hide();
+        //    } else {
+        //        $(att_div).val('').show();
+        //    }
+        //}
+
+        setTimeout(function () {
+
+            if ($(emrt).val() === "DXB") {
+                $(att_div).hide();
+            } else {
+                $(att_div).val('').show();
+            }
+        }, 200);
+        firstLoad = false;
+    }, 100)
+    function SetPostedValtoElement(el) {
+        if (el != undefined && $(el).length > 0 && $(el)[0].hasAttribute("data-postedvalue")) {
+            $(el).val($(el).data("postedvalue"));
+            $(el).removeAttr("data-postedvalue");
+        }
+    }
+
+    function CreateJsonFromTable() {
+        var arrayList = [];
+        $.each($(".m23-table__content-table-row"), function (i, tr) {
+
+            if ($(tr).find(".platenum").length > 0) {
+                var row = [];
+                $.each($(tr).find("td"), function (i, td) {
+
+                    if ($(td).find(".j109-ev-charger-actionBtn").length <= 0) {
+                        var td = {
+                            "label": $(td).data("label"),
+                            "delabel": $(td).data("delabel"),
+                            "value": $(td).data("value"),
+                            "text": $(td).text()
+                        };
+                        row.push(td);
+                    }
+
+                });
+
+                arrayList.push(row);
+
+            }
+        });
+
+
+        return arrayList;
+    }
+    function removeSpaces(string) {
+        return string.split(' ').join('');
+    }
+
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,1012 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.Header
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Feature.CommonComponents.Utils
+@using DEWAXP.Foundation.ORM.Models
+@using DEWAXP.Foundation.Content
+@using _scRenderingId = DEWAXP.Foundation.Content.SitecoreRenderingIds
+@using _scTemplate = DEWAXP.Foundation.Content.ScTemplate
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using _scHelper = DEWAXP.Foundation.Helpers.ScHelper
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Data.Items
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+
+
+@model Masthead
+@{
+    var tabindexcounter = 0;
+    string epasstemplateid = "{255C4545-C106-4D40-BE2A-10F8988AB89A}".ToLower();
+    string cpportaltemplateid = "{18ABACD9-7680-405B-A971-17E5C5DD3C86}".ToLower();
+    var quicklinks = Translate.Text("QuickLinks").Trim();
+    var mainmenu = Translate.Text("MainMenu").Trim();
+    var close = Translate.Text("Close").Trim();
+    IRequestContext _requestContext = new Glass.Mapper.Sc.Web.RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    var currentItem = _contextRepository.GetCurrentItem<Item>();
+    string homepageclass = Html.Sitecore().CurrentRendering.Parameters["homepage"] != null ? Html.Sitecore().CurrentRendering.Parameters["homepage"] : string.Empty;
+}
+@if (Model.Mastheadv1 != null)
+{
+    <ul class="skip-content">
+        <li><a href="#rs_area">@Translate.Text("Skip to the content")</a></li>
+    </ul>
+
+    if (!Model.CurrentItem.Template.ID.ToString().ToLower().Equals(epasstemplateid) || !Model.CurrentItem.Template.ID.ToString().ToLower().Equals(cpportaltemplateid))
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Notification/m24-msg-float.cshtml")
+    }
+    <header class="m12-masthead theme--a @homepageclass" data-component="m12-masthead" data-theme="a" data-labels='{"menu":"@Translate.Text("MENU")","close":"@close","quicklinks": "@quicklinks","mainmenu": "@mainmenu"}'>
+        <div class="m12-main" data-m12-main="true">
+            <div class="m12-main__content">
+                <!-- start logos -->
+                <div class="m12-main__logos">
+
+                    <div class="m12-logo m12-logo--government">
+                        @using (Html.Glass().BeginRenderLink(Model, x => x.Mastheadv1.TopLeftLogoPageUrl))
+                        {
+                            @Html.Glass().RenderImage(Model, x => x.Mastheadv1.TopLeftLogoImage, new { @alt = Model.Mastheadv1.TopLeftLogoImage.Alt, title = Model.Mastheadv1.TopLeftLogoImage.Title, @class = "m12-logo-image--government", hompagesrc = Model.Mastheadv1.TopLeftLogoImageDark.Src, defaultsrc = Model.Mastheadv1.TopLeftLogoImage.Src }, true, false)
+                        }
+                    </div>
+                    @*@if (Model.Mastheadv1.TopCenterLogoImage != null && !string.IsNullOrWhiteSpace(Model.Mastheadv1.TopCenterLogoImage.Src))
+                        {
+                            <div class="m12-logo m12-logo--yoi">
+                                @using (Html.Glass().BeginRenderLink(Model, x => x.Mastheadv1.TopCenterLogoPageUrl))
+                                {
+                                    @Html.Glass().RenderImage(Model, x => x.Mastheadv1.TopCenterLogoImage, new { @alt = Model.Mastheadv1.TopCenterLogoImage.Alt, title = Model.Mastheadv1.TopCenterLogoImage.Title, @class = "m12-logo-image--yoi" }, true, false)
+                                }
+                            </div>
+                        }*@
+
+                    <div class="m12-logo m12-logo--dewa">
+                        @using (Html.Glass().BeginRenderLink(Model, x => x.Mastheadv1.TopRightLogoPageUrl))
+                        {
+                            if (!string.IsNullOrWhiteSpace(homepageclass))
+                            {
+                                @Html.Glass().RenderImage(Model, x => x.Mastheadv1.TopRightLogoImageDark, new { @alt = Model.Mastheadv1.TopRightLogoImageDark.Alt, title = Model.Mastheadv1.TopRightLogoImageDark.Title, @class = "m12-logo-image--dewa", hompagesrc = Model.Mastheadv1.TopRightLogoImageDark.Src, defaultsrc = Model.Mastheadv1.TopRightLogoImage.Src }, true, false)
+                            }
+                            else
+                            {
+                                @Html.Glass().RenderImage(Model, x => x.Mastheadv1.TopRightLogoImage, new { @alt = Model.Mastheadv1.TopRightLogoImage.Alt, title = Model.Mastheadv1.TopRightLogoImage.Title, @class = "m12-logo-image--dewa", hompagesrc = Model.Mastheadv1.TopRightLogoImageDark.Src, defaultsrc = Model.Mastheadv1.TopRightLogoImage.Src }, true, false)
+                            }
+                        }
+                    </div>
+                </div>
+                <!-- end logos -->
+            </div>
+        </div>
+        <div class="m12-bar--substitute">
+        </div>
+
+        <div class="m12-bar nav-down" data-m12-bar="true">
+            <div class="m12-bar__outerwrapper">
+
+                <div class="m12-bar__wrapper">
+                    <div class="m12-bar__content" data-m12-bar-content="true">
+                        <div class="m12-section-navs">
+                            <button class="m12-menu_expandable">
+                                <span class="m12-menu_bar--wrapper">
+                                    <span class="top-bar"></span>
+                                    <span class="mid-bar"></span>
+                                    <span class="bot-bar"></span>
+                                </span>
+                                <span class="m12-menu_label">@Translate.Text("MENU")</span>
+                            </button>
+
+                            <div class="m12-menuover hidden">
+
+                                <div class="m12-menuover-content">
+                                    <div class="grid__column grid__column--3 m12-menuover-1">
+                                        <div class="m12-menuover-main">
+                                            <!-- ParsonaMenuItem 1 layer Rendering--->
+                                            @if (Model.Mastheadv1.ParsonaMenuList != null && Model.Mastheadv1.ParsonaMenuList.HasAny())
+                                            {
+                                                foreach (var ParsonaMenuItem in Model.Mastheadv1.ParsonaMenuList.Where(x => x != null && x.IsHidden != "1"))
+                                                {
+                                                    bool isActive = false;
+                                                    if (Model.ActiveLanding != null)
+                                                    {
+                                                        isActive = Model.ActiveLanding.Id == ParsonaMenuItem.PageLink.TargetId;
+
+                                                    }
+
+
+                                            <button class="m12-menuover-main_item @(isActive ? "m12-menuover-main_itemactive" : "")" data-call="@ParsonaMenuItem.Id" data-tid="@ParsonaMenuItem.PageLink.TargetId">
+                                                @ParsonaMenuItem.Title
+                                            </button>
+                                                }
+                                            }
+                                            <!-- ParsonaMenuItem 1 layer Rendering--->
+                                            <!-- OtherMenu 1 layer Rendering--->
+                                            @if (Model.Mastheadv1.OtherMenuList != null && Model.Mastheadv1.OtherMenuList.Any())
+                                            {
+                                                int i = 0;
+                                                foreach (var otherMenuItem in Model.Mastheadv1.OtherMenuList)
+                                                {
+                                                    bool isActive = (otherMenuItem != null && otherMenuItem.OtherMenuList.Where(x => x != null && x.MenuList != null && x.MenuList.Where(y => y != null && y.Id == Model.CurrentItem.ID.Guid).Count() > 0).Count() > 0);
+                                            <button class="m12-menuover-main_item@(i == 0 ? " m12-menuover-main_item--about" : "") @(isActive ? "m12-menuover-main_itemactive" : "")" data-call="@otherMenuItem.Id">
+                                                @otherMenuItem.Title
+                                            </button>
+                                                    i++;
+                                                }
+                                            }
+                                            <!-- OtherMenu 1 layer Rendering--->
+
+                                        </div>
+
+                                    </div>
+                                    <div class="grid__column grid__column--3 p0 m12-menuover-2">
+                                        <!-- ParsonaMenuItem 2 layer Rendering--->
+                                        @if (Model.Mastheadv1.ParsonaMenuList != null && Model.Mastheadv1.ParsonaMenuList.HasAny())
+                                        {
+                                            foreach (var ParsonaMenuItem in Model.Mastheadv1.ParsonaMenuList.Where(x => x != null && x.IsHidden != "1"))
+                                            {
+                                        <div class="m12-menuover-primary" data-tag="@ParsonaMenuItem.Id">
+                                            @if (ParsonaMenuItem.PersonaSectionMenuList.Count() > 0)
+                                                    {
+                                                        var cnt = 0;
+                                                        foreach (var PersonaSectionItem in ParsonaMenuItem.PersonaSectionMenuList.Where(x => x != null && x.IsHidden != "1"))
+                                                        {
+                                                            if (PersonaSectionItem != null && PersonaSectionItem.MenuList != null && PersonaSectionItem.MenuList.Count() > 0)
+                                                            {
+                                                                bool IsActive2Nav = (PersonaSectionItem != null && PersonaSectionItem.MenuList != null && PersonaSectionItem.MenuList.Where(x => x.Id == Model.CurrentItem.ID.Guid).ToList().Count > 0);
+                                            <button class="m12-menuover-primary_item  @((IsActive2Nav && cnt==0) ? "force-nav2-active" : "")" data-call="@PersonaSectionItem.Id">
+                                                @PersonaSectionItem.Title
+                                            </button>
+                                                                if (IsActive2Nav)
+                                                                { cnt++; }
+                                                            }
+                                                        }
+                                                    }
+                                        </div>
+                                            }
+                                        }
+                                        <!-- Parsona Menu Item 2 layer Rendering--->
+                                        <!-- OtherMenuItem 2 layer Rendering--->
+                                        @if (Model.Mastheadv1.OtherMenuList != null && Model.Mastheadv1.OtherMenuList.HasAny())
+                                        {
+                                            foreach (var OtherMenuItem in Model.Mastheadv1.OtherMenuList.Where(x => x != null))
+                                            {
+                                        <div class="m12-menuover-primary" data-tag="@OtherMenuItem.Id">
+                                            @if (OtherMenuItem.OtherMenuList != null && OtherMenuItem.OtherMenuList.Any())
+                                                    {
+                                                        var cnt = 0;
+                                                        foreach (var OtherSubMenuitem in OtherMenuItem.OtherMenuList)
+                                                        {
+
+                                                            bool IsActive2Nav = (OtherSubMenuitem != null && OtherSubMenuitem.MenuList != null && OtherSubMenuitem.MenuList.Where(x => x.Id == Model.CurrentItem.ID.Guid).ToList().Count > 0);
+                                            <button class="m12-menuover-primary_item  @((IsActive2Nav && cnt == 0) ? "force-nav2-active" : "")" data-call="@OtherSubMenuitem.Id">
+                                                @OtherSubMenuitem.Title
+                                            </button>
+                                                            if (IsActive2Nav)
+                                                            { cnt++; }
+                                                        }
+                                                    }
+                                        </div>
+
+                                            }
+                                        }
+                                        <!-- OtherMenuItem 2 layer Rendering--->
+                                    </div>
+
+                                    <div class="grid__column grid__column--6 m12-menuover-3">
+                                        <!-- ParsonaMenu 3 layer Rendering--->
+                                        @if (Model.Mastheadv1.ParsonaMenuList != null && Model.Mastheadv1.ParsonaMenuList.HasAny())
+                                        {
+                                            foreach (var ParsonaMenuItem in Model.Mastheadv1.ParsonaMenuList.Where(x => x != null && x.IsHidden != "1" && x.PersonaSectionMenuList != null))
+                                            {
+                                                foreach (var PersonaSectionItem in ParsonaMenuItem.PersonaSectionMenuList.Where(x => x != null && x.IsHidden != "1"))
+                                                {
+
+                                        <ul class="m12-menuover-secondary" data-tag="@PersonaSectionItem.Id">
+
+                                            @foreach (var MenuItem in PersonaSectionItem.MenuList)
+                                                        {
+                                                            string targettext;
+                                                            bool menuactive;
+                                                            string menuactiveclass = string.Empty;
+
+                                                            var pageurl = UtilSitecore.GetMenuURLV1(MenuItem, Model.CurrentItem, out targettext, out menuactive);
+
+                                                            if (menuactive)
+                                                            {
+                                                                menuactiveclass = "m12-menuover-secondary_item--active";
+                                                            }
+                                            <li class="m12-menuover-secondary_item @(menuactiveclass)">
+                                                <a href="@pageurl" aria-label="@(MenuItem.MenuLabel)" target="@(targettext)">@MenuItem.MenuLabel</a>
+
+                                            </li>
+
+                                                        }
+                                            @if (PersonaSectionItem.ActivateTeaser == "1" && PersonaSectionItem.TeaserLink != null && !string.IsNullOrWhiteSpace(PersonaSectionItem.TeaserHeader))
+                                                        {
+                                            <li class="m12-menuover-secondary_item">
+                                                <a href="@PersonaSectionItem.TeaserLink.Url" aria-label="@PersonaSectionItem.TeaserHeader" target="_self">@PersonaSectionItem.TeaserHeader</a>
+                                            </li>
+                                                        }
+                                        </ul>
+                                                }
+                                            }
+                                        }
+                                        <!-- ParsonaMenu 3 layer Rendering--->
+                                        <!---Other Menu 3 Layer Rendering-->
+                                        @if (Model.Mastheadv1.OtherMenuList != null && Model.Mastheadv1.OtherMenuList.HasAny())
+                                        {
+                                            foreach (var OtherMenuItem in Model.Mastheadv1.OtherMenuList)
+                                            {
+                                                foreach (var OtherMenuSectionItem in OtherMenuItem.OtherMenuList)
+                                                {
+                                        <ul class="m12-menuover-secondary" data-tag="@OtherMenuSectionItem.Id">
+                                            @foreach (var MenuItem in OtherMenuSectionItem.MenuList)
+                                                        {
+                                                            string targettext;
+                                                            bool menuactive;
+                                                            string menuactiveclass = string.Empty;
+                                                            var pageurl = UtilSitecore.GetMenuURLV1(MenuItem, Model.CurrentItem, out targettext, out menuactive);
+
+                                                            if (menuactive)
+                                                            {
+                                                                menuactiveclass = "m12-menuover-secondary_item--active";
+                                                            }
+                                            <li class="m12-menuover-secondary_item @(menuactiveclass)">
+                                                @if (!string.IsNullOrWhiteSpace(targettext) && (targettext == "_blank" || targettext == "_self"))
+                                                                {
+                                                <a href="@pageurl" target="@(targettext)">@MenuItem.MenuLabel</a>
+                                                                }
+                                                                else
+                                                                {
+                                                <a href="@pageurl" target="_blank" @Html.Raw(targettext)>@MenuItem.MenuLabel</a>
+                                                                }
+
+                                            </li>
+
+                                                        }
+
+                                        </ul>
+                                                }
+                                            }
+                                        }
+                                        <!---Other Menu 3 Layer Rendering-->
+
+                                    </div>
+                                </div>
+
+                                <div class="m12-menuover-footer">
+                                    <div class="grid__column grid__column--3 m12-menuover-1 flex-center">
+                                        @using (Html.Glass().BeginRenderLink(Model, x => x.Mastheadv1.RammasPageUrl, new { @class = "m12-menuover-footer--link flex-center" }))
+                                        {
+                                        @Html.Glass().RenderImage(Model, x => x.Mastheadv1.RammasImage, new { @alt = Model.Mastheadv1.RammasImage.Alt, title = Model.Mastheadv1.RammasImage.Title }, true, false)
+                                        @Model.Mastheadv1.RammasTitle
+                                        }
+                                    </div>
+
+                                    <div class="grid__column grid__column--9 m12-menuover-3">
+                                        <div class="flex-center float_left m12-menuover-3">
+                                            @if (Model.Mastheadv1.QuickMenuLinks != null && Model.Mastheadv1.QuickMenuLinks.HasAny())
+                                            {
+                                                foreach (var QuickMenuItem in Model.Mastheadv1.QuickMenuLinks)
+                                                {
+                                                    var pageurl = UtilSitecore.GetMenuURL(QuickMenuItem);
+
+                                                    if (QuickMenuItem.DisplayInMenu)
+                                                    {
+                                            <a href="@pageurl" class="m12-menuover-footer--link">
+                                                @QuickMenuItem.MenuLabel
+                                            </a>
+                                                    }
+
+                                                }
+                                            }
+                                        </div>
+
+                                        <div class="flex-center float_right m12-menuover-3">
+                                            <div class="m12-menuover-footer--link">
+                                                <button class="m12-tools__link m12-tools__link--accessibility  m27-accessibility-overlay__cta button m12-menuover-accessibility" aria-label="@Translate.Text("Accessibility")" aria-haspopup="true">
+                                                    <span class="invisible--hover"></span>
+                                                    <span>
+                                                        @Translate.Text("Accessibility")
+                                                    </span>
+                                                </button>
+                                            </div>
+                                            <div class="m12-menuover-footer--link">
+                                                @Html.Action("Languages", "Renderings", new { tabindex = (++tabindexcounter), type = 1 })
+                                            </div>
+                                            <div class="m12-menuover-footer--link">
+                                                <div class="m31-search">
+                                                    <a href="#" aria-label="m31-search-1" aria-haspopup="true" class="m31-search__button button">
+                                                        <span class="invisible--hover"></span>@Translate.Text("Search")
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <!--popup Login Link-->
+                                            @*@using (Html.Glass().BeginRenderLink(Model, x => x.Mastheadv1.CTAURL, new { @class = "button--small button button--outline" }))
+                                        {
+                                        @Model.Mastheadv1.CTAText
+                                        }*@
+
+
+                                            @{
+                                                Html.RenderPartial("~/Views/Feature/CommonComponents/Renderings/Header/HeaderLoginPopupButton.cshtml", Model);
+                                            }
+                                            <!--popup Login Link -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="m12-menuover-close flex-center">
+                                    <button class="m12-menuover-closebutton icon-cancel">@Translate.Text("Close")</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="m12-quicklinks">
+                            @{
+
+                                if (Model.ActiveLanding.TemplateId == Guid.Parse(_scTemplate.Persona_PageTemplateId) &&
+                                    Model.CurrentItem.TemplateID.Guid != Guid.Parse(_scTemplate.Persona_PageTemplateId))
+                                {
+                                <div class="m12-quicklinks-item m12-quicklinks-item_home">
+                                    <a class="m12-quicklinks-item_link" aria-label="@Model.ActiveLanding.MenuLabel" title="@Model.ActiveLanding.MenuLabel" href="@Model.ActiveLanding.Url">
+                                        @Translate.Text("Home")
+                                    </a>
+                                </div>
+                                }
+                                else
+                                if ((Model.ActiveLanding.TemplateId != Guid.Parse(_scTemplate.Persona_PageTemplateId) ||
+                                    Model.CurrentItem.TemplateID.Guid == Guid.Parse(_scTemplate.Persona_PageTemplateId)))
+                                {
+                                <div class="m12-quicklinks-item m12-quicklinks-item_home">
+                                    <a class="m12-quicklinks-item_link" aria-label="@Translate.Text("Home")" title="@Translate.Text("Home")" href="@LinkHelper.GetItemUrl(_scPageItemId.DewaHomePage)">
+                                        @Translate.Text("Home")
+                                    </a>
+                                </div>
+                                }
+                            }
+                            @if (Model.Mastheadv1.QuickMenuLinks != null && Model.Mastheadv1.QuickMenuLinks.HasAny())
+                            {
+                                foreach (var QuickMenuItem in Model.Mastheadv1.QuickMenuLinks)
+                                {
+                                    var pageurl = UtilSitecore.GetMenuURL(QuickMenuItem);
+
+                                    if (QuickMenuItem.DisplayInMenu)
+                                    {
+                            <div class="m12-quicklinks-item">
+                                <a class="m12-quicklinks-item_link" href="@pageurl">
+                                    @QuickMenuItem.MenuLabel
+                                </a>
+                            </div>
+                                    }
+
+                                }
+                            }
+                        </div>
+
+                    </div>
+                    <div class="m12-bar--logo_mobile">
+                        @using (Html.Glass().BeginRenderLink(Model, x => x.Mastheadv1.TopRightLogoPageUrl))
+                        {
+                        @Html.Glass().RenderImage(Model, x => x.Mastheadv1.TopRightLogoImage, new { @alt = Model.Mastheadv1.TopRightLogoImage.Alt, title = Model.Mastheadv1.TopRightLogoImage.Title, @class = "m12-logo-image--dewa" }, true, false)
+                        }
+                    </div>
+                    <!-- start my account -->
+                    @{
+                        Html.RenderPartial("~/Views/Feature/CommonComponents/Renderings/Header/HeaderLoginSection.cshtml", Model);
+                    }
+                    <!-- end my account -->
+                    <ul class="m12-tools m12-tools__search">
+                        <li class="m12-tools__item m12-tools__item-search">
+                            <!-- m31-search start -->
+                            @Html.AntiForgeryToken()
+                            <div class="m31-search" data-component="m31-search">
+                                <div class="m31-search--expand">
+                                </div>
+                                <div class="m31-search--tools-wrapper">
+                                    <div class="m31-search--tools">
+                                        <button class="m31-search--button">
+                                            <span class="aria-only">@Translate.Text("Search")</span>
+                                        </button>
+                                        <button class="m31-search--dm_close-word">
+                                            <span class="aria-only"> @Translate.Text("Search")</span>
+                                        </button>
+                                        <button class="m31-search--mic">
+                                            <span class="aria-only">@Translate.Text("m31_search_mic")</span>
+                                        </button>
+                                        <button class="m31-search--back">
+                                            <span class="aria-only">@Translate.Text("m31_search_mic")</span>
+                                        </button>
+                                        <div class="m31-search--dm_arrow" style="background-image:url(/images/search-arrow.png)"></div>
+                                        <input class="m31-search--input" id="site_search" name="site_search" maxlength="50" type="text" placeholder="@Translate.Text("m31_howcanwe")" autocomplete="off">
+                                    </div>
+                                </div>
+
+                                <label for="site_search">
+                                    <span class="aria-only"> @Translate.Text("Search")</span>
+                                </label>
+                                <div class="m31-search--doormat hidden">
+                                    <div class="preload-wrapper" id="wrapper_loader" style="display:none;">
+                                        <div class="loader"></div>
+                                    </div>
+                                    <div class="m31-search--doormat_inner search--results" id="dv_services">
+                                        <button class="m31-search--dm_close">
+                                            <span class="aria-only">@Translate.Text("Close")</span>
+                                        </button>
+                                        <ul class="m31-search--dm_column" id="ulS">
+                                            <li class="m31-search--dm_title">
+                                                @Translate.Text("m31_services")
+                                            </li>
+
+                                        </ul>
+                                        <ul class="m31-search--dm_column" id="ulC">
+                                            <li class="m31-search--dm_title">
+                                                @Translate.Text("m31_contents")
+                                            </li>
+
+                                        </ul>
+                                        <ul class="m31-search--dm_column" id="ulN">
+                                            <li class="m31-search--dm_title">
+                                                @Translate.Text("m31_medianews")
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="m31-search--doormat_inner search--results" id="NoRecordFound" style="display:none;">
+                                        <ul class="centered">
+                                            <li class="m31-search--dm_title">
+                                                @Translate.Text("VE_NoRecordFound")
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- m31-search end -->
+                        </li>
+                        <li class="m12-tools__item">
+                            <button class="m12-tools__link m12-tools__link--accessibility  m27-accessibility-overlay__cta button" aria-haspopup="true" aria-label="@Translate.Text("Accessibility")"><span class="invisible--hover"></span><span>@Translate.Text("Accessibility")</span></button>
+                            <!-- m27-accessibility-overlay start -->
+                            @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Accessibility/M27 Accessibility Overlay.cshtml")
+                            <!-- m27-accessibility-overlay end -->
+                        </li>
+                        <li class="m12-tools__item">
+                            @Html.Action("Languages", "Renderings", new { tabindex = (++tabindexcounter) })
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+            @Html.Partial("~/Views/Feature/CommonComponents/Renderings/Notification/_M20_Notification.cshtml")
+            @Html.Sitecore().Placeholder("innerwrapper")
+            @Html.Sitecore().Rendering(_scRenderingId.BREADCRUMB)
+
+        </div>
+    </header>
+
+
+}
+
+@helper RenderSublandings(MainLanding mainLanding, IEnumerable<ContentBase> sublandings, ContentBase activeSubLanding, int tabindexounter)
+{
+    <nav aria-label="@mainLanding.DisplayName" data-section-nav="true" class="m12-section-nav@(mainLanding.Id == Model.ActiveLanding.Id ? "--active" : string.Empty)">
+        <ul>
+            @foreach (var sublanding in sublandings)
+            {
+                @RenderSublanding(sublanding, activeSubLanding, tabindexounter)
+            }
+        </ul>
+    </nav>
+}
+
+@helper RenderHome(MainLanding customer, ContentBase activeSubLanding, int tabindexounter)
+{
+    <nav aria-label="@Model.ActiveLanding.DisplayName" data-section-nav="true" class="m12-section-nav--active">
+        <ul>
+
+            @foreach (var sublanding in customer.Children.Where(c => c.Id != Guid.Parse("FB606B30-EC6F-4952-B680-1E2C050CDED0")))
+            {
+                @RenderSublanding(sublanding, activeSubLanding, tabindexounter)
+            }
+        </ul>
+    </nav>
+}
+
+@helper RenderSublanding(ContentBase sublanding, ContentBase activeSubLanding, int tabindexounter)
+{
+    if (!(sublanding is SublandingBase))
+    {
+        return;
+    }
+    var subLandingChildren = ((SublandingBase)sublanding).Children.ToList();
+    var subLandingBase = sublanding as SublandingBase;
+    var activeClass = activeSubLanding != null && (subLandingBase.Id == activeSubLanding.Id) ? "m12-section-nav__link--active" : "";
+    <li data-section="true" class="m12-section-nav__item">
+        @if (sublanding.DisplayInMenu)
+        {
+            <a href="@sublanding.Url" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@subLandingBase.MenuLabel" class="m12-section-nav__link @activeClass">@subLandingBase.MenuLabel</a>
+        }
+
+        @if (subLandingChildren.Any())
+        {
+            var aclass = subLandingChildren.Where(x => x.DisplayInMenu).Count() > 3 ? "m12-subsection__column--4" : "";
+
+            <div class="m12-subsection" data-subsection="true">
+                <div class="m12-subsection__wrapper">
+                    <div class="m12-subsection__content">
+
+                        @foreach (var child in subLandingChildren.Where(x => x.DisplayInMenu))
+                        {
+
+                            <div class="m12-subsection__column @aclass">
+                                <h2 class="m12-subsection__title">@child.MenuLabel</h2>
+
+                                @if (child is SublandingFolder)
+                                {
+                                    var folder = (SublandingFolder)child;
+                                    <ul class="m12-subsection-menu">
+                                        @foreach (var subchild in folder.Children)
+                                        {
+                                            //var pageurl = UtilSitecore.GetMenuURL(subchild);
+
+                                            if (subchild.DisplayInMenu)
+                                            {
+                                                <li class="m12-subsection-menu__item"><a href="@subchild.FullUrl" class="m12-subsection-menu__link">@subchild.MenuLabel</a></li>
+                                            }
+
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </li>
+
+}
+
+@if (ViewBag.IsLoggedIn && !Model.CustomerProfile.IsContactUpdated)
+{
+    <script type="text/javascript">
+
+        jQuery(function () {
+
+            document.onload = setTimeout(function () { document.querySelector('.modal_contact').click(); }, 1000);
+
+            jQuery("#close-btn").click(function () {
+                jQuery(function () {
+                    jQuery(document).on('click', '.m39-m12-no', function () {
+                        @{
+                                Model.CustomerProfile.IsContactUpdated = true;
+                             }
+                        //parent.jQuery.fancybox.close();
+                    })
+                })
+            });
+
+            @*jQuery("#ok-btn").click(function () {
+                    window.location = "@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.UPDATE_PRIMARY_CONTACT)";
+                });*@
+        });
+
+
+    </script>
+}
+<script type="text/javascript">
+    const searchWrapper = ".m31-search";
+    const inputBox = document.querySelector(".m31-search--input");
+    var startTime = new Date(); var typeStarted = false, requesting=false; var searchInterval = null; var searchTerm = '';
+    const loader = ".m66-preloader-fullpage";
+    const wrapper_loader = "#wrapper_loader";
+    const ulS = "#ulS", ulC = "#ulC", ulN = "#ulN";
+    const resultsUrl = '@LinkHelper.GetItemUrl("{C02F5BBF-8A04-4D83-889A-2FDE2A2AEBC3}")';
+    var enterKey = false;
+
+		function debounce(func, delay) {
+		  let timeoutId;
+		  return function () {
+			clearTimeout(timeoutId);
+			timeoutId = setTimeout(func, delay);
+		  };
+		}
+
+
+    docReady(function () {
+        jQuery(".m31-search--dm_close").on("click", onFocusout);
+        jQuery(".m31-search--button").on("click", function () { if (inputBox.value.length > 2) { location.href = resultsUrl + '?term=' + inputBox.value + '&page=1&category=4'; } });
+        jQuery(searchWrapper).on("blur", onFocusout);
+
+        jQuery(".m31-search--dm_close-word").on("click", onFocusout);
+        jQuery(".m31-search--back").on("click", onFocusout);
+
+        if (typeof highlight == 'undefined') {
+            $.getScript("/scripts/External/jquery.highlight.min.js", function (data, textStatus, jqxhr) {
+                // console.log(data); // Data returned
+                // console.log(textStatus); // Success
+                // console.log(jqxhr.status); // 200
+                //console.log("Load was performed.");
+            });
+        }
+
+
+        setTimeout(function () { ReinitailizeMenuActiveState(); }, 1000);
+
+        try {
+            FnHighLightInitiate();
+            var recognition = new webkitSpeechRecognition();
+
+            recognition.continuous = true,
+                recognition.interimResults = true,
+                recognition.lang = '@(Language.Current.Name.ToLowerInvariant().Contains("ar") ? "ar-AE" : "en-US")',
+                $mic = jQuery('.m31-search--mic');
+
+            recognition.onresult = function (event) {
+                var interim_transcript = '';
+                for (var i = event.resultIndex; i < event.results.length; ++i) {
+                    var transcriptionPiece = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        final_transcript += transcriptionPiece;
+                        onFinalised(final_transcript);
+                    } else if (recognition.continuous) {
+                        interim_transcript += transcriptionPiece;
+                        onAnythingSaid(interim_transcript);
+                    }
+                }
+            };
+
+            recognition.onend = function () { onEndEvent(); };
+
+            $mic.on('click', function () { startButton(); });
+        } catch (error) {
+           // console.log(error);
+
+        }
+
+        function onEndEvent() {
+
+            resetSearchWrapper();
+            jQuery(wrapper_loader).show();
+
+            showSuggestion();
+
+
+			//console.log('end')
+        }
+
+        function onFinalised(text) {
+
+           if (text != null && text.toLowerCase().indexOf('diva') > -1)
+                text = 'Dewa';
+            jQuery('.m31-search--input').val(text);
+            jQuery('.m31-search--input').blur()
+            recognition.stop()
+        }
+
+        function onAnythingSaid(text) {
+           if (text != null && text.toLowerCase().indexOf('diva') > -1)
+				text = 'Dewa';
+
+            jQuery('.m31-search--input').val(text);
+            jQuery('.m31-search--input').focus();
+        }
+
+        function startButton() {
+            final_transcript = '';
+
+            if (location.pathname.toLowerCase().indexOf('ar-ae') > 0) {
+                recognition.lang = 'ar-AE';
+            } else {
+                recognition.lang = 'en-US';
+            }
+
+            recognition.start();
+            jQuery('.m31-search--input').val('')
+        }
+
+        jQuery(window).resize(function () {
+            ReinitailizeMenuActiveState();
+        })
+
+
+        if (window.location.href.indexOf('term') > -1) {
+
+            if (jQuery(window).width() <= 1024)
+            {
+                jQuery('.m31-search--button').trigger('touchstart')
+            }
+
+            else {
+
+                jQuery('.m31-search--expand').click();
+            }
+
+        }
+    });
+
+     // if user press any key and release
+    //inputBox.onkeyup = (e) => {
+      // launchSearch();
+    //}
+
+
+
+	function launchSearch()
+    {
+
+       $('.m31-search--input').val(inputBox.value.replaceAll(/\u200f/g, '').replaceAll('@@', '').replaceAll('*', '').replaceAll('{', '').replaceAll('}', '').replaceAll('[', '').replaceAll(']', '').replaceAll('=', '').replaceAll('_', '').replaceAll('+', '').replaceAll('-', '').replaceAll('/', '').replaceAll("\\",'').replaceAll("!",'').replaceAll("`",'').replaceAll("~",'').replaceAll("#",'').replaceAll("$",'').replaceAll("%",'').replaceAll("^",'').replaceAll("(",'').replaceAll(")",'').replaceAll("=",'').replaceAll("|",'').replaceAll(">",'').replaceAll("<",'').replaceAll("?",''));
+
+		var inVal = inputBox.value;
+		 startTime = new Date();
+        if (inVal.value == "") {
+		    requesting = true;
+            jQuery(wrapper_loader).hide();
+            jQuery(searchWrapper + "--doormat").removeClass('active');
+            jQuery(".m31-search--dm_arrow").removeClass("active");
+            jQuery(".m31-search--dm_close-word").hide(); jQuery(".m31-search--button").show();
+            jQuery(".m31-search--dm_close").hide();
+
+        }
+        else {
+            resetSearchWrapper();
+			requesting = false;
+            jQuery(wrapper_loader).show();
+            jQuery(".m31-search--dm_close-word").show();
+			jQuery(".m31-search--button").hide();
+
+			//setTimeout(function(){
+			showSuggestion();
+
+			//},300);
+
+        }
+
+
+
+        return true;
+	}
+
+    inputBox.addEventListener("keypress", function (event) {
+
+
+
+            if (event.key === "Enter") {
+                 $('.m31-search--input').val(inputBox.value.replaceAll(/\u200f/g, '').replaceAll('@@', '').replaceAll('*', '').replaceAll('{', '').replaceAll('}', '').replaceAll('[', '').replaceAll(']', '').replaceAll('=', '').replaceAll('_', '').replaceAll('+', '').replaceAll('-', '').replaceAll('/', '').replaceAll("\\",'').replaceAll("!",'').replaceAll("`",'').replaceAll("~",'').replaceAll("#",'').replaceAll("$",'').replaceAll("%",'').replaceAll("^",'').replaceAll("(",'').replaceAll(")",'').replaceAll("=",'').replaceAll("|",'').replaceAll(">",'').replaceAll("<",'').replaceAll("?",''));
+                event.preventDefault();
+                enterKey = true;
+                var langCheck = '@(Language.Current.Name.ToLowerInvariant().Contains("ar") ? "ar-AE" : "en-US")';
+                if (langCheck == 'en-US')
+                    window.location.href = '/en/search-results?page=1&category=0&term=' + inputBox.value;
+                else
+                    window.location.href = '/ar-AE/search-results?page=1&category=0&term=' + inputBox.value;
+                enterKey = false;
+            }
+        });
+
+	const debounceSearch = debounce(launchSearch, 300); // 300ms delay, adjust as needed
+
+	inputBox.addEventListener('input', debounceSearch);
+
+
+    function onFocusout() {
+        try {
+            //console.log(e.target);
+            inputBox.value = "";
+            typeStarted = false;
+            //clearInterval(searchInterval);
+            searchTerm = '';
+            jQuery(wrapper_loader).hide();
+            jQuery(searchWrapper + "--doormat").removeClass('active');
+            jQuery(".m31-search--dm_arrow").removeClass("active");
+            jQuery(".m31-search--dm_close-word").hide();
+            jQuery(".m31-search--button").show();
+
+        } catch (error) {
+
+            jQuery(wrapper_loader).hide();
+            //console.log(error);
+        }
+    }
+
+    function resetSearchWrapper() {
+        jQuery(".m31-search--dm_close").hide();
+        $('ul#ulS li:first').css('display', 'none');
+        $('ul#ulC li:first').css('display', 'none');
+        $('ul#ulN li:first').css('display', 'none');
+
+        jQuery(ulS).find("li:gt(0)").each(function () {
+            jQuery(this).html("");
+        });
+
+        jQuery(ulC).find("li:gt(0)").each(function () {
+            jQuery(this).html("");
+        });
+
+        jQuery(ulN).find("li:gt(0)").each(function () {
+            jQuery(this).html("");
+        });
+    }
+
+    function setWrapperHideShow(data, isrecord) {
+        if (data <= 0) {
+            jQuery(dv_services).hide();
+            jQuery(NoRecordFound).show();
+        } else {
+            jQuery(dv_services).show();
+            jQuery(NoRecordFound).hide();
+        }
+    }
+
+
+    function showSuggestion() {
+        try {
+		resetSearchWrapper();
+            let userData = inputBox.value;
+            if (inputBox.value != '') {
+                jQuery(".m31-search--dm_close-word").show();
+                jQuery(".m31-search--button").hide();
+            }
+            else {
+                jQuery(".m31-search--dm_close-word").hide();
+                jQuery(".m31-search--button").show();
+            }
+
+            let timeNow = new Date(); //let diff = Math.abs((timeNow - startTime) / 1000);
+            if ((userData.length > 2 && requesting === false) || enterKey) {
+				jQuery(NoRecordFound).hide();
+                jQuery(searchWrapper + "--doormat").addClass('active');
+                jQuery(".m31-search--dm_arrow").addClass("active");
+
+                resetSearchWrapper();
+                if (!enterKey)
+                    startTime = timeNow;
+               searchTerm = userData.replace(/\u200f/g, '');
+                jQuery.ajax({
+                    url: '@Url.Action("SearchSuggestion", "Search")', data: { "__RequestVerificationToken": GetAFToken(), term: searchTerm, item: '@currentItem.ID.ToString()' },
+                    beforeSend: function () {
+                        requesting = true;
+                    },
+                    complete: function () {
+                        jQuery(wrapper_loader).hide(); requesting = false;
+                    },
+                    dataType: "json",
+                    type: 'POST',
+                    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+                    success: function (res) {
+                        setWrapperHideShow(res.RecordsFound);
+                        if (res && res.RecordsFound > 0) {
+
+                            jQuery(".m31-search--dm_close").show();
+                            $('ul#ulS li:first').css('display', 'block');
+                            $('ul#ulC li:first').css('display', 'block');
+                            $('ul#ulN li:first').css('display', 'block');
+                            PopulateColumn(ulS, res.Services, res.MoreServices, 1);
+                            PopulateColumn(ulN, res.News, res.MoreNews, 2);
+                            PopulateColumn(ulC, res.Content, res.MoreContent, 3);
+                            if ($("#site_search").length > 0 && $("#site_search").val() != "") {
+                                jQuery(".m31-search--dm_linkTitle,.m31-search--dm_linkDesc").highlight($("#site_search").val(), {})
+                            }
+                        } else {
+
+                        }
+                        startTime = new Date();
+                    },
+                    fail: function (error) {
+                        //console.log(error);
+                        jQuery(wrapper_loader).hide();
+                    }
+                });
+            }
+            else {
+                jQuery(dv_services).hide();
+                jQuery(NoRecordFound).show();
+                jQuery(wrapper_loader).hide();
+
+                setTimeout(() => {
+
+                    if ((userData.length <= 2)) {
+                        jQuery(searchWrapper + "--doormat").removeClass('active');
+                        jQuery(".m31-search--dm_arrow").removeClass("active");
+                    }
+
+                }, 100);
+            }
+        } catch (error) {
+            //console.log(error);
+            jQuery(wrapper_loader).hide();
+        }
+    }
+
+
+    function toUnicode(str) {
+        return str.split('').map(function (value, index, array) {
+            var temp = value.charCodeAt(0).toString(16).padStart(4, '0');
+            if (temp.length > 2) {
+                return '\\u' + temp;
+            }
+            return value;
+        }).join('');
+    }
+
+    function convertUni(str) {
+        return decodeURIComponent(JSON.parse('"' + str.replace(/\"/g, '\\"') + '"'));
+    }
+
+    function ReinitailizeMenuActiveState() {
+
+        try {
+            if (jQuery(window).width() > 1024) {
+                var SelectedMenu = jQuery(".m12-menuover").find(".m12-menuover-main_itemactive");
+                if (SelectedMenu != null && SelectedMenu.length > 0) {
+                    jQuery(".m12-menuover").find(".m12-menuover-main_itemactive").each(function () {
+                        jQuery(this).click();
+                        if (!jQuery(this).hasClass("m12-menuover-main_itemactive")) {
+                            jQuery(this).addClass("m12-menuover-main_itemactive");
+                        }
+                    })
+
+                    if (jQuery(".m12-menuover").find(".force-nav2-active").length > 0) {
+                        jQuery(".m12-menuover").find(".force-nav2-active").each(function () {
+                            jQuery(this).click();
+                            if (!jQuery(this).hasClass("m2-menuover-primary_itemactive")) {
+                                jQuery(this).addClass("m2-menuover-primary_itemactive");
+                            }
+                        });
+                    }
+                } else {
+                    if (jQuery(".m12-menuover").find(".m12-menuover-main").find("button").length > 0) {
+
+                        jQuery(".m12-menuover").find(".m12-menuover-main").each(function () {
+                            jQuery(jQuery(this).find("button")[0]).click();
+                        });
+                    }
+                }
+            } else {
+                if (!jQuery('.mobile-menu-navs').find('.force-nav2-active').hasClass('m12-menuover-primary_itemactive-mobile')) {
+                    jQuery(jQuery('.mobile-menu-navs').find('.force-nav2-active').find('.m12-menuover-primary_item--label')[0]).click();
+                }
+
+            }
+            ///Initialize
+            setTimeout(function () {
+                jQuery(window).trigger('initMobile');
+            }, 100)
+        } catch (e) {
+            //console.log(e);
+        }
+    }
+
+    function GetAFToken() {
+        return jQuery('input[name="__RequestVerificationToken"]').val()
+    }
+
+   function PopulateColumn(ul, arr, ismore, category) {
+        var li = ' <li class="m31-search--dm_item"><a target="_blank" href="{0}" class="m31-search--dm_link"><div class="m31-search--dm_linkTitle">{1}</div><div class="m31-search--dm_linkDesc">{2}</div></a></li>';
+       var showMore = '<li class="m31-search--dm_item"><a target="_blank" href="{0}" class="m31-search--dm_link button button--text button--next"><div class="m31-search--dm_linkTitle">@Translate.Text("m31_showmore")</div></a></li>';
+        var resultsPage = resultsUrl + '?term=' + searchTerm + '&page=1&category='+category;
+
+        jQuery(ul + " li").not(":first").remove();
+        if (arr.length === 0) {
+            jQuery(ul).hide();
+            return;
+        }
+
+        jQuery(ul).show();
+		var __count1 = 0;
+        jQuery.each(arr, function (i, v) {
+			if(__count1 < 3)
+                jQuery(ul).append(li.replace('{0}', v.Url).replace('{1}', v.Title.replace('$name', '')).replace('{2}', v.Description.replace('$name', '')));
+			__count1++;
+        });
+        if (ismore === true) { jQuery(ul).append(showMore.replace('{0}', resultsPage)); }
+    }
+
+
+    function FnHighLightInitiate() {
+        if (jQuery("#site_search").length > 0 && jQuery("#site_search").val() != "") {
+
+            jQuery(".m31-search--dm_linkTitle,.m31-search--dm_linkDesc").highlight(jQuery("#site_search").val(), {})
+        }
+    }
+</script>

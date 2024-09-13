@@ -1,0 +1,105 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc.Web.Mvc
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.ArticleListing
+
+<div class="box box--news">
+    <div class="grid">
+        @if (!string.IsNullOrWhiteSpace(Model.Header))
+        {
+            <div class="grid__row">
+
+                <div class="grid__column grid__column--12">
+
+
+                    <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Header))
+                        {<h3 class="m17-sectiontitle__title  text__section-title">@Html.Glass().Editable(x => x.Header)</h3>
+
+                    }
+
+                        <a class="m17-sectiontitle__cta button button--text button--next" href="@Model.Url">@Translate.Text("View All News")</a>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="grid__row xscroll">
+            <div class="grid__scroll">
+                @if (Model.Children.HasAny())
+                {
+                    foreach (var group in Model.Children.Batch(4))
+                    {
+
+                        foreach (var item in group)
+                        {
+                            <div class="grid__column grid__column--3">
+                                <!-- start m9-new-teaser-->
+                                <div class="m9-new-teaser m9-new-teaser--news" data-component="m9-new-teaser">
+                                    <a href="@item.Url" class="teaser__link">
+
+                                        <div class="teaser__content">
+                                            @if (item.PublishDate != null && item.PublishDate > DateTime.MinValue)
+                                            {<div class="teaser__date">@item.PublishDate.ToString("dd MMM yyyy", Sitecore.Context.Language.CultureInfo).Replace("يوليه", "يوليو")</div>}
+                                            @if (!string.IsNullOrWhiteSpace(item.Header))
+                                            {
+                                                <h4 class="teaser__title">@Html.Glass().Editable(item, x => x.Header)</h4>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(item.Summary))
+                                            {
+                                                <p class="teaser__copy">@Html.Glass().Editable(item, x => x.Summary)</p>
+                                            }
+
+                                        </div>
+                                    </a>
+                                </div>
+                                <!-- end m9-new-teaser-->
+
+
+                            </div>
+                        }
+
+
+                    }
+                }
+                else
+                {
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--6">
+                            @Translate.Text("There are no related articles.")
+                        </div>
+                    </div>
+                }
+                @*@if (!string.IsNullOrEmpty(Model.FeatureHtml))
+                    {
+                        <div class="grid__column grid__column--6">
+                            @Html.Raw(Model.FeatureHtml)
+                        </div>
+                    }*@
+                <div class="grid__column grid__column--6">
+                   @Html.Sitecore().Placeholder("m9-new-teaser/left-col-6")
+                </div>
+            </div>
+
+
+        </div>
+        <div class="m39-modal m39-modal--new m39-modal--video" data-component="m39-modal" id="modal_true">
+            <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="_hbb33g4de_trigger" aria-controls="_hbb33g4de_content"> @Translate.Text("Video")</button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_hbb33g4de_content" aria-labelledby="_hbb33g4de_trigger">
+                <div class="m39-modal__dialog">
+                    <div class="m39-modal__header p0">
+                        <div class="m39-modal__title"></div>
+                        <a data-close="true" class="m39-modal__button--close" id="_hbb33g4de_close" aria-controls="_hbb33g4de_content"></a>
+                    </div>
+                    <div class="m39-modal__content p0" style="top: 0px;">
+                    </div>
+                    <div class="m39-modal--video_alt">@Translate.Text("YoutubeAltTagText")</div>
+                </div>
+            </div>
+            <div class="m39-modal__overlay"> </div>
+        </div>
+
+    </div>
+</div>

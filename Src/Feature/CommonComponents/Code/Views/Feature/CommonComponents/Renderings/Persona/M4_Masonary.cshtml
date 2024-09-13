@@ -1,0 +1,97 @@
+﻿@using DEWAXP.Feature.CommonComponents.Utils;
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web;
+@using DEWAXP.Foundation.Content.Repositories
+@using DEWAXP.Foundation.Content.Models.Common
+@using DEWAXP.Foundation.Content
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@using DEWAXP.Feature.CommonComponents.Models.Persona
+
+@model PersonaCategory
+@{
+
+    // Water Live saving count in Smart Response
+    bool smartresponseactive = false;
+    var waterlivecount = string.Empty;
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    var WaterLiveData = _contentRepository.GetItem<SmartResponseWaterModel>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.Smart_Response_Config)));
+    if (WaterLiveData != null && WaterLiveData.IsCheckedActive && !string.IsNullOrWhiteSpace(WaterLiveData.WaterUsageCount))
+    {
+        smartresponseactive = true;
+        waterlivecount = WaterLiveData.WaterUsageCount;
+    }
+}
+
+@if (Model != null)
+{
+    <div class='grid__column grid__column--12 p0'>
+        <div class='m4-masonry' data-component='m4-masonry'>
+            @foreach (PersonaSubItem personaSectionitem in Model.PersonaSectionMenuList)
+            {
+                <div class='m4-masonry--item_wrapper m4-masonry-service-guide @(personaSectionitem.IsDefaultAct == "1" ? "m4-masonry--item_wrapperactive" : "")'>
+                    <div class='m4-masonry--item padding-fix'>
+                        @if (personaSectionitem.ThumbnailImage != null && !string.IsNullOrEmpty(personaSectionitem.ThumbnailImage.Src))
+                        {
+                            string bannerSrc = "background-image:url('" + personaSectionitem.ThumbnailImage.Src + "')";
+                            <div class="m6-teaser-service-guide m6-teaser teaser__link m6-teaser--background" style="@Html.Raw(bannerSrc)">
+                            </div>
+                        }
+                        <div class='m4-masonry--title @personaSectionitem.Icon'>@personaSectionitem.Title </div>
+
+                        @if (personaSectionitem.MenuList != null && personaSectionitem.MenuList.Any())
+                        {
+                            <ul class='m4-masonry--list'>
+                                @foreach (var pageitem in personaSectionitem.MenuList)
+                                {
+                                    var pageurl = UtilSitecore.GetMenuURL(pageitem);
+                                    <li class='m4-masonry--list_item icon-new-arrow-right'>
+
+                                        <a class='m4-masonry--list_link' href='@(pageurl)?bck=1'>@pageitem.MenuLabel </a>
+                                        @if (pageitem.PersonaTag != null)
+                                        {
+                                            <span class='m4-masonry--list_item-tag @(Convert.ToString(pageitem.PersonaTag.Name).ToLower())'>@pageitem.PersonaTag.DataValue</span>
+
+                                        }
+                                    </li>
+                                }
+                            </ul>
+
+                            if (personaSectionitem.ActivateTeaser == "1" &&
+                                (personaSectionitem.TeaserImage != null || personaSectionitem.TeaserBackgroundImage != null) && personaSectionitem.TeaserLink != null)
+                            {
+                                string bgsrc = personaSectionitem.TeaserBackgroundImage != null ? @"background-image:url(""" + personaSectionitem.TeaserBackgroundImage.Src + "" + ")" : "";
+                                using (Html.Glass().BeginRenderLink(personaSectionitem, x => x.TeaserLink, new { @class = "m6-teaser teaser__link m6-teaser--background", @style = bgsrc }))
+                                {
+                                    <div class="m6-teaser__content">
+                                        @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "m6-teaser__title-img tooltipstered" }, true, false)
+                                        <p class="m6-teaser__text teaser__copy m6-teaser__btext white">@personaSectionitem.TeaserSubheader</p>
+                                        @if (smartresponseactive == true && personaSectionitem.ShowLiveData.Equals("1"))
+                                        {
+                                            <p class="m6-teaser__counter white">@waterlivecount <span class="m6-teaser__counter-unit white">@Translate.Text("IG")</span></p>
+                                            <p class="m6-teaser__text teaser__copy m6-teaser__btext white ">@personaSectionitem.TeaserSubfooter</p>
+                                        }
+                                    </div>
+                                }
+                                @*<a href="@personaSectionitem.TeaserLink.Url" class="m6-teaser teaser__link m6-teaser--background" style="@bgsrc">
+                                        <div class="m6-teaser__content">
+                                            @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "m6-teaser__title-img tooltipstered" }, true, false)
+                                            <p class="m6-teaser__text teaser__copy m6-teaser__btext white">@personaSectionitem.TeaserSubheader</p>
+                                            @if (smartresponseactive == true && personaSectionitem.ShowLiveData.Equals("1"))
+                                            {
+                                                <p class="m6-teaser__counter white">@waterlivecount <span class="m6-teaser__counter-unit white">@Translate.Text("IG")</span></p>
+                                                <p class="m6-teaser__text teaser__copy m6-teaser__btext white ">@personaSectionitem.TeaserSubfooter</p>
+                                            }
+                                        </div>
+                                    </a>*@
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

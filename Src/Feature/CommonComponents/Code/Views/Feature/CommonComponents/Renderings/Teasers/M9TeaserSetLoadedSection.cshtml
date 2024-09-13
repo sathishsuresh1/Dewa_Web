@@ -1,0 +1,78 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Resources.Media
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Teasers.M9TeaserSetWithSearchTextModel
+
+@if (Model != null && Model.CarouselSlides != null)
+{
+    foreach (var item in Model.CarouselSlides)
+    {
+        string _teaserUrl = "#";
+        string _targetType = "_blank";
+
+        if (item.ButtonLink != null)
+        {
+            _teaserUrl = item.ButtonLink.Url;
+            _targetType = item.ButtonLink.Target;
+        }
+        if (item.FileMediaItem != null)
+        {
+            string downloadBtnText = Translate.Text("Download");
+
+            if (!string.IsNullOrEmpty(item.DownloadButtonText))
+            {
+                downloadBtnText = item.DownloadButtonText;
+            }
+            _teaserUrl = @MediaManager.GetMediaUrl(item.FileMediaItem);
+        }
+        <div class="grid__column grid__column--4">
+            <div class="m9-teaser" data-component="m9-teaser">
+
+                <a href="@(_teaserUrl)" target="@(_targetType)" class="teaser__link">
+                    @{  string AltHtml = "";
+                        string background = "background-color:#f6f6f6";
+                        if (item.Image != null)
+                        {
+                            AltHtml = item.Image != null && !string.IsNullOrEmpty(item.Image.Alt) ? string.Format("data-alt=\"{0}\"", item.Image.Alt) : "";
+                            background = !string.IsNullOrEmpty(item.Image.Src) ? string.Format("background-image: url('{0}')", item.Image.Src) : background;
+                        }
+                    }
+                    <div class="m9-teaser-image" @Html.Raw(AltHtml) style="@Html.Raw(background)"></div>
+                    <div class="teaser__content">
+                        <h4 class="teaser__title">@Html.Glass().Editable(item, x => x.Header)</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+    }
+
+
+    if (Model.PaginationInfo.CanLoadMore)
+    {
+        if (Model.PaginationInfo.CurrentPage > 1)
+        {
+            <div class="grid__row loadmore-container" data-pageno="@(Model.PaginationInfo.CurrentPage+1)">
+                <div class="grid__column grid__column--12 grid__column--centered">
+                    <a href="javascript:void(0)" onclick="LoadMore()" class="button button--fullwidth mt12" data-datasrcid="@Model.DatasourceId">@Translate.Text("ViewMore")</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="data-appender-container" data-datasrcid="@Model.DatasourceId">
+                <div class="grid__row loadmore-container" data-pageno="@(Model.PaginationInfo.CurrentPage+1)">
+                    <div class="grid__column grid__column--12 grid__column--centered">
+                        <a href="javascript:void(0)" onclick="LoadMore()" class="button button--fullwidth mt12">@Translate.Text("ViewMore")</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+
+}
+else
+{
+    <p>@Translate.Text("NoData")</p>
+}

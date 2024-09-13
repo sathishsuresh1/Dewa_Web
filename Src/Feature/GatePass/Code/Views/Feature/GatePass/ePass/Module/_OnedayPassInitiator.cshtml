@@ -1,0 +1,196 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.ePass.PermanentPass
+@{ var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(2);
+    var FromToTime = EpassHelper.GetFromToTime();
+    var CurrentFromToTime = EpassHelper.GetCurrentFromToTime();
+    DateTime nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddDays(30);
+}
+<div>
+    <div class="j113-epass" data-journey="j113-epass">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("pagetitle")
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "ePassForm", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                        <div class="j113-epass--permPass__form-page">
+                            <div class="form-field form-field--text  ">
+                                <label for="form-field-fullname" class="form-field__label">
+                                    @Translate.Text("Epass.Fullnameasonedaypass")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input maxlength="50"
+                                           data-parsley-maxlength="50"
+                                           value="@Model.FullName"
+                                           @*data-parsley-pattern="/^[a-zA-Z ]*$/"*@
+                                           class="form-field__input form-field__input--text"
+                                           id="form-field-fullname"
+                                           name="FullName"
+                                           type="text"
+                                           placeholder="@Translate.Text("Epass.Fullname")"
+                                           aria-describedby="description-for-fullname"
+                                           data-parsley-errors-container="#description-for-fullname"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("Epass.Fullname")"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="30">
+                                </span>
+                                <div id="description-for-fullname" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-visitoremailid" class="form-field__label">
+                                    @Translate.Text("Epass.op_visitorEmailid")
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    @Html.TextBoxFor(x => x.op_visitorEmailid,
+                                     new
+                                     {
+                                         @class = "form-field-EmailAddress form-field__input form-field__input--text",
+                                         @id = "form-field-visitoremailid",
+                                         @placeholder = Translate.Text("Epass.Enterop_visitorEmailid"),
+                                         @data_parsley_error_message = Translate.Text("Epass.Entervalidemail"),
+                                         @data_parsley_errors_container = "#description-for-visitoremailid",
+                                         @aria_describedby = "description-for-visitoremailid",
+                                         @data_parsley_id = "14",
+                                         @step = "any",
+                                         @type = "email",
+                                         @required = "",
+                                         @maxlength = "50",
+                                         @data_parsley_trigger = "focusout",
+                                         @data_parsley_maxlength = "50"
+                                     })
+
+                                </span>
+                                <div id="description-for-visitoremailid" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.op_visitorEmailid, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-MobilePhone" class="form-field__label">
+                                    @Translate.Text("Epass.Mobile")
+                                    <span class="form-field__label-required">(@Translate.Text("Epass.Optional"))</span>
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                    @Html.TextBoxFor(x => x.Mobilenumber, new
+                                        {
+                                            @type = "tel",
+                                            @class = "form-field__input form-field__input--text form-field__input--prefixed",
+                                            @name = "MobilePhone",
+                                            @id = "form-field-MobilePhone",
+                                            @placeholder = Translate.Text("Enter UAE mobile number"),
+                                            @data_parsley_error_message = Translate.Text("Please enter a valid UAE mobile number"),
+                                            @data_parsley_errors_container = "#description-for-MobilePhone",
+                                            @aria_describedby = "description-for-MobilePhone",
+                                            @data_parsley_id = "14",
+                                            @data_parsley_type = "digits",
+                                            @data_parsley_mobilenumber = "",
+                                            @step = "any"
+                                        })
+                                </span>
+                                <div id="description-for-MobilePhone" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Mobilenumber, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text  ">
+                                <label for="form-field-companyname" class="form-field__label">
+                                    @Translate.Text("Epass.Companyname")
+                                    <span class="form-field__label-required">(@Translate.Text("Epass.Optional"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input maxlength="100"
+                                           data-parsley-maxlength="100"
+                                           value="@Model.CompanyName"
+                                           class="form-field__input form-field__input--text"
+                                           id="form-field-companyname"
+                                           name="CompanyName"
+                                           type="text"
+                                           placeholder="@Translate.Text("Epass.Companyname")"
+                                           aria-describedby="description-for-projectname"
+                                           data-parsley-errors-container="#description-for-companyname"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="29">
+                                </span>
+                                <div id="description-for-companyname" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text form-field--textarea">
+                                <label for="form-field-projectname" class="form-field__label">
+                                    @Translate.Text("Epass.projectname")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <textarea maxlength="500"
+                                              data-parsley-maxlength="500"
+                                              class="form-field__input form-field__input--text form-field__input--textarea"
+                                              id="form-field-projectname"
+                                              name="op_projectName"
+                                              type="textarea" multiple=""
+                                              placeholder="@Translate.Text("Epass.enterprojectname")"
+                                              aria-describedby="description-for-projectname"
+                                              data-parsley-errors-container="#description-for-projectname"
+                                              required="" data-textarea="projectname"
+                                              data-parsley-required-message="@Translate.Text("Epass.projectnameerrormessage")"
+                                              data-parsley-trigger="focusout"
+                                              data-parsley-id="30">@Model.op_projectName</textarea>
+                                </span>
+                                <div id="description-for-projectname" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-snmgremailid" class="form-field__label">
+                                    @Translate.Text("Epass.op_seniormanagerEmailid")
+                                </label>
+                                <label class="form-field__input-wrapper">
+                                    @Html.TextBoxFor(x => x.op_seniormanagerEmailid,
+                                     new
+                                     {
+                                         @class = "form-field-EmailAddress form-field__input form-field__input--text",
+                                         @id = "form-field-snmgremailid",
+                                         @placeholder = Translate.Text("Epass.Enterop_seniormanagerEmailid"),
+                                         @data_parsley_error_message = Translate.Text("Epass.Entervalidemail"),
+                                         @data_parsley_errors_container = "#description-for-snmgremailid",
+                                         @aria_describedby = "description-for-snmgremailid",
+                                         @data_parsley_id = "14",
+                                         @step = "any",
+                                         @type = "email",
+                                         @required = "",
+                                         @maxlength = "50",
+                                         @data_parsley_trigger = "focusout",
+                                         @data_parsley_maxlength = "50"
+                                     })
+
+                                </label>
+                                <div id="description-for-snmgremailid" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.op_seniormanagerEmailid, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            <div class="form-field__button">
+                                <button class="button button--primary" data-submission-text="@Translate.Text("Submitting")..." type="submit">@Translate.Text("Epass.Submit")</button>
+                            </div>
+
+                        </div>
+
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,63 @@
+﻿@using System.Linq
+@using DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey
+@model DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey.SurveyQuestionViewModel
+@{
+    string buttonradio = Model.Answers.Find(x => !string.IsNullOrEmpty(x.ImageUrl)) == null ? "form-field--buttonradio" : "form-field--iconradio";
+    string fakeradio = Model.Answers.Find(x => !string.IsNullOrEmpty(x.ImageUrl)) == null ? "form-field__fakeradio" : "form-field__fakeiconradio";
+    string dclass = Model.Answers.Find(x => x.DynamicQuestions != null && x.DynamicQuestions.Count > 0) != null ? "form-field__radio--toggle" : "";
+    string isClear = string.IsNullOrEmpty(dclass) ? "" : "is-clear=\"true\"";
+}
+<div class="form-dynamic-section active">
+    <div class="form-dynamic-section_screen"></div>
+    <div class="form-dynamic-section_title">
+        @Html.Raw(Model.Description)
+    </div>
+    <div class="form-field @Html.Raw(buttonradio) @Html.Raw(dclass)">
+        <fieldset class="fieldset">
+            <legend class="form-field__label">
+                <span class="aria-only">@Html.Raw(Model.Description)</span>
+            </legend>
+            @foreach (SurveyAnswerViewModel vm in Model.Answers)
+            {
+                string check = vm.Selected ? "checked=\"checked\"" : "";
+
+                <p class="form-field__radio ">
+                    <label>
+                        <input class="form-field__input form-field__input--radio " id="ff_@Model.GetKey()" name="@Model.GetKey()" type="radio" value="@vm.Number" aria-describedby="des_@Model.Number" data-parsley-errors-container="#des_@Model.Number" data-parsley-multiple="@Model.GetKey()" @Html.Raw(vm.GetToggleAttribute(Model)) @Html.Raw(isClear) data-parsley-required-message="@Sitecore.Globalization.Translate.Text("j154_FR")" required="required" @Html.Raw(check)>
+
+                        <span class="@Html.Raw(fakeradio) focus-enabled">
+                            @if (!string.IsNullOrEmpty(vm.ImageUrl))
+                            {
+                                <img src="@Html.Raw(vm.ImageUrl)" alt="@vm.Description">
+                            }
+                            @vm.Description
+                        </span>
+                    </label>
+                </p>
+            }
+
+            <div id="des_@Model.Number" class="form-field__messages">
+            </div>
+        </fieldset>
+    </div>
+    @foreach (var ans in Model.Answers)
+    {
+        if (ans.DynamicQuestions != null && ans.DynamicQuestions.Count > 0)
+        {
+            foreach (var dq in ans.DynamicQuestions)
+            {
+                switch (dq.Type)
+                {
+                    case QuestionType.RadioButton:
+                    case QuestionType.CheckBox:
+                        Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_DynamicSingleSelectButton.cshtml", dq);
+                        break;
+                    case QuestionType.Rating:
+                        Html.RenderPartial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/_Rating.cshtml", dq);
+                        break;
+                }
+            }
+        }
+    }
+</div>
+

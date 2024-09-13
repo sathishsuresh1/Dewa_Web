@@ -1,0 +1,149 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model openTenderList
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m23-table" data-component="m23-table">
+            <div class="j131-scrap-sales--table_title">
+                <p style="line-height: 26px!important;">@Html.Raw(Translate.Text("SS_PurchaseHistoryTitle"))</p>
+                @*<a href="" class="link">View all</a>*@
+            </div>
+            <table class="m23-table__content-table" style="background-color: #fff">
+                <thead class="m23-table__content-table-header">
+                    <tr class="m23-table__content-table-row" tabindex="0">
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_SlNo")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_TenderNo")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_Description")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_Status")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Html.Raw(@Translate.Text("SS_Fee"))</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_FloatingDate")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_ClosingDate")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_Receipt")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_Documents")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BOMStructure")</th>
+                        <th class="m23-table__content-table-cell--header center-text">@Translate.Text("SS_BidActions")</th>
+                    </tr>
+                </thead>
+                <tbody class="m23-table__content-table-body">
+                    @if (Model != null && Model.opentender != null)
+                    {
+                        foreach (openTender item in Model.opentender)
+                        {
+                            <tr class="m23-table__content-table-row" tabindex="0">
+                                <td class="m23-table__content-table-cell m23-table__content-table-cell--center" data-label="@Translate.Text("SS_SlNo")">
+                                    @(item.serialNumber)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_TenderNo")">
+                                    @(item.transactionNumber)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_Description")">
+                                    @(item.transactionDescription)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_Status")">
+                                    @Translate.Text(item.bidstatus)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_Fee")">
+                                    @(item.tenderFeeAmount)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_FloatingDate")">
+                                    @(item.floatingDate)
+                                </td>
+                                <td class="m23-table__content-table-cell" data-label="@Translate.Text("SS_ClosingDate")">
+                                    @(item.closingDate)
+                                </td>
+                                <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_Receipt")">
+                                    <a href="javascript:void(0)" data-tid="@(item.referencenumber)" class="button button--primary button--very_small reciept-downloadbtn">@Translate.Text("SS_View")</a>
+                                </td>
+                                <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_Documents")">
+                                    <a href="javascript:void(0)" data-tid="@(item.transactionNumber)" class="button button--primary button--very_small doc-downloadbtn">@Translate.Text("SS_Download")</a>
+                                </td>
+                                <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_BOMStructure")">
+                                    <a href="javascript:void(0)" data-tid="@(item.transactionNumber)" class="button button--primary button--very_small bomstru-downloadbtn">@Translate.Text("SS_Download")</a>
+                                </td>
+                                @if (item.action == "CREATE")
+                                {
+                                    <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_BidActions")">
+                                        <a href="@string.Format("{0}?t={1}&m={2}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP1),item.transactionNumber,item.action)" class="button button--primary button--very_small bidaction-bidnowbtn">@Translate.Text("SS_BidNow")</a>
+                                    </td>
+                                }
+                                else if (item.action == "EDIT")
+                                {
+                                    <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_BidActions")">
+                                        <a href="@string.Format("{0}?t={1}&m={2}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP1),item.transactionNumber,item.action)" class="button button--primary button--very_small bidaction-bidnowbtn">@Translate.Text("SS_BidEdit")</a>
+                                    </td>
+                                }
+                                else if (item.action == "DISPLAY")
+                                {
+                                    <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_BidActions")">
+                                        <a href="@string.Format("{0}?t={1}&m={2}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP1),item.transactionNumber,item.action)" class="button button--primary button--very_small bidaction-bidnowbtn">@Translate.Text("SS_BidView")</a>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="m23-table__content-table-cell center-text" data-label="@Translate.Text("SS_BidActions")">
+                                        @* <a href="@string.Format("{0}?t={1}&m={2}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP1),item.transactionNumber,item.action)" class="button button--primary button--very_small bidaction-bidnowbtn">@Translate.Text("SS_BidNone")</a>*@
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+
+
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div style="display:none">
+
+    <form id="scrap-doc-form" action="/api/sitecore/ScrapSale/DownloadTenderDocument" method="post">
+        @Html.AntiForgeryToken();
+        <input type="hidden" name="tno" id="tno" class="tno" value="" />
+    </form>
+
+    <form id="scrap-reciept-form" action="/api/sitecore/ScrapSale/ViewTenderReciept" method="post">
+        @Html.AntiForgeryToken();
+        <input type="hidden" name="tno" id="tno" class="tno" value="" />
+    </form>
+
+    <form id="scrap-bomstru-form" action="/api/sitecore/ScrapSale/DownloadBOMDocument" method="post">
+        @Html.AntiForgeryToken();
+        <input type="hidden" name="tno" id="tno" class="tno" value="" />
+    </form>
+</div>
+
+
+<script>
+    setTimeout(function () {
+
+        $(".doc-downloadbtn").on("click", function () {
+            // alert();
+            $(".tno").val($(this).data("tid"))
+            $("#scrap-doc-form").submit();
+
+        });
+
+
+        $(".reciept-downloadbtn").on("click", function () {
+            // alert();
+            $(".tno").val($(this).data("tid"))
+            $("#scrap-reciept-form").submit();
+
+        });
+
+        $(".bomstru-downloadbtn").on("click", function () {
+            // alert();
+            $(".tno").val($(this).data("tid"))
+            $("#scrap-bomstru-form").submit();
+
+        });
+
+    }, 500);
+
+</script>

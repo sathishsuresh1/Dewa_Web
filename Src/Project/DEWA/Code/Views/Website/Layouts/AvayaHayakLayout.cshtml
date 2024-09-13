@@ -1,0 +1,67 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Resources.Media;
+@using Sitecore.Globalization;
+@using Sitecore.Links.UrlBuilders;
+@using Sitecore.Mvc.Analytics.Extensions;
+@using DEWAXP.Foundation.Helpers.Extensions;
+@using System.Web.Optimization
+@using DEWAXP.Foundation.Helpers.MetaTags
+@model RenderingModel
+@{
+    var currentItem = Html.Sitecore().CurrentItem;
+    var textDirection = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var lang = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+
+<!doctype html>
+<html lang="@Model.Item.Language.Name" dir="@textDirection">
+<head>
+    @*@Html.GetMetaTags()*@
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/MetaTags.cshtml", Sitecore.Context.Item)
+    @Html.GetSeoTagsForPage(Sitecore.Context.Item)
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/_FaviconRendering.cshtml")
+    @Scripts.Render("~/bundles/headjs")
+    <script type="text/javascript" src="~/Scripts/External/moment/moment.min.js"></script>
+    @if (lang == "en")
+    {
+        <link href="/styles/hayak/static.en.css" media="all" rel="stylesheet" type="text/css">
+        <link href="/styles/hayak/typography.en.css" media="all" rel="stylesheet" type="text/css">
+    }
+    else
+    {
+        <link href="/styles/hayak/static.ar.css" media="all" rel="stylesheet" type="text/css">
+        <link href="/styles/hayak/typography.ar.css" media="all" rel="stylesheet" type="text/css">
+    }
+    <link href="/styles/hayak/print.css" media="print" rel="stylesheet" type="text/css">
+    <!--Visitor-->
+	@Html.Sitecore().VisitorIdentification()
+	<!--Visitor-->
+</head>
+<body id="page">
+    <!--[if lte IE 8]>
+        <div class="browserupgrade">
+            <div class="grid browserupgrade__grid-row">
+                <div class="grid__column grid__column--12">
+                    @if (lang.Equals("ar"))
+                    {
+
+                        <p dir="rtl" class="browserupgrade__message">المتصفح قديم. <a class="browserupgrade__link" href="/compatibility.html">الرجاء القيام بترقية المتصفح</a> للاستخدام الأمثل للموقع.</p>
+                    }
+                    else
+                    {
+                        <p class="browserupgrade__message">You are using an <strong>outdated</strong> browser. Please <a class="browserupgrade__link" href="/compatibility.html">upgrade your browser</a> to improve your experience.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    <![endif]-->
+    <h1 style="display: none;">@Html.Sitecore().Field("Browser Title", new { DisableWebEdit = true })</h1> <!--This H1 tag is a guideline for Bing Search Engine -->
+    @Html.Sitecore().Placeholder("main")
+    <script type="text/javascript" src="~/Scripts/hayak/static.js"></script>
+    <script type="text/javascript" src="~/Scripts/hayak/HtmlSanitizer.js"></script>
+    @Html.Partial("~/Views/Website/SubLayouts/ReadSpeaker/_ReadSpeaker.cshtml")
+  </body>
+
+</html>
+

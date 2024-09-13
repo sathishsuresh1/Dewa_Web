@@ -1,0 +1,53 @@
+﻿@using DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+}
+
+<fieldset class="fieldset form-field mb48">
+    @if (!string.IsNullOrWhiteSpace(Model.Asheading) && Model.Asheading.Equals("X")) { }
+    else
+    {
+        <legend class="form-field__label">
+            @Model.Question
+        </legend>
+    }
+    @if (Model.Optionslist != null)
+    {
+        <div class="m76-range-slider" data-component="m76-range-slider">
+            <div class="range-container">
+                <div class="range-container-bg">
+                    <input id="form-field-rangeslider@(groupnumber)_question@(Model.Questionnumber)"
+                           name="form-field-rangeslider@(groupnumber)_question@(Model.Questionnumber)"
+                           data-range-slider="" 
+                           class="range blue slider"
+                           type="range" 
+                           data-snap="0,@Model.Optionslist.Select(i => i.Questionoption).Aggregate((i, j) => i + "," + j)" 
+                           min="0" 
+                           value="@Model.Optionslist.Select(x => x.Selectedflag == "X").Max()" 
+                           max="@Model.Optionslist.Select(x => Convert.ToInt32(x.Questionoption)).Max()" 
+                           step="1" 
+                           list="ticks"
+                           data-parsley-pattern="/[@Model.Optionslist.Select(x => Convert.ToInt32(x.Questionoption)).Min()-@Model.Optionslist.Select(x => Convert.ToInt32(x.Questionoption)).Max()]/"
+                           data-parsley-pattern-message="@Model.Questionplaceholder"
+                           data-parsley-errors-container="#description-for-rangeslider@(groupnumber)_question@(Model.Questionnumber)"
+                           data-parsley-id="28">
+                </div>
+            </div>
+            <div class="ticks-container" data-range-ticks="">
+                <div class="sliderticks">
+                    <span data-option="0" class="ticks"></span>
+                    @foreach (Optionslist optionitem in Model.Optionslist)
+                    {
+                        <span data-option="@optionitem.Questionoption" class="ticks"><span class="ticks-inner-text">@optionitem.Questionoptiondescription</span><span class="rangeslider_click"></span></span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    
+</fieldset>
+<div id="description-for-rangeslider@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages mb24">
+</div>

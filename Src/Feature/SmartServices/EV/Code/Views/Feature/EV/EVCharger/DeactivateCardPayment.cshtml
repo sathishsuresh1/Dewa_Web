@@ -1,0 +1,132 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models.Payment
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@model PaymentCompletionModel
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="grid">
+    <div class="grid__row noprint">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("payment-confirmation/page-title")
+        </div>
+    </div>
+
+    @if (Model.Succeeded)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                    <div class="m40-status-message__title icon--success">@Translate.Text("Payment completed")</div>
+                    @*<div class="m40-status-message__text">@Model.Message</div>*@
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+
+            <div class="grid__column grid__column--12 grid__column--form">
+                <h2 class="text__section-title success-subtitle__h2">@Translate.Text("Transaction_Details")</h2>
+
+                <div class="m42-keyvalue success-page">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("payment date and time label")</dt>
+                        @if (Language.Current.Name.ToLowerInvariant() == "ar-ae")
+                        {
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "ss:" + timeFix + "mm:" + timeFix + "HH", Sitecore.Context.Culture)</dd>
+                        }
+                        else
+                        {
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+                        }
+                        @*<dt class="m42-keyvalue__key--stacked">@Translate.Text("receipt id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.ReceiptIdentifiers</dd>*@
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("evdeactivate.deg transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("moveout.payment.businesspartnernumber")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.BusinessPartners</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Model.Total+ Model.SuqiaAmount)</dd>
+                    </dl>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m44-bill-selector" data-component="m44-bill-selector" data-bill-total="@Model.Total" data-currency-suffix="@Translate.Text("AED")">
+                    <div class="m44-bill-selector__partner">
+                        <div class="m44-bill-selector__accounts-list">
+                            @foreach (var receipt in Model.LstReceipts)
+                            {
+                                var indicatorClass = "active";
+
+                                <div class="m44-bill-selector__account_confirmation--detail">
+                                    <span class="m44-bill-selector__account m44-bill-selector__account--confirm" data-acc-detail="wrapper">
+
+                                        <span class="m44-bill-selector__header">
+                                            <span class="m44-bill-selector__name" data-acc-detail="acc_name">
+                                                @(receipt.ReceiptAccountName)
+                                                <span dir="@dir" class="m44-bill-selector__status m44-bill-selector__status--@indicatorClass"></span>
+                                            </span>
+
+                                            <span class="m44-bill-selector__details">
+                                                <abbr title="@Translate.Text("Account")">@Translate.Text("Acc")</abbr>: <span data-acc-detail="acc_number">@receipt.AccountNumber</span><span class="aria-only"> | </span>
+                                            </span>
+
+                                        </span>
+                                    </span>
+                                    @*<div class="m44-bill-selector__confirmation-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">
+                                        @receipt.Amount
+                                    </div>*@
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    else
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    }
+
+    @*<div class="noprint">
+            @Html.Sitecore().Placeholder("payment-confirmation/next-step-title")
+        </div>*@
+
+    <div class="grid__row noprint">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+            <div class="form-field__button">
+
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_DeActivateCard_Details)" class="button button--primary button--next">@Translate.Text("Ev.return to deactivate")</a>
+            </div>
+        </div>
+    </div>
+</div>

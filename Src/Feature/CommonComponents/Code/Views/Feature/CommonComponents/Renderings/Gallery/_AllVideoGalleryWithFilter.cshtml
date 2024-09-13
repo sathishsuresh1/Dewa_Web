@@ -1,0 +1,196 @@
+﻿@using System.Linq
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.CommonComponents.Models.Gallery
+@model MediaVidoeGalleryModel
+
+@if (Model != null)
+{
+
+    <div class="grid j134-media" data-journey="j134-media">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m35-filter m35-filter--left">
+                    <label for="form-field-albumtype" class="form-field__label">
+                        <span class="aria-only">@Translate.Text("albumtype")</span>
+                    </label>
+                    <label for="form-field-searchtext" class="form-field__label">
+                        <span class="aria-only">@Translate.Text("searchText")</span>
+                    </label>
+                    <div class="m35-filter__column--combination">
+                        @if (Model.FilterDataList != null)
+                        {
+
+                            <div class="form-field form-field--select form-field--select-single">
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full " id="form-field-albumtype" name="AlbumType"
+                                            onchange="FnTotalFiltered()">
+                                        <option value="">@Translate.Text("All")</option>
+                                        @foreach (string filterValue in Model.FilterDataList)
+                                        {
+                                            <option value="@(filterValue.Replace(" ",""))">@(filterValue)</option>
+                                        }
+                                    </select>
+                                </span>
+                            </div>
+                        }
+                        <div class="form-field form-field--text">
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text actionElement" id="form-field-searchtext" name="searchText" type="text" placeholder="@Translate.Text("PG_SearchPlaceholder")">
+                            </span>
+                        </div>
+                        <button type="button" id="filterbtn" class="icon-search actionElement ">
+                            <span class="aria-only">@Translate.Text("searchText")</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @foreach (BaseMediaVideoListItem item in Model.AlbumPageList)
+        {
+            <div class="grid__row typeFilter @(item.Key.Replace(" ","") + "_content")">
+                <div class="grid__column grid__column--12">
+                    <div class="j134-media--photo_gallerytitle">
+                        @Html.Raw(item.Key)
+                    </div>
+
+                    @{
+                        int i = 0;
+                        if (item.MediaItems != null && item.MediaItems.Count > 0)
+                        {
+                            <div class="j134-media--photo_outer">
+                                <div class="j134-media--photo_gallery">
+                                    @foreach (DEWAXP.Feature.CommonComponents.Models.Renderings.YoutubeVideo albumpage in item.MediaItems)
+                                    {
+                                        string _teaserUrl = string.Format("{0}?id={1}", @LinkHelper.GetItemUrl(SitecoreItemIdentifiers.VIDEOGALLERYPAGE), albumpage.VideoId);
+                                        if (i == 0)
+                                        {
+                                            @Html.Raw(" <div class='j134 - media--photo_slide'>")
+                                        }
+                                        else if (i % 4 == 0)
+                                        {
+                                            @Html.Raw("</div><div class='j134 - media--photo_slide'>")
+                                        }
+
+                                        string AltHtml = "";
+                                        string background = "background-color:#f6f6f6";
+                                        if (albumpage.ImageLink != null)
+                                        {
+                                            AltHtml = !string.IsNullOrEmpty(albumpage.Title) ? string.Format("data-alt=\"{0}\"", albumpage.Title) : "";
+                                            background = !string.IsNullOrEmpty(albumpage.ImageLink) ? string.Format("background-image: url('{0}')", albumpage.ImageLink) : background;
+                                        }
+                                        <div class="grid__column grid__column--4 grid__column--videog" data-dvalue="@(albumpage.Title)">
+                                            <div class="m9-teaser" data-component="m9-teaser">
+                                                <a href="@(_teaserUrl)" class="teaser__link">
+                                                    <div class="m9-teaser-image" style="@(background)"></div>
+                                                    <div class="teaser__content">
+                                                        <h4 class="teaser__title">@Html.Raw(albumpage.Title)</h4>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        i++;
+                                        if (i == item.MediaItems.Count)
+                                        {
+                                            @Html.Raw("</div>")
+                                        }
+
+                                    }
+
+
+
+                                </div>
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+        }
+    </div>
+
+    <script type="text/javascript">
+
+        docReady(function () {
+            jQuery("#filterbtn").on("click", function () {
+                FnTotalFiltered();
+            });
+
+            jQuery('.actionElement').on('keypress', function (e) {
+                if (e.keyCode == 13) {
+                    FnTotalFiltered();
+                }
+            });
+
+
+        });
+
+
+        function FilterByType(type) {
+            if (type != null && type != undefined && type != "") {
+                jQuery(".typeFilter").hide();
+                jQuery("." + type + "_content").show();
+            } else {
+                jQuery(".typeFilter").show();
+            }
+        }
+
+        function FilterByText(element) {
+            //var regex = new RegExp('\\b\\w*' + element + '\\w*\\b');
+            //$('.j134-media--photo_item').hide().filter(function () {
+            //    return regex.test($(element).data('dvalue'))
+            //}).show();
+
+            var filtertext = $(element).val().toLowerCase();
+            if (filtertext != null && filtertext != undefined && filtertext != "") {
+                $.each($('.grid__column--videog'), function (key, value) {
+                    var d = String($(value).data("dvalue")).toLowerCase();
+                    $(value).hide();
+                    try {
+                        if (d.includes(filtertext)) {
+                            $(value).show();
+                        }
+                    } catch (e) {
+                        $(value).hide();
+                    }
+                });
+            } else {
+                $('.grid__column--videog').show();
+            }
+
+        }
+
+        function DectectAllChildIsHide() {
+
+            $.each(jQuery(".typeFilter"), function (i, obj) {
+
+                var childs = jQuery(obj).find('.grid__column--videog');
+                var ccount = childs.length;
+                var hideCount = 0;
+                $.each(childs, function (ci, cobj) {
+
+                    if (jQuery(cobj).css("display") == "none") {
+                        hideCount++;
+                    }
+                });
+
+                if (hideCount == ccount) {
+                    jQuery(obj).hide();
+                }
+            });
+            $(".m66-preloader-fullpage").fadeOut();
+        }
+
+        function FnTotalFiltered() {
+            $(".m66-preloader-fullpage").show();
+            var type = jQuery("#form-field-albumtype").children("option:selected").val();
+            FilterByType(type);
+            FilterByText(jQuery("#form-field-searchtext"));
+            DectectAllChildIsHide();
+            window.initComponents('rs_area');
+            jQuery(window).trigger('reinit_tooltip');
+        }
+    </script>
+}

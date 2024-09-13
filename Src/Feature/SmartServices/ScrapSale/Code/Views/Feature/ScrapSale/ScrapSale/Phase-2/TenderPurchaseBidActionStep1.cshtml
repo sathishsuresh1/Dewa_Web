@@ -1,0 +1,109 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.ScrapSale.Models.ScrapSale.TenderBidingStep1Model
+
+
+<div class="grid">
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_PORTAL_DASHBOARD)" class="button button--text button--back">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">
+                    @Translate.Text("SS_BD_Header") @Model.TenderNumber
+                </h2>
+                <p class="text-page__intro">
+                    @if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft)
+                    {
+                        @Model.TenderARDescription
+                    }
+                    else
+                    {
+                        @Model.TenderEndDescription
+                    }
+                </p>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+
+    <!-- step tracker-->
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="7" data-current-step="1" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="false">
+                <div class="m38-steptracker__info-wrapper">@Translate.Text("SS_BD_Step1")</div>
+                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+         FormMethod.Post, new
+         {
+             @class = "form",
+             @id = "IdTenderbidAction",
+             data_form = "true",
+             data_parsley_focus = "none",
+             @data_submit_validate = "enabled",
+             enctype = "multipart/form-data",
+             @autocomplete = "off"
+         }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="m42-keyvalue">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_TenderNumber")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TenderNumber</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_BidAmountExVat")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TenderBondAmount @Translate.Text("AED")</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_VatPayable")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TenderVatPayble @Translate.Text("AED")</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_TenderStatus")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Translate.Text(Model.TenderStatus)</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_BidStatus")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Translate.Text(Model.TenderBidStatus)</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_SubmissionDate")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@(!string.IsNullOrEmpty(Model.TenderSubmissiondate) ? Convert.ToDateTime(Model.TenderSubmissiondate).ToString("dd MMMM yyyy", Sitecore.Context.Culture) : "")</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@(Translate.Text("SS_TimeLeft"))</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" dir="ltr" style="color: #717173;">@(!string.IsNullOrWhiteSpace( Model.TenderSubmissionDeadline) ? Model.TenderSubmissionDeadline : "00:00:00")</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_TenderBondVal")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TenderBidAmount @Translate.Text("AED")</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_TenderBondPer")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TenderBondPercentage @Translate.Text("AED")</dd>
+
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_BidRefNumber")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@(!string.IsNullOrWhiteSpace(Model.TenderBidRefNumber) ? Model.TenderBidRefNumber : " N/A")</dd>
+                    </dl>
+                </div>
+                <div class="form-field__button">
+                    @if (Model.TenderStatusValue == "1" && Model.bidMode != "DISPLAY")
+                    {
+                        <button id="btnwithdrow" type="submit" name="SubmitType" value="stpwithdraw" class="button button--primary button--fullwidth-mobile mb12" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("SS_BD_Withdraw")</button>
+                    }
+                    <button id="btnnext" type="submit" name="SubmitType" value="stpnext" class="button button--primary button--fullwidth-mobile mb12" data-submission-text="@Translate.Text("Continue")...">@Translate.Text("Next")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+
+

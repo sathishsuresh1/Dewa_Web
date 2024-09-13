@@ -1,0 +1,75 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using DEWAXP.Foundation.Helpers.Extensions
+@model DEWAXP.Feature.Dashboard.Models.BES.Bes
+
+@if (Model != null)
+{
+    string endpoint = !string.IsNullOrEmpty(Model.Endpoint) ? Model.Endpoint : "/api/bes/proxy";
+    string returnURL = !string.IsNullOrEmpty(Model.returnurl) ? Model.returnurl : string.Empty;
+    string id = "bes__inner_" + Model.ComponentId;
+    bool IsNEwLayoutEnable = Model.EnableNewBESLayout == "1";
+    string hindput = "hidden_" + Guid.NewGuid();
+    if (IsNEwLayoutEnable)
+    {
+        <input type="hidden" id="@hindput" value="@Model.Header" />
+        if (Model.CalltoAction != null)
+        {
+        <script>
+            var h = $("#@hindput");
+            jQuery(h).closest(".j69-dashboard--card").find(".j69-dashboard--card_title").html($(h).val());
+            jQuery(h).closest(".j69-dashboard--card").find(".j69-dashboard--card-head_link").show();
+            jQuery(h).closest(".j69-dashboard--card").find(".j69-dashboard--card-head_link_anchor").html('@Model.CalltoAction.Text');
+            jQuery(h).closest(".j69-dashboard--card").find(".j69-dashboard--card-head_link_anchor").attr('title','@Model.CalltoAction.Text');
+            jQuery(h).closest(".j69-dashboard--card").find(".j69-dashboard--card-head_link_anchor").attr('href','@Model.CalltoAction.Url');
+        </script>
+        }
+        else
+        {
+        <script>
+            var h = $("#@hindput");
+            jQuery(h).closest(".j69-dashboard--card").find(".j69-dashboard--card_title").html($(h).val());
+        </script>
+        }
+    }
+    <div class="bes-container" style="display:none;">
+        <div class="bes-placeholder @Model.cssclass">
+
+            <!--Add condition to Hide -->
+            @if (!IsNEwLayoutEnable)
+            {
+                <div class="m17-sectiontitle" data-component="m17-sectiontitle">
+                    @if (!string.IsNullOrEmpty(Model.Header))
+                    {
+                        <h3 class="m17-sectiontitle__title text__section-title">
+                            @Model.Header
+                        </h3>
+                    }
+                    @if (Model.CalltoAction != null)
+                    {
+                        <a href="@Model.CalltoAction.Url" @Model.CalltoAction.GetUrlAttributes() class="m17-sectiontitle-bes m17-sectiontitle__cta button button--next" title="@Model.CalltoAction.Text">@Model.CalltoAction.Text</a>
+                    }
+                </div>
+            }
+
+
+            <div class="bes-wrapper">
+                @if (!string.IsNullOrEmpty(Model.Component) || !string.IsNullOrEmpty(Model.ComponentId))
+                {
+                    <div id="@id"></div>
+                }
+            </div>
+            @if (!IsNEwLayoutEnable && !string.IsNullOrEmpty(Model.Footer))
+            {
+                <div class="bes-wrapper" style="padding-top:10px;">@Model.Footer</div>
+            }
+        </div>
+        <script>
+            $(".bes-accountid").on('change', function () {
+                //console.log('bes');
+                loadwidget('@Model.Component', '@id', '@endpoint', '@returnURL');
+            });
+        </script>
+    </div>
+
+
+}

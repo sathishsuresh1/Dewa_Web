@@ -1,0 +1,71 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.DRRG.Models.DRRGModuleList
+
+<table class="m23-table__content-table mt0">
+    <thead class="m23-table__content-table-header">
+        <tr class="m23-table__content-table-row">
+            <th class="m23-table__content-table-cell--header">Model Name</th>
+            <th class="m23-table__content-table-cell--header">Rated Power</th>
+            @*<th class="m23-table__content-table-cell--header">Extra Compliance</th>*@
+            <th class="m23-table__content-table-cell--header">Usage Category</th>
+            <th class="m23-table__content-table-cell--header">Model Datasheet</th>
+        </tr>
+    </thead>
+    <tbody class="m23-table__content-table-body">
+        @if (Model != null && Model.ModuleItem.Count > 0)
+        {
+            foreach (var item in Model.ModuleItem)
+            {
+                <tr class="j02-dashboard--row m23-table__content-table-row middle">
+                    <td data-label="" class="m23-table__content-table-cell">
+                        @if (Model.isAdmin)
+                        {
+                            <a class="link" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Details)?id=@item.inverterId">
+                                @item.modelName
+                            </a>
+                        }
+                        else
+                        {
+                            @item.modelName
+                        }
+                    </td>
+                    <td data-label="" class="m23-table__content-table-cell">
+                        @item.ratedpower
+                    </td>
+                    @*<td data-label="" class="m23-table__content-table-cell">
+                        @item.extraCompliance
+                    </td>*@
+                    <td data-label="" class="m23-table__content-table-cell">
+                        @item.usageCategory
+                    </td>
+                    <td data-label="@item.id" class="m23-table__content-table-cell centered">
+                        <a data-id="@item.inverterId" data-manuid="@item.referenceNumber" href="#" class="link filelink icon icon-download">
+                            <span class="aria-only">Download</span>
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr class="j02-dashboard--row m23-table__content-table-row middle">
+                <td colspan="5" data-label="" class="m23-table__content-table-cell">
+                    No Record Found.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript" language="javascript">
+    $(".filelink").click(function (event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        var fileid = $(this).data('id');
+        var manuid = $(this).data('manuid');
+        window.open("/api/sitecore/DRRGRegistration/mdFile?id=" + fileid + "&manu=" + manuid, '_blank');
+    });
+</script>

@@ -1,0 +1,458 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@model  DEWAXP.Feature.HR.Models.CareerFair.NormalRegistrationDetail
+@{
+    var now = DateHelper.DubaiNow().AddMonths(-1);
+    //var yearmax = DateTime.ParseExact(DateHelper.DubaiNow().AddYears(-14).ToString("yyyy1206"), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+    var yearmin = DateHelper.DubaiNow().AddYears(-60);
+    var yearmax = DateHelper.DubaiNow().AddYears(-18);
+
+
+    List<SelectListItem> yoeList = new List<SelectListItem>();
+    yoeList.Add(new SelectListItem() { Text = Translate.Text("yoeL1"), Value = Translate.Text("yoeL1val") });
+    yoeList.Add(new SelectListItem() { Text = Translate.Text("yoeL2"), Value = Translate.Text("yoeL2") });
+    yoeList.Add(new SelectListItem() { Text = Translate.Text("yoeL3"), Value = Translate.Text("yoeL3") });
+    yoeList.Add(new SelectListItem() { Text = Translate.Text("yoeL4"), Value = Translate.Text("yoeL4") });
+    yoeList.Add(new SelectListItem() { Text = Translate.Text("yoeL5"), Value = Translate.Text("yoeL5") });
+}
+<div class="fromNormalRegistrationWapper">
+    <div class="grid__row academy-inner">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @if (TempData["ErrorMessage"] != null)
+            {
+
+                <div class="m40-status-message m40-status-message--error  " data-component="m40-status-message">
+                    <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                    <div class="m40-status-message__text">@Convert.ToString(TempData["ErrorMessage"])</div>
+                </div>
+            }
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "fromNormalRegistration", @data_form = "true", @enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-field form-field--text  ">
+                    <label for="form-field-ApplicantFirstName" class="form-field__label">
+                        @Translate.Text("CF_NR__FirstName")
+                        @*<span class="form-field__label-required aria-only">(required)</span>*@
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.ApplicantFirstName,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                            @name = "ApplicantFirstName",
+                            @id = "form-field-ApplicantFirstName",
+                            @placeholder = @Translate.Text("CR_NR_Placeholder_FirstName"),
+                            @required = Translate.Text("CR_NR_Required_FirstName"),
+                            @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_FirstName"),
+                            @data_parsley_errors_container = "#description-for-ApplicantFirstName",
+                            @aria_describedby = "description-for-ApplicantFirstName"
+                        })
+                    </span>
+                    <div id="description-for-ApplicantFirstName" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.ApplicantFirstName, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                @*<div class="form-field form-field--text">
+                        <label for="form-field-ApplicantMiddleName" class="form-field__label">
+                            @Translate.Text("CF_NR__MiddleName")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.ApplicantMiddleName,
+                            new
+                            {
+                                @class = "form-field__input form-field__input--text",
+                                @name = "ApplicantMiddleName",
+                                @id = "form-field-ApplicantMiddleName",
+                                @placeholder = @Translate.Text("CR_NR_Placeholder_MiddleName"),
+                                @aria_required = "true",
+                                @required = Translate.Text("CR_NR_Required_MiddleName"),
+                                @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_MiddleName"),
+                                @data_parsley_errors_container = "#description-for-ApplicantMiddleName",
+                                @aria_describedby = "description-for-ApplicantMiddleName"
+                            }
+                           )
+                        </span>
+                        <div id="description-for-ApplicantMiddleName" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.ApplicantLastName, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>*@
+                <div class="form-field form-field--text">
+                    <label for="form-field-ApplicantLastName" class="form-field__label">
+                        @Translate.Text("CF_NR__LastName")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.ApplicantLastName,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                            @name = "ApplicantLastName",
+                            @id = "form-field-ApplicantLastName",
+                            @placeholder = @Translate.Text("CR_NR_Placeholder_LastName"),
+                            @required = Translate.Text("CR_NR_Required_LastName"),
+                            @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_LastName"),
+                            @data_parsley_errors_container = "#description-for-ApplicantLastName",
+                            @aria_describedby = "description-for-ApplicantLastName"
+                        }
+                       )
+                    </span>
+                    <div id="description-for-ApplicantLastName" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.ApplicantLastName, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field">
+                    <fieldset class="fieldset">
+                        <legend class="form-field__label">
+                            @Translate.Text("CR_NR__Gender")
+                            @*<span class="form-field__label-required aria-only">(required)</span>*@
+                        </legend>
+                        <p class="form-field__radio ">
+                            <label for="form-field-radio_1_1">
+                                <input class="form-field__input form-field__input--radio" id="form-field-radio_1_1" name="Gender" type="radio" value="@Translate.Text("CF_NR__Male")" aria-describedby="description-for-z6zdgabug" data-parsley-errors-container="#description-for-z6zdgabug" checked="" data-parsley-multiple="radios_group1" data-parsley-id="9">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("CF_NR__Male")
+                                </span>
+                            </label>
+                        </p>
+                        <p class="form-field__radio ">
+                            <label for="form-field-radio_1_2">
+                                <input class="form-field__input form-field__input--radio" id="form-field-radio_1_2" name="Gender" type="radio" value="@Translate.Text("CF_NR__Female")" aria-describedby="description-for-z6zdgabug" data-parsley-errors-container="#description-for-z6zdgabug" data-parsley-multiple="radios_group1">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("CF_NR__Female")
+                                </span>
+                            </label>
+                        </p>
+                        <div id="description-for-z6zdgabug" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                </div>
+                <div id="datepicker-container-nzzttuiuk" class="form-field form-field--text  ">
+                    <label for="form-field-dob" class="form-field__label">
+                        @Translate.Text("CR_NR__DOB")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        @Html.TextBoxFor(x => x.DateOfBirth, new
+                       {
+
+                           data_parsley_id = "6",
+                           @class = "form-field__input form-field__input--text  form-field__input--datepicker  picker__input",
+                           id = "form-field-dob",
+                           placeholder = Translate.Text("CR_NR_Placeholder_DOB"),
+                           required = "required",
+                           data_parsley_required_message = Translate.Text("CR_NR_ErrorMsg_DOB"),
+                           @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_DOB"),
+                           data_el = "datepicker",
+                           data_parsley_errors_container = "#description-for-dob",
+                           data_picker_options = "{\"selectMonths\": true ,\"selectYears\": 60 ,\"max\": [" + yearmax.Year + "," + (yearmax.Month) + "," + yearmax.Day + "],\"min\": [" + yearmin.Year + "," + (yearmin.Month) + "," + yearmin.Day + "] }",
+                           type = "text",
+                           @data_initial_date = string.Empty
+                       })
+                    </span>
+                    <div id="description-for-dob" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.DateOfBirth, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--text">
+                    <label for="form-field-Emailaddress" class="form-field__label">
+                        @Translate.Text("CF_NR__Emailaddress")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.Emailaddress,
+                    new
+                    {
+                        @class = "form-field__input form-field__input--text form-field--vanilla_email",
+                        @name = "Emailaddress",
+                        @id = "form-field-Emailaddress",
+                        @placeholder = @Translate.Text("CR_NR_Placeholder_Emailaddress"),
+                        @required = Translate.Text("CR_NR_Required_Emailaddress"),
+                        @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_Emailaddress"),
+                        @data_parsley_errors_container = "#description-for-Emailaddress",
+                        @aria_describedby = "description-for-Emailaddress",
+                        @type = "email"
+
+                    }
+                   )
+                    </span>
+                    <div id="description-for-Emailaddress" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Emailaddress, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--text">
+                    <label for="form-field-MobileNumber" class="form-field__label">
+                        @Translate.Text("CF_NR__MobileNumber")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                        @Html.TextBoxFor(m => m.MobileNumber,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text form-field__input--prefixed",
+                            @name = "MobileNumber",
+                            @id = "form-field-MobileNumber",
+                            @placeholder = @Translate.Text("CR_NR_Placeholder_MobileNumber"),
+                            @required = Translate.Text("CR_NR_Required_MobileNumber"),
+                            @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_MobileNumber"),
+                            @data_parsley_errors_container = "#description-for-MobileNumber",
+                            @aria_describedby = "description-for-MobileNumber",
+                            @data_parsley_mobilenumber = ""
+                        }
+                       )
+                    </span>
+                    <div id="description-for-MobileNumber" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.MobileNumber, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--text">
+                    <label for="form-field-EmiratesID" class="form-field__label">
+                        @Translate.Text("CF_NR__EmiratesID")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.EmiratesID,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                            @name = "EmiratesID",
+                            @id = "form-field-EmiratesID",
+                            @placeholder = @Translate.Text("CR_NR_Placeholder_EmiratesID"),
+                            @required = Translate.Text("CR_NR_Required_EmiratesID"),
+                            @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_EmiratesID"),
+                            @data_parsley_errors_container = "#description-for-EmiratesID",
+                            @aria_describedby = "description-for-EmiratesID",
+                            @data_parsley_emiratesid = ""
+                        }
+                       )
+                    </span>
+                    <div id="description-for-EmiratesID" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.EmiratesID, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-Qualification" class="form-field__label">
+                        @Translate.Text("CR_NR__Qualification")
+                        @*<span class="form-field__label-required aria-only">(required)</span>*@
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.Qualification, (IEnumerable<SelectListItem>
+                            )Model.QualificationList,
+                            Translate.Text("Default_Qualification"),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-Qualification",
+                                @name = "Qualification",
+                                @aria_describedby = "description-for-Qualification",
+                                @required = "",
+                                @data_parsley_error_message = @Translate.Text("CR_NR_ErrorMsg_Qualification"),
+                                @data_parsley_errors_container = "#description-for-Qualification",
+                                @data_parsley_id = "15",
+                            })
+                    </span>
+                    <div id="description-for-Qualification" class="form-field__messages">
+                    </div>
+                </div>
+
+
+                <div class="form-field form-field--text">
+                    <label for="form-field-University" class="form-field__label">
+                        @Translate.Text("CR_NR_UniversityLbl")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.University,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                            @name = "University",
+                            @id = "form-field-University",
+                            @placeholder = @Translate.Text("CR_NR_Placeholder_University"),
+
+                            @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_University"),
+                            @data_parsley_errors_container = "#description-for-University",
+                            @aria_describedby = "description-for-University"
+                        })
+                    </span>
+                    <div id="description-for-University" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.University, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-Specialisation" class="form-field__label">
+                        @Translate.Text("CR_NR__Specialisation")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.Specialisation, (IEnumerable<SelectListItem>
+                            )Model.SpecialisationList,
+                            Translate.Text("Default_Specialisation"),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-Specialisation",
+                                @name = "Specialisation",
+                                @aria_describedby = "description-for-Specialisation",
+                                @required = "",
+                                @data_parsley_error_message = @Translate.Text("CR_NR_ErrorMsg_Specialisation"),
+                                @data_parsley_errors_container = "#description-for-Specialisation",
+                                @data_parsley_id = "15",
+                            })
+                    </span>
+                    <div id="description-for-Specialisation" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Specialisation, "", new { @class = "parsley-errors-list" })
+                    </div>
+					
+                </div>
+
+                <div class="form-field form-field--text @Translate.Text("CR_NR_OtherValue")" style="display:none;">
+                    <label for="form-field-Other" class="form-field__label">
+                        @Translate.Text("CR_NR_OtherDetailValue")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.Other,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                            @name = "Other",
+                            @id = "form-field-Other",
+                            @placeholder = @Translate.Text("CR_NR_Placeholder_Other"),
+                            @data_parsley_error_message = Translate.Text("CR_NR_ErrorMsg_Other"),
+                            @data_parsley_errors_container = "#description-for-Other",
+                            @aria_describedby = "description-for-Other"
+                        })
+                    </span>
+                    <div id="description-for-ApplicantFirstName" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Other, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-YearsOfExperience" class="form-field__label">
+                        @Translate.Text("CR_NR_YearsOfExperienceLbl")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.YearsOfExperience, (IEnumerable<SelectListItem>)yoeList,
+                          Translate.Text("Default_YOE"),
+                          new
+                          {
+                              @class = "form-field__input form-field__input--select form-field__input--select-full",
+                              @id = "form-field-YearsOfExperience",
+                              @name = "YearsOfExperience",
+                              @aria_describedby = "description-for-YearsOfExperience",
+                              @required = "",
+                              @data_parsley_error_message = @Translate.Text("CR_NR_ErrorMsg_YearsOfExperience"),
+                              @data_parsley_errors_container = "#description-for-YearsOfExperience",
+                              @data_parsley_id = "15",
+                          })
+                    </span>
+                    <div id="description-for-YearsOfExperience" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.YearsOfExperience, "", new { @class = "parsley-errors-list" })
+                    </div>
+					<p>@Html.Raw(Translate.Text("CR_NR_SepcailizationDisclaimer"))</p>
+                </div>
+
+
+                <!--No needed-->
+                @*<fieldset class="fieldset">
+
+                        <legend class="legend">@Translate.Text("CR_NR__UploadedResume")</legend>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="../../images/preview@2x.png" data-src="../../images/preview@2x.png" data-success="../images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="cwn9omitk">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-cwn9omitk" class="form-field__label">
+                                        <strong class="form-field__label-description">Choose your resume</strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.UploadedResume,
+                                                  new
+                                                  {
+                                                      @class = "form-field__input form-field__input--upload",
+                                                      @id = "form-field-UploadedResume",
+                                                      @name = "UploadedResume",
+                                                      @type = "file",
+                                                      @aria_describedby = "description-for-UploadedResume",
+                                                      @data_parsley_errors_container = "#description-for-UploadedResume",
+                                                      @data_uploader_field = "UploadedResume",
+                                                      @accept = "application/pdf",
+                                                      //@data_accepts="'.pdf'" ,
+                                                      @data_size = "2048000",
+                                                      @data_parsley_trigger = "focusout",
+                                                      @data_parsley_id = "25"
+                                                  })
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("CR_NR__UploadedResumeBtnText")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("CF_NR_UploadResumeFormatError")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("CF_NR_UploadResumeSizeError")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="UploadedResume"></p>
+                                    <p><button class="button button--text button--remove hidden" data-uploader-remove="UploadedResume">@Translate.Text("CF_NR_UploadResumeRemoveBtnText")</button></p>
+                                </div>
+                            </div>
+                            <div id="description-for-UploadedResume" class="form-field__messages">
+                                <p class="form-field__description">@Html.ValidationMessageFor(x => x.UploadedResume, "", new { @class = "parsley-errors-list" })</p>
+                            </div>
+                        </div>
+                    </fieldset>*@
+                <div class="form-field__button">
+                    @*  <a href="javascript:void(0)" class="button button--primary button--fullwidth" onclick="alert();fnDataSubmit()">Submit</a>*@
+                    <button type="submit" class="button button--primary button--fullwidth">@Translate.Text("CR_NR_SubmitBtnText")</button>
+                    <div class="form-field__messages">
+                        @Html.ValidationMessage("ErrorMessage")
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@*<script type="text/javascript">
+        var fnDataSubmit = function () {
+            alert();
+            var _fromNormalRegistration = $(".fromNormalRegistration");
+            var _postUrl = _fromNormalRegistration.attr("action");
+            var _data = _fromNormalRegistration.serialize();
+            jQuery.ajax({
+                type: "POST",
+                url: _postUrl,
+                cache: false,
+                processData: false,
+                contentType: false,
+                data: _data,
+                success: function (result) {
+                    $(".fromNormalRegistrationWapper").html(result);
+                },
+                error: function (xhr, status, p3, p4) {
+                    var err = "Error " + " " + status + " " + p3 + " " + p4;
+                    if (xhr.responseText && xhr.responseText[0] == "{")
+                        err = JSON.parse(xhr.responseText).Message;
+                }, complete: function () {
+                    $(".j113-epass--loader").hide();
+                    $('body').removeClass('unscrollable');
+                }
+            });
+
+            return false;
+        }
+        docReady(function () {
+
+
+        });
+    </script>*@
+
+<script type="text/javascript">
+    docReady(function () {
+        var _OtherClassName = '@Translate.Text("CR_NR_OtherValue")';
+        jQuery("#form-field-Specialisation").on("change", function () {
+            jQuery("." + _OtherClassName).hide();
+            if (jQuery(this).val() == _OtherClassName) {
+                jQuery("." + _OtherClassName).show()
+            } else {
+                jQuery("#form-field-Other").val('');
+            };
+        })
+    });
+</script>

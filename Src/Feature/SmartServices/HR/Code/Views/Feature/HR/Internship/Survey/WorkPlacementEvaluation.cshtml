@@ -1,0 +1,193 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@using DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Surveydataoutput
+
+<div class="grid j167-internship">
+    <div class="grid__row ">
+        <div class="grid__column grid__column--12" id="main-skip">
+            <div class="m26-page-title title_message">
+                <h2 class="text__page-title">@(Model != null && !string.IsNullOrWhiteSpace(Model.Introductionheader) ? Model.Introductionheader : string.Empty)</h2>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "internsurveyform", @class = "form form-info", data_form = "true", @data_submit_validate = "enabled", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <input type="hidden" name="d" value="@ViewBag.surveyid">
+                if (ViewData.ModelState.IsValid && Model != null && Model.Grouplist != null && Model.Grouplist.Count > 0)
+                {
+                    int maxPage = Model.Grouplist.GroupBy(x => x.Pagenumber).Select(x => Convert.ToInt32(x.Key)).Max();
+                    int pageitemcounttemp = 1;
+                    <div class="grid" id="dvMainGrid">
+                        @foreach (Grouplist group in Model.Grouplist.Where(x => !string.IsNullOrWhiteSpace(x.Pagenumber)).OrderBy(y => Convert.ToInt32(y.Pagenumber)))
+                        {
+
+                            var pageitemcount = Model.Grouplist.Where(x => x.Pagenumber.Equals(group.Pagenumber)).Count();
+
+                            <div id="group@(group.Groupnumber)" data-page="@(group.Pagenumber)" class="pageclass pageitem mb12 @((!string.IsNullOrWhiteSpace(group.Pagenumber) && group.Pagenumber.Equals("0"))?"show":"hidden")">
+                                @if (!string.IsNullOrWhiteSpace(group.Note))
+                                {
+                                    <legend class="form-field__label">@group.Note</legend>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(group.Showheading) && group.Showheading.Equals("X"))
+                                {
+                                    <legend class="legend"><span>@group.Groupdescription</span></legend>
+                                }
+                                @foreach (Questiontypeslist question in group.Questiontypeslist)
+                                {
+                                    switch (question.Questiontype)
+                                    {
+
+                                        case "SR":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_SingleLineText.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "ML":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_SingleLineText.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "email", "email" }, { "status", Model.Status } });
+                                            break;
+                                        case "MB":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_MobileNumber.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "countrylist", (List<SelectListItem>)ViewBag.CountryCallingCodesList }, { "status", Model.Status } });
+                                            break;
+                                        case "DD":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_DropDownList.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "DG":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_DropDownList.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "select2", "select2" }, { "status", Model.Status } });
+                                            break;
+                                        case "DT":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_DatePeriod.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "RB":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_RadioButton.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "CM":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_CommentField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "CH":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_CheckBoxField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "TM":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_TimerField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "SM":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_SmileyField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "SW":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_SwitchField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "ST":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_RatingField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        case "FL":
+                                        case "SG":
+                                        case "PH":
+                                            Html.RenderPartial("~/Views/Feature/HR/Internship/Survey/_FileUploadField.cshtml", question, new ViewDataDictionary { { "group", group.Groupnumber }, { "status", Model.Status } });
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(group.Pagenumber) && !group.Pagenumber.Equals(maxPage.ToString()) && pageitemcounttemp.Equals(pageitemcount))
+                                {
+                                    pageitemcounttemp = 0;
+                                    <div class="form-field__button">
+                                        @if (Convert.ToInt32(group.Pagenumber) > 0)
+                                        {
+                                            <button class="button button--primary button--back backbutton"
+                                                    id="btBack" type="button">
+                                                @Translate.Text("Back")
+                                            </button>
+                                        }
+                                        <button class="button button--primary button--next nextbutton"
+                                                id="btNext" type="button">
+                                            @Translate.Text("Next")
+                                        </button>
+                                    </div>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(group.Pagenumber) && group.Pagenumber.Equals(maxPage.ToString()) && pageitemcounttemp.Equals(pageitemcount))
+                                {
+                                    <div class="form-field__button">
+                                        @if (Convert.ToInt32(group.Pagenumber) > 0)
+                                        {
+                                            <button class="button button--primary button--back backbutton"
+                                                    id="btBack" type="button">
+                                                @Translate.Text("Back")
+                                            </button>
+                                        }
+                                        @if (string.IsNullOrWhiteSpace(Model.Status))
+                                        {
+                                            <button class="button button--primary" id="btSubmit" type="submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            pageitemcounttemp++;
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery('.m12-main').addClass('m12-main-survey');
+    jQuery('.nextbutton').click(function (e) {
+        e.preventDefault();
+        var pagenumber = parseInt(jQuery(this).closest('.pageclass').attr("data-page"));
+        require(['parsley'], function () {
+            jQuery('#internsurveyform').parsley().validate();
+            if (jQuery('#internsurveyform').parsley().isValid()) {
+                jQuery('.pageclass[data-page=' + (pagenumber) + ']').addClass('hidden');
+                jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']').removeClass('hidden');
+                //jQuery('.nextbutton').closest('.pageclass').addClass('hidden');
+                jQuery('.pageclass').not(jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']')).addClass('hidden');
+                jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+            };
+        });
+    });
+    jQuery('.backbutton').click(function (e) {
+        e.preventDefault();
+        var pagenumber = parseInt(jQuery(this).closest('.pageclass').attr("data-page"));
+        jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']').removeClass('hidden');
+        jQuery('.pageclass[data-page=' + (pagenumber) + ']').addClass('hidden');
+        jQuery('.pageclass').not(jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']')).addClass('hidden');
+        //jQuery('.pageclass:first-child').removeClass('hidden');
+        //jQuery('.pageclass').not(jQuery('.pageclass:first-child')).addClass('hidden');
+        jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+    });
+    function getUrlVars() {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < hashes.length; i++) {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+    docReady(function () {
+        setTimeout(hideFooter(), 200);
+    });
+    function hideFooter() {
+        var queryString = getUrlVars()["d"];
+        if (queryString != undefined) {
+            if (queryString.startsWith("REP")) {
+                jQuery(".m13-footer").hide();
+            }
+            else {
+                jQuery(".m13-footer").show();
+            }
+        }
+    }
+    
+</script>
+<script src="~/Scripts/nml/form-submit-validate.js"></script>

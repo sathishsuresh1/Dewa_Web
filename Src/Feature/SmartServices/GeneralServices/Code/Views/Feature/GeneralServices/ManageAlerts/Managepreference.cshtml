@@ -1,0 +1,136 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Feature.GeneralServices.Models.ManageAlerts.Unsubscribe
+
+@Html.Sitecore().Placeholder("j94/m26-page-title")
+
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid__row">
+	<div class="grid__column grid__column--12 grid__column--form">
+        
+		@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new {id = "preferenceform", @class = "form", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled"}))
+		{
+			@Html.Sitecore().FormHandler()
+			@Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.contractaccount)
+            <label for="form-field-reason" class="form-field__label">
+                @Translate.Text("managepreference.selectchannel")
+            </label>
+            if (!string.IsNullOrWhiteSpace(Model.emailid))
+            {
+                @Html.HiddenFor(m => m.emailid)
+                <input id="emailtempflag" name="emailtempflag" type="hidden" value="@Model.emailflag">
+                <input id="emailflag" name="emailflag" type="hidden" value="@Model.emailflag">
+             @*@Html.HiddenFor(m => m.emailflag, new { id = "emailflag"})*@
+            @*<h3 class="text__section-subtitle">@Translate.Text("Email Subscription")</h3>*@
+            <div class="form-field form-field--toggles">
+                <fieldset class="fieldset">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field__checkbox">
+                        <label>
+                            <input class="form-field__input form-field__input--checkbox 0" id="form-field-checkbox_1_1" aria-label="form-field-checkbox_1_1" name="settings" type="checkbox" value="1" aria-describedby="description-for-6intbmreb" data-parsley-error-message="Checkbox error message" data-parsley-errors-container="#description-for-6intbmreb" @if (Model.emailflag == "1") { <text> checked="" </text> } data-parsley-multiple="settings" data-parsley-id="7">
+                            <span data-id="@Model.emailflag" class="form-field__fakecheckbox focus-enabled email">@Model.emailid</span>
+                        </label>
+                    </div>
+                    <div id="description-for-6intbmreb" class="form-field__messages"></div>
+                </fieldset>
+            </div>
+            }
+            if (!string.IsNullOrWhiteSpace(Model.mobile))
+            {
+                @Html.HiddenFor(m => m.mobile)
+                <input id="mobiletempflag" name="mobiletempflag" type="hidden" value="@Model.mobileflag">
+                <input id="mobileflag" name="mobileflag" type="hidden" value="@Model.mobileflag">
+             @*@Html.HiddenFor(m => m.mobileflag, new { id = "mobileflag" })*@
+            @*<h3 class="text__section-subtitle" style="margin-top: 56px;">@Translate.Text("SMS Subscription")</h3>*@
+            <div class="form-field form-field--toggles">
+                <fieldset class="fieldset">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field__checkbox">
+                        <label>
+                            <input class="form-field__input form-field__input--checkbox 0" id="form-field-checkbox_1_2" aria-label="form-field-checkbox_1_2" name="settings" type="checkbox" value="1" aria-describedby="description-for-6intbmreb" data-parsley-error-message="Checkbox error message" data-parsley-errors-container="#description-for-6intbmreb" @if (Model.mobileflag == "1") { <text> checked="" </text> } data-parsley-multiple="settings" data-parsley-id="7">
+                            <span data-id="@Model.mobileflag" class="form-field__fakecheckbox focus-enabled mobile">@Model.mobile</span>
+                        </label>
+                    </div>
+                    <div id="description-for-6intbmreb" class="form-field__messages"></div>
+                </fieldset>
+            </div>
+            }
+            if ((bool)ViewBag.Recaptcha)
+            {
+                <br />
+                <div class="g-recaptcha" data-sitekey="@(ViewBag.SiteKey)"></div>
+            }
+            @*else
+            {
+                @Html.Captcha(Translate.Text("Unsubscribe-Refresh"), Translate.Text("Unsubscribe-Captcha"), 5, "Is required field", true)
+            }*@
+		    <div class="form-field__button">
+				<button id="subcribe-button" type="submit" class="button button--primary button--next "  data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Subscribe Update")</button>
+			</div>
+
+            @Html.Sitecore().Placeholder("managepreference description")
+        }
+	</div>
+</div>
+
+
+<script>
+	docReady(function () {
+	    tooglebutton();
+	    $('#form-field-checkbox_1_1').change(function () {
+	        var $emailflag = jQuery('#emailflag');
+	        if ($('#form-field-checkbox_1_1').is(":checked")) {
+	            $emailflag[0].value = "1";
+		        //jQuery("input[name='emailflag']").val("1");
+		    }
+		    else
+	        {
+	            $emailflag[0].value = "2";
+		        //jQuery("input[name='emailflag']").val("2");
+	        }
+	        tooglebutton();
+		});
+
+	    $('#form-field-checkbox_1_2').change(function () {
+	        var $mobileflag = jQuery('#mobileflag');
+	        if ($('#form-field-checkbox_1_2').is(":checked")) {
+	            $mobileflag[0].value = "1";
+		    }
+	        else {
+	            $mobileflag[0].value = "2";
+	        }
+	        tooglebutton();
+		});
+		
+	    function tooglebutton()
+	    {
+	        var $emailtempflag = jQuery('#emailtempflag');
+	        var $mobileflag = jQuery('#mobileflag');
+	        var $mobiletempflag = jQuery('#mobiletempflag');
+	        var $emailflag = jQuery('#emailflag');
+	        if ($emailtempflag[0].value === $emailflag[0].value && $mobiletempflag[0].value === $mobileflag[0].value) {
+	            jQuery('#subcribe-button').attr("disabled", true);
+	            //jQuery('#subcribe-button').hide();
+	        }
+	        else
+	        {
+	            jQuery('#subcribe-button').removeAttr("disabled");
+	            //jQuery('#subcribe-button').show();
+            }
+        }
+		//jQuery('#preferenceform').on('submit', handleSubmission);
+	});
+
+	function handleSubmission() {
+		
+		jQuery.ajax(
+			jQuery('#preferenceform').prop('action'),
+			{
+				dataType: 'json',
+				method: 'POST'
+			});
+	}
+</script>

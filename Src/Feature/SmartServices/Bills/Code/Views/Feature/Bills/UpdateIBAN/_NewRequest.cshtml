@@ -1,0 +1,1549 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.UpdateIBAN.UpdateIBANModel
+
+@{
+
+    var direction = "ltr";
+    var lang = "en";
+    if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft)
+    {
+        direction = "rtl";
+        lang = "ar";
+    }
+}
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+@Html.Sitecore().Placeholder("j87/m41-tab-box")
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+        @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+        <div id="updateibansubmissionsucccess">
+            @Html.Partial("~/Views/Feature/Bills/UpdateIBAN/_SubmissionSuccess.cshtml", Model)
+        </div>
+        <div id="updateibansubmissionerror">
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+        </div>
+
+    </div>
+    <div class="grid__column grid__column--12 grid__column--form">
+        <form id="form-account-selector" action="#" data-form="true" method="POST" form-skipvalidation="true">
+            @Html.Sitecore().Placeholder("j18/m43-account-selector")
+        </form>
+    </div>
+
+    <div id="PendingRefundSection" class="grid__column grid__column--12 grid__column--form mt12 hidden">
+
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @data_submit_validate = "enabled", @autocomplete = "off", @id = "refundRecoveryForm", enctype = "multipart/form-data" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+
+            <fieldset class="fieldset creditbalancediv_pending">
+                <legend class="legend-color">.</legend>
+                <div class="form-field form-field--text">
+                    <label for="form-field-creditbalance-ot" class="form-field__label form-field__label--readonly">
+                        @Translate.Text("updateiban_EligibleRefund")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                        <input class="form-field__input form-field__input--readonly"
+                               readonly="" id="form-field-creditbalance-ot"
+                               name="CreditBalance"
+                               type="text" value="@Model.CreditBalance"
+                               aria-describedby="description-for-creditbalance-ot"
+                               data-parsley-errors-container="#description-for-creditbalance-ot"
+                               data-parsley-trigger="focusout">
+                    </div>
+                    <div id="description-for-creditbalance-ot" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.CreditBalance)
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend class="legend-color">.</legend>
+                <div class="form-field form-field--text">
+                    <label for="form-field-Outstandingbalance-ot" class="form-field__label form-field__label--readonly">
+                        @Translate.Text("updateiban.Outstandingbalance_ot")
+                    </label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                        <input class="form-field__input form-field__input--readonly"
+                               readonly="" id="form-field-Outstandingbalance-ot"
+                               name="OutstandingBalance"
+                               type="text"
+                               aria-describedby="description-for-creditbalance"
+                               data-parsley-errors-container="#description-for-Outstandingbalance-ot"
+                               data-parsley-trigger="focusout">
+                    </div>
+                    <div id="description-for-Outstandingbalance-ot" class="form-field__messages">
+
+                    </div>
+                </div>
+            </fieldset>
+
+
+
+            @Html.HiddenFor(x => x.SelectedBusinessPartnerNumber, new { @class = "SelectedBusinessPartnerNumber" })
+            @Html.HiddenFor(x => x.AccountSelected, new { @class = "AccountSelected" })
+
+            <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+                <button data-trigger="true" class="m39-modal__trigger" type="button" id="_kz7biy3li_trigger" aria-controls="_kz7biy3li_content">@Translate.Text("RR_ViewDetails")</button>
+                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_kz7biy3li_content" aria-labelledby="_kz7biy3li_trigger">
+                    <div class="m39-modal__dialog ">
+                        <div class="m39-modal__header">
+                            <div class="m39-modal__title green">@Translate.Text("RR_RefundTitle")</div>
+                            <button data-close="true" class="m39-modal__button--close" id="_kz7biy3li_close" aria-controls="_kz7biy3li_content">@Translate.Text("Close")</button>
+                            <div class="m39-modal__subtitle">@Translate.Text("RR_RefundSubTitle")</div>
+                        </div>
+                        <div class="m39-modal__content" id="outstandinglist-content" style="top: 123px;">
+
+                        </div>
+                        <div class="m39-modal__footer">
+                            <div class="button button--primary" data-close="true" id="_kz7biy3li_close" aria-controls="_kz7biy3li_content">@Translate.Text("Refund.Done")</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="m39-modal__overlay" style="display: none;"> </div>
+            </div>
+
+            <div class="divskipcontainer hidden">
+                <p style="margin:10px 0 20px 0">@Translate.Text("RR_SkioIntro")</p>
+                <fieldset class="fieldset" style="margin-top:2px">
+                    <legend class="legend-color">.</legend>
+                    <p class="form-field__radio mt0">
+                        <label>
+                            <input class="form-field__input form-field__input--radio"
+                                   id="form-field-radio_paytype1"
+                                   aria-label="form-field-radio_paytype1"
+                                   name="refundpaytype"
+                                   checked=""
+                                   type="radio"
+                                   value="1"
+                                   aria-describedby="description-for-radio_paytype1"
+                                   data-parsley-errors-container="#description-for-radio_paytype1"
+                                   data-input="radio">
+                            <span class="form-field__fakeradio">
+                                <strong>@Translate.Text("RR_SkipOtp1Label")</strong>
+                                <span class="form-field__fakeradio-info">
+                                    @Translate.Text("RR_SkipOtp1SubLabel")
+                                </span>
+                            </span>
+                        </label>
+                    </p>
+                </fieldset>
+
+                <fieldset class="fieldset" style="margin-top:2px">
+                    <legend class="legend-color">.</legend>
+                    <p class="form-field__radio mt0">
+                        <label>
+                            <input class="form-field__input form-field__input--radio"
+                                   id="form-field-radio_paytype2"
+                                   aria-label="form-field-radio_paytype2"
+                                   name="refundpaytype"
+                                   type="radio"
+                                   value="0"
+                                   aria-describedby="description-for-paytype2"
+                                   data-parsley-errors-container="#description-for-paytype2"
+                                   data-input="radio">
+                            <span class="form-field__fakeradio">
+                                <strong>@Translate.Text("RR_SkipOtp2Label")</strong>
+                                <span class="form-field__fakeradio-info">
+                                    @Translate.Text("RR_SkipOtp2SubLabel")
+                                </span>
+                            </span>
+                        </label>
+                    </p>
+                </fieldset>
+            </div>
+            <div class="form-field__button refundrecoverypay-popupbtn">
+                <a id="refundrecoverypay-popup" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("RR_pay")</a>
+            </div>
+
+            <input type="hidden" id="totalAmount" />
+            <input type="hidden" name="SumbitType" id="SumbitType" />
+            @* Payment Type Popup module *@
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+
+        }
+
+    </div>
+
+
+    <div id="updateibanerror" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;text-align: center;margin-bottom: 32px;">
+    </div>
+
+
+    <div style="clear:both;">
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form hidden", @data_form = "true", @data_submit_validate = "enabled", @autocomplete = "off", @id = "updateibanform", enctype = "multipart/form-data" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div id="personal-details-placeholder" class="grid__row">
+                    <fieldset class="fieldset">
+                        <legend class="legend-color">.</legend>
+                        <div class="form-field form-field--text creditbalancediv">
+                            <label for="form-field-creditbalance" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("updateiban.creditbalance")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly="" id="form-field-creditbalance"
+                                       name="CreditBalance"
+                                       type="text" value="@Model.CreditBalance"
+                                       aria-describedby="description-for-creditbalance"
+                                       data-parsley-errors-container="#description-for-creditbalance"
+                                       data-parsley-trigger="focusout">
+                            </div>
+                            <div id="description-for-creditbalance" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.CreditBalance)
+                            </div>
+                        </div>
+                        <!-- Mobile Number-->
+                        <div class="form-field form-field--text ">
+                            <label for="MobileNumberinput" class="form-field__label">
+                                @Translate.Text("Sc.Mobile Number")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            @*<span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                    <input type="tel" id="MobileNumberinput" name="MobileNumber"
+                                           value="@Model.MobileNumber"
+                                           aria-describedby="description-for-mobilenumber"
+                                           required=""
+                                           placeholder="@Translate.Text("Mobile number placeholder")"
+                                           data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")"
+                                           data-parsley-type="digits" data-parsley-trigger="focusout"
+                                           data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber"
+                                           class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                </span>*@
+                            <div dir="ltr" class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly form-field__input--dir-ltr"
+                                       readonly="" id="MobileNumberinput"
+                                       name="MaskedMobileNumber"
+                                       type="text" value="@Model.MaskedMobileNumber"
+                                       aria-describedby="description-for-mobilenumber"
+                                       data-parsley-errors-container="#description-for-mobilenumber"
+                                       data-parsley-trigger="focusout">
+                            </div>
+
+                            <div id="description-for-mobilenumber" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.MobileNumber)
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text" id="emailiddiv">
+                            <label for="form-field-Emailid" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("updateiban.Emailid")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly="" id="form-field-Emailid"
+                                       name="MaskedEmailid"
+                                       type="text" value="@Model.MaskedEmailid"
+                                       aria-describedby="description-for-Emailid"
+                                       data-parsley-errors-container="#description-for-Emailid"
+                                       data-parsley-trigger="focusout">
+                            </div>
+                            <div id="description-for-Emailid" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.Emailid)
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-TransferTo" class="form-field__label">
+                                @Translate.Text("updateiban.transferto")
+                                @*<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.SelectedIBAN, (IEnumerable<SelectListItem>)Model.IBANSList,
+                                       Translate.Text("updateiban.dropdown"),
+                                        new
+                                        {
+                                            @class = "form-field-TransferTo form-field__input form-field__input--select form-field__input--select-full",
+                                            @id = "form-field-TransferTo",
+                                            @aria_describedby = "description-for-TransferTo",
+                                            @required = "required",
+                                            @data_parsley_error_message = Translate.Text("updateiban.select"),
+                                            @data_parsley_errors_container = "#description-for-TransferTo",
+                                            @data_parsley_id = "22"
+                                        })
+                            </span>
+                            <div id="description-for-TransferTo" class="form-field__messages"></div>
+                        </div>
+                        <fieldset class="fieldset fieldset--hidden" id="iban_details_select">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-ibanlist" class="form-field__label">
+                                    @Translate.Text("updateiban.newiban")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select id="form-field-selectibanlist"
+                                            name="IBANList"
+                                            data-parsley-id="20"
+                                            data-parsley-error-message="@Translate.Text("updateiban.select")"
+                                            class="form-field__input form-field__input--select form-field__input--select-full"
+                                            aria-describedby="description-for-ibanlist"></select>
+                                </span>
+                                <div id="description-for-ibanlist" class="form-field__messages"></div>
+                            </div>
+                            <div class="form-field form-field--text hidden" id="selectibannumber">
+                                <label for="form-field-ibannumber2" class="form-field__label">
+                                    @Translate.Text("updateiban.selectiban")
+                                    @* <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.IbanAccountNumber,
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                                    @name = "IbanAccountNumber",
+                                    @type = "number",
+                                    @lang = "en",
+                                    @maxlength = 21,
+                                    @id = "form-field-ibannumber2",
+                                    @placeholder = Translate.Text("Enter 21 digit number"),
+                                    @required = "required",
+                                    @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                                    @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                                    @data_parsley_errors_container = "#description-for-ibannumber2",
+                                    @aria_describedby = "description-for-ibannumber2",
+                                    @data_parsley_selectediban = "",
+                                    @data_parsley_equalto = "#form-field-ibannumber2"
+                                })
+                                </span>
+
+                                <div id="description-for-ibannumber2" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.IbanAccountNumber)
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text hidden " id="confirmibannumber">
+                                <label for="form-field-confirm-iban-number" class="form-field__label">
+                                    @Translate.Text("updateiban.confirmiban")
+                                    @*<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.ConfirmIbanAccountNumber,
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                                    @name = "ConfirmIbanAccountNumber",
+                                    @type = "number",
+                                    @lang = "en",
+                                    @maxlength = 21,
+                                    @id = "form-field-select-confirm-iban-number",
+                                    @placeholder = Translate.Text("Enter 21 digit number"),
+                                    @required = "required",
+                                    @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                                    @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                                    @data_parsley_equalto_message = Translate.Text("IBANNumberMisMatch"),
+                                    @data_parsley_errors_container = "#description-for-selectibanconfirm",
+                                    @aria_describedby = "description-for-selectibanconfirm",
+                                    @bankcodes = "",
+                                    @data_parsley_selectediban = "",
+                                    @data_iban_confirm = "",
+                                    @data_parsley_equalto = "#form-field-selectibanlist",
+                                })
+                                </span>
+
+                                <div id="description-for-selectibanconfirm" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.ConfirmIbanAccountNumber)
+                                    <span class="bank_msg form-field__label"></span>
+
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset fieldset--hidden" id="iban_details">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-ibannumber" class="form-field__label">
+                                    @Translate.Text("updateiban.editiban")
+                                    @* <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.IbanAccountNumber,
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                                    @name = "IbanAccountNumber",
+                                    @type = "number",
+                                    @lang = "en",
+                                    @maxlength = 21,
+                                    @id = "form-field-ibannumber",
+                                    @placeholder = Translate.Text("Enter 21 digit number"),
+                                    @required = "required",
+                                    @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                                    @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                                    @data_parsley_errors_container = "#description-for-ibannumber",
+                                    @aria_describedby = "description-for-ibannumber",
+                                    @data_parsley_selectediban = "",
+                                    @data_parsley_equalto = "#form-field-ibannumber"
+                                })
+                                </span>
+
+                                <div id="description-for-ibannumber" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.IbanAccountNumber)
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-confirm-iban-number" class="form-field__label">
+                                    @Translate.Text("updateiban.confirmiban")
+                                    @*<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                </label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                    @Html.TextBoxFor(x => x.ConfirmIbanAccountNumber2,
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--text form-field__input--prefixed selectediban",
+                                    @name = "ConfirmIbanAccountNumber",
+                                    @type = "number",
+                                    @lang = "en",
+                                    @maxlength = 21,
+                                    @id = "form-field-confirm-iban-number",
+                                    @placeholder = Translate.Text("Enter 21 digit number"),
+                                    @required = "required",
+                                    @data_parsley_selectediban_message = Translate.Text(DictionaryKeys.MoveOut.ValidIBANNumber),
+                                    @data_parsley_required_message = Translate.Text("IBAN number is required."),
+                                    @data_parsley_equalto_message = Translate.Text("IBANNumberMisMatch"),
+                                    @data_parsley_errors_container = "#description-for-ibanconfirm",
+                                    @aria_describedby = "description-for-ibanconfirm",
+                                    @data_parsley_selectediban = "",
+                                    @data_iban_confirm = "",
+                                    @data_parsley_equalto = "#form-field-ibannumber"
+                                })
+                                </span>
+
+                                <div id="description-for-ibanconfirm" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.ConfirmIbanAccountNumber2)
+                                    <span class="bank_msg"></span>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset fieldset--hidden" id="cheque_details">
+                            <legend class="legend-color">.</legend>
+                            <div>
+                                <div class="form-field form-field--text ">
+                                    <label for="form-field-address" class="form-field__label">
+                                        @Translate.Text("updateiban.address")
+                                        @*<span class="form-field__label-required aria-only">(required)</span>*@
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        @Html.TextBoxFor(x => x.Comments,
+                                new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                                    @name = "text",
+                                    @type = "text",
+                                    @id = "form-field-address",
+                                    @placeholder = Translate.Text("updateiban.addressplaceholder"),
+                                    @required = "",
+                                    @data_parsley_error_message = Translate.Text("Please enter a value"),
+                                    @data_parsley_errors_container = "#description-for-address",
+                                    @aria_describedby = "description-for-address",
+                                    @data_parsley_id = "8",
+                                    @maxlength = "255"
+                                })
+                                    </span>
+
+                                    <div id="description-for-address" class="form-field__messages">
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="fieldset fieldset--hidden" id="attachment_details">
+                            <legend class="legend" id="documentname">.</legend>
+
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="IbanRefundDocument">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-IbanRefundDocument" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.IbanRefundDocument,
+                                                new
+                                                {
+                                                    @type = "file",
+                                                    @class = "form-field__input form-field__input--upload",
+                                                    @id = "form-field-IbanRefundDocument",
+                                                    @name = "IbanRefundDocument",
+                                                    @aria_describedby = "description-for-IbanRefundDocument",
+                                                    @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                                    @data_parsley_errors_container = "#errors-for-IbanRefundDocument",
+                                                    @data_uploader_field = "IbanRefundDocument",
+                                                    @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                                    @data_size = @AttachmentValidation.maximumFileSize,
+                                                    @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                                    @data_parsley_id = "16"
+                                                })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="IbanRefundDocument"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="IbanRefundDocument">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-IbanRefundDocument" class="form-field__messages">
+                                    <div id="errors-for-IbanRefundDocument">
+                                        @Html.ValidationMessageFor(x => x.IbanRefundDocument, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                                    <p class="form-field__description mt24"><strong id="ibnnote">.</strong></p>
+                                </div>
+                            </div>
+                        </fieldset>
+
+
+                        @Html.HiddenFor(x => x.transferaccount, new { value = Model.transferaccount })
+                        <fieldset class="fieldset fieldset--hidden" id="transfer_details-0">
+                            <legend class="legend-color">.</legend>
+                            <div class="m43-accountsel" data-component="m43-account-selector">
+                                <p class="m43-accountsel__labelstyle">@Sitecore.Globalization.Translate.Text("Select an account to transfer")</p>
+
+
+
+                                <button class="m43-accountsel__selected m43-accountsel__selected--dropdown no-min-height "
+                                        data-accountselector="acc-sel-ctrl-0"
+                                        data-preventsubmit="true" data-minselection="1"
+                                        data-maxselection="1"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        type="button"
+                                        id="m43-accountsel__selected-0"
+                                        aria-controls="_nhlzytky3_content">
+                                    <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                                        <span id="accountheader" class="m43-accountsel__header">
+                                            <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                                <span class="inline-block" dir="@direction">@Model.AccountNumberSelected</span>
+                                            </span>
+                                        </span>
+                                    </span>
+                                </button>
+                                <div id="transferaccounts-error" class="transferaccounts-error form-field__messages hidden" style="color:#ff0000;cursor:pointer;padding-bottom:15px;">
+                                </div><br />
+                                <div class="m39-modal" data-component="m39-modal" id="modal_acc-sel-ctrl-0">
+                                    <div data-content="acc-sel-ctrl-0" class="m39-modal__container" id="_nhlzytky3_content" role="dialog" aria-expanded="false">
+                                        <div class="m39-modal__dialog m39-modal__dialog--account">
+                                            <div class="m39-modal__header">
+                                                <div class="m39-modal__title">@Sitecore.Globalization.Translate.Text("Select Transfer account")</div>
+                                                <button data-close="acc-sel-ctrl-0" class="m39-modal__button--close">@Translate.Text("Close")</button>
+                                                <!-- m49-list-filter-start -->
+                                                <!-- ideally data-filter-list will match a container id for all list items to filter -->
+                                                <div class="m49-list-filter" data-component="m49-list-filter" data-filter-list="#m69-modal__content">
+                                                    <input class="m49-list-filter--input" id="m49-list-filter--input" name="m49-list-filter--input" placeholder="@Translate.Text(DictionaryKeys.AccountSelector.SearchByNumber)" type="search">
+                                                    <button class="m49-list-filter--button btnappendtaccountsearch" title="Filter results" type="button" role="search" aria-label="@Translate.Text(DictionaryKeys.AccountSelector.Filter)"><span class="aria-only">@Translate.Text(DictionaryKeys.AccountSelector.Filter)</span></button>
+                                                </div>
+                                                <!-- m49-list-filter-end -->
+                                            </div>
+                                            <div class="m39-modal__content" id="m69-modal__content">
+                                                <div class="m43-accountsel__group_wrap">
+                                                    <div class="m43-accountsel__group">
+                                                        <div class="m43-accountsel__accounts-list" data-accounts="true">
+                                                            <div class="form-field appendtaccount">
+
+                                                                <div id="description-for-radios_group1" class="form-field__messages"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="m49-no-matches appendtaccount-nodata" style="margin-top:50px;">@Translate.Text(DictionaryKeys.AccountSelector.NoMatchesFound)</div>
+                                            </div>
+                                            <div class="m39-modal__footer">
+                                                <button class="button button--primary accountmodalconfirm" data-account-count="0" id="accountmodalconfirm" data-accountupdate="true" data-modal-confirm="true">@Translate.Text("Confirm")</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+
+                        <br />
+                        <div class="form-field form-field--toggles hidden inline-terms" id="IBANModal">
+                            <div class="form-field__checkbox  last">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment1" type="checkbox" value="true" aria-describedby="description-for-accept-terms1" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms1" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                    <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                                </label>
+                            </div>
+                            <fieldset class="fieldset m39-modal__tnc">
+                                <legend class="legend-color">.</legend>
+                                <span class="text">@Translate.Text("updateiban.Iagree")</span>
+                                @Html.Sitecore().Placeholder("IBANModal")
+                            </fieldset>
+                            @*<fieldset class="fieldset ">
+                                    <legend class="legend-color">.</legend>
+
+                                </fieldset>*@
+                            <div id="description-for-accept-terms1" class="form-field__messages"></div>
+                            <input type="hidden" name="AgreedToPayment1" value="false" />
+                        </div>
+
+                        <div class="westernuniondiv">@Html.Sitecore().Placeholder("Westernuniontext")</div>
+
+                        <fieldset class="fieldset fieldset--hidden" id="western_union_selectcountry">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-countrylist" class="form-field__label">
+                                    @Translate.Text("updateiban.country")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.SelectedCountry, Enumerable.Empty<SelectListItem>(),
+                                        Translate.Text("updateiban.selectcountry"),
+                                         new
+                                         {
+                                             @class = "form-field-TransferTo form-field__input form-field__input--select form-field__input--select-full",
+                                             @id = "form-field-countrylist",
+                                             @aria_describedby = "description-for-countrylist",
+                                             @required = "required",
+                                             @data_parsley_error_message = Translate.Text("updateiban.selectcountryvalid"),
+                                             @data_parsley_errors_container = "#description-for-countrylist",
+                                             @data_parsley_id = "22"
+                                         })
+                                </span>
+                                <div id="description-for-countrylist" class="form-field__messages"></div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset fieldset--hidden" id="western_union_selectstate">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-statelist" class="form-field__label">
+                                    @Translate.Text("updateiban.state")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.SelectedState, Enumerable.Empty<SelectListItem>(),
+                                       Translate.Text("updateiban.selectstate"),
+                                        new
+                                        {
+                                            @class = "form-field-TransferTo form-field__input form-field__input--select form-field__input--select-full",
+                                            @id = "form-field-statelist",
+                                            @aria_describedby = "description-for-statelist",
+                                            @required = "required",
+                                            @data_parsley_error_message = Translate.Text("updateiban.selectstatevalid"),
+                                            @data_parsley_errors_container = "#description-for-statelist",
+                                            @data_parsley_id = "22"
+                                        })
+                                </span>
+                                <div id="description-for-statelist" class="form-field__messages"></div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset fieldset--hidden" id="western_union_selectcity">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-citylist" class="form-field__label">
+                                    @Translate.Text("updateiban.city")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.SelectedCity, Enumerable.Empty<SelectListItem>(),
+                                       Translate.Text("updateiban.selectcity"),
+                                        new
+                                        {
+                                            @class = "form-field-TransferTo form-field__input form-field__input--select form-field__input--select-full",
+                                            @id = "form-field-citylist",
+                                            @aria_describedby = "description-for-citylist",
+                                            @required = "required",
+                                            @data_parsley_error_message = Translate.Text("updateiban.selectcityvalid"),
+                                            @data_parsley_errors_container = "#description-for-citylist",
+                                            @data_parsley_id = "22"
+                                        })
+                                </span>
+                                <div id="description-for-citylist" class="form-field__messages"></div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset fieldset--hidden" id="western_union_selectcurrency">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field form-field--text ">
+                                <label for="form-field-currencylist" class="form-field__label">
+                                    @Translate.Text("updateiban.currency")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.SelectedCurrency, Enumerable.Empty<SelectListItem>(),
+                                       Translate.Text("updateiban.selectcurrency"),
+                                        new
+                                        {
+                                            @class = "form-field-TransferTo form-field__input form-field__input--select form-field__input--select-full",
+                                            @id = "form-field-currencylist",
+                                            @aria_describedby = "description-for-currencylist",
+                                            @required = "required",
+                                            @data_parsley_error_message = Translate.Text("updateiban.selectcurrencyvalid"),
+                                            @data_parsley_errors_container = "#description-for-currencylist",
+                                            @data_parsley_id = "22"
+                                        })
+                                </span>
+                                <div id="description-for-currencylist" class="form-field__messages"></div>
+                            </div>
+                        </fieldset>
+                        <div id="description-for-westernlocation" class="form-field__messages hidden">
+                            <p class="form-field__helplink">
+                                <a href="https://locations.westernunion.com" rel="noreferrer" target="_blank" class="link">@Translate.Text("updateiban.viewlocation")</a>
+                            </p>
+                        </div>
+                        <br>
+                        <div class="form-field form-field--toggles hidden inline-terms" id="WesternUnionTerms">
+                            <div class="form-field__checkbox  last">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_2" name="AgreedToPayment2" type="checkbox" value="true" aria-describedby="description-for-accept-terms2" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms2" data-parsley-multiple="checkbox_1_2" data-parsley-id="23">
+                                    <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                                </label>
+                            </div>
+                            <fieldset class="fieldset m39-modal__tnc">
+                                <legend class="legend-color">.</legend>
+                                <span class="text">@Translate.Text("updateiban.Iagree")</span>
+                                @Html.Sitecore().Placeholder("IBANModal")
+                            </fieldset>
+                            <div id="description-for-accept-terms2" class="form-field__messages"></div>
+                            <input type="hidden" name="AgreedToPayment2" value="false" />
+                        </div>
+                        @Html.HiddenFor(x => x.SelectedBusinessPartnerNumber)
+                        @Html.HiddenFor(x => x.AccountSelected)
+                        @Html.HiddenFor(x => x.CustomerName)
+                        @Html.HiddenFor(x => x.CustomerFirstName)
+                        @Html.HiddenFor(x => x.CustomerLastName)
+                        @Html.HiddenFor(x => x.SelectedPremiseNumber)
+                        @Html.HiddenFor(x => x.Ibanavailable)
+                        @Html.HiddenFor(x => x.IsRequestChequeAllowed)
+                        @Html.HiddenFor(x => x.IsRequestIbanAllowed)
+                        @Html.HiddenFor(x => x.IsRequestTransferAllowed)
+                        @Html.HiddenFor(x => x.IsUpdateChequeAllowed)
+                        @Html.HiddenFor(x => x.IsUpdateIbanAllowed)
+                        @Html.HiddenFor(x => x.IsWesternUnionAllowed)
+                        @Html.HiddenFor(x => x.SelectedCountrytext)
+                        @Html.HiddenFor(x => x.SelectedStatetext)
+                        @Html.HiddenFor(x => x.SelectedCity)
+                        @Html.HiddenFor(x => x.SelectedCurrency)
+                        @Html.HiddenFor(x => x.OtpRequestId)
+                        @Html.HiddenFor(x => x.Emailid)
+                        @Html.HiddenFor(x => x.MobileNumber)
+                    </fieldset>
+
+
+                    <div class="form-field__button">
+                        <button type="submit" class="button--submit button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("updateiban.Submit")</button>
+                    </div>
+
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<script id="outstandingrefund-item-template" type="text/x-handlebars-template">
+    {{#divisionlist}}
+    <div class="refund_detail-card" style="max-width:96%">
+        <div class="refund_detail-name">
+            {{contractaccountname}}
+            {{#ifCond finalbillflag '==' 'X'}}
+            <span class="refund_detail-status">
+                @Translate.Text("RR_FinalBiling")
+            </span>
+            {{/ifCond}}
+        </div>
+        <div class="refund_detail-details">
+            @Translate.Text("RR_AcountNo") ({{contractaccountnumber}})
+        </div>
+        <div class="refund_detail-details">
+            {{premiseaddress1}} {{premiseaddress2}}
+        </div>
+        <div class="refund_detail-details">
+            @Translate.Text("Premise Number") ( {{premisenumber}} )
+        </div>
+        <div class="refund_detail-amount">
+            @if (direction == "rtl")
+            {
+                <span> {{formattedtotalamount}} @Translate.Text("AED")</span>
+            }
+            else
+            {
+                <span>@Translate.Text("AED") {{formattedtotalamount}}</span>
+            }
+        </div>
+    </div>
+    @*<p class="mt12">Space for info text</p>*@
+
+    {{/divisionlist}}
+</script>
+
+
+<script id="taccount-item-template" type="text/x-handlebars-template">
+    {{#lsttranferaccount}}
+    <p class="form-field__radio form-field__radio--accselector">
+        <label>
+            <input class="form-field__input form-field__input--radio ac_item"
+                   data-input="radio"
+                   id="transferAccount{{@@index}}"
+                   name="transferAccount"
+                   type="radio"
+                   value="{{contractaccountname}}"
+                   data-id="{{contractaccountnumber}}">
+            <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                    <img src="/account_thumbs.ashx?id={{contractaccountnumber}}&aty=0"
+                         class="m43-accountsel__image withimage tooltipstered" alt="{{contractaccountname}}"
+                         role="presentation" data-acc-detail="acc_image">
+
+                    <span class="m43-accountsel__header">
+                        <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                            <span class="inline-block" dir="@direction">{{contractaccountname}}</span>
+                            {{#ifCond contractaccountnumber '!=' '0'}}
+                            <span dir="ltr" class="m43-accountsel__status m43-accountsel__status--active"></span>
+                            {{/ifCond}}
+                        </span>
+                        {{#ifCond contractaccountnumber '!=' '0'}}
+                        <span class="m43-accountsel__details">
+                            <span title="Account">Acc:</span> <span dir="@direction" data-acc-detail="acc_number">{{contractaccountnumber}}</span><span class="aria-only"> | </span>
+                        </span>
+                        {{/ifCond}}
+                    </span>
+                </span>
+            </span>
+        </label>
+    </p>
+    {{/lsttranferaccount}}
+</script>
+<script type="text/javascript">
+
+    var firsttimeflag = true;
+    docReady(function () {
+        Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+
+            switch (operator) {
+                case '==':
+                    return (v1 == v2) ? options.fn(this) : options.inverse(this);
+                case '===':
+                    return (v1 === v2) ? options.fn(this) : options.inverse(this);
+                case '!=':
+                    return (v1 != v2) ? options.fn(this) : options.inverse(this);
+                case '!==':
+                    return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+                case '<':
+                    return (v1 < v2) ? options.fn(this) : options.inverse(this);
+                case '<=':
+                    return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+                case '>':
+                    return (v1 > v2) ? options.fn(this) : options.inverse(this);
+                case '>=':
+                    return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+                case '&&':
+                    return (v1 && v2) ? options.fn(this) : options.inverse(this);
+                case '||':
+                    return (v1 || v2) ? options.fn(this) : options.inverse(this);
+                default:
+                    return options.inverse(this);
+            }
+        });
+        var bpnumber = "";
+        var premisenumber = "";
+
+        // Disable up and down keys.
+        $('form').on('keydown', 'input[type=number]', function (e) {
+            if (e.which == 38 || e.which == 40)
+                e.preventDefault();
+        });
+
+        $('.accountmodalconfirm').each(function () {
+            if ($(this).attr('id') == "accountmodalconfirm") {
+                $(this).on('click', function () {
+                    var _this = this;
+                    setTimeout(function () {
+                        var id = $(_this).attr("data-account-count"),
+                            parent = $(_this).closest('.m43-accountsel').find('.m43-accountsel__selected');
+                        $(parent).find('.m43-accountsel__details').find('span').each(function () {
+                            if ($(this).attr('data-acc-detail') == "acc_number") {
+                                jQuery('input[name="transferaccount"]')[0].value = $(this).html();
+                            };
+                        });
+                    }, 500);
+                });
+            }
+        });
+        jQuery('#form-account-selector').submit(handleAccountSelection);
+        jQuery('#form-account-selector').submit();
+        $("#form-field-TransferTo").change(function () {
+
+            var selectedvalue = $('#form-field-TransferTo option:selected').val();
+            var ibanavailble = jQuery('input[name="Ibanavailable"]').val();
+            if (selectedvalue == "upiban") {
+                $("#transfer_details-0").hide();
+
+                if (ibanavailble == "true") {
+                    $("#iban_details_select").show();
+                }
+                else {
+                    $("#iban_details").show();
+                }
+                $("#IBANModal").show();
+                $("#WesternUnionTerms").hide();
+                $("#description-for-westernlocation").hide();
+                $("#cheque_details").hide();
+                $("#attachment_details").hide();
+                $("#western_union_selectcountry").hide();
+                $(".westernuniondiv").hide();
+                $("#western_union_selectstate").hide();
+                $("#western_union_selectcity").hide();
+                $("#western_union_selectcurrency").hide();
+                jQuery("#form-field-address").val('');
+                $('#ibnnote').html("@Translate.Text("updateiban.refundthroughIBANnote")");
+            }
+            else if (selectedvalue == "upcq") {
+                $("#transfer_details-0").hide();
+
+                $("#cheque_details").show();
+                $("#iban_details").hide();
+                $("#iban_details_select").hide();
+                $("#attachment_details").hide();
+                $("#IBANModal").show();
+                $("#WesternUnionTerms").hide();
+                $("#western_union_selectcountry").hide();
+                $(".westernuniondiv").hide();
+                $("#western_union_selectstate").hide();
+                $("#western_union_selectcity").hide();
+                $("#western_union_selectcurrency").hide();
+                $("#description-for-westernlocation").hide();
+                jQuery("#form-field-ibannumber").val('');
+                jQuery("#form-field-confirm-iban-number").val('');
+                $('#ibnnote').html("");
+            }
+            else if (selectedvalue == "cq") {
+                $("#transfer_details-0").hide();
+
+                //$("#cheque_details").show();
+                $("#iban_details").hide();
+                $("#iban_details_select").hide();
+                $("#attachment_details").hide();
+                $("#western_union_selectcountry").hide();
+                $(".westernuniondiv").hide();
+                $("#western_union_selectstate").hide();
+                $("#western_union_selectcity").hide();
+                $("#western_union_selectcurrency").hide();
+                $("#IBANModal").show();
+                $("#WesternUnionTerms").hide();
+                $("#description-for-westernlocation").hide();
+                $('#documentname').html("@Translate.Text("updateiban.updatechequedocument")");
+                $('#ibnnote').html("");
+                jQuery("#form-field-ibannumber").val('');
+                jQuery("#form-field-confirm-iban-number").val('');
+            }
+            else if (selectedvalue == "iban") {
+                $("#transfer_details-0").hide();
+
+                $("#cheque_details").hide();
+                $("#western_union_selectcountry").hide();
+                $(".westernuniondiv").hide();
+                $("#western_union_selectstate").hide();
+                $("#western_union_selectcity").hide();
+                $("#western_union_selectcurrency").hide();
+                if (ibanavailble == "true") {
+                    $("#iban_details_select").show();
+                }
+                else {
+                    $("#iban_details").show();
+                }
+                // $("#iban_details").show();
+                $("#attachment_details").show();
+                $("#IBANModal").show();
+                $("#WesternUnionTerms").hide();
+                $("#description-for-westernlocation").hide();
+                // $("#ChequeModal").hide();
+                // $("#ChequeModal1").hide();
+                if (jQuery('#form-field-IbanRefundDocument').attr("required") == undefined) {
+                    $('#documentname').html("@Translate.Text("updateiban.updateibandocument")");
+
+                }
+                else {
+                    $('#documentname').html("@Translate.Text("updateiban.updateibandocumentmandatory")");
+
+                }
+                $('#ibnnote').html("@Translate.Text("updateiban.refundthroughIBANnote")");
+                jQuery("#form-field-ibannumber").val('');
+                jQuery("#form-field-address").val('');
+            }
+            else if (selectedvalue == "t") {
+                $("#cheque_details").hide();
+                $("#iban_details").hide();
+                $("#iban_details_select").hide();
+                $("#western_union_selectcountry").hide();
+                $(".westernuniondiv").hide();
+                $("#western_union_selectstate").hide();
+                $("#western_union_selectcity").hide();
+                $("#western_union_selectcurrency").hide();
+                $("#IBANModal").show();
+                $("#WesternUnionTerms").hide();
+                $("#description-for-westernlocation").hide();
+                //  $("#ChequeModal").hide();
+                // $("#ChequeModal1").hide();
+                $("#attachment_details").hide();
+                $("#transfer_details-0").show();
+                $('#ibnnote').html("");
+            }
+            else if (selectedvalue == "w") {
+                $("#transfer_details-0").hide();
+                $("#cheque_details").hide();
+                $("#iban_details").hide();
+                $("#iban_details_select").hide();
+                $("#IBANModal").hide();
+                $("#WesternUnionTerms").show();
+                $("#attachment_details").hide();
+                $("#western_union_selectcountry").show();
+                $(".westernuniondiv").show();
+                $("#description-for-westernlocation").show();
+                $('#form-field-countrylist').find('option:not(:first)').remove();
+                $('#ibnnote').html("");
+                var url = "/api/IBANList/GetMasterDataWUlist";
+                $.ajax({
+                    url: url,
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                        //window.attachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                        $('input[name="SelectedCountrytext"]').val('');
+                        $('input[name="SelectedStatetext"]').val('');
+                        $('input[name="SelectedCity"]').val('');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                        //window.detachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                    },
+                    success: function (response) {
+                        if (response != undefined || response != null) {
+                            $.each(response, function (i, item) {
+                                $("#form-field-countrylist").append($('<option>', {
+                                    value: item.Value,
+                                    text: item.Text
+                                }));
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        console.log('GetMasterDataWUlist ' + error);
+                    }
+                });
+            }
+            else {
+                $("#cheque_details").hide();
+                $("#iban_details").hide();
+                $("#iban_details_select").hide();
+                $("#IBANModal").hide();
+                $("#attachment_details").hide();
+                jQuery("#form-field-ibannumber").val('');
+                jQuery("#form-field-confirm-iban-number").val('');
+                jQuery("#form-field-address").val('');
+                $("#transfer_details-0").hide();
+                $("#western_union_selectcountry").hide();
+                $(".westernuniondiv").hide();
+                $("#western_union_selectstate").hide();
+                $("#western_union_selectcity").hide();
+                $("#western_union_selectcurrency").hide();
+                $('#ibnnote').html("");
+            }
+        });
+        $("#form-field-selectibanlist").change(function () {
+            var selectedvalue = $('#form-field-selectibanlist option:selected').val();
+
+
+            if (selectedvalue == "") {
+                jQuery('#selectibannumber').hide();
+                jQuery('#confirmibannumber').hide();
+                jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-selectibanlist');
+                //this.attr("required", "");
+            } else
+                if (selectedvalue == "others") {
+                    jQuery('#selectibannumber').show();
+                    jQuery('#confirmibannumber').show();
+                    jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-ibannumber2');
+                    //this.removeAttr("required");
+                }
+                else {
+                    jQuery('#selectibannumber').hide();
+                    jQuery('#confirmibannumber').show();
+                    jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-selectibanlist');
+                    //this.removeAttr("required");
+
+                }
+        });
+
+        $(".accountmodalconfirm").on('click', function () {
+            $(".transferaccounts-error").addClass('hidden');
+        });
+
+        var validate = function () {
+            jQuery('.button--submit').off('click.verify').on('click.verify', function (e) {
+
+                var flag = true,
+                    _this = this;
+
+                jQuery('.form-field-TransferTo').each(function () {
+                    if ($(this).val() == "t") {
+                        // debugger;
+                        var buttonaccount = $('#transfer_details-0').find('.m43-accountsel__selected--dropdown');
+                        var closestaccount = $('#transfer_details-0').find('.m43-accountsel__selected--dropdown').find(".m43-accountsel__details").closest('span').find('span');
+                        if (closestaccount.html() == undefined || closestaccount.html() == "0") {
+
+                            buttonaccount.closest('div').find(".transferaccounts-error").removeClass('hidden');
+                            buttonaccount.closest('div').find(".transferaccounts-error").html("@Translate.Text("refund.selectaccount")");
+                            flag = false;
+                        }
+                        else {
+                            buttonaccount.closest('div').find(".transferaccounts-error").addClass('hidden');
+                        }
+                    }
+                });
+                if (flag == false) {
+                    e.preventDefault();
+                    jQuery('#updateibanform').parsley().validate();
+                    return false;
+                }
+                else {
+                    jQuery('#updateibanform').submit();
+                }
+            });
+        };
+        validate();
+        jQuery('.accountmodalconfirm').off('click.call').on('click.call', validate());
+        function handleAccountSelection(e) {
+
+            var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+
+            bpnumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').parent().parent().find('[id$=BusinessPartnerNumber]').val();
+
+
+            premisenumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').parent().parent().find('[id$=__PremiseNumber]').val();
+            if (accountNumber) {
+                jQuery('#contact-details-placeholder').empty();
+
+                var url = "/api/IBANList/Getaccount";
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    data: "accountnumber=" + accountNumber + "&bpNumber=" + bpnumber,
+                    beforeSend: function () {
+                        jQuery("#SumbitType").val("");
+                        jQuery('#updateibanform').hide();
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                        //window.attachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                        $("#iban_details_select").hide();
+                        $("#IBANModal").hide();
+                        $("#transfer_details-0").hide();
+                        $("#iban_details").hide();
+                        $("#cheque_details").hide();
+                        $("#attachment_details").hide();
+                        jQuery('#updateibanerror').hide();
+                        $("#form-field-TransferTo").val('');
+                        jQuery("#form-field-ibannumber").val('');
+                        jQuery("#form-field-confirm-iban-number").val('');
+                        jQuery("#form-field-address").val('');
+                        $("#western_union_selectcountry").hide();
+                        $(".westernuniondiv").hide();
+                        $("#western_union_selectstate").hide();
+                        $("#western_union_selectcity").hide();
+                        $("#western_union_selectcurrency").hide();
+                        jQuery('#updateibansubmissionerror').hide();
+                        jQuery('#updateibansubmissionsucccess').hide();
+                        jQuery('input[name="MobileNumber"]').val('');
+                        jQuery('input[name="CreditBalance"]').val('');
+                        jQuery('.creditbalancediv').hide();
+                        jQuery('.creditbalancediv_pending').hide();
+                        jQuery('#emailiddiv').hide();
+                        jQuery('input[name="Emailid"]').val('');
+                        jQuery('#transfer_details-0 .m43-accountsel__header:first-child').html('');
+                        jQuery('#transfer_details-0 .m43-accountsel__header:first-child').html('<span class="m43-accountsel__name" data-acc-detail="acc_name"><span class="inline-block" dir="@direction">@Model.AccountNumberSelected</span></span>');
+
+                        jQuery("#PendingRefundSection").hide();
+                        jQuery(".divskipcontainer").hide();
+                        _currentData = null;
+                    },
+                    complete: function () {
+                        require(['parsley'], function () {
+                            jQuery('#updateibanform').parsley().reset();
+                        });
+                        jQuery('#updateibanform .form-field__input-wrapper').removeClass('form-field__input-wrapper--error');
+                        jQuery('#updateibanform .form-field__input--select').removeClass('form-field__input--error');
+                        $(".transferaccounts-error").addClass('hidden');
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                        //window.detachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                    },
+                    success: function (response) {
+                        _currentData = response;
+                        if (response.Message == undefined) {
+                            fnRenderRefundRequestPage(response)
+                        }
+                        else {
+                            jQuery('#updateibanform').hide();
+                            jQuery('#updateibanerror').show();
+                            jQuery('#updateibanerror').html(response.Message);
+                        }
+                    },
+                    error: function (error) {
+                        // console.log(error);
+                    }
+                });
+            }
+            return false;
+        }
+
+        //western union state
+        $("#form-field-countrylist").change(function () {
+            var selectedvalue = $('#form-field-countrylist option:selected').val();
+            $('#form-field-statelist').find('option:not(:first)').remove();
+            $('#form-field-citylist').find('option:not(:first)').remove();
+            $('#form-field-currencylist').find('option:not(:first)').remove();
+
+            var url = "/api/IBANList/GetWUStateList";
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    SelectedCountry: selectedvalue
+                },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    //window.attachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                    $('#western_union_selectstate').hide();
+                    $('#western_union_selectcity').hide();
+                    $('#western_union_selectcurrency').hide();
+                        $('input[name="SelectedCountrytext"]').val('');
+                        $('input[name="SelectedStatetext"]').val('');
+                        $('input[name="SelectedCity"]').val('');
+                    $('input[name="SelectedCountrytext"]').val($('#form-field-countrylist option:selected').text());
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                    //window.detachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                },
+                success: function (response) {
+                    if (response != undefined || response != null) {
+                        if (response.stateflag) {
+                            $("#western_union_selectstate").show();
+                            $.each(response.statelst, function (i, item) {
+                                $("#form-field-statelist").append($('<option>', {
+                                    value: item.Value,
+                                    text: item.Text
+                                }));
+                            });
+                        }
+                        else if (response.cityflag) {
+                            $("#western_union_selectcity").show();
+                            $.each(response.citylst, function (i, item) {
+                                $("#form-field-citylist").append($('<option>', {
+                                    value: item.Value,
+                                    text: item.Text
+                                }));
+                            });
+                        }
+                        if (response.currencylst != null || response.currencylst != undefined) {
+                            $("#western_union_selectcurrency").show();
+                            $.each(response.currencylst, function (i, item) {
+                                $("#form-field-currencylist").append($('<option>', {
+                                    value: item.Value,
+                                    text: item.Text
+                                }));
+                                if (response.currencylst.length == 1) {
+                                    $("#form-field-currencylist").val(response.currencylst[0].Value);
+                                }
+                            });
+                        }
+                    }
+                },
+                error: function (error) {
+                    console.log('WUStateList ' + error);
+                }
+            });
+        });
+
+        //western union city
+        $("#form-field-statelist").change(function () {
+            var selectedvalue = $('#form-field-statelist option:selected').val();
+            $('#form-field-citylist').find('option:not(:first)').remove();
+
+            var url = "/api/IBANList/GetWUCityList";
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    SelectedState: selectedvalue
+                },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    //window.attachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                    $('#western_union_selectcity').hide();
+                        $('input[name="SelectedStatetext"]').val('');
+                        $('input[name="SelectedCity"]').val('');
+                    $('input[name="SelectedStatetext"]').val($('#form-field-statelist option:selected').text());
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                    //window.detachSpinner('#updateibanform', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                },
+                success: function (response) {
+                    if (response != undefined || response != null) {
+                        if (response.cityflag) {
+                            $("#western_union_selectcity").show();
+                            $.each(response.citylst, function (i, item) {
+                                $("#form-field-citylist").append($('<option>', {
+                                    value: item.Value,
+                                    text: item.Text
+                                }));
+                            });
+                        }
+                    }
+                },
+                error: function (error) {
+                    console.log('WUStateList ' + error);
+                }
+            });
+        });
+
+        jQuery('#refundrecoverypay-popup').on('click', function () {
+            //var value = jQuery("#form-field-Outstandingbalance-ot").val();
+            var total = jQuery("#totalAmount").val();
+            var currency = '@Translate.Text("AED")';
+
+            jQuery('#divPaymentAmountVal').attr('data-value', total);
+            jQuery('#divPaymentAmountVal').data('value', total);
+
+            if (numeral(total) > 0)
+            {
+                //Set payment method based on paid amount
+                setPaymentMethod(total);
+                jQuery("#SumbitType").val("recoverypayment");
+                jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+                jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                jQuery('.btnmodaltrigger').trigger('click');
+            }
+
+        });
+
+        jQuery('input[name ="refundpaytype"]').on("change", function () {
+            fnRenderRefundRequestPage(_currentData, jQuery(this).val() == 0)
+        });
+
+        jQuery('.btnappendtaccountsearch').on('click', function () {
+            $(".ac_item").removeAttr("checked");
+        });
+
+        function fnRenderRefundRequestPage(response, isskip) {
+            var renderPaymentPaySection = parseFloat(response.TotalPendingBalance) > 0 && (parseFloat(response.CreditBalance) * -1) > 0 && isskip == undefined;
+
+
+
+            if (!response.IsRequestChequeAllowed && !response.IsRequestIbanAllowed && !response.IsUpdateChequeAllowed && !response.IsUpdateIbanAllowed && !response.IsRequestTransferAllowed) {
+                jQuery('#updateibanform').hide();
+                jQuery('#updateibanerror').show();
+                jQuery('#updateibanerror').html("@Translate.Text("updateiban.norefundtext")");
+
+            } else if (renderPaymentPaySection) {
+
+                if (Math.sign(response.CreditBalance) < 0) { //if (Math.abs(response.CreditBalance) > 0) {
+                    jQuery('.creditbalancediv_pending').show();
+                    if ('@direction' == "rtl") {
+                        jQuery('#form-field-creditbalance-ot').val(numeral(Math.abs(response.CreditBalance)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                    }
+                    else {
+                        jQuery('#form-field-creditbalance-ot').val('@Translate.Text("AED") ' + numeral(Math.abs(response.CreditBalance)).format('0,0.00'));
+                    }
+                }
+
+
+
+                if (parseFloat(response.TotalPendingBalance) > 0) {
+                    var paymenttext = '@Translate.Text("AED") ' + numeral(Math.abs(response.TotalPendingBalance)).format('0,0.00');
+                    if ('@direction' == "rtl") {
+                        paymenttext = numeral(Math.abs(response.TotalPendingBalance)).format('0,0.00') + " " + '@Translate.Text("AED")';
+                    }
+                    jQuery("#form-field-Outstandingbalance-ot").val(paymenttext);
+                    jQuery("#totalAmount").val(response.TotalPendingBalance);
+                    jQuery("#refundrecoverypay-popup").html('@Translate.Text("RR_pay") ' + paymenttext);
+                    jQuery("#refundrecoverypaybtn").html('@Translate.Text("RR_pay") ' + paymenttext);
+                }
+
+                if (response.nomoveoutpayflag == "X") {
+                    jQuery(".divskipcontainer").show();
+                }
+                //----
+                jQuery('.SelectedBusinessPartnerNumber').val(response.SelectedBusinessPartnerNumber);
+                jQuery('.AccountSelected').val(response.AccountSelected);
+                jQuery('.refundrecoverypay-popupbtn').show();
+                var template = Handlebars.compile(jQuery('#outstandingrefund-item-template').html());
+                $("#outstandinglist-content").empty().html(template(response));
+                jQuery("#PendingRefundSection").show();
+            }
+            else {
+                jQuery('#updateibanform').show();
+                jQuery('#form-field-TransferTo option[value="iban"]').hide().attr('disabled', true);
+                jQuery('#form-field-TransferTo option[value="upiban"]').hide().attr('disabled', true);
+                jQuery('#form-field-TransferTo option[value="cq"]').hide().attr('disabled', true);
+                jQuery('#form-field-TransferTo option[value="upcq"]').hide().attr('disabled', true);
+                jQuery('#form-field-TransferTo option[value="t"]').hide().attr('disabled', true);
+                jQuery('#form-field-TransferTo option[value="w"]').hide().attr('disabled', true);
+                //bank message
+                if (response.ValidBankCodes && response.ValidBankCodes.Item1 != "" && response.ValidBankCodes.Item2 != "") {
+                    $("#form-field-ibannumber").attr("bankcodes", response.ValidBankCodes.Item1);
+                    $("#form-field-ibannumber2").attr("bankcodes", response.ValidBankCodes.Item1);
+                    $("#form-field-select-confirm-iban-number").attr("bankcodes", response.ValidBankCodes.Item1);
+                    $("#form-field-confirm-iban-number").attr("bankcodes", response.ValidBankCodes.Item1);
+                    var msg = "@Translate.Text("moveout.allowedbanks").Trim()";
+                    $(".bank_msg").text($.trim(msg.replace(/[\t\n]+/g, ' ')).replace("{0}", response.ValidBankCodes.Item2));
+                }
+                if (response.IsRequestChequeAllowed) {
+                    jQuery('input[name="IsRequestChequeAllowed"]').val(true);
+                    jQuery('#form-field-TransferTo option[value="cq"]').show().attr('disabled', false);
+                }
+                if (response.IsRequestIbanAllowed) {
+                    jQuery('input[name="IsRequestIbanAllowed"]').val(true);
+                    jQuery('#form-field-TransferTo option[value="iban"]').show().attr('disabled', false);
+                }
+                if (response.IsUpdateChequeAllowed) {
+                    jQuery('input[name="IsUpdateChequeAllowed"]').val(true);
+                    jQuery('#form-field-TransferTo option[value="upcq"]').show().attr('disabled', false);
+                }
+                if (response.IsUpdateIbanAllowed) {
+                    jQuery('input[name="IsUpdateIbanAllowed"]').val(true);
+                    jQuery('#form-field-TransferTo option[value="upiban"]').show().attr('disabled', false);
+                }
+                if (response.IsWesternUnionAllowed) {
+                    jQuery('input[name="IsWesternUnionAllowed"]').val(true);
+                    jQuery('#form-field-TransferTo option[value="w"]').show().attr('disabled', false);
+                }
+                if (response.IsRequestTransferAllowed) {
+                    jQuery('input[name="IsRequestTransferAllowed"]').val(true);
+                    jQuery('#form-field-TransferTo option[value="t"]').show().attr('disabled', false);
+                    if (response.lsttranferaccount && response.lsttranferaccount.length > 0) {
+                        var markup = jQuery('#taccount-item-template').html();
+                        var template = Handlebars.compile(markup);
+                        $("#transfer_details-0 .m43-accountsel__selected--dropdown .m43-accountsel__name .inline-block").text(response.lsttranferaccount[0].contractaccountname);
+                        $("#contractaccountnumber-0").text(response.lsttranferaccount[0].contractaccountnumber);
+                        jQuery('input[name="transferaccount"]')[0].value = response.lsttranferaccount[0].contractaccountnumber;
+
+                        $(".appendtaccount").empty().html(template(response));
+                        jQuery("input:radio[name='transferAccount']:first").attr('checked', true);
+                        setTimeout(function () {
+                            window.initComponents('list-filter');
+                        }, 100);
+                        if (response.lsttranferaccount.length > 1) {
+                            jQuery(".appendtaccount-nodata").hide();
+                        }
+                        jQuery(window).trigger("data_loaded");
+                    }
+                }
+                //if (response.BusinessPartnerType == "2") {
+                //    jQuery('#form-field-IbanRefundDocument').attr("required", "");
+                //}
+                //if (response.BusinessPartnerType == "1") {
+                //    jQuery('#form-field-IbanRefundDocument').removeAttr("required", "");
+                //}
+               // jQuery('#form-field-IbanRefundDocument').attr("required", "");
+                if (firsttimeflag) {
+                    jQuery('#updateibansubmissionerror').show();
+                    jQuery('#updateibansubmissionsucccess').show();
+                    firsttimeflag = false;
+                }
+
+
+
+                jQuery('input[name="SelectedBusinessPartnerNumber"]').val(response.SelectedBusinessPartnerNumber);
+                jQuery('input[name="AccountSelected"]').val(response.AccountSelected);
+                jQuery('input[name="CustomerName"]').val(response.CustomerName);
+                jQuery('input[name="CustomerFirstName"]').val(response.CustomerFirstName);
+                jQuery('input[name="CustomerLastName"]').val(response.CustomerLastName);
+                jQuery('input[name="SelectedPremiseNumber"]').val(premisenumber);
+                jQuery('input[name="SelectedCountrytext"]').val($('#form-field-countrylist option:selected').text());
+                jQuery('input[name="SelectedStatetext"]').val($('#form-field-statelist option:selected').text());
+                jQuery('input[name="Ibanavailable"]').val(false);
+                if (response.Emailid != "") {
+                    jQuery('#emailiddiv').show();
+                }
+                jQuery('input[name="MaskedEmailid"]').val(response.MaskedEmailid);
+                jQuery('input[name="MaskedMobileNumber"]').val(response.MaskedMobileNumber);
+                jQuery('input[name="Emailid"]').val(response.Emailid);
+                jQuery('input[name="MobileNumber"]').val(response.MobileNumber);
+                if (Math.sign(response.CreditBalance) < 0) { //if (Math.abs(response.CreditBalance) > 0) {
+                    jQuery('.creditbalancediv').show();
+                    if ('@direction' == "rtl") {
+                        jQuery('input[name="CreditBalance"]').val(numeral(Math.abs(response.CreditBalance)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                    }
+                    else {
+                        jQuery('input[name="CreditBalance"]').val('@Translate.Text("AED") ' + numeral(Math.abs(response.CreditBalance)).format('0,0.00'));
+                    }
+                }
+                if (response.IbanValues != null) {
+                    $("#form-field-selectibanlist").children().remove();
+                    //jQuery('#iban_details_select').show();
+                    jQuery('input[name="Ibanavailable"]').val(true);
+                    $("#form-field-selectibanlist").append($("<option></option>").val('').html("@Translate.Text("updateiban.PleaseSelectIBAN")"));
+                    $("#form-field-selectibanlist").attr("required", "");
+                    $(response.IbanValues).each(function (i, obj) {
+                        //firstselection.push(obj.attributes[1].value);
+                        $("#form-field-selectibanlist").append($("<option></option>").val(response.IbanValues[i].iban.replace('AE', '')).html(response.IbanValues[i].maskIban));
+                        //console.log(response.IbanValues[i]);
+                    });
+                    jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-ibannumber2');
+                    $("#form-field-selectibanlist").append($("<option></option>").val('others').html("@Translate.Text("updateiban.others")"));
+                    // $("#form-field-ibanlist").append($("<option></option>").val(value.CountryId).html(value.CountryName));
+                }
+            }
+
+            if (isskip != undefined) {
+
+                if (isskip) {
+                    jQuery('#updateibanform').show();
+                    jQuery('.refundrecoverypay-popupbtn').hide();
+                    jQuery('.creditbalancediv').hide();
+
+                } else {
+                    jQuery('#updateibanform').hide();
+                    jQuery('.refundrecoverypay-popupbtn').show();
+                }
+            }
+
+        }
+
+
+
+    });
+    var _currentData = null;
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,700 @@
+﻿@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.HR.Models.CareerPortal
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.HR.Helpers.CareerPortal 
+@{
+
+    var genderList = CareerPortalHelper.GetGender();
+    var MaritalStatusList = CareerPortalHelper.GetMaritalStatus();
+}
+
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { Action = "CandidateProfile", Controller = "CareerPortal" }, FormMethod.Post, new { @id = "candidateprofile" + Model.Section, @name = "j126-career-portal-profile", @autocomplete = "off" }))
+{
+    @Html.Sitecore().FormHandler("CareerPortal", "EducationProfession")
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Section)
+    @Html.HiddenFor(x => x.JobId)
+    @Html.HiddenFor(x => x.ExperienceType)
+    <p>@Translate.Text("education intro text")</p>
+    <p><label id="educationError" class="parsley-errors-list"></label></p>
+    @*<div class="form-field--group">
+            <div class="form-field form-field--select form-field--select-single    ">
+                <label for="form-field-educationtype" class="form-field__label form-field__label_large">
+                    @Translate.Text("educational label")
+                </label>
+                <div class="form-field--add_button" data-toggle-button="true"><span>+</span> @Translate.Text("add text")</div>
+            </div>
+            <div data-toggle-target="true" data-table-post="university_grades-data-table" class="form-field  fieldset--hidden form-field-table" id="university_grades" aria-expanded="false">
+                <div class="form-field form-field--select form-field--select-single    ">
+                    <label for="form-field-educationtype" class="form-field__label">
+                        @Translate.Text("educational label")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full form-field-educationtype"
+                                id="form-field-educationtype"
+                                name="EducationType"
+                                aria-describedby="description-for-educationtype"
+                                data-parsley-errors-container="#description-for-educationtype"
+                                required="required"
+                                data-parsley-required-message="This field is required">
+                            <option value="" selected>@Translate.Text("select text") @Translate.Text("education level label")</option>
+                            @{
+                                foreach (var item in Model.EducationLevel)
+                                {
+                                    <option value="@item.Text" data-option-value="@item.Value">@item.Text</option>
+                                }
+                            }
+
+                        </select>
+                    </span>
+                    <div id="description-for-educationtype" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field form-field--text  ">
+
+                    <label for="form-field-SchoolUniversitys" class="form-field__label">
+                        @Translate.Text("school university label")
+                        <span class="form-field__label-required aria-only">((@Translate.Text("required text")))</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--select"
+                               id="form-field-SchoolUniversitys"
+                               name="SchoolUniversitys"
+                               type="text"
+                               placeholder="Enter school/university"
+                               aria-describedby="description-for-SchoolUniversitys"
+                               data-parsley-errors-container="#description-for-SchoolUniversitys"
+                               required="required"
+                               data-parsley-required-message="This field is required" />
+                    </span>
+                    <div id="description-for-SchoolUniversitys" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-FieldOfStudy" class="form-field__label">
+                        @Translate.Text("field of study label")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full form_select_textVal"
+                                id="form-field-FieldOfStudy"
+                                name="FieldOfStudy"
+                                required="required"
+                                aria-describedby="description-for-FieldOfStudy"
+                                data-parsley-required-message="This field is required"
+                                data-parsley-errors-container="#description-for-FieldOfStudy">
+                            <option value="" selected>@Translate.Text("select text") @Translate.Text("field of study label")</option>
+                            @{
+                                foreach (var item in Model.FieldOfStudy)
+                                {
+                                    <option value="@item.Text" data-option-value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </span>
+                    <div id="description-for-FieldOfStudy" class="form-field__messages">
+                    </div>
+                </div>
+                <div id="datepicker-container-startDate" class="form-field form-field--text   form-field--6">
+                    <label for="form-field-startDate" class="form-field__label">
+                        @Translate.Text("start date label")
+                    </label>
+                    <span class="form-field__input-wrapper  form-field__input-wrapper--datepicker">
+                        <input class="form-field__input form-field__input--text form-field__input--datepicker"
+                               id="form-field-startDate"
+                               name="edu_start_date"
+                               type="text"
+                               required="required"
+                               placeholder="DD/MM/YY"
+                               aria-describedby="description-for-startDate"
+                               data-parsley-errors-container="#description-for-startDate"
+                               data-el="datepicker"
+                               data-picker-options='{}' />
+                    </span>
+                    <div id="description-for-startDate" class="form-field__messages">
+                    </div>
+                </div>
+                <div id="datepicker-container-endDate" class="form-field form-field--text form-field--6">
+                    <label for="form-field-endDate" class="form-field__label">
+                        @Translate.Text("end date label")
+                        <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                        <input class="form-field__input form-field__input--text form-field__input--datepicker"
+                               id="form-field-endDate"
+                               name="edu_end_date"
+                               type="text"
+                               placeholder="DD/MM/YY"
+                               aria-describedby="description-for-endDate"
+                               data-parsley-errors-container="#description-for-endDate"
+                               required="required"
+                               data-parsley-required-message="This field is required"
+                               data-el="datepicker"
+                               data-picker-options='{}' />
+                    </span>
+                    <div id="description-for-endDate" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field__button">
+                    <div type="button" id="btnSaveEduc" data-text="True" class="button  button--text button--save_legend">@Translate.Text("save button text")</div>
+                    <div type="button" class="button  button--text button--cancel_legand">@Translate.Text("cancel button text")</div>
+                </div>
+            </div>
+            <div data-table-form="true" class="form-field" id="university_grades-data-table">
+                @if (Model.CandidateEducation != null && Model.CandidateEducation.Count == 0)
+                {
+                    <div class="form--data-table-row template-row hidden" data-component="m73-form-expand-tab">
+                        <span data-toggle="true" aria-controls="" class="form--data-table-tab form--data-table-title tab-large m73-form-trigger-expand">
+                            <div class="tab-title tab-expand"></div>
+                        </span>
+                        <div data-content="true" aria-labelledby="" aria-expanded="false" class="m73-form-content-expand">
+                            <div class="form--data-table-buttons">
+                                <div class="form-field--add_button edit">Edit</div>
+                                <div class="form-field--add_button remove">Remove</div>
+                            </div>
+                            <div class="form--data-table-content">
+                                <div class="form--data-table-wrapper"><label class="form-data-table__label">School/University </label><span class="form-data-table__value">sdfsdfsdf</span></div>
+                                <div class="form--data-table-wrapper"><label class="form-data-table__label">Major(optional) </label><span class="form-data-table__value"></span></div>
+                                <div class="form--data-table-wrapper"><label class="form-data-table__label">LevelofEducation </label><span class="form-data-table__value">1</span></div>
+                                <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">StartDate </label><span class="form-data-table__value">14 March 2019</span></div>
+                                <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">EndDate </label><span class="form-data-table__value">22 March 2019</span></div>
+                                <div class="form--data-table-wrapper"><label class="form-data-table__label">Country</label><span class="form-data-table__value">United Arab Emirates</span></div>
+                                <div class="form--data-table-wrapper"><label class="form-data-table__label">Region</label><span class="form-data-table__value">Dubai</span></div>
+                                <div class="form--data-table-wrapper"><label class="form-data-table__label">Grade/Percentage </label><span class="form-data-table__value">sdfsdf</span></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div id="educationList">
+                    @{ Html.RenderPartial("~/Views/Feature/HR/CareerPortal/Modules/_EducationList.cshtml", Model); }
+                </div>
+            </div>
+        </div>*@
+    <div class="form-field--group mb0">
+        <div class="form-field form-field--select form-field--select-single mb24">
+            <div class="form-field__label_large formid">@Translate.Text("qualification label")</div>
+            <div class="form-field--add_button" id="addQualification" data-toggle-button="true"><span>+</span> @Translate.Text("add text")</div>
+        </div>
+        <div data-toggle-target="true" data-table-post="qualification-data-table" class="form-field  fieldset--hidden form-field-table mb24" id="qualification" aria-expanded="false">
+            <div class="form-field form-field--text">
+                <label for="form-field-qualificationgrp" class="form-field__label">
+                    @Translate.Text("qualification group label")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select  form-field__input--select-full form_select_textVal"
+                            id="form-field-qualificationgrp"
+                            name="QualificationGrp"
+                            onchange="GetQualification()"
+                            required="required"
+                            data-form-of="true"
+                            aria-describedby="description-for-qualificationgrp"
+                            data-parsley-required-message="This field is required"
+                            data-parsley-errors-container="#description-for-qualificationgrp">
+                        <option value="" selected>@Translate.Text("select text") @Translate.Text("qualification group label")</option>
+                        @{
+                            foreach (var item in Model.QualificationGroup)
+                            {
+                                if (item.Value != "40000008" && item.Text != "")
+                                {
+                                    <option value="@item.Value" data-option-value="@item.Text">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-qualificationgrp" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field--text">
+                <label for="form-field-qualificationlist" class="form-field__label">
+                    @Translate.Text("qualification label")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select2 form-field__input--select-full form_select_textVal"
+                            id="form-field-qualificationlist"
+                            name="QualificationList"
+                            required="required"
+                            aria-describedby="description-for-qualificationlist"
+                            data-parsley-required-message="This field is required"
+                            data-parsley-errors-container="#description-for-qualificationlist">
+                        <option value="" selected>@Translate.Text("select text")  @Translate.Text("qualification label")</option>
+                        @{
+                            if (Model.QualificationList != null && Model.QualificationList.Count > 0)
+                            {
+                                foreach (var item in Model.QualificationList)
+                                {
+                                    <option value="@item.Value" data-option-value="@item.Text">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-qualificationlist" class="form-field__messages">
+                </div>
+            </div>
+            @*<div class="form-field form-field--text">
+                    <label for="form-field-proficiencylist" class="form-field__label">
+                        @Translate.Text("proficiency label")
+                        <span class="form-field__label-required aria-only">(required)</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full form_select_textVal"
+                                id="form-field-proficiencylist"
+                                name="ProficiencyList"
+                                required="required"
+                                aria-describedby="description-for-proficiencylist"
+                                data-parsley-required-message="This field is required"
+                                data-parsley-errors-container="#description-for-proficiencylist">
+                            <option value="" selected>@Translate.Text("select text")  @Translate.Text("proficiency label")</option>
+                            @{
+                                foreach (var item in Model.ProficiencyList)
+                                {
+                                    <option value="@item.Value" data-option-value="@item.Text">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </span>
+                    <div id="description-for-proficiencylist" class="form-field__messages">
+                    </div>
+                </div>*@
+            <div class="form-field__button mt12">
+                <div type="button" id="btnSaveQua" data-text="True" class="button  button--text button--save_legend">@Translate.Text("save button text")</div>
+                <div type="button" class="button  button--text button--cancel_legand">@Translate.Text("cancel button text")</div>
+            </div>
+        </div>
+        <div data-table-form="true" class="form-field mt0" id="qualification-data-table">
+            @if (Model.CandidateQualification != null && Model.CandidateQualification.Count == 0)
+            {
+                <div class="form--data-table-row template-row hidden" data-component="m73-form-expand-tab">
+                    <span data-toggle="true" class="form--data-table-tab form--data-table-title tab-large m73-form-trigger-expand">
+                        <div class="tab-title tab-expand">
+                            Grade 10x
+                        </div>
+                    </span>
+                    <div data-content="true" aria-labelledby="" aria-expanded="false" class="m73-form-content-expand">
+                        <div class="form--data-table-buttons">
+                            <div class="form-field--add_button edit">Edit</div>
+                            <div class="form-field--add_button remove">Remove</div>
+                        </div>
+                        <div class="form--data-table-content">
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">School/University </label><span class="form-data-table__value">sdfsdfsdf</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Major(optional) </label><span class="form-data-table__value"></span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">LevelofEducation </label><span class="form-data-table__value">1</span></div>
+                            <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">StartDate </label><span class="form-data-table__value">14 March 2019</span></div>
+                            <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">EndDate </label><span class="form-data-table__value">22 March 2019</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Country </label><span class="form-data-table__value">United Arab Emirates</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Region </label><span class="form-data-table__value">Dubai</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Grade/Percentage </label><span class="form-data-table__value">sdfsdf</span></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div id="qualificationList">
+                @{ Html.RenderPartial("~/Views/Feature/HR/CareerPortal/Modules/_QualificationList.cshtml", Model); }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-field--group mb0">
+        <div class="form-field form-field--select form-field--select-single mb12">
+            <div class="form-field__label_large formid">@Translate.Text("certifications label")</div>
+            <div class="form-field--add_button" id="addCertification" data-toggle-button="true"><span>+</span> @Translate.Text("add text")</div>
+        </div>
+        <div data-toggle-target="true" data-table-post="certificate-data-table" class="form-field  fieldset--hidden form-field-table mb24" id="certificate" aria-expanded="false">
+            <div class="form-field form-field--text  ">
+                <label for="form-field-IssuingOrganization" class="form-field__label">
+                    @Translate.Text("issuing organization label")
+                    <span class="form-field__label-required aria-only">((@Translate.Text("required text")))</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input class="form-field__input form-field__input--select"
+                           id="form-field-IssuingOrganization"
+                           name="IssuingOrganization"
+                           type="text"
+                           placeholder=" @Translate.Text("issuing organization label")"
+                           aria-describedby="description-for-IssuingOrganization"
+                           data-parsley-errors-container="#description-for-IssuingOrganization"
+                           required="required"
+                           data-parsley-required-message="This field is required" />
+                </span>
+                <div id="description-for-IssuingOrganization" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field--text">
+                <label for="form-field-certificationlist" class="form-field__label">
+                    @Translate.Text("certifications label")
+                    <span class="form-field__label-required aria-only">(required)</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select2 form-field__input--select-full form_select_textVal"
+                            id="form-field-certificationlist"
+                            name="CertificationList"
+                            required="required"
+                            aria-describedby="description-for-certificationlist"
+                            data-parsley-required-message="This field is required"
+                            data-parsley-errors-container="#description-for-certificationlist">
+                        <option value="" selected>@Translate.Text("select text") @Translate.Text("certifications label")</option>
+                        @{
+                            if (Model.CertificationList != null && Model.CertificationList.Count > 0)
+                            {
+                                foreach (var item in Model.CertificationList)
+                                {
+                                    <option value="@item.Value" data-option-value="@item.Text">@item.Text</option>
+                                }
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-certificationlist" class="form-field__messages">
+                </div>
+            </div>
+            @*<div class="form-field form-field--text">
+                    <label for="form-field-certproficiencylist" class="form-field__label">
+                        @Translate.Text("proficiency label")
+                        <span class="form-field__label-required aria-only">(required)</span>
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        <select class="form-field__input form-field__input--select form-field__input--select-full form_select_textVal"
+                                id="form-field-certproficiencylist"
+                                name="CertProficiencyList"
+                                required="required"
+                                aria-describedby="description-for-certproficiencylist"
+                                data-parsley-required-message="This field is required"
+                                data-parsley-errors-container="#description-for-certproficiencylist">
+                            <option value="" selected>@Translate.Text("select text")  @Translate.Text("proficiency label")</option>
+                            @{
+                                foreach (var item in Model.ProficiencyList)
+                                {
+                                    <option value="@item.Value" data-option-value="@item.Text">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </span>
+                    <div id="description-for-certproficiencylist" class="form-field__messages">
+                    </div>
+                </div>*@
+            <div class="form-field__button mt0">
+                <div type="button" id="btnSaveCert" data-text="True" class="button  button--text button--save_legend">@Translate.Text("save button text")</div>
+                <div type="button" class="button  button--text button--cancel_legand">@Translate.Text("cancel button text")</div>
+            </div>
+        </div>
+        <div data-table-form="true" class="form-field mt0" id="certificate-data-table">
+            @if (Model.CandidateCertification != null && Model.CandidateCertification.Count == 0)
+            {
+                <div class="form--data-table-row template-row hidden" data-component="m73-form-expand-tab">
+                    <span data-toggle="true" class="form--data-table-tab form--data-table-title tab-large m73-form-trigger-expand">
+                        <div class="tab-title tab-expand">
+                            Grade 10x
+                        </div>
+                    </span>
+                    <div data-content="true" aria-labelledby="" aria-expanded="false" class="m73-form-content-expand">
+                        <div class="form--data-table-buttons">
+                            <div class="form-field--add_button edit">Edit</div>
+                            <div class="form-field--add_button remove">Remove</div>
+                        </div>
+                        <div class="form--data-table-content">
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">School/University </label><span class="form-data-table__value">sdfsdfsdf</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Major(optional) </label><span class="form-data-table__value"></span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">LevelofEducation </label><span class="form-data-table__value">1</span></div>
+                            <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">StartDate </label><span class="form-data-table__value">14 March 2019</span></div>
+                            <div class="form--data-table-wrapper column-2"><label class="form-data-table__label">EndDate </label><span class="form-data-table__value">22 March 2019</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Country </label><span class="form-data-table__value">United Arab Emirates</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Region </label><span class="form-data-table__value">Dubai</span></div>
+                            <div class="form--data-table-wrapper"><label class="form-data-table__label">Grade/Percentage </label><span class="form-data-table__value">sdfsdf</span></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div id="certificateList">
+                @{ Html.RenderPartial("~/Views/Feature/HR/CareerPortal/Modules/_CertificationList.cshtml", Model); }
+            </div>
+        </div>
+    </div>
+
+    <div class="form-field__button save-continue-btns form-field--12 mb0">
+        @Html.HiddenFor(x => x.SaveandContinueButtonClicked, new { id = "saveandcontinuebuttonclicked" })
+        @Html.HiddenFor(x => x.postedEducations, new { id = "postedEducationsjson", @value = "" })
+        @Html.HiddenFor(x => x.postedQualifications, new { id = "postedQualificationjson", @value = "" })
+        @Html.HiddenFor(x => x.postedCeritificates, new { id = "postedCertificatesjson", @value = "" })
+        <button id="btnEducationInfoContinue" type="submit" data-text="False" class="button button--quaternary">@Translate.Text("exit text")</button>
+        <button id="btnEducationInfoSave" data-text="True" type="submit" class="button button--primary">@Translate.Text("continue text")</button>
+    </div>
+}
+<script type="text/javascript">
+    $('.m21-avatar__name').html('@ViewBag.FullName');
+    setTimeout(function () {
+        jQuery(window).trigger('proprogress', [@Model.ProfileProgress]);
+    }, 500);
+
+    var $saveandcontinuebuttonclicked = jQuery('#saveandcontinuebuttonclicked');
+    $("form button[type=submit]").click(function (e) {
+        // Disable things that we don't want to validate.
+
+        var id = "#candidateprofile"+@Model.Section;
+        jQuery(id).parsley().destroy();
+        if ($(this).attr("data-text") == "True") {
+            $saveandcontinuebuttonclicked[0].value = true;
+        }
+        else {
+            $saveandcontinuebuttonclicked[0].value = false;
+        }
+        $("form button[type=submit]").submit();
+        //handleQualificationSelection1(e);
+    });
+
+    $("#btnSaveEduc").click(function (e) {
+        var check = 0,
+            $form = $(this).closest('.form-field-table');
+
+        requirejs(['parsley'], function () {
+            $form.find('input, select').each(function () {
+                jQuery(this).parsley().validate();
+                if (!jQuery(this).parsley().isValid()) {
+                    check = check + 1;
+                };
+            });
+            if (check == 0) {
+                handleEducationSelection(e);
+
+                var formId = "candidateprofile" + @Model.Section;
+                var url = "/api/sitecore/CareerPortal/AjaxSaveEducationDetails";
+
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    traditional: true,
+                    data: AddForgeryToken({ educationData: jQuery("#postedEducationsjson").val(), IsDelete: "false" }, formId),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                    },
+                }).done(function (response) {
+                    jQuery("#educationList").html('');
+                    jQuery("#educationList").html(response);
+                    $form.addClass('fieldset--hidden');
+                    $('#' + $form.attr('id').replace('_target', '_button') + '').removeClass('form_button_disable');
+                });
+            }
+        });
+
+    });
+    $("#btnSaveQua").click(function (e) {
+        var check = 0,
+            $form = $(this).closest('.form-field-table');
+
+        requirejs(['parsley'], function () {
+            $form.find('input, select').each(function () {
+                jQuery(this).parsley().validate();
+                if (!jQuery(this).parsley().isValid()) {
+                    check = check + 1;
+                };
+            });
+            if (check == 0) {
+                handleQualificationSelection(e);
+
+                 var formId = "candidateprofile" + @Model.Section;
+                var url = "/api/sitecore/CareerPortal/AjaxSaveQualification";
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    traditional: true,
+                    data: AddForgeryToken({ qualificationData: $("#postedQualificationjson").val(), IsDelete: "false", IsCert: "false" }, formId),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                        jQuery('#educationError').html('');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                    },
+                }).done(function (response) {
+                    if (response != null && response.strMessage != undefined && response.strMessage != "") {
+                        jQuery('#educationError').html('');
+                        jQuery('#educationError').html(response.strMessage);
+                    }
+                    else {
+                        jQuery("#qualificationList").html('');
+                        jQuery("#qualificationList").html(response);
+                        $form.addClass('fieldset--hidden');
+                        $('#' + $form.attr('id').replace('_target', '_button') + '').removeClass('form_button_disable');
+                    }
+
+                });
+            }
+        });
+    });
+    $("#btnSaveCert").click(function (e) {
+        var check = 0,
+            $form = $(this).closest('.form-field-table');
+
+        requirejs(['parsley'], function () {
+            $form.find('input, select').each(function () {
+                jQuery(this).parsley().validate();
+                if (!jQuery(this).parsley().isValid()) {
+                    check = check + 1;
+                };
+            });
+            if (check == 0) {
+                handleCertificatesSelection(e);
+
+                var url = "/api/sitecore/CareerPortal/AjaxSaveQualification";
+                var formId = "candidateprofile" + @Model.Section;
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    traditional: true,
+                    data: AddForgeryToken({ qualificationData: $("#postedCertificatesjson").val(), IsDelete: "false", IsCert: "true" }, formId),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                        jQuery('#educationError').html('');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        jQuery('body').removeClass('unscrollable');
+                    },
+                }).done(function (response) {
+                    if (response != null && response.strMessage != undefined && response.strMessage != "") {
+                        jQuery('#educationError').html('');
+                        jQuery('#educationError').html(response.strMessage);
+                    }
+                    else {
+                        jQuery("#certificateList").html('');
+                        jQuery("#certificateList").html(response);
+                        $form.addClass('fieldset--hidden');
+                        $('#' + $form.attr('id').replace('_target', '_button') + '').removeClass('form_button_disable');
+                    }
+                });
+            }
+        });
+    });
+
+    function handleEducationSelection(e) {
+
+        var postedEducationslist = jQuery('#postedEducationsjson');
+        var universitygradeslist = [];
+        var obj = {};
+        //obj.EducationLevel = $("#university_grades").attr("data-form-of");
+        obj.UniversityName = $("#form-field-SchoolUniversitys").val();
+        obj.FieldOfStudy = $("#form-field-FieldOfStudy option:selected").attr("data-option-value");//$("#form-field-FieldOfStudy").val();
+        obj.strStartDate = $("#form-field-startDate").val();
+        obj.strEndDate = $("#form-field-endDate").val();
+        if (jQuery('#btnSaveEduc.button--save_legend').closest('.form-field-table').attr('data-seq-no') != undefined) {
+            var objData = jQuery('#btnSaveEduc.button--save_legend').closest('.form-field-table').attr('data-seq-no').split('#');
+            if (objData.length > 0) {
+                obj.sequenceNo = objData[0];
+                obj.objectid = objData[1];
+                obj.objectversion = objData[2];
+                obj.planversion = objData[3];
+            }
+        }
+        obj.EducationLevel = $(".form-field-educationtype option:selected").attr("data-option-value");
+        if (obj.EducationLevel == "" || obj.EducationLevel == undefined) {
+            obj.EducationLevel = "01";
+        }
+        universitygradeslist.push(obj);
+
+        if (universitygradeslist.length > 0) {
+            jQuery(".form-field-educationtype").removeAttr('required');
+        }
+        postedEducationslist[0].value = JSON.stringify(universitygradeslist);
+        return true;
+    }
+
+    function handleQualificationSelection(e) {
+
+        var postedQualificationslist = jQuery('#postedQualificationjson');
+        var qualificationlist = [];
+        var obj = {};
+        obj.QualificationGrp = $("#form-field-qualificationgrp option:selected").html();//"form-field-qualificationgrp form-field-qualificationlist form-field-proficiencylist";
+        obj.QualificationGrpId = $("#form-field-qualificationgrp").val();
+        obj.ProficiencyId = "0000"; //$("#form-field-proficiencylist option:selected").val();
+        obj.ProficiencyName = $("#form-field-proficiencylist option:selected").html();
+        obj.QualificationId = $("#form-field-qualificationlist").val();
+        obj.QualificationName = $("#form-field-qualificationlist option:selected").html();
+        if (jQuery('#btnSaveQua.button--save_legend').closest('.form-field-table').attr('data-seq-no') != undefined) {
+            var objData = jQuery('#btnSaveQua.button--save_legend').closest('.form-field-table').attr('data-seq-no').split('#');
+            if (objData.length > 0) {
+                obj.sequenceNo = objData[0];
+                obj.objectid = objData[1];
+                obj.objectversion = objData[2];
+                obj.planversion = objData[3];
+            }
+        }
+        qualificationlist.push(obj);
+        postedQualificationslist[0].value = JSON.stringify(qualificationlist);
+        return true;
+    }
+
+    function handleCertificatesSelection(e) {
+        var postedCertificateslist = jQuery('#postedCertificatesjson');
+        var certificateslist = [];
+        var obj = {};
+        obj.QualificationGrp = "Certificates";//"form-field-qualificationgrp form-field-qualificationlist form-field-proficiencylist";
+        obj.QualificationGrpId = "40000008";
+        obj.IssuingOrganization = $("#form-field-IssuingOrganization").val();
+        obj.ProficiencyId = "0000";//$("#form-field-certproficiencylist option:selected").val();
+        obj.ProficiencyName = $("#form-field-certproficiencylist option:selected").html();
+        obj.QualificationId = $("#form-field-certificationlist").val();
+        obj.QualificationName = $("#form-field-certificationlist option:selected").html();
+        if (jQuery('#btnSaveCert.button--save_legend').closest('.form-field-table').attr('data-seq-no') != undefined) {
+            var objData = jQuery('#btnSaveCert.button--save_legend').closest('.form-field-table').attr('data-seq-no').split('#');
+            if (objData.length > 0) {
+                obj.sequenceNo = objData[0];
+                obj.objectid = objData[1];
+                obj.objectversion = objData[2];
+                obj.planversion = objData[3];
+            }
+        }
+        certificateslist.push(obj);
+        postedCertificateslist[0].value = JSON.stringify(certificateslist);
+        return true;
+    }
+
+    function GetQualification() {
+        var _selVal = $("#form-field-qualificationgrp option:selected").val();
+        var formId = "candidateprofile" + @Model.Section;
+        var url = "/api/sitecore/CareerPortal/AjaxGetQualifications";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            //datatype: 'application/json',
+            data: AddForgeryToken({ groupId: _selVal }, formId),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                jQuery('body').removeClass('unscrollable');
+            },
+        }).done(function (response) {
+            //console.log(response);
+            jQuery("#form-field-qualificationlist").empty();
+            jQuery("#form-field-qualificationlist").append('<option value="" selected>@Translate.Text("select text")  @Translate.Text("qualification label")</option>');
+            $.each(response, function (QuaKey, QuaValue) {
+                jQuery("#form-field-qualificationlist").append(jQuery("<option></option>").val(QuaValue.Value).html(QuaValue.Text));
+            });
+            //setTimeout(function () {
+            //    jQuery(window).trigger('reinitSelect2');
+            //}, 100);
+        });
+    }
+</script> 

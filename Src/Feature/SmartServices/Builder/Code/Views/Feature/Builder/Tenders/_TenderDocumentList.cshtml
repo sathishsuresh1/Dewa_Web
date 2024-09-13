@@ -1,0 +1,66 @@
+﻿@*@model DEWAXP.Foundation.Integration.Responses.TenderSvc.GetOpenTenderList*@
+@model DEWAXP.Foundation.Integration.Responses.VendorSvc.GetOpenTenderListDataResponse
+@using Sitecore.Globalization
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        @if (Model != null && Model.OpenTendersList.Tender != null)
+        {
+            foreach (var tender in @Model.OpenTendersList.Tender)
+            {
+                <div class="tender-result">
+                    <h2 class="tender-result__title">@Translate.Text("S1 No"): @tender.LineNumber</h2>
+
+                    <dl class="tender-result__details">
+                        <dt class="tender-result__key">@Translate.Text("Tender No"):</dt>
+                        <dd class="tender-result__value">
+                            @tender.TenderNumber
+                            @*<a href='@ViewBag.Repo?FID=@tender.TenderNumber' class='link'>@Translate.Text("Download PDF")</a>*@
+                            @*@Html.ActionLink(Translate.Text("Advertisement"), "ViewAttachment", "TenderDocumentList", new { tenderNumber = tender.TenderNumber }, new { @class = "link" })*@
+                            @Html.AntiForgeryToken()
+                            <a href="javascript:void(0)" data-tender="@tender.TenderNumber" data-apiurl="/api/sitecore/TenderDocumentList/ViewAttachment" class="link DisplayPDF">@Translate.Text("Advertisement")</a>
+                        </dd>
+                        <dt class="tender-result__key">@Translate.Text("Tender Description"):</dt>
+                        <dd class="tender-result__value">@tender.TenderDescription</dd>
+                        <dt class="tender-result__key">@Translate.Text("Tender Status"):</dt>
+                        <dd class="tender-result__value">@tender.Status</dd>
+                    </dl>
+                    <div class="m37-expander" data-component="m37-expander">
+                        <button data-toggle="true" class="m37-expander__trigger m37-expander__trigger--themed">@Translate.Text("Document details")</button>
+                        <div data-content="true" class="m37-expander__content" aria-expanded="false">
+                            <dl class="tender-result__details">
+                                <dt class="tender-result__key">@Translate.Text("TenderDocFees"):</dt>
+                                <dd class="tender-result__value">@tender.TenderFee</dd>
+                                <dt class="tender-result__key">@Translate.Text("Floating Date"):</dt>
+                                <dd class="tender-result__value">
+                                    @DEWAXP.Foundation.Content.Helpers.DateHelper.GetFormatedDate(tender.FloatingDate)
+                                </dd>
+                                <dt class="tender-result__key">@Translate.Text("Closing Date"):</dt>
+                                <dd class="tender-result__value">@DEWAXP.Foundation.Content.Helpers.DateHelper.GetFormatedDate(tender.ClosingDate)</dd>
+                                <dt class="tender-result__key">@Translate.Text("Buying Details"):</dt>
+                                <dd class="tender-result__value">
+                                    <a href='@ViewBag.PayUrl' class='link' target="_blank">@Translate.Text("Purchase Now and Submit Bid")</a>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <form action="/api/sitecore/TenderDocumentList/ViewAttachment" class="hidden" method="post" id="DisplayPFDFrom">
+                <input type="hidden" name="test" />
+            </form>
+            <script type="text/javascript">
+                docReady(function () {
+                    $(".DisplayPDF").on("click", function () {
+                        $('#DisplayPFDFrom').html("");
+                        $('#DisplayPFDFrom').append('<input type="hidden" name="tenderNumber" value="' + $(this).data("tender") + '"/>');
+                        $('#DisplayPFDFrom').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('.tender-result input[name=__RequestVerificationToken]').val() + '">');
+                        $('#DisplayPFDFrom').submit();
+                        $('#DisplayPFDFrom').html('<input type="hidden" name="test" />');
+                        return false;
+                    })
+                });
+            </script>
+        }
+    </div>
+</div>

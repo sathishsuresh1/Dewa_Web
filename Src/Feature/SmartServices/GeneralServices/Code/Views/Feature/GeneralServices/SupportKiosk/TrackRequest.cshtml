@@ -1,0 +1,108 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Feature.GeneralServices.Models.SupportKiosk.TrackRequestDetails
+
+@Html.Sitecore().Placeholder("j75/m26-page-title")
+
+
+<div id="personal-details-placeholder">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <form id="form-track-request" data-form="true" action="#" method="POST" form-skipvalidation="false">
+                <fieldset class="fieldset ">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--text ">
+                        <label for="form-field-requestNumber" class="form-field__label">
+                            @Translate.Text("Kiosk.RequestNumber")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text parsley-success"
+                                   id="form-field-requestNumber"
+                                   name="RequestNumber"
+                                   maxlength="9"
+                                   type="number" lang="en"
+                                   placeholder="@Translate.Text("Kiosk.RequestNumber")"
+                                   aria-describedby="description-for-qt1pztbyg"
+                                   required=""
+                                   data-parsley-error-message="@Translate.Text("Kiosk.RequestNumberError")"
+                                   data-parsley-id="8"
+                                   aria-invalid="false">
+                            <button class="track_request--submit" data-submission-text="@Translate.Text("Submitting")..." type="submit"></button>
+                        </span>
+                        <div id="description-for-qt1pztbyg" class="form-field__messages">
+                            <p class="form-field__description">@Translate.Text("This is a 9 digit reference number sent to your email")</p>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <div class="grid__row" id="divRequestDetails">
+
+    </div>
+</div>
+<style>
+    .form-field__input-wrapper--error:after, .field-content--error:after {
+        display: none;
+    }
+
+    .form-field__input-wrapper--validated:after {
+        display: none;
+    }
+</style>
+<script type="text/javascript">
+    docReady(function () {
+        $(".track_request--submit").click(function () {
+            $("#divRequestDetails").html('');
+            $("#divRequestDetails").hide();
+            jQuery("#form-track-request").submit(handleAccountSelection);
+        });
+    });
+    function handleAccountSelection(e) {
+        data = { requestNumber: $("#form-field-requestNumber").val() }
+        //var url = '/api/sitecore/SupportKiosk/TrackRequestDetails?requestNumber=' + $("#form-field-requestNumber").val() + '';
+        $.ajax({
+            type: "GET",
+            url: "/api/sitecore/SupportKiosk/TrackRequestDetails",
+            data: data,
+            cache: false,
+            beforeSend: function () {
+                window.attachSpinner('#divRequestDetails', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+            },
+            complete: function () {
+                window.detachSpinner('#divRequestDetails', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+            },
+            success: function (response) {
+                $("#divRequestDetails").html(response);
+                $("#divRequestDetails").show();
+            },
+            error: function (error) {
+                //console.log("Error: " + error);
+                $("#divRequestDetails").hide();
+            }
+        });
+        //jQuery.ajax(url, {
+        //    beforeSend: function () {
+        //        window.attachSpinner('#divRequestDetails', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+        //    },
+        //    complete: function () {
+        //        window.detachSpinner('#divRequestDetails', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+        //    },
+        //    dataType: 'json',
+        //    method: 'GET'
+        //}).success(function (response) {
+        //    debugger;
+        //    if (response != null && response.status == true && response.Data != null) {
+        //        var resultData = JSON.parse(response.Data);
+        //        $("#divRequestDetails").html(resultData);
+        //    }
+        //    else {
+        //    }
+        //});
+        return false;
+    }
+
+</script>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,116 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Integration.Responses.VendorSvc.GetTenderResultDisplayDataResponse
+
+@{
+    string tab = "m25-tab-3";
+    var cnt = 1;
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12">
+        <div class="m26-page-title__links">
+            <p class="m26-page-title__backlink">
+                <a class="button button--text button--back" href="@string.Format("{0}#{1}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_OPENING_RESULTS),tab)">@Translate.Text("Back")</a>
+            </p>
+        </div>
+        @Html.Sitecore().Placeholder("j28/m26-page-title")
+        @Html.Sitecore().Placeholder("j28/subnote")
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        <div class="journey-intro">
+            <h2 class="journey-intro__subtitle">@Translate.Text("TenderOpenResults")</h2>
+        </div>
+        <!-- intro -->
+        <div class="tender-result">
+
+            <dl class="tender-result__details">
+
+                <dt class="tender-result__key">@Translate.Text("Tender No")</dt>
+                <dd class="tender-result__value">@Model.TenderNumber</dd>
+
+                <dt class="tender-result__key">@Translate.Text("Tender Description")</dt>
+                <dd class="tender-result__value">@Model.TenderDescription</dd>
+
+                <dt class="tender-result__key">@Translate.Text("Floating Date")</dt>
+                <dd class="tender-result__value">@Model.FloatingDate</dd>
+
+                <dt class="tender-result__key">@Translate.Text("Closing Date")</dt>
+                <dd class="tender-result__value">@Model.ClosingDate</dd>
+
+                <dt class="tender-result__key">@Translate.Text("Tender Type")</dt>
+                <dd class="tender-result__value">@Model.TenderType</dd>
+
+            </dl>
+        </div>
+
+        <!-- list -->
+        @if (!(bool)ViewBag.HasResult)
+        {
+            <div class="tender-result">
+                <h2 class="tender-result__title">@Translate.Text("NoExtraInfo")</h2>
+            </div>
+        }
+        else
+        {
+            if (Model.OfferList.TenderOffer != null && Model.OfferList.TenderOffer.Any())
+            {
+                foreach (var tItem in Model.OfferList.TenderOffer)
+                {
+                    <div class="tender-result">
+
+                        <h2 class="tender-result__title">@Translate.Text("Offer No") @tItem.OfferNumber</h2>
+
+                        <dl class="tender-result__details">
+
+                            <dt class="tender-result__key">@Translate.Text("Name of the Tenderer")</dt>
+                            <dd class="tender-result__value">@tItem.TendererName</dd>
+
+                        </dl>
+
+
+                        <div aria-expanded="true" role="region" data-content="true" id="_u5u4dpdw4_content_@cnt" aria-labelledby="_u5u4dpdw4_trigger_@cnt">
+
+                            <dl class="tender-result__details">
+
+                                <dt class="tender-result__key">@Translate.Text("PriceLabel")</dt>
+
+                                @if (tItem.AmountAED != "0" && !String.IsNullOrEmpty(tItem.AmountAED))
+                                {
+                                    <dd class="tender-result__value">@tItem.AmountAED AED</dd>
+                                }
+                                @if (tItem.Currency1 != "0" && !String.IsNullOrEmpty(tItem.Currency1))
+                                {
+                                    <dd class="tender-result__value">, @tItem.Currency1</dd>
+                                }
+                                @if (tItem.Currency2 != "0" && !String.IsNullOrEmpty(tItem.Currency2))
+                                {
+                                    <dd class="tender-result__value">, @tItem.Currency2</dd>
+                                }
+                                <dt class="tender-result__key">@Translate.Text("Delivery or Completion")</dt>
+                                <dd class="tender-result__value">@tItem.DeliveryDays</dd>
+
+                                <dt class="tender-result__key">@Translate.Text("Bank Guarante")</dt>
+                                <dd class="tender-result__value">@tItem.BankGuarantee</dd>
+                                @if (!String.IsNullOrEmpty(tItem.Remarks))
+                                {
+                                    <dt class="tender-result__key">@Translate.Text("Remarks")</dt>
+                                    <dd class="tender-result__value">@tItem.Remarks</dd>
+                                }
+                            </dl>
+                        </div>
+
+                    </div>
+                    cnt++;
+                }
+            }
+            <div>
+                @Html.Sitecore().Placeholder("j28/subfooternote")
+            </div>
+        }
+    </div>
+</div>

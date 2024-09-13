@@ -1,0 +1,351 @@
+﻿@using System.Collections.Specialized
+@using Sitecore.Links
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc
+@using DEWAXP.Feature.CommonComponents.Utils;
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web;
+@using DEWAXP.Foundation.Content.Repositories
+@using DEWAXP.Foundation.Content.Models.Common
+@using DEWAXP.Foundation.Content
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@using DEWAXP.Feature.CommonComponents.Models.Persona
+
+@model PersonaTabBox
+@{
+    var pageUrl = LinkManager.GetItemUrl(Sitecore.Context.Item);
+    int i = 0;
+
+    // Water Live saving count in Smart Response
+    bool smartresponseactive = false;
+    var waterlivecount = string.Empty;
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    var WaterLiveData = _contentRepository.GetItem<SmartResponseWaterModel>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.Smart_Response_Config)));
+    if (WaterLiveData != null && WaterLiveData.IsCheckedActive && !string.IsNullOrWhiteSpace(WaterLiveData.WaterUsageCount))
+    {
+        smartresponseactive = true;
+        waterlivecount = WaterLiveData.WaterUsageCount;
+    }
+}
+
+
+
+<!--M41-PersonaTabsBox.cshtml-->
+@if (Model != null && Model.PersonaList != null && Model.PersonaList.Any())
+{
+    var PersonaCount = Model.PersonaList.Count();
+    var isLinkTab = Model.PersonaList.Where(x => x.PageLink != null).Count() > 0;
+
+    <div class="m41-persona-tabs-box m41-persona-tabs-box-v2 @(isLinkTab?"":"m41-persona-tabs-box--scripted")" data-component="m41-persona-tabs-box">
+
+        <div class="m41-persona-tabs-box__tabs m41-persona-tabs-box--desktop @(PersonaCount > 1?"p0":"")">
+
+            @if (PersonaCount > 1)
+            {
+                <div class="m41-persona-tabs-box__tab-items_wrapper">
+                    <ul class="m41-persona-tabs-box__tab-items">
+                        @{
+                            foreach (var personaItem in Model.PersonaList)
+                            {
+                                var tabTargetUrl = personaItem.PageLink != null ? personaItem.PageLink.Url : null;
+
+                                var active = pageUrl.Equals(tabTargetUrl);
+                                var additionalCssClasses = active ? " m41-persona-tabs-box__tab-link--active" : string.Empty;
+                                <li class="m41-persona-tabs-box__tab-item" data-index="@i">
+                                    @using (Html.Glass().BeginRenderLink(personaItem, x => x.PageLink, new { @class = "m41-persona-tabs-box__tab-link" + additionalCssClasses }))
+                                    {
+                                        <div class="m41-persona-tabs-box-icon">
+                                            @Html.Glass().RenderImage(personaItem, x => x.IconImage)
+                                        </div>
+                                        <div class="m41-persona-tabs-box__tab-itemtitle">@personaItem.Title</div>
+                                        <div class="m41-persona-tabs-box__tab-itemdesc">@personaItem.Description</div>
+                                    }
+                                    @if (!isLinkTab)
+                                    {
+                                        <div class="m41-persona-tabs-box__tab-link@(Model.ActivePersona!=null && personaItem.Id == Model.ActivePersona.Id ? " m41-persona-tabs-box__tab-link--active" : "")">
+                                            <div class="m41-persona-tabs-box-icon">
+                                            </div>
+                                            <div class="m41-persona-tabs-box__tab-itemtitle">@personaItem.Title</div>
+                                            <div class="m41-persona-tabs-box__tab-itemdesc">@personaItem.Description</div>
+                                        </div>
+                                    }
+
+
+
+                                </li>
+                                i++;
+                            }
+                        }
+
+                    </ul>
+                </div>
+                <script type="text/javascript">
+                    docReady(function () {
+                        setTimeout(function () {
+                            if (jQuery(".m41-persona-tabs-box__tab-link--active").length == 0) {
+                                jQuery(jQuery(".m41-persona-tabs-box__tab-items").find('a')[0]).addClass("m41-persona-tabs-box__tab-link--active")
+                            };
+                        }, 500)
+                    })
+
+                </script>
+            }
+
+            <div class="m41-persona-tabs-box__tab-panels">
+
+                @{
+                    i = 0;
+
+                    if (isLinkTab)
+                    {
+                        var _personaList = Model.PersonaList.Where(x => x.PageLink != null && x.PageLink.Url.Equals(pageUrl));
+                        if (_personaList != null && _personaList.Count() == 0)
+                        {
+                            _personaList = Model.PersonaList.Where(x => x.Name.ToLower() == "consumer");
+
+                        }
+                        foreach (var personaItem in _personaList)
+                        {
+                            <div class="m41-persona-tabs-box__tab-panel" data-index="@i" style="display:block;">
+                                <div class='grid'>
+                                    <div class='grid__row'>
+
+                                        @{
+                                            string personaSitecorePlacholder = Convert.ToString("persona/content" + i);
+                                        }
+                                        <!--@(personaSitecorePlacholder)-->
+                                        @Html.Sitecore().Placeholder(personaSitecorePlacholder)
+                                        <!--@(personaSitecorePlacholder)-->
+
+                                        <div class='grid__column grid__column--12 p0'>
+                                            <div class='m4-masonry' data-component='m4-masonry'>
+
+                                                @foreach (var personaSectionitem in personaItem.PersonaSectionMenuList)
+                                                {
+                                                    if (personaSectionitem.MenuList != null && personaSectionitem.MenuList.Any())
+                                                    {
+                                                        <div class='m4-masonry--item_wrapper @(personaSectionitem.IsDefaultAct == "1" ? "m4-masonry--item_wrapperactive" : "")'>
+                                                            <div class='m4-masonry--item'>
+                                                                <div class='m4-masonry--title @personaSectionitem.Icon'>@personaSectionitem.Title </div>
+
+                                                                @if (personaSectionitem.MenuList != null && personaSectionitem.MenuList.Any())
+                                                                {
+                                                                    <ul class='m4-masonry--list'>
+                                                                        @foreach (var pageitem in personaSectionitem.MenuList)
+                                                                        {
+                                                                            var pageurl = UtilSitecore.GetMenuURL(pageitem);
+                                                                            <li class='m4-masonry--list_item icon-new-arrow-right'>
+
+                                                                                <a class='m4-masonry--list_link' href='@pageurl'>@pageitem.MenuLabel </a>
+                                                                                @if (pageitem.PersonaTag != null)
+                                                                                {
+                                                                                    <span class='m4-masonry--list_item-tag @(Convert.ToString(pageitem.PersonaTag.Name).ToLower())'>@pageitem.PersonaTag.DataValue</span>
+
+                                                                                }
+                                                                            </li>
+                                                                        }
+                                                                    </ul>
+
+                                                                    if (personaSectionitem.ActivateTeaser == "1" &&
+                                                                        (personaSectionitem.TeaserImage != null || personaSectionitem.TeaserBackgroundImage != null) && personaSectionitem.TeaserLink != null)
+                                                                    {
+                                                                        string lnkcls = "m6-teaser teaser__link m6-teaser--background" + personaSectionitem.TextAlignment;
+                                                                        string bgsrc = personaSectionitem.TeaserBackgroundImage != null ? @"background-image:url(" + personaSectionitem.TeaserBackgroundImage.Src + "" + ")" : "";
+                                                                        string mb24 = !string.IsNullOrWhiteSpace(personaSectionitem.TextAlignment) ? "mb24" : "";
+                                                                        string pt24 = !string.IsNullOrWhiteSpace(personaSectionitem.TextAlignment) ? "pt24" : "";
+                                                                        {
+                                                                            using (Html.Glass().BeginRenderLink(personaSectionitem, x => x.TeaserLink, new { @class = lnkcls, @style = bgsrc }))
+                                                                            {
+                                                                                <div class="m6-teaser__content">
+                                                                                    @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "m6-teaser__title-img tooltipstered" }, true, false)
+                                                                                    <p class="m6-teaser__text teaser__copy m6-teaser__btext @Html.Raw(personaSectionitem.ShowLiveData.Equals("1") ? "white" : "")">@personaSectionitem.TeaserSubheader</p>
+                                                                                    @if (smartresponseactive == true && personaSectionitem.ShowLiveData.Equals("1"))
+                                                                                    {
+                                                                                        <p class="m6-teaser__counter white">@waterlivecount <span class="m6-teaser__counter-unit white">@Translate.Text("IG")</span></p>
+                                                                                        <p class="m6-teaser__text teaser__copy m6-teaser__btext white ">@personaSectionitem.TeaserSubfooter</p>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        }
+                                                                        @*<a href="@personaSectionitem.TeaserLink.Url" class="m6-teaser teaser__link m6-teaser--background @personaSectionitem.TextAlignment" style="@bgsrc">
+                                                                                <div class="m6-teaser__content">
+                                                                                    @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "m6-teaser__title-img tooltipstered" }, true, false)
+                                                                                    <p class="m6-teaser__text teaser__copy m6-teaser__btext @Html.Raw(personaSectionitem.ShowLiveData.Equals("1") ? "white" : "")">@personaSectionitem.TeaserSubheader</p>
+                                                                                    @if (smartresponseactive == true && personaSectionitem.ShowLiveData.Equals("1"))
+                                                                                    {
+                                                                                        <p class="m6-teaser__counter white">@waterlivecount <span class="m6-teaser__counter-unit white">@Translate.Text("IG")</span></p>
+                                                                                        <p class="m6-teaser__text teaser__copy m6-teaser__btext white ">@personaSectionitem.TeaserSubfooter</p>
+                                                                                    }
+                                                                                </div>
+                                                                            </a>*@
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (personaSectionitem.ActivateTeaser == "1" &&
+                                                                           (personaSectionitem.TeaserImage != null || personaSectionitem.TeaserBackgroundImage != null) && personaSectionitem.TeaserLink != null)
+                                                        {
+                                                            string bgsrc = personaSectionitem.TeaserBackgroundImage != null ? @"background-image:url(" + personaSectionitem.TeaserBackgroundImage.Src + "" + ")" : "";
+                                                            <div class='mobile-hide m4-masonry--item_wrapper m4-masonry--item_wrapper_promo'>
+                                                                @{
+                                                                    using (Html.Glass().BeginRenderLink(personaSectionitem, x => x.TeaserLink, new { @class = "m4-masonry--item m4-masonry--item_promo", @style = bgsrc }))
+                                                                    {
+                                                                        @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "tooltipstered" }, true, false)
+                                                                        <div class='m4-masonry--title'>@personaSectionitem.TeaserSubfooter</div>
+                                                                        <div class='m4-masonry--subtitle'>@personaSectionitem.TeaserSubheader</div>
+                                                                    }
+                                                                }
+                                                                @*<a href="@personaSectionitem.TeaserLink.Url" class='m4-masonry--item m4-masonry--item_promo' style="@bgsrc">
+                                                                        @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "tooltipstered" }, true, false)
+                                                                        <div class='m4-masonry--title'>@personaSectionitem.TeaserSubfooter</div>
+                                                                        <div class='m4-masonry--subtitle'>@personaSectionitem.TeaserSubheader</div>
+                                                                    </a>*@
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        foreach (var personaItem in Model.PersonaList)
+                        {
+                            <div class="m41-persona-tabs-box__tab-panel" data-index="@i">
+                                <div class='grid'>
+                                    <div class='grid__row'>
+
+                                        @{
+                                            string personaSitecorePlacholder = Convert.ToString("persona/content" + i);
+                                        }
+                                        <!--@(personaSitecorePlacholder)-->
+                                        @Html.Sitecore().Placeholder(personaSitecorePlacholder)
+                                        <!--@(personaSitecorePlacholder)-->
+                                        <div class='grid__column grid__column--12 p0'>
+                                            <div class='m4-masonry' data-component='m4-masonry'>
+                                                @foreach (var personaSectionitem in personaItem.PersonaSectionMenuList)
+                                                {
+                                                    if (personaSectionitem.MenuList != null && personaSectionitem.MenuList.Any())
+                                                    {
+                                                        <div class='m4-masonry--item_wrapper @(personaSectionitem.IsDefaultAct == "1" ? "m4-masonry--item_wrapperactive" : "")'>
+                                                            <div class='m4-masonry--item'>
+                                                                <div class='m4-masonry--title @personaSectionitem.Icon'>@personaSectionitem.Title </div>
+
+                                                                @if (personaSectionitem.MenuList != null && personaSectionitem.MenuList.Any())
+                                                                {
+                                                                    <ul class='m4-masonry--list'>
+                                                                        @foreach (var pageitem in personaSectionitem.MenuList)
+                                                                        {
+                                                                            var pageurl = UtilSitecore.GetMenuURL(pageitem);
+                                                                            <li class='m4-masonry--list_item icon-new-arrow-right'>
+
+                                                                                <a class='m4-masonry--list_link' href='@pageitem.FullUrl'>@pageitem.MenuLabel </a>
+                                                                                @if (pageitem.PersonaTag != null)
+                                                                                {
+                                                                                    <span class='m4-masonry--list_item-tag @(Convert.ToString(pageitem.PersonaTag.Name).ToLower())'>@pageitem.PersonaTag.Name</span>
+
+                                                                                }
+                                                                            </li>
+                                                                        }
+                                                                    </ul>
+
+                                                                    if (personaSectionitem.ActivateTeaser == "1" &&
+                                                                        (personaSectionitem.TeaserImage != null || personaSectionitem.TeaserBackgroundImage != null) && personaSectionitem.TeaserLink != null)
+                                                                    {
+                                                                        string bgsrc = personaSectionitem.TeaserBackgroundImage != null ? @"background-image:url(" + personaSectionitem.TeaserBackgroundImage.Src + "" + ")" : "";
+                                                                        {
+                                                                            using (Html.Glass().BeginRenderLink(personaSectionitem, x => x.TeaserLink, new { @class = "m6-teaser teaser__link m6-teaser--background", @style = bgsrc }))
+                                                                            {
+                                                                                <div class="m6-teaser__content">
+                                                                                    @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "m6-teaser__title-img tooltipstered" }, true, false)
+                                                                                    <p class="m6-teaser__text teaser__copy m6-teaser__btext">@personaSectionitem.TeaserSubheader</p>
+                                                                                    @if (smartresponseactive == true && personaSectionitem.ShowLiveData.Equals("1"))
+                                                                                    {
+                                                                                        <p class="m6-teaser__counter">@waterlivecount <span class="m6-teaser__counter-unit">@Translate.Text("IG")</span></p>
+                                                                                        <p class="m6-teaser__text teaser__copy m6-teaser__btext">@personaSectionitem.TeaserSubfooter</p>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        }
+                                                                        @*<a href="@personaSectionitem.TeaserLink.Url" class="m6-teaser teaser__link m6-teaser--background" style="@bgsrc">
+                                                                                <div class="m6-teaser__content">
+                                                                                    @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "m6-teaser__title-img tooltipstered" }, true, false)
+                                                                                    <p class="m6-teaser__text teaser__copy m6-teaser__btext">@personaSectionitem.TeaserSubheader</p>
+                                                                                    @if (smartresponseactive == true && personaSectionitem.ShowLiveData.Equals("1"))
+                                                                                    {
+                                                                                        <p class="m6-teaser__counter">@waterlivecount <span class="m6-teaser__counter-unit">@Translate.Text("IG")</span></p>
+                                                                                        <p class="m6-teaser__text teaser__copy m6-teaser__btext">@personaSectionitem.TeaserSubfooter</p>
+                                                                                    }
+                                                                                </div>
+                                                                            </a>*@
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (personaSectionitem.ActivateTeaser == "1" &&
+                                                                           (personaSectionitem.TeaserImage != null || personaSectionitem.TeaserBackgroundImage != null) && personaSectionitem.TeaserLink != null)
+                                                        {
+                                                            string bgsrc = personaSectionitem.TeaserBackgroundImage != null ? @"background-image:url(" + personaSectionitem.TeaserBackgroundImage.Src + "" + ")" : "";
+                                                            <div class='mobile-hide m4-masonry--item_wrapper m4-masonry--item_wrapper_promo'>
+                                                                @{
+                                                                    using (Html.Glass().BeginRenderLink(personaSectionitem, x => x.TeaserLink, new { @class = "m4-masonry--item m4-masonry--item_promo", @style = bgsrc }))
+                                                                    {
+                                                                        @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "tooltipstered" }, true, false)
+                                                                        <div class='m4-masonry--title'>@personaSectionitem.TeaserSubfooter</div>
+                                                                        <div class='m4-masonry--subtitle'>@personaSectionitem.TeaserSubheader</div>
+                                                                    }
+                                                                }
+                                                                @*<a href="@personaSectionitem.TeaserLink.Url" class='m4-masonry--item m4-masonry--item_promo' style="@bgsrc">
+                                                                        @Html.Glass().RenderImage(personaSectionitem, x => x.TeaserImage, new { role = "presentation", aria_hidden = "true", @class = "tooltipstered" }, true, false)
+                                                                        <div class='m4-masonry--title'>@personaSectionitem.TeaserSubfooter</div>
+                                                                        <div class='m4-masonry--subtitle'>@personaSectionitem.TeaserSubheader</div>
+                                                                    </a>*@
+                                                            </div>
+                                                        }
+                                                    }
+                                                }
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            i++;
+                        }
+                    }
+
+                }
+            </div>
+
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        docReady(function () {
+            setTimeout(function () {
+                if (jQuery(".m41-persona-tabs-box__tab-panel").length == 0) {
+                    jQuery(".m41-persona-tabs-box__tab-panel").show();
+                };
+            }, 500)
+        })
+
+    </script>
+
+}
+
+<!--M41-PersonaTabsBox.cshtml-->

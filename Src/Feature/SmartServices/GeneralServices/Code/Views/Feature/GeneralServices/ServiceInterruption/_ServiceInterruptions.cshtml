@@ -1,0 +1,50 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers.Extensions
+@model DEWAXP.Foundation.Integration.Responses.ServiceInterruptionResponse
+@{
+    string timeFix = "";
+    //if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    //{
+    //    timeFix = "\u200F";
+    //}
+}
+
+@if (Model.ResponseCode == 0)
+{
+    foreach (var interruptionDetails in Model.InterruptionDetails)
+    {
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+
+        <h2 class="text__section-subtitle">@Html.Raw(string.Format(Translate.Text("InterruptBlurb"), Html.GetFriendlyDate(interruptionDetails.ST_DATE), @interruptionDetails.ST_TIME.ToString(timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss"), interruptionDetails.INTRUPTION))</h2>
+
+        <div class="m42-keyvalue">
+            <dl>
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("Community")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@interruptionDetails.CityName</dd>
+
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("End time")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@string.Format(Translate.Text("DateAtHours"), Html.GetFriendlyDate(interruptionDetails.END_DATE), interruptionDetails.END_TIME.ToString(timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss"))</dd>
+
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("DurationJ77")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@interruptionDetails.DURATION @Translate.Text("Hour")</dd>
+
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("Account")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@interruptionDetails.CONTRACTACCOUNT</dd>
+            </dl>
+        </div>
+
+    </div>
+</div>
+        }
+    }
+else
+{
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+            <div class="m40-status-message__title">@Translate.Text("NoInt")</div>
+        </div>
+    </div>
+</div>
+}

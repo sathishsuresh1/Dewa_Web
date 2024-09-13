@@ -1,0 +1,289 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Content.Models.Common
+@model DEWAXP.Feature.GeneralServices.Models.Conservation.FormProjectModel
+
+
+@using Sitecore.Globalization;
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "scfForm", @id = "FormEI", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data", @autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-field">
+
+
+                <div class="form-introduction"><p style="text-align: justify;">@Translate.Text("FP_SubTitle")</p></div>
+                <fieldset class="display-section-fieldset">
+                    <legend class="display-section-legend">@Translate.Text("FG_Subheading")</legend>
+                </fieldset>
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <fieldset class="fieldset">
+
+
+                    <legend class="form-field__label">
+                        @Translate.Text("FG_SectorLbl")
+                    </legend>
+                    @{ int i = 0;
+                        foreach (DataSourceItems item in Model.SectorList.Items)
+                        {
+                            <p class="form-field__radio ">
+                                <label for="Sector@(i)">
+                                    <input class="form-field__input form-field__input--radio" id="Sector@(i)"
+                                           name="Sector"
+                                           type="radio"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("FEI_sector_Error_Message")"
+                                           value="@item.Value" @(Model.Sector == item.Value || (item.Value == "2" && string.IsNullOrWhiteSpace(Model.Sector)) ? "checked" : "")
+                                           aria-describedby="description-for-e8g4ccn3c"
+                                           data-parsley-errors-container="#description-for-sector">
+
+                                    <span class="form-field__fakeradio focus-enabled">
+                                        @item.Text
+                                    </span>
+                                </label>
+                            </p>
+                            i++;
+                        }
+                    }
+                    <div id="description-for-sector" class="form-field__messages">
+                    </div>
+                </fieldset>
+
+                <!--Instruction-->
+                <fieldset class="display-section-fieldset">
+                    <legend class="display-section-legend">@Translate.Text("FP_Section1Lbl")</legend>
+                    <div class="form-field form-field--text">
+                        <label for="InstitutionDetails_Name" class="form-field__label">
+                            @Translate.Text("FG_InstituteNameLbl")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.InstitutionDetails.Name,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_NameRequired"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_name = "",
+                               @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+                               @data_parsley_errors_container = "#description-for-institutiondetails_name"
+                           })
+                        </span>
+                        <div id="description-for-institutiondetails_name" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="InstitutionDetails_ContactNo" class="form-field__label">
+                            @Translate.Text("FG_LandLineLbl")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                   id="InstitutionDetails_ContactNo"
+                                   name="InstitutionDetails.ContactNo"
+                                   type="tel"
+                                   aria-describedby="description-for-institutiondetails_contactno"
+                                   data-parsley-errors-container="#description-for-institutiondetails_contactno"
+                                   required
+                                   @*data-parsley-error-message="@Translate.Text("FG_LandLineInvalid")"*@
+                                   data-parsley-required-message="@Translate.Text("FG_LandLineRequired")"
+                                   data-parsley-telephone_number=""
+                                   data-parsley-telephone_number-message="@Translate.Text("FG_LandLineInvalid")"
+                                   value="@(!string.IsNullOrWhiteSpace(Model.InstitutionDetails.ContactNo)?Model.InstitutionDetails.ContactNo:"")" />
+                        </span>
+                        <div id="description-for-institutiondetails_contactno" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="InstitutionDetails_EmailAddress" class="form-field__label">
+                            @Translate.Text("FG_EmailAddressLbl")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.InstitutionDetails.EmailAddress,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_EmailAddressRequired"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @type = "email",
+                               @data_parsley_type_message = Translate.Text("FG_EmailAddressInvalids"),
+                               @aria_describedby = "description-for-institutiondetails_Email",
+                               @data_parsley_errors_container = "#description-for-institutiondetails_Email"
+                           })
+                        </span>
+                        <div id="description-for-institutiondetails_Email" class="form-field__messages">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!--Nominated Conservation Project Supervisor (Institution Faculty)-->
+                <fieldset class="display-section-fieldset">
+                    <legend class="display-section-legend">@Translate.Text("FP_Section2Lbl")</legend>
+                    <div class="form-field form-field--text">
+                        <label for="InstitutionFacultyDetail_Name" class="form-field__label">
+                            @Translate.Text("FG_NameLbl")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.InstitutionFacultyDetail.Name,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_NameRequired"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_name = "",
+                               @data_parsley_name_message = Translate.Text("FG_NameInvalid"),
+                               @data_parsley_errors_container = "#description-for-InstitutionFacultyDetail_Name"
+                           })
+                        </span>
+                        <div id="description-for-InstitutionFacultyDetail_Name" class="form-field__messages">
+                        </div>
+                    </div>
+
+
+                    <div class="form-field form-field--text">
+                        <label for="InstitutionFacultyDetail_ContactNo" class="form-field__label">
+                            @Translate.Text("FG_MobileLbl")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                   id="InstitutionFacultyDetail_ContactNo"
+                                   name="InstitutionFacultyDetail.ContactNo"
+                                   type="tel"
+                                   aria-describedby="description-for-InstitutionFacultyDetail_ContactNo"
+                                   data-parsley-errors-container="#description-for-InstitutionFacultyDetail_ContactNo"
+                                   required
+                                   data-parsley-required-message="@Translate.Text("FG_MobileNoRequired")"
+                                   data-parsley-mobile_number=""
+                                   data-parsley-mobile_number-message="@Translate.Text("FG_MobileNoInvalids")"
+                                   value="@(!string.IsNullOrWhiteSpace(Model.InstitutionFacultyDetail.ContactNo)?Model.InstitutionFacultyDetail.ContactNo:"")" />
+                        </span>
+                        <div id="description-for-InstitutionFacultyDetail_ContactNo" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="InstitutionFacultyDetail_EmailAddress" class="form-field__label">
+                            @Translate.Text("FG_EmailAddressLbl")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.InstitutionFacultyDetail.EmailAddress,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_EmailAddressRequired"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @type = "email",
+                               @data_parsley_type_message = Translate.Text("FG_EmailAddressInvalids"),
+                               @data_parsley_type = "email",
+                               @data_parsley_errors_container = "#description-for-InstitutionFacultyDetail_Email"
+                           })
+                        </span>
+                        <div id="description-for-InstitutionFacultyDetail_Email" class="form-field__messages">
+                        </div>
+                    </div>
+                </fieldset>
+
+
+                <!--Distinguished Conservation Team member’s names: (maximum of 5 students)-->
+                <fieldset class="display-section-fieldset">
+                    <legend class="display-section-legend">@Translate.Text("FP_Section3Lbl")</legend>
+                    <div class="form-field form-field--text">
+                        <label for="NominatedTeamMembers_NAME1" class="form-field__label">
+                            (1)
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.NominatedTeamMembers.NAME1,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_Name1Required"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_errors_container = "#description-for-NominatedTeamMembers_NAME1"
+                           })
+                        </span>
+                        <div id="description-for-NominatedTeamMembers_NAME1" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="NominatedTeamMembers_NAME2" class="form-field__label">
+                            (2)
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.NominatedTeamMembers.NAME2,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_Name2Required"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_errors_container = "#description-for-NominatedTeamMembers_NAME2"
+                           })
+                        </span>
+                        <div id="description-for-NominatedTeamMembers_NAME2" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="NominatedTeamMembers_NAME3" class="form-field__label">
+                            (3)
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(m => m.NominatedTeamMembers.NAME3,
+                           new
+                                {
+                                    @class = "form-field__input form-field__input--text",
+                               @data_parsley_required_message = Translate.Text("FG_Name3Required"),
+                               @required = "",
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_errors_container = "#description-for-NominatedTeamMembers_NAME3"
+                           })
+                        </span>
+                        <div id="description-for-NominatedTeamMembers_NAME3" class="form-field__messages">
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-field__button">
+                    <button class="button button--primary">@Translate.Text("Submit") </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    docReady(function () {
+
+        jQuery(".button--primary").on("click", function () {
+
+            setTimeout(function () {
+                var id = GetErrorMessageId();
+                if (id != "") {
+                    var _url = window.location.href;
+                    window.location.href = "#" + id;
+                    history.pushState({}, '', _url);
+                };
+            }, 100);
+
+        });
+
+
+        function GetErrorMessageId() {
+            var _Id = "";
+            $.each($(".parsley-errors-list"), function (i, obj) {
+                if (_Id == "" && $(obj).find("li").length > 0) {
+                    if (_Id == "") {
+                        _Id = jQuery(obj).prop("id");
+                    }
+                }
+            })
+            return _Id;
+        }
+
+    })
+</script>;

@@ -1,0 +1,1720 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.ShamsDubai.Models.ShamsDubaiTraining
+@model BookTrainingModel
+@{
+    var Nationalities = DEWAXP.Foundation.Helpers.Extensions.FormExtensions.GetNationalities(null, false);
+    var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(1);
+    DateTime nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddYears(1);
+    var GccCountries = DEWAXP.Foundation.Content.Extensions.GenericExtension.GetGccCountriesList().ToArray();
+}
+<style>
+    .bookingsection .ticks-inner-subtext {
+        position: absolute;
+        width: 100px;
+        right: -50px;
+        top: 70px;
+        font-size: 0.8em;
+        color: #3d3d3d;
+    }
+</style>
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+         FormMethod.Post, new
+         {
+             @class = "form",
+             @id = "IdBookTraining",
+             data_form = "true",
+             data_parsley_focus = "none",
+             @data_submit_validate = "enabled",
+             enctype = "multipart/form-data",
+             @autocomplete = "off"
+         }))
+            {
+                <!-- step tracker-->
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="" data-current-step="" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="true">
+                            <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End-->
+                if (Model.IsSuccess)
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.TrainingId)
+                    @Html.HiddenFor(x => x.TrainingName)
+                    @Html.HiddenFor(x => x.TrainingDuration)
+                    @Html.HiddenFor(x => x.TraningStartDate)
+                    @Html.HiddenFor(x => x.TraningEndDate)
+                    <!-- step 1 -->
+                    <div id="divstep_1" class="bookingsection">
+                        <legend class="legend hidden" id="legend1">@Translate.Text("PVCC_Applicationdetails")</legend>
+                        <div class="m42-keyvalue">
+                            <dl>
+                                @if (!string.IsNullOrWhiteSpace(Model.TrainingName))
+                                {
+                                    <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("PVCC_Trainingname")</strong></dt>
+                                    <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TrainingName</dd>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Model.TrainingDuration))
+                                {
+                                    <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("PVCC_Duration")</strong></dt>
+                                    <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TrainingDuration</dd>
+                                }
+                            </dl>
+                        </div>
+                        <div class="form-field form-field--select form-field--select-single form-field--12">
+                            <label for="form-field-solarpvexpertlist" class="form-field__label">
+                                @Translate.Text("PVCC_SolarPVExpert")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-solarpvexpertlist"
+                                        name="SolarPVExpert"
+                                        aria-describedby="description-for-solarpvexpertlist"
+                                        data-parsley-errors-container="#description-for-solarpvexpertlist"
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="28"
+                                        data-parsley-required-message="@Translate.Text("PVCC_Selectpvexpert")"
+                                        required="">
+                                    @{
+                                        if (Model.SolarPVExpertList != null)
+                                        {
+                                            foreach (var item in Model.SolarPVExpertList)
+                                            {
+                                                if (!string.IsNullOrWhiteSpace(Model.SolarPVExpert) && item.Value == Model.SolarPVExpert)
+                                                {
+                                                    <option data-show="@item.Value" value="@item.Value" selected>@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option data-show="@item.Value" value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-solarpvexpertlist" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text  ">
+                            <label for="form-field-EmiratesID" class="form-field__label">
+                                @Translate.Text("PVCC_EmiratesId")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @*value="@Model.EmiratesID"*@
+                                       class="form-field__input form-field__input--text form-field__binding disEmirateid"
+                                       id="form-field-EmiratesID"
+                                       name="EmiratesID"
+                                       type="number"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("PVCC_EnterEmiratesId")"
+                                       placeholder="@Translate.Text("PVCC_EnterEmiratesId")"
+                                       aria-describedby="description-for-EmiratesID"
+                                       data-parsley-errors-container="#description-for-EmiratesID"
+                                       data-parsley-emiratesid=""
+                                       data-parsley-emiratesid-message="@Translate.Text("PVCC_EnterValidEmiratesId")">
+                            </span>
+                            <div id="description-for-EmiratesID" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.EmiratesID, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text " style="display:none" id="divPVCC_mobileVerifyCode">
+                            <label for="form-field-mobile_otpnumber" class="form-field__label">
+                                @Translate.Text("SS_UP_MobileVerification")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text disotpnumber" id="form-field-mobile_otpnumber"
+                                       @*name="mobileVerifyCode"*@
+                                       maxlength="5"
+                                       data-parsley-maxlength="5"
+                                       type="text"
+                                       lang="en"
+                                       placeholder="@Translate.Text("PVCC_Label5digit")"
+                                       aria-describedby="description-for-mobileverifycode"
+                                       data-parsley-errors-container="#description-for-mobileverifycode"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("PVCC_Label5digit")"
+                                       @*data-parsley-verification_code=""
+                                       data-parsley-verification_code-message="@Translate.Text("PVCC_Label5digit")"*@ />
+                            </span>
+                            <div id="description-for-mobileverifycode" class="form-field__messages">
+                            </div>
+                            <div class="form-field__messages">
+                                <p class="form-field__description">
+                                    @Translate.Text("Moveout.Anonymous.Notification.Code")
+                                </p>
+                                <p class="form-field__description">
+                                    <a href="javascript:void(0)" id="resendmpin" class="link resendmobotp">@Translate.Text("Moveout.Anonymous.Resend.Code")</a>
+                                    <div id="divtxtresendpin" style="display:none; color: red; white-space:normal;" class="j108-np"></div>
+                                </p>
+                            </div>
+                        </div>
+                        @*<div class="form-field form-field--text" id="divPVCC_ApplicationName">
+                                <label for="form-field-applicationname" class="form-field__label">
+                                    @Translate.Text("PVCC_Applicantname")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input maxlength="50"
+                                           data-parsley-maxlength="50"
+                                           data-parsley-pattern="/^[a-zA-Z ]*$/"
+                                           class="form-field__input form-field__input--text"
+                                           id="form-field-applicationname"
+                                           name="ApplicationName"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Enterapplicantname")"
+                                           aria-describedby="description-for-applicationname"
+                                           data-parsley-errors-container="#description-for-applicationname"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Enterapplicantname")"
+                                           data-parsley-pattern-message="@Translate.Text("PVCC_Validapplicationname")"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="34">
+                                </span>
+                                <div id="description-for-applicationname" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text " id="divPVCC_Email">
+                                <label for="form-field-email" class="form-field__label">@Translate.Text("PVCC_Emailaddress") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                                <span class="form-field__input-wrapper">
+                                    @Html.TextBoxFor(x => x.Email,
+                                new
+                                {
+                                    @type = "email",
+                                    @class = "form-field-email",
+                                    @id = "form-field-email",
+                                    @placeholder = Translate.Text("J40.EnterEmailAddressPlaceHolder"),
+                                    @required = "",
+                                    @data_parsley_error_message = Translate.Text("PVCC_Validemailaddress"),
+                                    @data_parsley_errors_container = "#description-for-email",
+                                    @aria_describedby = "description-for-email",
+                                    @data_parsley_id = "14",
+                                    @data_parsley_email ="",
+                                    @step = "any"
+                                })
+                                </span>
+                                <div id="description-for-email" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Email, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text" id="divPVCC_Mobile">
+                                <label for="form-field-mobilenumber" class="form-field__label">
+                                    @Translate.Text("PVCC_Mobilenumber")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                    <input type="tel"
+                                           name="Mobile"
+                                           id="form-field-mobilenumber"
+                                           aria-describedby="description-for-mobilenumber"
+                                           required="required"
+                                           placeholder="@Translate.Text("Mobile number placeholder")"
+                                           data-parsley-error-message="@Translate.Text("PVCC_Validmobilenum")"
+                                           data-parsley-type="digits"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-mobile_number
+                                           data-parsley-errors-container="#description-for-mobilenumber"
+                                           class="form-field__input form-field__input--text form-field__input--prefixed" />
+                                </span>
+                                <div id="description-for-mobilenumber" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Mobile)
+                                </div>
+                            </div>*@
+                        <div class="form-field form-field--text  ">
+                            <div class="form-field__checkbox">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox"
+                                           id="form-field-ischeckedcertificate"
+                                           name="IsCheckedCertificate"
+                                           type="checkbox"
+                                           value=""
+                                           aria-describedby="description-for-ischeckedcertificate"
+                                           data-parsley-errors-container="#description-for-ischeckedcertificate"
+                                           data-parsley-multiple="checkbox_1_2"
+                                           data-parsley-id="48">
+                                    <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("PVCC_Certificatecheck")</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text" id="divcertificatenumber" style="display:none">
+                            <label for="form-field-pvcccertificatenumber" class="form-field__label">
+                                @Translate.Text("PVCC_Certificatenumber")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("optional"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input maxlength="15"
+                                       data-parsley-maxlength="15"
+                                       @*value="@Model.VisaNumber"*@
+                                       class="form-field__input form-field__input--text form-field__binding"
+                                       id="form-field-pvcccertificatenumber"
+                                       name="PVCCCertificateNumber"
+                                       type="text"
+                                       placeholder=" @Translate.Text("PVCC_Entercertificatenumber")"
+                                       aria-describedby="description-for-pvcccertificatenumber"
+                                       data-parsley-errors-container="#description-for-visa"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="40"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("PVCC_Entercertificatenumber")"
+                                       data-bindingID="visabinding"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+
+                                @*@Html.TextBoxFor(x => x.PVCCCertificateNumber,
+                                    new
+                                    {
+                                        @class = "form-field__input form-field__input--text pvcccertificatenumber",
+                                        @name = "pvcccertificatenumber",
+                                        @id = "form-field-pvcccertificatenumber",
+                                        @placeholder = Translate.Text("PVCC_Entercertificatenumber"),
+                                        @required = "",
+                                        @type="number",
+                                        @data_parsley_error_message = Translate.Text("PVCC_Entercertificatenumber"),
+                                        @data_parsley_errors_container = "#description-for-pvcccertificatenumber",
+                                        @aria_describedby = "description-for-pvcccertificatenumber",
+                                    })*@
+                            </span>
+                            <div id="description-for-pvcccertificatenumber" class="form-field__messages">
+                                @*@Html.ValidationMessageFor(x => x.PVCCCertificateNumber, "", new { @class = "parsley-errors-list" })*@
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single form-field--12" id="divreasonforenrollmentlist" style="display:none">
+                            <label for="form-field-reasonforenrollmentlist" class="form-field__label">
+                                @Translate.Text("PVCC_Reasonforenrollment")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-reasonforenrollmentlist"
+                                        name="ReasonforEnrollment"
+                                        aria-describedby="description-for-reasonforenrollmentlist"
+                                        data-parsley-errors-container="#description-for-reasonforenrollmentlist"
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="28"
+                                        data-parsley-required-message="@Translate.Text("PVCC_Selectenrollment")"
+                                        required="">
+                                    <option value="" selected>@Translate.Text("PVCC_Selectenrollment")</option>
+                                    @{
+                                        if (Model.ReasonforEnrollmentList != null)
+                                        {
+                                            foreach (var item in Model.ReasonforEnrollmentList)
+                                            {
+                                                if (!string.IsNullOrWhiteSpace(Model.ReasonforEnrollment) && item.Value == Model.ReasonforEnrollment)
+                                                {
+                                                    <option value="@item.Value" selected>@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-reasonforenrollmentlist" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        @*<div class="form-field form-field--select form-field--select-single form-field--12" id="divPVCC_Nationality">
+                                <label for="form-field-nationality" class="form-field__label">
+                                    @Translate.Text("PVCC_Nationality")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select2 form-field__input--select form-field__input--select-full"
+                                            id="form-field-nationality"
+                                            name="Nationality"
+                                            aria-describedby="description-for-nationality"
+                                            data-parsley-errors-container="#description-for-nationality"
+                                            required=""
+                                            data-placeholder="@Translate.Text("PVCC_Selectnationality")"
+                                            data-parsley-required-message="@Translate.Text("PVCC_Selectnationality")"
+                                            data-parsley-trigger="change"
+                                            data-parsley-id="32">
+                                        <option value="" selected="">@Translate.Text("PVCC_Selectnationality")</option>
+                                        @{
+                                            foreach (var item in Nationalities)
+                                            {
+
+                                                if (!string.IsNullOrWhiteSpace(Model.Nationality) && item.Value == Model.Nationality)
+                                                {
+                                                    <option value="@item.Value" selected>@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </span>
+                                <div id="description-for-nationality" class="form-field__messages">
+                                </div>
+                            </div>*@
+
+                        <div class="form-field form-field--text  ">
+                            <label for="form-field-department" class="form-field__label">
+                                @Translate.Text("PVCC_Department")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input maxlength="50"
+                                       data-parsley-maxlength="50"
+                                       @*value="@Model.Department"*@
+                                       data-parsley-pattern="/^[a-zA-Z ]*$/"
+                                       class="form-field__input form-field__input--text"
+                                       id="form-field-department"
+                                       name="Department"
+                                       type="text"
+                                       placeholder="@Translate.Text("PVCC_Enterdepartment")"
+                                       aria-describedby="description-for-department"
+                                       data-parsley-errors-container="#description-for-department"
+                                       @*required=""*@
+                                       data-parsley-required-message="@Translate.Text("PVCC_Enterdepartment")"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="34">
+                            </span>
+                            <div id="description-for-department" class="form-field__messages">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- step 1 end -->
+                    <!-- step 2 -->
+                    <div id="divstep_2" class="bookingsection">
+                        <legend class="legend hidden" id="legend2">@Translate.Text("PVCC_Applicationdetails")</legend>
+                        @*<div class="form-field form-field--text  " id="divPVCC_Visanumber">
+                                <label for="form-field-VisaNumber" class="form-field__label" id="lblPVCC_Visanumber">
+                                    @Translate.Text("PVCC_Visanumber")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input maxlength="15"
+                                           data-parsley-maxlength="15"
+                                           class="form-field__input form-field__input--text form-field__binding"
+                                           id="form-field-VisaNumber"
+                                           name="VisaNumber"
+                                           type="number"
+                                           placeholder=" @Translate.Text("PVCC_Entervisanumber")"
+                                           aria-describedby="description-for-VisaNumber"
+                                           data-parsley-errors-container="#description-for-visa"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="40"
+                                           data-parsley-required-message="@Translate.Text("PVCC_Entervisanumber")"
+                                           data-bindingID="visabinding"
+                                           oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+                                </span>
+                                <div id="description-for-VisaNumber" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--select form-field--select-single form-field--12" id="divPVCC_Designation">
+                                <label for="form-field-designationlist" class="form-field__label" id="lblPVCC_Designation">
+                                    @Translate.Text("PVCC_Designation")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full optdesignation"
+                                            id="form-field-designationlist"
+                                            name="Designation"
+                                            aria-describedby="description-for-designationlist"
+                                            data-parsley-errors-container="#description-for-designationlist"
+                                            data-parsley-trigger="change"
+                                            data-parsley-id="28"
+                                            data-parsley-required-message="@Translate.Text("PVCC_Selectdesignation")"
+                                            required="">
+                                        <option value="" selected>@Translate.Text("PVCC_Selectdesignation")</option>
+                                        @{
+                                            if (Model.DesignationList != null)
+                                            {
+                                                foreach (var item in Model.DesignationList)
+                                                {
+                                                    if (!string.IsNullOrWhiteSpace(Model.Designation) && item.Value == Model.Designation)
+                                                    {
+                                                        <option value="@item.Value" selected>@item.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.Value">@item.Text</option>
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </span>
+                                <div id="description-for-designationlist" class="form-field__messages">
+                                    <p class="form-field__description optdesignationattach" style="display:none">@Translate.Text("PVCC_Ensuresubmit")</p>
+                                </div>
+                            </div>
+                            <div id="datepicker-container-visaissuedate" class="form-field form-field--text ">
+                                <label for="form-field-visaissuedate" class="form-field__label" id="lblPVCC_Visaissuedate">
+                                    @Translate.Text("PVCC_Visaissuedate")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input
+                                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                                           id="form-field-visaissuedate"
+                                           name="VisaIssueDate"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Selectvisaissuedate")"
+                                           aria-describedby="description-for-visaissuedate"
+                                           data-parsley-errors-container="#description-for-visaissuedate"
+                                           data-parsley-required-message="@Translate.Text("PVCC_Selectvisaissuedate")"
+                                           data-el="datepicker-past"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="46"
+                                           readonly=""
+                                           data-bindingID="passbinding"
+                                           aria-haspopup="true"
+                                           aria-expanded="false"
+                                           aria-readonly="false"
+                                           aria-owns="form-field-PassIssueDate_root"
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; }' />
+                                </span>
+                                <div id="description-for-visaissuedate" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-visaexpiry" class="form-field form-field--text  ">
+                                <label for="form-field-visaexpiry" class="form-field__label" id="lblPVCC_Visaexpirydate">
+                                    @Translate.Text("PVCC_Visaexpirydate")
+                                    <span class="form-field__label-required aria-only" id="spnVisaexpirydate">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input
+                                           class="form-field__input form-field__input--text  form-field__input--datepicker picker__input form-field__binding"
+                                           id="form-field-visaexpiry"
+                                           name="VisaExpiryDate"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Selectvisaexpirydate")"
+                                           aria-describedby="description-for-visaexpiry"
+                                           data-parsley-errors-container="#description-for-visaexpiry"
+                                           data-el="datepicker-future"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="42"
+                                           readonly=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Selectvisaexpirydate")"
+                                           aria-haspopup="true"
+                                           aria-expanded="false"
+                                           aria-readonly="false"
+                                           data-bindingID="visabinding"
+                                           aria-owns="form-field-visaexpiry_root"
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)]}'>
+                                </span>
+                                <div id="description-for-visaexpiry" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text  " id="divPVCC_PassportNumber">
+                                <label for="form-field-Passportnumber" class="form-field__label">
+                                    @Translate.Text("PVCC_Passportnumber")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Visitor_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input maxlength="15"
+                                           data-parsley-maxlength="15"
+                                           class="form-field__input form-field__input--text form-field__binding"
+                                           id="form-field-Passportnumber"
+                                           name="PassportNumber"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Enterpassportnumber")"
+                                           aria-describedby="description-for-Passportnumber"
+                                           data-parsley-errors-container="#description-for-Passportnumber"
+                                           required=""
+                                           data-bindingID="passportbinding"
+                                           data-parsley-required-message="@Translate.Text("PVCC_Enterpassportnumber")"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="44">
+                                </span>
+                                <div id="description-for-Passportnumber" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-passportissuedate" class="form-field form-field--text  ">
+                                <label for="form-field-passportissuedate" class="form-field__label">
+                                    @Translate.Text("PVCC_Passportissuedate")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input
+                                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                                           id="form-field-passportissuedate"
+                                           name="PassportIssueDate"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Selectpassportissuedate")"
+                                           aria-describedby="description-for-passportissuedate"
+                                           data-parsley-errors-container="#description-for-passportissuedate"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Selectpassportissuedate")"
+                                           data-el="datepicker-past"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="46"
+                                           readonly=""
+                                           data-bindingID="passbinding"
+                                           aria-haspopup="true"
+                                           aria-expanded="false"
+                                           aria-readonly="false"
+                                           aria-owns="form-field-PassIssueDate_root"
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; }' />
+                                </span>
+                                <div id="description-for-passportissuedate" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-Passportexpiry" class="form-field form-field--text  ">
+                                <label for="form-field-Passportexpiry" class="form-field__label">
+                                    @Translate.Text("PVCC_Passportexpirydate")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Visitor_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input
+                                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                                           id="form-field-Passportexpiry"
+                                           name="PassportExpiryDate"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Selectpassportexpirydate")"
+                                           aria-describedby="description-for-Passportexpiry"
+                                           data-parsley-errors-container="#description-for-Passportexpiry"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Selectpassportexpirydate")"
+                                           data-el="datepicker-future"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="46"
+                                           readonly=""
+                                           data-bindingID="passportbinding"
+                                           aria-haspopup="true"
+                                           aria-expanded="false"
+                                           aria-readonly="false"
+                                           aria-owns="form-field-Passportexpiry_root"
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)]}'>
+                                </span>
+                                <div id="description-for-Passportexpiry" class="form-field__messages">
+                                </div>
+                            </div>*@
+
+                        <div class="form-field form-field--select form-field--select-single form-field--12">
+                            <label class="form-field__label" for="form-field-electricalsystemlist">
+                                @Translate.Text("PVCC_Electricalsystemlbl")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-electricalsystemlist"
+                                        name="ElectricalSystem"
+                                        aria-describedby="description-for-electricalsystemlist"
+                                        data-parsley-errors-container="#description-for-electricalsystemlist"
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="28"
+                                        data-parsley-required-message="@Translate.Text("PVCC_Selectelesystem")"
+                                        required="">
+                                    <option value="" selected>@Translate.Text("PVCC_Selectelesystem")</option>
+                                    @{
+                                        if (Model.ElectricalSystemList != null)
+                                        {
+                                            foreach (var item in Model.ElectricalSystemList)
+                                            {
+                                                if (!string.IsNullOrWhiteSpace(Model.ElectricalSystem) && item.Value == Model.ElectricalSystem)
+                                                {
+                                                    <option value="@item.Value" selected>@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div class="form-field__messages" id="description-for-electricalsystemlist">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text form-field--textarea">
+                            <label class="form-field__label" for="form-field-pvdesignlist">
+                                @Translate.Text("PVCC_PVDesign")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                        id="form-field-pvdesignlist"
+                                        name="PVDesign"
+                                        aria-describedby="description-for-pvdesignlist"
+                                        data-parsley-errors-container="#description-for-pvdesignlist"
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="28"
+                                        data-parsley-required-message="@Translate.Text("PVCC_Selectpvdesign")"
+                                        required="">
+                                    <option value="" selected>@Translate.Text("PVCC_Selectpvdesign")</option>
+                                    @{
+                                        if (Model.PVDesignList != null)
+                                        {
+                                            foreach (var item in Model.PVDesignList)
+                                            {
+                                                if (!string.IsNullOrWhiteSpace(Model.PVDesign) && item.Value == Model.PVDesign)
+                                                {
+                                                    <option value="@item.Value" selected>@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div class="form-field__messages" id="description-for-pvdesignlist">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text form-field--textarea">
+                            <label class="form-field__label" for="form-field-descforshamsproject">
+                                @Translate.Text("PVCC_Shamsprojectlbl")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                          maxlength="250"
+                                          data-textarea="descforshamsproject"
+                                          id="form-field-descforshamsproject"
+                                          name="DescforShamsProject"
+                                          type="textarea"
+                                          placeholder="@Translate.Text("PVCC_Enterreasontxt")"
+                                          aria-describedby="description-for-descforshamsproject"
+                                          required=""
+                                          data-parsley-error-message="@Translate.Text("PVCC_Enterreasontxt")"
+                                          data-parsley-errors-container="#description-for-descforshamsproject"
+                                          data-parsley-id="15"></textarea>
+                            </span>
+                            <div class="form-field__messages" id="description-for-descforshamsproject">
+                                <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="descforshamsproject">0</span>/250 @Translate.Text("Characters")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text form-field--textarea">
+                            <label class="form-field__label" for="form-field-descforadditional">
+                                @Translate.Text("PVCC_Additionalnotes")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                          maxlength="250"
+                                          data-textarea="descforadditional"
+                                          id="form-field-descforadditional"
+                                          name="DescforAdditional"
+                                          type="textarea"
+                                          placeholder="@Translate.Text("PVCC_Enterreasontxt")"
+                                          aria-describedby="description-for-descforadditional"
+                                          @*required=""*@
+                                          data-parsley-error-message="@Translate.Text("PVCC_Enterreasontxt")"
+                                          data-parsley-errors-container="#description-for-descforadditional"
+                                          data-parsley-id="15"></textarea>
+                            </span>
+                            <div class="form-field__messages" id="description-for-descforadditional">
+                                <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="descforadditional">0</span>/250 @Translate.Text("Characters")</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- step 2 end -->
+                    <!-- step 3 -->
+                    <div id="divstep_3" class="bookingsection">
+                        <legend class="legend hidden" id="legend3">@Translate.Text("PVCC_Companydetails")</legend>
+                        @*<div class="form-field form-field--text  ">
+                                <label for="form-field-companyname" class="form-field__label">
+                                    @Translate.Text("PVCC_Companyname")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input maxlength="50"
+                                           data-parsley-maxlength="50"
+                                           data-parsley-pattern="/^[a-zA-Z ]*$/"
+                                           class="form-field__input form-field__input--text"
+                                           id="form-field-companyname"
+                                           name="companyDetails.CompanyName"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Entercompanyname")"
+                                           aria-describedby="description-for-companyname"
+                                           data-parsley-errors-container="#description-for-companyname"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Entercompanyname")"
+                                           data-parsley-pattern-message="@Translate.Text("PVCC_Validcompanyname")"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="34">
+                                </span>
+                                <div id="description-for-companyname" class="form-field__messages">
+                                </div>
+                            </div>*@
+                        <div class="form-field form-field--text">
+                            <label for="form-field-companytradelicencenumber" class="form-field__label">
+                                @Translate.Text("PVCC_Companytradelicense")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-companytradelicencenumber"
+                                       name="companyDetails.CompanyTradeLicenceNumber"
+                                       type="text"
+                                       required=""
+                                       @*value="@Model.companyDetails.CompanyTradeLicenceNumber"*@
+                                       placeholder="@Translate.Text("PVCC_Entertradelicensenumber")"
+                                       aria-describedby="description-for-companytradelicencenumber"
+                                       data-parsley-errors-container="#description-for-companytradelicencenumber"
+                                       data-parsley-required-message="@Translate.Text("PVCC_Entertradelicensenumber")"
+                                       data-parsley-trigger="focusout">
+                            </span>
+                            <div id="description-for-companytradelicencenumber" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        @*<div id="datepicker-container-licenseissuedate" class="form-field form-field--text  ">
+                                <label for="form-field-licenseissuedate" class="form-field__label">
+                                    @Translate.Text("PVCC_Tradelicenseissuedate")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input
+                                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                                           id="form-field-licenseissuedate"
+                                           name="companyDetails.LicenseIssueDate"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Selecttradelicenseissuedate")"
+                                           aria-describedby="description-for-licenseissuedate"
+                                           data-parsley-errors-container="#description-for-licenseissuedate"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Selecttradelicenseissuedate")"
+                                           data-el="datepicker-past"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="46"
+                                           readonly=""
+                                           data-bindingID="passbinding"
+                                           aria-haspopup="true"
+                                           aria-expanded="false"
+                                           aria-readonly="false"
+                                           aria-owns="form-field-PassIssueDate_root"
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; }' />
+                                </span>
+                                <div id="description-for-licenseissuedate" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div id="datepicker-container-licenseexpirydate" class="form-field form-field--text  ">
+                                <label for="form-field-Passportexpiry" class="form-field__label">
+                                    @Translate.Text("PVCC_Tradelicenseexpirydate")
+                                    <span class="form-field__label-required aria-only">@Translate.Text("Visitor_Required")</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input
+                                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                                           id="form-field-Passportexpiry"
+                                           name="companyDetails.LicenseExpiryDate"
+                                           type="text"
+                                           placeholder="@Translate.Text("PVCC_Selecttradelicenseexpirydate")"
+                                           aria-describedby="description-for-licenseexpirydate"
+                                           data-parsley-errors-container="#description-for-licenseexpirydate"
+                                           required=""
+                                           data-parsley-required-message="@Translate.Text("PVCC_Selecttradelicenseexpirydate")"
+                                           data-el="datepicker-future"
+                                           data-parsley-trigger="focusout"
+                                           data-parsley-id="46"
+                                           readonly=""
+                                           data-bindingID="passportbinding"
+                                           aria-haspopup="true"
+                                           aria-expanded="false"
+                                           aria-readonly="false"
+                                           aria-owns="form-field-Passportexpiry_root"
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;min&quot;: [@nowmax.Year,@nowmax.Month,@(nowmax.Day)]}'>
+                                </span>
+                                <div id="description-for-licenseexpirydate" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--text">
+                                <label for="form-field-vatregistrationnumber" id="vatnumber" class="form-field__label">
+                                    @Translate.Text("PVCC_Vatregistrationnumber")
+                                    <span class="form-field__label-required aria-only">(@Translate.Text("optional"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper">
+                                    <input class="form-field__input form-field__input--text"
+                                           name="companyDetails.VATRegistrationNumber"
+                                           id="form-field-vatregistrationnumber"
+                                           placeholder="@Translate.Text("PVCC_Entervatregisnumber")"
+                                           data-parsley-error-message="@Translate.Text("PVCC_Entervatregisnumber")"
+                                           data-parsley-errors-container="#description-for-vatregistrationnumber"
+                                           aria-describedby="description-for-vatregistrationnumber" />
+                                </span>
+                                <div id="description-for-vatregistrationnumber" class="form-field__messages">
+                                </div>
+                            </div>*@
+
+                        <div class="form-field form-field--text form-field--textarea">
+                            <label class="form-field__label" for="form-field-companyactivitydescription">
+                                @Translate.Text("PVCC_Companyactivity")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                          maxlength="250"
+                                          data-textarea="companyactivitydescription"
+                                          id="form-field-companyactivitydescription"
+                                          name="companyDetails.CompanyActivityDescription"
+                                          type="textarea"
+                                          placeholder="@Translate.Text("PVCC_Enteractivitytxt")"
+                                          aria-describedby="description-for-companyactivitydescription"
+                                          required=""
+                                          data-parsley-error-message="@Translate.Text("PVCC_Enteractivitytxt")"
+                                          data-parsley-errors-container="#description-for-companyactivitydescription"
+                                          data-parsley-id="15"></textarea>
+                            </span>
+                            <div class="form-field__messages" id="description-for-companyactivitydescription">
+                                <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="companyactivitydescription">0</span>/250 @Translate.Text("Characters")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-companyemail" class="form-field__label">@Translate.Text("PVCC_Companyemailaddress") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                            <label class="form-field__input-wrapper">
+                                @Html.TextBoxFor(x => x.companyDetails.CompanyEmail,
+                            new
+                            {
+                                @type = "email",
+                                @class = "form-field-email",
+                                @id = "form-field-companyemail",
+                                @placeholder = Translate.Text("J40.EnterEmailAddressPlaceHolder"),
+                                @required = "",
+                                @data_parsley_error_message = Translate.Text("PVCC_Validemailaddress"),
+                                @data_parsley_errors_container = "#description-for-companyemail",
+                                @aria_describedby = "description-for-companyemail",
+                                @data_parsley_id = "14",
+                                @data_parsley_email = "",
+                                @step = "any"
+                            })
+                            </label>
+                            <div id="description-for-companyemail" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.companyDetails.CompanyEmail, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text ">
+                            <label for="form-field-companymobile" class="form-field__label">
+                                @Translate.Text("moveout.mobilenumber")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                <input type="tel"
+                                       name="companyDetails.CompanyMobile"
+                                       @*value="@(!string.IsNullOrWhiteSpace(Model.companyDetails.CompanyMobile) ? Model.companyDetails.CompanyMobile :"")"*@
+                                       aria-describedby="description-for-companymobile"
+                                       required="required"
+                                       placeholder="@Translate.Text("Mobile number placeholder")"
+                                       data-parsley-error-message="@Translate.Text("PVCC_Validmobilenum")"
+                                       data-parsley-type="digits"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-mobile_number
+                                       data-parsley-errors-container="#description-for-companymobile"
+                                       class="form-field__input form-field__input--text form-field__input--prefixed" />
+                            </span>
+                            <div id="description-for-companymobile" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.companyDetails.CompanyMobile)
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text  ">
+                            <label for="form-field-contactpersonname" class="form-field__label">
+                                @Translate.Text("PVCC_Contactpersonname")
+                                <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input maxlength="50"
+                                       data-parsley-maxlength="50"
+                                       @*value="@Model.companyDetails.ContactPersonName"*@
+                                       @*data-parsley-pattern="/^[a-zA-Z ]*$/"*@
+                                       class="form-field__input form-field__input--text"
+                                       id="form-field-contactpersonname"
+                                       name="companyDetails.ContactPersonName"
+                                       type="text"
+                                       placeholder="@Translate.Text("PVCC_Enterpersonname")"
+                                       aria-describedby="description-for-contactpersonname"
+                                       data-parsley-errors-container="#description-for-contactpersonname"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("PVCC_Enterpersonname")"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="34">
+                            </span>
+                            <div id="description-for-contactpersonname" class="form-field__messages">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- step 3 end -->
+                    <!-- step 4 -->
+                    <div id="divstep_4" class="bookingsection">
+                        <legend class="legend hidden" id="legend4">@Translate.Text("PVCC_Applicationdetails")</legend>
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("PVCC_PV1attachment")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png"
+                                             data-src="/images/preview@2x.png"
+                                             data-success="/images/preview@2x.png"
+                                             class="form-field__preview"
+                                             aria-hidden="true"
+                                             role="presentation"
+                                             alt=""
+                                             data-uploader-image="PV1_ExperienceCertificate">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-PV1_ExperienceCertificate" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-PV1_ExperienceCertificate"
+                                                       name="PV1_ExperienceCertificate"
+                                                       type="file"
+                                                       aria-describedby="description-for-PV1_ExperienceCertificate"
+                                                       data-parsley-errors-container="#description-for-PV1_ExperienceCertificate"
+                                                       data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                       data-parsley-required-message="@Translate.Text("PVCC_PV1attachment")"
+                                                       data-uploader-field="PV1_ExperienceCertificate"
+                                                       required=""
+                                                       accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="PV1_ExperienceCertificate"></p>
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV1_ExperienceCertificate">@Translate.Text("Remove")</button></p>
+                                    </div>
+                                </div>
+
+                                <div id="description-for-PV1_ExperienceCertificate" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("PVCC_PV2attachment")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png"
+                                             data-src="/images/preview@2x.png"
+                                             data-success="/images/preview@2x.png"
+                                             class="form-field__preview"
+                                             aria-hidden="true"
+                                             role="presentation"
+                                             alt=""
+                                             data-uploader-image="PV2_CompanySeal">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-PV2_CompanySeal" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-PV2_CompanySeal"
+                                                       name="PV2_CompanySeal"
+                                                       type="file"
+                                                       aria-describedby="description-for-PV2_CompanySeal"
+                                                       data-parsley-errors-container="#description-for-PV2_CompanySeal"
+                                                       data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                       data-parsley-required-message="@Translate.Text("PVCC_PV2attachment")"
+                                                       data-uploader-field="PV2_CompanySeal"
+                                                       required=""
+                                                       accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="PV2_CompanySeal"></p>
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV2_CompanySeal">@Translate.Text("Remove")</button></p>
+                                    </div>
+                                </div>
+
+                                <div id="description-for-PV2_CompanySeal" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        @*<fieldset class="fieldset">
+                                <legend class="legend">@Translate.Text("PVCC_PV3attachment")</legend>
+                                <div class="form-field form-field--upload">
+                                    <div class="form-field__input-wrapper">
+                                        <div class="form-field__preview-wrapper">
+                                            <img src="/images/preview@2x.png"
+                                                 data-src="/images/preview@2x.png"
+                                                 data-success="/images/preview@2x.png"
+                                                 class="form-field__preview"
+                                                 aria-hidden="true"
+                                                 role="presentation"
+                                                 alt=""
+                                                 data-uploader-image="PV3_TradeLicense">
+                                        </div>
+                                        <div class="form-field__uploader-details">
+                                            <label for="form-field-PV3_TradeLicense" class="form-field__label">
+                                                <strong class="form-field__label-description"></strong>
+                                            </label>
+                                            <div>
+                                                <label>
+                                                    <input class="form-field__input form-field__input--upload"
+                                                           id="form-field-PV3_TradeLicense"
+                                                           name="PV3_TradeLicense"
+                                                           type="file"
+                                                           aria-describedby="description-for-PV3_TradeLicense"
+                                                           data-parsley-errors-container="#description-for-PV3_TradeLicense"
+                                                           data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                           data-parsley-required-message="@Translate.Text("PVCC_PV3attachment")"
+                                                           data-uploader-field="PV3_TradeLicense"
+                                                           required=""
+                                                           accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                    <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                                </label>
+                                            </div>
+                                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                            <p class="form-field__input--upload-filename" data-uploader-filename="PV3_TradeLicense"></p>
+                                            <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV3_TradeLicense">@Translate.Text("Remove")</button></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="description-for-PV3_TradeLicense" class="form-field__messages">
+                                        <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                    </div>
+                                </div>
+                            </fieldset>*@
+
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("PVCC_PV4attachment")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png"
+                                             data-src="/images/preview@2x.png"
+                                             data-success="/images/preview@2x.png"
+                                             class="form-field__preview"
+                                             aria-hidden="true"
+                                             role="presentation"
+                                             alt=""
+                                             data-uploader-image="PV4_ApplicantDegree">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-PV4_ApplicantDegree" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-PV4_ApplicantDegree"
+                                                       name="PV4_ApplicantDegree"
+                                                       type="file"
+                                                       aria-describedby="description-for-PV4_ApplicantDegree"
+                                                       data-parsley-errors-container="#description-for-PV4_ApplicantDegree"
+                                                       data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                       data-parsley-required-message="@Translate.Text("PVCC_PV4attachment")"
+                                                       data-uploader-field="PV4_ApplicantDegree"
+                                                       required=""
+                                                       accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="PV4_ApplicantDegree"></p>
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV4_ApplicantDegree">@Translate.Text("Remove")</button></p>
+                                    </div>
+                                </div>
+
+                                <div id="description-for-PV4_ApplicantDegree" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <!-- step 4 end -->
+                    <!-- step 5 -->
+                    <div id="divstep_5" class="bookingsection">
+                        <legend class="legend hidden" id="legend5">@Translate.Text("PVCC_Applicationdetails")</legend>
+                        @*<fieldset class="fieldset">
+                                <legend class="legend">@Translate.Text("PVCC_PV5attachment")</legend>
+                                <div class="form-field form-field--upload">
+                                    <div class="form-field__input-wrapper">
+                                        <div class="form-field__preview-wrapper">
+                                            <img src="/images/preview@2x.png"
+                                                 data-src="/images/preview@2x.png"
+                                                 data-success="/images/preview@2x.png"
+                                                 class="form-field__preview"
+                                                 aria-hidden="true"
+                                                 role="presentation"
+                                                 alt=""
+                                                 data-uploader-image="PV5_ApplicantPassport">
+                                        </div>
+                                        <div class="form-field__uploader-details">
+                                            <label for="form-field-PV5_ApplicantPassport" class="form-field__label">
+                                                <strong class="form-field__label-description"></strong>
+                                            </label>
+                                            <div>
+                                                <label>
+                                                    <input class="form-field__input form-field__input--upload"
+                                                           id="form-field-PV5_ApplicantPassport"
+                                                           name="PV5_ApplicantPassport"
+                                                           type="file"
+                                                           aria-describedby="description-for-PV5_ApplicantPassport"
+                                                           data-parsley-errors-container="#description-for-PV5_ApplicantPassport"
+                                                           data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                           data-parsley-required-message="@Translate.Text("PVCC_PV5attachment")"
+                                                           data-uploader-field="PV5_ApplicantPassport"
+                                                           required=""
+                                                           accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                    <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                                </label>
+                                            </div>
+                                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                            <p class="form-field__input--upload-filename" data-uploader-filename="PV5_ApplicantPassport"></p>
+                                            <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV5_ApplicantPassport">@Translate.Text("Remove")</button></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="description-for-PV5_ApplicantPassport" class="form-field__messages">
+                                        <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="fieldset">
+                                <legend class="legend">@Translate.Text("PVCC_PV6attachment")</legend>
+                                <div class="form-field form-field--upload">
+                                    <div class="form-field__input-wrapper">
+                                        <div class="form-field__preview-wrapper">
+                                            <img src="/images/preview@2x.png"
+                                                 data-src="/images/preview@2x.png"
+                                                 data-success="/images/preview@2x.png"
+                                                 class="form-field__preview"
+                                                 aria-hidden="true"
+                                                 role="presentation"
+                                                 alt=""
+                                                 data-uploader-image="PV6_ApplicantEmiratesID">
+                                        </div>
+                                        <div class="form-field__uploader-details">
+                                            <label for="form-field-PV6_ApplicantEmiratesID" class="form-field__label">
+                                                <strong class="form-field__label-description"></strong>
+                                            </label>
+                                            <div>
+                                                <label>
+                                                    <input class="form-field__input form-field__input--upload"
+                                                           id="form-field-PV6_ApplicantEmiratesID"
+                                                           name="PV6_ApplicantEmiratesID"
+                                                           type="file"
+                                                           required=""
+                                                           aria-describedby="description-for-PV6_ApplicantEmiratesID"
+                                                           data-parsley-errors-container="#description-for-PV6_ApplicantEmiratesID"
+                                                           data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                           data-parsley-required-message="@Translate.Text("PVCC_PV6attachment")"
+                                                           data-uploader-field="PV6_ApplicantEmiratesID"
+                                                           accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                    <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                                </label>
+                                            </div>
+                                            <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                            <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                            <p class="form-field__input--upload-filename" data-uploader-filename="PV6_ApplicantEmiratesID"></p>
+                                            <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV6_ApplicantEmiratesID">@Translate.Text("Remove")</button></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="description-for-PV6_ApplicantEmiratesID" class="form-field__messages">
+                                        <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                    </div>
+                                </div>
+                            </fieldset>*@
+
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("PVCC_PV8attachment")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png"
+                                             data-src="/images/preview@2x.png"
+                                             data-success="/images/preview@2x.png"
+                                             class="form-field__preview"
+                                             aria-hidden="true"
+                                             role="presentation"
+                                             alt=""
+                                             data-uploader-image="PV8_ApplicantPhoto">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-PV8_ApplicantPhoto" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-PV8_ApplicantPhoto"
+                                                       name="PV8_ApplicantPhoto"
+                                                       type="file"
+                                                       aria-describedby="description-for-PV8_ApplicantPhoto"
+                                                       data-parsley-errors-container="#description-for-PV8_ApplicantPhoto"
+                                                       data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                       data-parsley-required-message="@Translate.Text("PVCC_PV8attachment")"
+                                                       data-uploader-field="PV8_ApplicantPhoto"
+                                                       required=""
+                                                       accept="image/x-png,,image/jpg,,image/jpeg,,image/bmp" data-accepts='"jpg", "bmp","png","jpeg"' data-size="2048000">
+
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="PV8_ApplicantPhoto"></p>
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV8_ApplicantPhoto">@Translate.Text("Remove")</button></p>
+                                    </div>
+                                </div>
+
+                                <div id="description-for-PV8_ApplicantPhoto" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote2")</p>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("PVCC_PV7attachment")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png"
+                                             data-src="/images/preview@2x.png"
+                                             data-success="/images/preview@2x.png"
+                                             class="form-field__preview"
+                                             aria-hidden="true"
+                                             role="presentation"
+                                             alt=""
+                                             data-uploader-image="PV7_Others">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-PV7_Others" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-PV7_Others"
+                                                       name="PV7_Others"
+                                                       type="file"
+                                                       aria-describedby="description-for-PV7_Others"
+                                                       data-parsley-errors-container="#description-for-PV7_Others"
+                                                       data-parsley-error-message="@Translate.Text("Please select a file")"
+                                                       data-parsley-required-message="@Translate.Text("PVCC_PV7attachment")"
+                                                       data-uploader-field="PV7_Others"
+                                                       accept="application/pdf" data-accepts='"pdf"' data-size="10240000">
+
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="PV7_Others"></p>
+                                        <p><button class="button button--text button--remove hidden" data-removeindex="1" data-uploader-remove="PV7_Others">@Translate.Text("Remove")</button></p>
+                                    </div>
+                                </div>
+
+                                <div id="description-for-PV7_Others" class="form-field__messages">
+                                    <p class="form-field__description">@Translate.Text("PVCC_Attachmentnote")</p>
+                                </div>
+                            </div>
+
+                            @if ((bool)ViewBag.Recaptcha)
+                            {
+                                <br />
+                                <div class="g-recaptcha" id="captcha" data-sitekey="@(ViewBag.SiteKey)"></div>
+                                <span id='errorContainer' class="parsley-errors-list"></span>
+                            }
+                        </fieldset>
+                    </div>
+                    <!-- step 5 end -->
+                    <div class="grid__column--centered form-navigation form-field__button">
+                        <a role="button" data-m51-next="" aria-label="@Translate.Text("Back")" class="button button--primary previous">@Translate.Text("Back")</a>
+                        <a role="button" data-m51-next="" aria-label="@Translate.Text("Next")" class="button button--primary next">@Translate.Text("Next")</a>
+                        <button type="submit" class="button button--primary button--submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    </div>
+                }
+                else
+                {
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    @*<div class="form-field__button">*@
+                    @*<a href="@string.Format("{0}?t={1}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SHAMS_BOOK_TRAINING),Model.TrainingId.ToString())" class="button button--primary" role="button">@Translate.Text("pvcc.book")</a>*@
+                    @*<a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SHAMS_SOLAR_PV_DISPLAYING)#m25-tab-10)" class="button button--primary" role="button">@Translate.Text("pvcc.book")</a>
+                        </div>*@
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    docReady(function () {
+
+        var $eidnumberfield = jQuery('#form-field-EmiratesID');
+        var errIdNumber = jQuery('#description-for-EmiratesID');
+        var $otpNumber = jQuery('#form-field-mobile_otpnumber');
+        var errotpIdNumber = jQuery('#description-for-mobileverifycode');
+
+        // Step tracker function
+        var total = parseInt(5);
+        var current = parseInt(1);
+        var txt = jQuery("#divstep_1").find('.legend').text();
+        steptracker(total, current, txt);
+        var $sections = jQuery('.bookingsection');
+        function steptracker(total, current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', total);
+            $('.m38-step-tracker').attr('data-current-step', current);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+            jQuery(window).trigger('reinit_m38');
+        }
+        function curIndex() {
+            // Return the current index by looking at which section has the class 'current'
+            return $sections.index($sections.filter('.current'));
+        }
+        function navigateTo(index) {
+            var txt = $sections.hide().eq(index).find('.legend').text();
+            steptracker(total, index + 1, txt);
+
+            // Mark the current section with the class 'current'
+            $sections
+                .removeClass('current')
+                .eq(index)
+                .addClass('current');
+            $sections
+                .hide()
+                .eq(index)
+                .show();
+
+
+            // Show only the navigation buttons that make sense for the current section:
+            jQuery('.form-navigation .previous').toggle(index > 0);
+            var atTheEnd = index >= $sections.length - 1;
+            jQuery('.form-navigation .next').toggle(!atTheEnd);
+            jQuery('.form-navigation [type=submit]').toggle(atTheEnd);
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+            if (atTheEnd) {
+            }
+        }
+
+        // Next button click event
+        jQuery('.form-navigation .next').click(function (e) {
+            if(jQuery(".parsley-custom-error-message").length > 0) {
+                return false;
+            }
+            if (curIndex() == 0) {
+                jQuery('.m26-page-title__backlink').show();
+            }
+            else {
+                jQuery('.m26-page-title__backlink').hide();
+            }
+            require(['parsley'], function () {
+                if (jQuery('#IdBookTraining').parsley().validate()) {
+                    e.preventDefault();
+                    navigateTo(curIndex() + 1);
+                };
+            });
+
+        });
+
+        // Previous button is easy, just go back
+        jQuery('.form-navigation .previous').click(function (e) {
+            e.preventDefault();
+            navigateTo(curIndex() - 1);
+            if (curIndex() == 0) {
+                jQuery('.m26-page-title__backlink').show();
+            }
+        });
+
+        // submit button click event
+        jQuery('.button--submit').off('click.submit').on('click.submit', function (e) {
+            require(['parsley'], function () {
+                recaptchaCallback();
+                if (!jQuery('#IdBookTraining').parsley().validate()) {
+                    e.preventDefault();
+                }
+                else {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                }
+            });
+        });
+        setTimeout(function () { navigateTo(0); }, 200);
+
+        // Checkbox events
+        jQuery('#form-field-ischeckedcertificate').on('click', function () {
+            if (jQuery('#form-field-ischeckedcertificate').is(':checked')) {
+                jQuery('#divcertificatenumber').show();
+                jQuery('#divreasonforenrollmentlist').show();
+            }
+            else {
+                jQuery('#divcertificatenumber').hide();
+                jQuery('#divreasonforenrollmentlist').hide();
+                jQuery('.pvcccertificatenumber').val('');
+            }
+        });
+
+        // PVCC certificate number onchange
+        //jQuery('.pvcccertificatenumber').on('change', function () {
+        //    var _this = this;
+        //    var value = jQuery(_this).parent().find('input').val();
+
+        //    if (value != "" && value != null) {
+        //        jQuery('#divreasonforenrollmentlist').show();
+        //    }
+        //    else {
+        //        jQuery('#divreasonforenrollmentlist').hide();
+        //    }
+        //});
+
+        // Designation onchange
+        jQuery('.optdesignation').on('change', function () {
+            var des = jQuery('select[name="Designation"] option:selected').val();
+
+            if (des != null && des != "" && des == "Partner") {
+                jQuery('#form-field-PV7_Others').attr("required", true);
+                jQuery('.optdesignationattach').show();
+            }
+            else {
+                jQuery('.optdesignationattach').hide();
+            }
+        });
+
+        // Nationality onChange
+        jQuery('#form-field-nationality').on('change', function () {
+
+            var isRequired = true;
+            var CountryArray = @Html.Raw(Json.Encode(@GccCountries.ToArray()));
+            for (i = 0; i < CountryArray.length; i++) {
+                if ($(this).find("option:selected").text() == CountryArray[i].Text) {
+                    isRequired = false;
+                    break;
+                }
+            }
+            if (isRequired) {
+                $("#lblPVCC_Visanumber").html('@Translate.Text("PVCC_Visanumber")');
+                $("#lblPVCC_Visaissuedate").html('@Translate.Text("PVCC_Visaissuedate")');
+                $("#lblPVCC_Visaexpirydate").html('@Translate.Text("PVCC_Visaexpirydate")');
+                $("#lblPVCC_Designation").html('@Translate.Text("PVCC_Designation")');
+                $("#divPVCC_Visanumber").show();
+                $("#datepicker-container-visaissuedate").show();
+                $("#datepicker-container-visaexpiry").show();
+                $("#form-field-VisaNumber, #form-field-visaissuedate, #form-field-visaexpiry").prop('required', true);
+            }
+            else {
+                $("#lblPVCC_Visanumber").html('@Translate.Text("PVCC_Visanumber1")');
+                $("#lblPVCC_Visaissuedate").html('@Translate.Text("PVCC_Visaissuedate1")');
+                $("#lblPVCC_Visaexpirydate").html('@Translate.Text("PVCC_Visaexpirydate1")');
+                $("#lblPVCC_Designation").html('@Translate.Text("PVCC_Designation1")');
+                $("#divPVCC_Visanumber").hide();
+                $("#datepicker-container-visaissuedate").hide();
+                $("#datepicker-container-visaexpiry").hide();
+                $("#form-field-VisaNumber, #form-field-visaissuedate, #form-field-visaexpiry").removeAttr('required');
+            }
+        });
+
+        // PV expert category change event
+        $('#form-field-solarpvexpertlist').off('change.jrsr').on('change.jrsr', function () {
+            var show = $(this).find('option:selected').attr('data-show'),
+                list = [];
+
+            if (show.toLowerCase() == 'senior') {
+                list = ['0 year', '1 year']
+            } else {
+                list = []
+            }
+
+            $('#form-field-pvdesignlist').find('option').each(function () {
+                $(this).show();
+            });
+
+            $(list).each(function () {
+                $('#form-field-pvdesignlist').find('option[value="' + this + '"]').hide();
+            });
+        });
+
+        //recaptcha callback function
+        function recaptchaCallback() {
+            var v = grecaptcha.getResponse();
+            if (v.length == 0) {
+                jQuery('#errorContainer').text('@Translate.Text("You cant leave Captcha Code empty")');
+                return false;
+            }
+            else {
+                jQuery('#errorContainer').text("");
+                return true;
+            }
+        }
+
+        // emiratesId on change
+        $eidnumberfield.on('focusout', function () {
+            jQuery("#idemiratesmsg").remove();
+            geteiddetails();
+        });
+
+        function geteiddetails() {
+            if ($eidnumberfield.val() != "") {
+                var form = $('#IdBookTraining');
+                var token = $('input[name="__RequestVerificationToken"]', form).val();
+                var url = "/api/sitecore/ShamsDubaiTraining/GetDetails";
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        eidnumber: $eidnumberfield.val()
+                    },
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                        errIdNumber.html('');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    success: function (response) {
+                        if (response != null) {
+                            if (response.Message != "") {
+                                errIdNumber.html('<ul class="parsley-errors-list filled" id="idemiratesmsg"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                                jQuery("#divPVCC_mobileVerifyCode").hide();
+                            }
+                            else {
+                                //jQuery("#divPVCC_ApplicationName").hide();
+                                //jQuery("#divPVCC_Email").hide();
+                                //jQuery("#divPVCC_Mobile").hide();
+                                //jQuery("#divPVCC_Nationality").hide();
+                                //jQuery("#divPVCC_Visanumber").hide();
+                                //jQuery("#divPVCC_Designation").hide();
+                                //jQuery("#datepicker-container-visaissuedate").hide();
+                                //jQuery("#datepicker-container-visaexpiry").hide();
+                                //jQuery("#divPVCC_PassportNumber").hide();
+                                //jQuery("#datepicker-container-passportissuedate").hide();
+                                //jQuery("#datepicker-container-Passportexpiry").hide();
+                                jQuery("#divPVCC_mobileVerifyCode").show();
+                                errIdNumber.html('');
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // otpNumber on change
+        $otpNumber.on('focusout', function () {
+            jQuery("#idotp").remove();
+            getotpdetails();
+        });
+
+        function getotpdetails() {
+            if ($eidnumberfield.val() != "" && $otpNumber.val() != "") {
+                var form = $('#IdBookTraining');
+                var token = $('input[name="__RequestVerificationToken"]', form).val();
+                var url = "/api/sitecore/ShamsDubaiTraining/GetDetails";
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        eidnumber: $eidnumberfield.val(),
+                        otpnumber: $otpNumber.val()
+                    },
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                        errIdNumber.html('');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    success: function (response) {
+                        if (response != null) {
+                            if (response.Message != "") {
+                                errotpIdNumber.html('<ul class="parsley-errors-list filled" id="idotp"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Resend otp
+        jQuery(".resendmobotp").on("click", function () {
+            if ($eidnumberfield.val() != "") {
+                geteiddetails();
+            }
+        });
+
+        // Emirate id disabled on enter key
+        setTimeout(function () {
+            jQuery('.disEmirateid','.disotpnumber').each(function () {
+                jQuery(this).off('keydown.submit').on('keydown.submit', function (event) {
+                    if (event.keyCode == 13 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                })
+            });
+        }, 250)
+
+        // Mobile otp disabled on enter key
+        setTimeout(function () {
+            jQuery('.disotpnumber').each(function () {
+                jQuery(this).off('keydown.submit').on('keydown.submit', function (event) {
+                    if (event.keyCode == 13 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                })
+            });
+        }, 250)
+    });
+</script>

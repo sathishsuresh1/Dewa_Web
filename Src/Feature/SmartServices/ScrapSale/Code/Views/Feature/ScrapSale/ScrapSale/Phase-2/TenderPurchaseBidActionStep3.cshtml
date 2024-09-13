@@ -1,0 +1,207 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.ScrapSale.Models.ScrapSale.TenderBidingStep3Model
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP2)" class="button button--text button--back">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">
+                    @Translate.Text("SS_BD_Header") @Model.TenderNumber
+                </h2>
+                <p class="text-page__intro">
+                    @if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft)
+                    {
+                        @Model.TenderARDescription
+                    }
+                    else
+                    {
+                        @Model.TenderEndDescription
+                    }
+                </p>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="7" data-current-step="3" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="false">
+                <div class="m38-steptracker__info-wrapper">@Translate.Text("SS_BD_Step3")</div>
+                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+         FormMethod.Post, new
+         {
+             @class = "form",
+             @id = "IdTenderbidActionStep3",
+             data_form = "true",
+             data_parsley_focus = "none",
+             @data_submit_validate = "enabled",
+             enctype = "multipart/form-data",
+             @autocomplete = "off"
+         }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="m42-keyvalue">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_BidRefNumber")</strong></dt>
+                        <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@(!string.IsNullOrWhiteSpace(Model.TenderBidRefNumber) ? Model.TenderBidRefNumber : " N/A")</dd>
+                    </dl>
+                </div>
+                @*<div id="description-for-totaltenderbondamount" class="form-field__messages">
+                            <p class="form-field__description"><a href="" class="link">@Translate.Text("View Payment History")</a></p>
+                        </div>
+                    </div>*@
+                <div class="form-field form-field--toggles form-field__deposit-type">
+                    <fieldset class="fieldset">
+                        <legend class="form-field__label">
+                            @Translate.Text("SS_BD_DepositType")
+                        </legend>
+                        <div class="form-field__checkbox first">
+                            <label>
+                                <input data-parsley-id="9"
+                                       data-parsley-multiple="deposit1"
+                                       class="form-field__input form-field__input--checkbox"
+                                       id="form-field-checkbox_deposit1"
+                                       aria-label="form-field-checkbox_deposit1"
+                                       name="chkEarnestmoney"
+                                       data-j41-pledge="deposit1"
+                                       value="1"
+                                       aria-describedby="description-for-deposit1"
+                                       data-parsley-errors-container="#description-for-deposit1"
+                                       type="checkbox">
+                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("SS_BD_EarnestMoney")</span>
+                            </label>
+                        </div>
+                        @*<div id="description-for-deposit1" class="form-field__messages">
+                            </div>*@
+                        <div class="form-field__checkbox last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox"
+                                       id="form-field-checkbox_deposit2"
+                                       aria-label="form-field-checkbox_deposit2"
+                                       name="chkTenderbond"
+                                       type="checkbox"
+                                       value="2"
+                                       aria-describedby="description-for-deposit2"
+                                       data-parsley-errors-container="#description-for-deposit2"
+                                       data-parsley-multiple="deposit2"
+                                       data-parsley-id="48">
+                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("SS_BD_Tenderbond")</span>
+                            </label>
+                        </div>
+                        <div id="description-for-deposit2" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="form-field form-field--text" id="divearnestdeposit" style="display:none">
+                    <label for="form-field-earnestdepositamount" class="form-field__label">
+                        @Translate.Text("SS_BD_EarnestDeposit")
+                    </label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--small">
+                        <input class="form-field__input form-field__input--text earnestdepositamount"
+                               id="form-field-earnestdepositamount"
+                               type="number"
+                               name="EarnestDepositAmount"
+                               aria-describedby="description-for-earnestdepositamount"
+                               required="required"
+                               data-parsley-errors-container="#description-for-earnestdepositamount"
+                               min="0.00"
+                               max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                               step="any"
+                               data-parsley-currency=""
+                               data-input-truncate="9"
+                               data-parsley-min="0"
+                               data-parsley-max="@PaymentConstants.MaximumAllowedPaymentAmount"
+                               data-parsley-required-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                               data-parsley-currency-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                               data-parsley-min-message="@Translate.Text(DictionaryKeys.Global.InvalidCurrencyValue)"
+                               data-parsley-range-message
+                               lang="en"
+                               data-parsley-trigger="focusout"
+                               data-parsley-id="18"
+                               data-parsley-max-message="@Translate.Text("Easy.payment amount", PaymentConstants.EasyMaximumAllowedPaymentAmount.ToString("0,0.00"))">
+                    </span>
+                    <div id="description-for-earnestdepositamount" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field__button">
+                    <button type="submit" name="SubmitType" value="nextbid" class="button button--primary button--fullwidth-mobile mb12" data-submission-text="@Translate.Text("Continue")...">
+                        @Translate.Text("Next")
+                    </button>
+                    @*<a id="continue-button-popup" href="@string.Format("{0}?t={1}&a={2}",LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_BIDDING_PUCHASE), Model.TenderBidRefNumber, Model.EarnestDepositAmount)" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")" class="button button--primary hidden"> @Translate.Text("easypay.pay"):</a>*@
+                    <button type="submit" name="SubmitType" value="paybid" id="continue-button-popup" data-text="continue-button-popup" class="button button--primary button--fullwidth-mobile mb12 hidden" data-submission-text="@Translate.Text("Submitting")...">
+                        @Translate.Text("Pay")
+                    </button>
+                    @*<a class="button button--primary">
+                            @Translate.Text("easypay.pay"):
+                            <span id="continue-button-popup" name="continue-button" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")"></span>
+                        </a>*@
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    docReady(function () {
+
+        // Earnest checkbox event
+        jQuery('#form-field-checkbox_deposit1').on('click', function () {
+            if (jQuery('#form-field-checkbox_deposit1').is(':checked')) {
+                jQuery('#divearnestdeposit').show();
+               // jQuery('#continue-button-popup').show();
+                jQuery('#continue-button-popup').html('@Translate.Text("Pay")');
+                jQuery('#form-field-checkbox_deposit2').attr('disabled', true);
+            } else {
+                jQuery('#divearnestdeposit').hide();
+                jQuery('.earnestdepositamount').val('');
+                jQuery("#continue-button-popup").html('');
+                jQuery('#form-field-checkbox_deposit2').attr('disabled', false);
+                jQuery('#continue-button-popup').hide();
+            }
+        });
+
+        jQuery('#form-field-checkbox_deposit2').on('click', function () {
+            if (jQuery('#form-field-checkbox_deposit2').is(':checked')) {
+                jQuery('#form-field-checkbox_deposit1').attr('disabled', true);
+            }
+            else {
+                jQuery('#form-field-checkbox_deposit1').attr('disabled', false);
+            }
+        });
+
+        // Earnest button value change
+        jQuery('.earnestdepositamount').on('change', function () {
+            var _this = this;
+            var currency = '@Translate.Text("AED")';
+            var value = jQuery(_this).parent().find('input').val();
+
+            if (value != "" && value > 0) {
+                jQuery('#continue-button-popup').show();
+                jQuery("input[name='EarnestDepositAmount']").val(parseFloat(value).toFixed(2));
+                jQuery("#continue-button-popup").html('@Translate.Text("Pay"):' + " " + numeral(parseFloat(value)).format('0,0.00') + " " + currency);
+            }
+            else {
+                jQuery('#continue-button-popup').hide();
+            }
+        });
+
+    });
+</script>

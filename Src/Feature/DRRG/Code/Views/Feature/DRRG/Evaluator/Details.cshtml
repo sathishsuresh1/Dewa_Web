@@ -1,0 +1,584 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.DRRG.Models
+@model ModuleDetail
+@{
+    int manulist = (int)ViewBag.manuref;
+    string detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_ManufactureList);
+    if (manulist.Equals(2))
+    {
+        detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_EditedProfileList);
+    }
+    else if (manulist.Equals(3))
+    {
+        detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_RejectedApplicationList);
+    }
+    else if (manulist.Equals(4))
+    {
+        detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_EquipmentList);
+    }
+    var saltMistTestMethods = DEWAXP.Foundation.Content.Extensions.GenericExtension.GetLstDataSource(DataSources.DRRG_SALT_MIST_TEST_METHODS);
+    if (!string.IsNullOrWhiteSpace(Model.Status) && Model.Status.Equals("Rejected") && Model.UserRole.Equals("drrgevaluator"))
+    {
+        detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_RejectedApplicationList);
+    }
+}
+@if (Model != null)
+{
+    <div class="j105-drrg">
+        <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="j04-drrg-evaluator">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("pagetitle")
+
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <div class="j04-drrg-evaluator--detail_wrapper">
+                        @if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber))
+                        {
+                            <div class="j04-drrg-evaluator--detail_ref">
+                                <strong>Reference No.:</strong> @Model.ReferenceNumber
+                            </div>
+                        }
+                        @foreach (ModuleSectionRow moduleSectionRow in Model.moduleSectionRows)
+                        {
+                            <div class="j04-drrg-evaluator--detail_title">
+                                @moduleSectionRow.Title
+                            </div>
+                            <div class="j04-drrg-evaluator--detail_sectionrow">
+                                @if (moduleSectionRow.moduleSections != null && moduleSectionRow.moduleSections.Count > 0)
+                                {
+                                    foreach (ModuleSection moduleSection in moduleSectionRow.moduleSections)
+                                    {
+                                        if (moduleSection != null && moduleSection.moduleItems != null && moduleSection.moduleItems.Count > 0)
+                                        {
+                                            <div class="j04-drrg-evaluator--detail_section mb24">
+                                                @foreach (ModuleKeyValueItem modulekeyvalueitem in moduleSection.moduleItems.Where(x => !string.IsNullOrWhiteSpace(x.Value)))
+                                                {
+                                                    <div class="j04-drrg-evaluator--detail">
+                                                        @if (modulekeyvalueitem.FileLink)
+                                                        {
+                                                            <strong>@modulekeyvalueitem.Key <span>: </span></strong>
+                                                            <a data-fileid="@modulekeyvalueitem.Value" href="#" style="display: inline-block;" rel="" target="_blank" class="link filelink tooltipstered">@Translate.Text("View Certificate")</a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="j04-drrg-evaluator--key">
+                                                                @Html.Raw(modulekeyvalueitem.Key)
+                                                            </div>
+                                                            <div class="j04-drrg-evaluator--value">
+                                                                @if (modulekeyvalueitem.Linkvalue)
+                                                                {
+                                                                    @Html.Raw(modulekeyvalueitem.Value) <a href="#" target="_blank" rel="" class="link ">: View Certificate</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    @Html.Raw(modulekeyvalueitem.Value)
+                                                                }
+                                                            </div>
+
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--content grid__column--centered">
+                    <a href="#" class="button button--outline cancelApplication">CANCEL</a>
+                    <div class="m39-modal m39-modal--confirm m39-modal--reject m39-modal--button" data-component="m39-modal" id="reject">
+                        @if (Model.Status != null && ((Model.Status.ToLower().Equals("submitted") && Model.UserRole.Equals("drrgevaluator")) ||
+                                 (Model.Status.ToLower().Equals("rejected") && Model.UserRole.Equals("drrgevaluator")) ||
+                                  (Model.Status.ToLower().Equals("updated") && Model.UserRole.Equals("drrgevaluator")) ||
+                                 (Model.Status.ToLower().Equals("reviewerapproved") && Model.UserRole.Equals("drrgschemamanager")) ||
+                                 Model.Status.ToLower().Equals("authorizedletterupdated") || Model.Status.ToLower().Equals("authorizedlettersubmitted")))
+                        {
+                            <button data-trigger="true" class="button button--outline" type="button" id="_manufacturer_trigger" aria-controls="_manufacturer_content">REJECT</button>
+                        }
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_manufacturer_content" aria-labelledby="_manufacturer_trigger">
+                            <div class="m39-modal__dialog ">
+                                <div class="m39-modal__header">
+                                    <div class="m39-modal__title">Rejection - Application Ref. @Model.ReferenceNumber</div>
+                                    <button data-close="true" class="m39-modal__button--close" id="_manufacturer_close" aria-controls="_manufacturer_content">
+                                        <span class="aria-only">Close</span>
+                                    </button>
+                                </div>
+                                <div class="m39-modal__content" style="top: 31.1875px;">
+                                    <p class="mb24">
+                                        Are you sure you want to reject this application?
+                                    </p>
+
+                                    <form method="get" id="rejectApplication" class="form" data-form="true" novalidate="">
+                                        <div class="form-field form-field--text form-field--textarea">
+                                            <label for="form-field-rejectedreason" class="form-field__label">
+                                                <span class="aria-only">Textarea Field (required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                          maxlength="500" data-textarea="rejectedreason"
+                                                          id="form-field-rejectedreason" name="textarea" type="textarea" placeholder="Please type your comments here"
+                                                          aria-describedby="description-for-rejectedreason"
+                                                          data-parsley-errors-container="#description-for-rejectedreason"
+                                                          required="" data-parsley-required-message="This field is required" data-parsley-id="6"></textarea>
+                                            </span>
+                                            <div id="description-for-rejectedreason" class="form-field__messages">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--upload">
+                                            <div class="form-field__input-wrapper">
+                                                <div class="form-field__preview-wrapper">
+                                                    <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" alt="alt text" data-uploader-image="rejectedfile">
+                                                </div>
+                                                <div class="form-field__uploader-details">
+                                                    <label for="form-field-rejectedfile" class="form-field__label">
+                                                        <span class="aria-only">Supporting Documents (required)</span>
+                                                    </label>
+                                                    <div>
+                                                        <label>
+                                                            <input class="form-field__input form-field__input--upload" id="form-field-rejectedfile"
+                                                                   name="upload" type="file" aria-describedby="description-for-rejectedfile"
+                                                                   data-parsley-errors-container="#description-for-rejectedfile"
+                                                                   data-parsley-required-message="This field is required"
+                                                                   data-uploader-field="rejectedfile"
+                                                                   accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="8">
+                                                            <span class="button button--primary button--next button--small focus-enabled"
+                                                                  data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                                            </label>
+                                                        </div>
+                                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                                        <p class="form-field__input--upload-filename" data-uploader-filename="rejectedfile"></p>
+                                                        <p>
+                                                            <button class="button button--text button--remove hidden" data-uploader-remove="rejectedfile">@Translate.Text("Remove")</button>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div id="description-for-rejectedfile" class="form-field__messages">
+                                                    <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-field form-field--buttons centered">
+                                                <div class="button button--outline m39-m12-noReject" data-close="true" id="_manufacturer_close" aria-controls="_manufacturer_content">No</div>
+                                                <a class="button button--primary m39-m12-yesReject" href="#" id="_manufacturerrej_close" aria-controls="_manufacturerrej_content">Yes</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay" style="display: none;"> </div>
+                        </div>
+                        <div class="m39-modal m39-modal--confirm m39-modal--reject m39-modal--button" style="" data-component="m39-modal" id="approvemodal">
+                            @if (Model.Status != null && ((Model.Status.ToLower().Equals("submitted") && Model.UserRole.Equals("drrgevaluator")) ||
+                                (Model.Status.ToLower().Equals("rejected") && Model.UserRole.Equals("drrgevaluator")) ||
+                                 (Model.Status.ToLower().Equals("updated") && Model.UserRole.Equals("drrgevaluator")) ||
+                                (Model.Status.ToLower().Equals("reviewerapproved") && Model.UserRole.Equals("drrgschemamanager")) ||
+                                Model.Status.ToLower().Equals("authorizedletterupdated") || Model.Status.ToLower().Equals("authorizedlettersubmitted")))
+                            {
+                                <button data-trigger="true" class="button button--primary btnapprove" type="button" id="_manufacturerapp_trigger" aria-controls="_manufacturerapp_content">APPROVE</button>
+                            }
+                            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_manufacturerapp_content" aria-labelledby="_manufacturerapp_trigger">
+                                <div class="m39-modal__dialog" style="max-height:@(!string.IsNullOrWhiteSpace(Model.ReferenceNumber) && Model.UserRole.Equals("drrgevaluator") && (Model.ReferenceNumber.ToLower().StartsWith("pv")) ? "300px" : "200px");">
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title">Approval - Application Ref. @Model.ReferenceNumber</div>
+                                        <button data-close="true" class="m39-modal__button--close" id="_manufacturerapp_close" aria-controls="_manufacturerapp_content">
+                                            <span class="aria-only">Close</span>
+                                        </button>
+                                    </div>
+                                    <div class="m39-modal__content" style="top: 31.1875px;">
+                                        @if (Model.UserRole.Equals("drrgevaluator"))
+                                        {
+                                            <p class="mb24">
+                                                Are you sure you want to approve this application?
+                                            </p>
+                                        }
+                                        else
+                                        {
+                                            <p class="mb24">
+                                                Are you sure you want to approve and publish this application ?
+                                            </p>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber) && Model.UserRole.Equals("drrgevaluator") && (Model.ReferenceNumber.ToLower().StartsWith("pv")))
+                                        {
+                                            <form method="get" class="form align_left" data-form="true" novalidate="">
+                                                <div class="form-field form-field--select form-field--select-single">
+                                                    <label for="form-field-manufacturercountry" class="form-field__label">
+                                                        @Translate.Text("Please select the Test Method approached fot this model.")
+                                                        <span class="form-field__label-required aria-only">@Translate.Text("Required")</span>
+                                                    </label>
+                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                        <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                                                id="form-field-saltmisttestmethod"
+                                                                name="saltMistTestMethods"
+                                                                aria-describedby="description-for-saltmisttestmethod"
+                                                                data-parsley-errors-container="#description-for-saltmisttestmethod"
+                                                                required=""
+                                                                data-placeholder="@Translate.Text("Select Salt test method")"
+                                                                data-parsley-required-message="@Translate.Text("Select Salt test method")"
+                                                                data-parsley-trigger="change"
+                                                                data-parsley-id="32">
+                                                            <option value="" selected="">@Translate.Text("Select Salt test method")</option>
+
+                                                            @{
+                                                                foreach (var item in saltMistTestMethods)
+                                                                {
+
+                                                                    <option value="@item.Value">@item.Text</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </span>
+                                                    <div id="description-for-saltmisttestmethod" class="form-field__messages">
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        }
+
+                                        <button class="button button--outline m39-m12-noApprove" data-close="true" id="_manufacturerapp_close" aria-controls="_manufacturerapp_content">No</button>
+                                        <a class="button button--primary m39-m12-yesApprove" href="#" id="_manufacturerapp_close" aria-controls="_manufacturerapp_content">Yes</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay" style="display: none;"> </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="m39-modal m39-modal--success m39-modal--nofocus" data-component="m39-modal" id="successmodal">
+                    <button data-trigger="true" class="m39-modal__trigger" type="button" id="_hcuvgdv8v_trigger" aria-controls="_hcuvgdv8v_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_hcuvgdv8v_content" aria-labelledby="_hcuvgdv8v_trigger">
+                        <div class="m39-modal__dialog ">
+                            <div class="m39-modal__header">
+                                <button data-close="true" class="m39-modal__button--close" id="_hcuvgdv8v_close" aria-controls="_hcuvgdv8v_content">
+                                    <span class="aria-only">Close</span>
+                                </button>
+                            </div>
+                            <div class="m39-modal__content" style="top: 10px;">
+                                <div class="icon icon-new-success-message green"></div>
+                                <p id="successMessage">
+                                    @if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber) && Model.ReferenceNumber.ToLower().StartsWith("pv"))
+                                    {
+                                        <strong>@Translate.Text("PV Module Registration Approved.")</strong>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber) && (Model.ReferenceNumber.ToLower().StartsWith("manufacturer") || Model.ReferenceNumber.ToLower().StartsWith("manuf")))
+                                    {
+                                        <strong>
+                                            @Translate.Text("Manufacturer Registration Approved")
+                                        </strong>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber) && Model.ReferenceNumber.ToLower().StartsWith("ip"))
+                                    {
+                                        <strong>
+                                            @Translate.Text("Interface Protection Registration Approved")
+                                        </strong>
+                                    }
+                                    else if (!string.IsNullOrWhiteSpace(Model.ReferenceNumber) && (Model.ReferenceNumber.ToLower().StartsWith("iv") || Model.ReferenceNumber.ToLower().StartsWith("inv")))
+                                    {
+                                        <strong>
+                                            @Translate.Text("PV Inverter Registration Approved")
+                                        </strong>
+                                    }
+                                </p>
+                                <p id="responseMessage"></p>
+                                <a class="button button--primary" href="@detailedurl" id="_hcuvgdv8v_close" aria-controls="_hcuvgdv8v_content">
+                                    @Translate.Text("BACK TO THE LIST")
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay" style="display: none;"> </div>
+                </div>
+                <div class="m39-modal m39-modal--success m39-modal--nofocus" data-component="m39-modal" id="lockmodal">
+                    <button data-trigger="true" class="m39-modal__trigger" type="button" id="_hcuvgdv8vlock_trigger" aria-controls="_hcuvgdv8vlock_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_hcuvgdv8vlock_content" aria-labelledby="_hcuvgdv8vlock_trigger">
+                        <div class="m39-modal__dialog ">
+                            <div class="m39-modal__header">
+                                <button data-close="true" class="m39-modal__button--close applicationClose" id="_hcuvgdv8vlock_close" aria-controls="_hcuvgdv8vlock_content">
+                                    <span class="aria-only">Close</span>
+                                </button>
+                            </div>
+                            <div class="m39-modal__content" style="top: 10px;">
+                                <div class="icon icon-new-success-message green"></div>
+                                <p id="successMessage">
+                                    <strong>@Translate.Text("This application is open by another Evaluator")</strong>
+                                </p>
+                                <p id="responseMessage"></p>
+                                <a class="button button--primary" href="@detailedurl" id="_hcuvgdv8vlock_close" aria-controls="_hcuvgdv8vlock_content">
+                                    @Translate.Text("BACK TO THE LIST")
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay" style="display: none;"> </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" language="javascript">
+
+            docReady(function () {
+
+                if ('@Model.itemLock' == 'True') {
+                    setTimeout(function () {
+                        jQuery('#lockmodal').find('.m39-modal__trigger').trigger('click');
+                    }, 200);
+                }
+                if ('@Model.ReferenceNumber.ToLower().StartsWith("pv")' == 'True') {
+                    jQuery(".text-page__intro").html('PV Module Application');
+                }
+                else if ('@Model.ReferenceNumber.ToLower().StartsWith("ip")' == 'True') {
+                    jQuery(".text-page__intro").html('Interface Protection Application');
+                }
+                else if ('@Model.ReferenceNumber.ToLower().StartsWith("inv")' == 'True') {
+                    jQuery(".text-page__intro").html('PV Inverter Application');
+                }
+                else {
+                    jQuery(".text-page__intro").html('Manufacturer Detail');
+                }
+                $(".filelink").click(function (event) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                    var fileid = $(this).data('fileid');
+                    window.open("/api/sitecore/DRRGEvaluator/Attachment?id=" + fileid, '_blank');
+                });
+                $(".applicationClose").click(function (event) {
+                    window.location = '@detailedurl';
+                });
+                $(".cancelApplication").click(function (event) {
+                    var url = "/api/Sitecore/DRRGEvaluator/closeApplication";
+                    var regNumber = '@Model.ReferenceNumber';
+                    requestData = {
+                        regnumber: regNumber,
+                    }
+                    jQuery.ajax({
+                        url: url,
+                        type: 'POST',
+                        traditional: true,
+                        data: requestData,
+                        beforeSend: function () {
+                            jQuery('.m66-preloader').show();
+                            jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                            $('body').removeClass('unscrollable').addClass('unscrollable');
+                        },
+                        complete: function () {
+                            jQuery('.m66-preloader').hide();
+                            $('body').removeClass('unscrollable');
+                        },
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.status != null && response.status) {
+                                window.location = '@detailedurl';
+                            }
+                        },
+                        error: function (jqXHR, exception) {
+                            var msg = '';
+                            if (jqXHR.status === 0) {
+                                msg = 'Not connect.\n Verify Network.';
+                            } else if (jqXHR.status == 404) {
+                                msg = 'Requested page not found. [404]';
+                            } else if (jqXHR.status == 500) {
+                                msg = 'Internal Server Error [500].';
+                            } else if (exception === 'parsererror') {
+                                msg = 'Requested JSON parse failed.';
+                            } else if (exception === 'timeout') {
+                                msg = 'Time out error.';
+                            } else if (exception === 'abort') {
+                                msg = 'Ajax request aborted.';
+                            } else {
+                                msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                            }
+
+                        }
+                    });
+                });
+                $(".m39-m12-yesApprove").click(function () {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    var isvalid = true;
+                    var regNumber = '@Model.ReferenceNumber';
+                    if (regNumber != null && (regNumber.toLowerCase().startsWith("pv") || regNumber.toLowerCase().startsWith("inv") || regNumber.toLowerCase().startsWith("iv") || regNumber.toLowerCase().startsWith("ip"))) {
+                        requestData = {
+                            regnumber: regNumber,
+                            saltmethod: jQuery("#form-field-saltmisttestmethod").val()
+                        }
+                        if (jQuery("#form-field-saltmisttestmethod").val() == '') {
+                            isvalid = false;
+                            requirejs(['parsley'], function () {
+                                jQuery("#form-field-saltmisttestmethod").parsley().validate();
+                            });
+                        }
+                    }
+                    else {
+                        requestData = {
+                            regnumber: regNumber,
+                        }
+                    }
+                    if (isvalid) {
+                        var url = "/api/Sitecore/DRRGEvaluator/ApproveRegistration";
+                        jQuery.ajax({
+                            url: url,
+                            type: 'POST',
+                            traditional: true,
+                            data: requestData,
+                            beforeSend: function () {
+                                jQuery('.m66-preloader').show();
+                                jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                                $('body').removeClass('unscrollable').addClass('unscrollable');
+                            },
+                            complete: function () {
+                                jQuery('.m66-preloader').hide();
+                                $('body').removeClass('unscrollable');
+                            },
+                            dataType: 'json',
+                            success: function (response) {
+                                jQuery("#responseMessage").html(response.Message);
+                                jQuery(".m39-m12-noApprove").click();
+                                jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                            },
+                            error: function (jqXHR, exception) {
+                                var msg = '';
+                                if (jqXHR.status === 0) {
+                                    msg = 'Not connect.\n Verify Network.';
+                                } else if (jqXHR.status == 404) {
+                                    msg = 'Requested page not found. [404]';
+                                } else if (jqXHR.status == 500) {
+                                    msg = 'Internal Server Error [500].';
+                                } else if (exception === 'parsererror') {
+                                    msg = 'Requested JSON parse failed.';
+                                } else if (exception === 'timeout') {
+                                    msg = 'Time out error.';
+                                } else if (exception === 'abort') {
+                                    msg = 'Ajax request aborted.';
+                                } else {
+                                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                                }
+
+                            }
+                        });
+                    }
+                });
+
+                $(".m39-m12-yesReject").click(function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    var files = jQuery("#form-field-rejectedfile").get(0).files;
+                    var data1 = new FormData();
+                    var regNumber = '@Model.ReferenceNumber';
+                    data1.append("regnumber", '@Model.ReferenceNumber');
+                    data1.append("rejectionreason", $("#form-field-rejectedreason").val());
+                    if (files.length > 0) {
+                        data1.append("file", files[0]);
+                    }
+                    var url = "/api/Sitecore/DRRGEvaluator/RejectionRegistration";
+                    jQuery.ajax({
+                        url: url,
+                        type: 'POST',
+                        traditional: true,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        data: data1,
+                        beforeSend: function () {
+                            jQuery('.m66-preloader').show();
+                            jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                            $('body').removeClass('unscrollable').addClass('unscrollable');
+                        },
+                        complete: function () {
+                            jQuery('.m66-preloader').hide();
+                            $('body').removeClass('unscrollable');
+                        },
+                        dataType: 'json',
+                        success: function (response) {
+                            jQuery("#responseMessage").html(response.Message);
+                            if (regNumber != null && regNumber.toLowerCase().startsWith("pv")) {
+                                jQuery("#successMessage").html("<strong>@Translate.Text("PV Module Registration Rejected")</strong>");
+                                jQuery("#successMessage").addClass("red");
+                            }
+                            if (regNumber != null && (regNumber.toLowerCase().startsWith("iv") || regNumber.toLowerCase().startsWith("inv"))) {
+                                jQuery("#successMessage").html("<strong>@Translate.Text("PV Inverter Registration Rejected")</strong>");
+                                jQuery("#successMessage").addClass("red");
+                            }
+                            if (regNumber != null && regNumber.toLowerCase().startsWith("ip")) {
+                                jQuery("#successMessage").html("<strong>@Translate.Text("Interface Protection Registration Rejected")</strong>");
+                                jQuery("#successMessage").addClass("red");
+                            }
+                            if (regNumber != null && (regNumber.toLowerCase().startsWith("manufacturer") || regNumber.toLowerCase().startsWith("manuf"))) {
+                                jQuery("#successMessage").html("<strong>@Translate.Text("New User Registration Rejected")</strong>");
+                                jQuery("#successMessage").addClass("red");
+                            }
+                            if (response.status != null && response.status) {
+                                jQuery(".m39-m12-noReject").click();
+                                jQuery('#successmodal').find(".icon").removeClass("icon-new-success-message green");
+                                jQuery('#successmodal').find(".icon").addClass("icon-new-announcement red");
+                                jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                                jQuery(".m39-m12-noReject").click();
+                            }
+                            else {
+                                jQuery(".form-field__input--upload-format-error-message").css("display", "block");
+                            }
+                        },
+                        error: function (jqXHR, exception) {
+                            var msg = '';
+                            if (jqXHR.status === 0) {
+                                msg = 'Not connect.\n Verify Network.';
+                            }
+                            else if (jqXHR.status == 404) {
+                                msg = 'Requested page not found. [404]';
+                            }
+                            else if (jqXHR.status == 500) {
+                                msg = 'Internal Server Error [500].';
+                            }
+                            else if (exception === 'parsererror') {
+                                msg = 'Requested JSON parse failed.';
+                            }
+                            else if (exception === 'timeout') {
+                                msg = 'Time out error.';
+                            }
+                            else if (exception === 'abort') {
+                                msg = 'Ajax request aborted.';
+                            }
+                            else {
+                                msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                            }
+
+                        }
+                    });
+                });
+            });
+        </script>
+    }
+    else
+    {
+        <div class="j04-drrg-evaluator">
+            <div class="grid mt12">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionErrorV2.cshtml")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }

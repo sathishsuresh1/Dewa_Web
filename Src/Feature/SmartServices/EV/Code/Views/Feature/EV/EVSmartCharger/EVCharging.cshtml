@@ -1,0 +1,94 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content.Models.Bills
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@model DEWAXP.Feature.EV.Models.EVSmartCharger.EVPaymentModel
+@{
+    var total = (ViewBag.Durationcount == null) ? 4 : ((int)ViewBag.Durationcount / 10) + 1;
+}
+<div id="evchargerdiv">
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+    @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "EVChargingForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="grid j152-ev-smart-charge" data-journey="j152-ev-smart-charge" style="height: auto;">
+            <div class="j152-ev-smart-charge-wrapper mt-40">
+
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                        <h3 class="text__page-title">@Html.Raw(string.Format(Translate.Text("EVSmart_ChargingText"), @ViewBag.ChargerType, @ViewBag.Durationcount))</h3>
+                    </div>
+                </div>
+
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                        <div class="j152-ev-smart-charge-icon icon-EV-Charge"></div>
+                    </div>
+                </div>
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                        <p class="text__content-copy--small align-center">@Translate.Text("EVSmart_WaitingText")</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    }
+</div>
+<script type="text/javascript">
+        var count=0, total = @total;
+        docReady(function () {
+            setTimeout(StartCharging, 100);
+        });
+
+        function StartCharging() {
+            var url = "/api/Sitecore/EVSmartCharger/StartEVCharging";
+            jQuery.ajax({
+                type: 'POST',
+                url: url,
+                //traditional: true,
+                data: AddForgeryToken({}, "EVChargingForm"),
+                beforeSend: function () {
+
+                },
+                complete: function (response) {
+                    if (count < total) {
+                        if (typeof response == "object") {
+                            if (response != null && response != undefined && response.responseJSON != undefined) {
+                                if (response.responseJSON.status) {
+                                }
+                                else if (response.responseJSON.Redirect) {
+                                    window.location.href = response.RedirectUrl;
+                                }
+                                else {
+                                    setTimeout(StartCharging, 10000);
+                                }
+                            }
+                        }
+                        count = count + 1;
+                    }
+                    else {
+                        window.location.href = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EVGREEN_PAYMENT_CONFIRMATION_PAGE)';
+                    }
+                },
+                //dataType: 'json',
+                success: function (response) {
+                    if (typeof response == "object") {
+
+                    }
+                    else {
+                        jQuery("#evchargerdiv").html(response);
+                        window.initComponents('rs_area');
+                    }
+                },
+                error: function () {
+                }
+            });
+            return false;
+        }
+</script>

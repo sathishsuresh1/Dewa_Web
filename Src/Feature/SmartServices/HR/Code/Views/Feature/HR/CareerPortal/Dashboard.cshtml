@@ -1,0 +1,123 @@
+﻿@model DEWAXP.Feature.HR.Models.CareerPortal.Dashboard
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using DEWAXP.Foundation.Content
+@{
+    var tURL = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_TELL_FRIEND) + "?q=";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j126-career-portal">
+    <div class="m41-tabs-box m41-tabs-box--variant m41-tabs-box--scripted">
+        <div class="m41-tabs-box__tabs">
+            <div class="m41-tabs-box__tab-panels">
+                <div class="m41-tabs-box__tab-panel" style="display: block;">
+                    <div class="box--news">
+                        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { }, FormMethod.Post, new { @id = "CandidateDashboard", @name = "j126-career-portal-profile", @data_parsley_focus = "true", @data_form = "true", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+                        {
+                            @Html.Sitecore().FormHandler("CareerPortal", "Withdraw")
+                            @Html.AntiForgeryToken()
+                            @Html.HiddenFor(x => x.postedApplicationDetails, new { id = "postedApplicationDetails", @value = "" })
+
+                            <div class="grid">
+                                <div class="grid__row">
+                                    <div class="grid__column grid__column--12">
+                                        <div class="m26-page-title__links">
+                                            <div class="form-field__button">
+                                                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_POD)" id="pod_landing" class="button button--quaternary button--fullwidth-mobile" title="@Translate.Text("further support pod label")">@Translate.Text("further support pod label")</a>
+                                                <a href="#" id="tellafriendurl" class="button button--quaternary" title="@Translate.Text("tell friend label")">@Translate.Text("tell friend label")</a>
+                                                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_JOBSEARCH)" class="button button--primary" title="@Translate.Text("search more jobs label")">@Translate.Text("search more jobs label")</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p><label id="appError" class="parsley-errors-list"></label></p>
+                                <div class="grid__row">
+                                    <div id="applicationList" class="grid__column grid__column--12">
+                                        @{ Html.RenderPartial("~/Views/Feature/HR/CareerPortal/Modules/_ApplicationList.cshtml", Model); }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("form button[type=submit]").click(function (e) {
+        var $row = $(this).closest("tr"); // Find the row
+        var $text = $row.find(".PostingGuid a").attr("data-option-guid");
+    });
+    $('input[type=radio][name=PostingGUID]').change(function () {
+       // console.log($(this).attr("data-guid-option"));
+        var URL = '@tURL';
+        $("#tellafriendurl").attr("href", URL + $(this).attr("data-guid-option"));
+    });
+    //$(".m23-table__content-table-row .form-field__input--radio:checked").val();
+    $(".deleteApp").click(function () {
+        //debugger;
+        var postedApplicationDetails = jQuery('#postedApplicationDetails');
+        var applicationDetaillist = [];
+        var obj = {};
+        var objJob = {};
+        var $row = $(this).closest(".table-body-row"); // Find the row
+        var $text = $row.find(".PostingGuid a").attr("data-option-guid");
+        if ($row.find(".PostingGuid a").attr("data-option-guid") != undefined) {
+            var objData = $row.find(".PostingGuid a").attr("data-option-guid").split('#');
+            if (objData.length > 0) {
+                obj.PostingGuid = objData[0];
+                objJob.ObjectId = objData[1];
+                objJob.ObjectType = objData[2];
+                objJob.PlanVersion = objData[3];
+                obj.JobDetails = objJob;
+            }
+        }
+        applicationDetaillist.push(obj);
+        postedApplicationDetails[0].value = JSON.stringify(applicationDetaillist);
+        // Let's test it out
+        if (postedApplicationDetails.length > 0) {
+            var url = "/api/sitecore/CareerPortal/AjaxWithdrawApp";
+            var data = $("#postedApplicationDetails").val();
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                //datatype: 'application/json',
+                data: { applicationData: data },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                if (response != null && response.Message != undefined && response.Success != undefined) {
+                    $("#appError").html('');
+                    $("#appError").html(response.Message);
+                } else {
+                    jQuery("#applicationList").html('');
+                    jQuery("#applicationList").html(response);
+                }
+            });
+        }
+    });
+
+</script>

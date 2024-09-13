@@ -1,0 +1,198 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GeneralServices.Models.CCSurvey
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Content
+@model SurveyQuestionandAnswers
+
+@*<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+<div class="grid j122-calls-inquiries" data-journey="j122-calls-inquiries">
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div style="margin-top:60px;">
+            @{
+                ModelState ms;
+                var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+            }
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.TryGetValue(ViewData.TemplateInfo.HtmlFieldPrefix, out ms))
+            {
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <div class="m40v2-status-message m40v2-status-message--error icon icon-caution" data-component="m40v2--status-message">
+                            <div class="m40v2-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                            <div class="m40v2-status-message__text" dir="@direction">@Html.ValidationSummary(true)</div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (ViewBag.success != null && !string.IsNullOrWhiteSpace((string)ViewBag.success))
+    {
+        <div style="margin-top:60px;">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--content">
+                    <div class="m40v2-status-message m40v2-status-message--success icon icon-new-success-message" data-component="m40v2-status-message">
+                        @*<div class="m40v2-status-message__title icon--success">@Translate.Text("Submission Successful")</div>*@
+                        <div class="m40v2-status-message__text">
+                            @((string)ViewBag.success)<br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--content">
+                    <p>@Translate.Text("cc.survey.successnote")</p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        if (Model != null && Model.InquiryType != null && Model.InquiryType.QuestionList != null && Model.InquiryType.QuestionList.Count() > 0)
+        {
+            var qCounter = 0;
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "ccsurveyinquriesform", @data_form = "true", @data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.datasource)
+                        @Html.HiddenFor(m => m.Transactioncode)
+                        <div class="survey_wrapper">
+                            <div class="grid__row">
+                                @foreach (Question question in Model.InquiryType.QuestionList)
+                                {
+                                    if (question != null && question.QuestionType != null && !string.IsNullOrWhiteSpace(question.QuestionType.Value) && question.AnswerList != null && question.AnswerList.Count() > 0)
+                                    {
+                                        if (question.QuestionType.Value.Equals("1"))
+                                        {
+                                            <div class="survey_block @((qCounter + 1).Equals(1) ? "survey_block_active" : string.Empty)" data-ranger-block="@(qCounter + 1)">
+                                                <h3 class="survey_q">
+                                                    @question.DetailedQuestion
+                                                    @Html.Hidden("enquiryInputs[" + qCounter + "].question", qCounter + 1)
+                                                </h3>
+                                                <div class="survey-button-wrapper">
+                                                    @foreach (var option in question.AnswerList)
+                                                    {
+                                                        <input class="form-field__input form-field__input--radio"
+                                                               data-radio="q@(qCounter)a@(option.Value)"
+                                                               id="form-field-radio_" @(qCounter)
+                                                               name="enquiryInputs[@(qCounter)].choosen_value"
+                                                               type="radio"
+                                                               value="@option.Value">
+                                                        <a href="#"
+                                                           data-radio-trigger="q@(qCounter)a@(option.Value)"
+                                                           class="button button--survey button--quaternary">
+                                                            @option.Text
+                                                        </a>
+                                                    }
+                                                </div>
+                                                <div class="survey_warning-message" style="display:none;">@Translate.Text("ccsuvey.Selectvalue")</div>
+                                            </div>
+                                        }
+                                        if (question.QuestionType.Value.Equals("2"))
+                                        {
+                                            var answerlist = question.AnswerList.ToList();
+                                            answerlist.Insert(0, new Answer { Value = (Int32.Parse(question.AnswerList.FirstOrDefault().Value) - 1).ToString() });
+                                            <div class="survey_block @((qCounter + 1).Equals(1) ? "survey_block_active" : string.Empty)" data-ranger-block="@(qCounter + 1)">
+                                                <h3 class="survey_q">
+                                                    @question.DetailedQuestion
+                                                    @Html.Hidden("enquiryInputs[" + qCounter + "].question", qCounter + 1)
+                                                </h3>
+                                                <div class="m76-range-slider"
+                                                     data-component="m76-range-slider">
+                                                    <div class="range-container">
+                                                        <div class="range-container-bg">
+                                                            <input id="rangeslider"
+                                                                   name="enquiryInputs[@(qCounter)].choosen_value"
+                                                                   data-range-slider=""
+                                                                   class="range blue slider"
+                                                                   type="range"
+                                                                   data-snap='@(Enumerable.Range(1, answerlist.Count()).Select(x => x.ToString()).Aggregate((i, j) => i + "," + j))'
+                                                                   min="@(answerlist.FirstOrDefault().Value)"
+                                                                   value="@(answerlist.FirstOrDefault().Value)"
+                                                                   max="@(answerlist.LastOrDefault().Value)"
+                                                                   step="@(answerlist.FirstOrDefault().Value)" list="ticks">
+                                                        </div>
+                                                    </div>
+                                                    <div class="ticks-container" data-range-ticks="">
+                                                        <div class="sliderticks">
+                                                            @{
+                                                                int answercount = 1;
+                                                            }
+                                                            @foreach (var option in answerlist)
+                                                            {
+                                                                <span data-option="@option.Value" class="ticks @(answercount.Equals(1) ? "ticks-active" : string.Empty)">
+                                                                    <span class="@(answercount.Equals(1) ? string.Empty : "ticks-inner-text")">@Html.Raw(option.Text)</span>
+                                                                    <span class="rangeslider_click"></span>
+                                                                </span>
+                                                                { answercount++; }
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                                        }
+                                                                        {
+                                                                            qCounter++;
+                                                                        }
+                                                                    }
+                                                                }
+                            </div>
+
+                            
+                            <div class="grid__row">
+                                <div class="grid__column grid__column--12 grid__column--centered survey_button">
+                                    <a role="button" data-m51-next="" aria-label="Next" class="survey-btn button button--primary button--back">@Translate.Text("ccsurvey.Previous")</a>
+                                    <a role="button" disabled="disabled" data-m51-next="" aria-label="Next" class="survey-btn button button--primary button--next disabled" >@Translate.Text("ccsurvey.Next")</a>
+                                    <button type="submit" disabled="disabled"  class="button button--primary button--submit disabled" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("ccsurvey.Submit")</button>
+                                 </div>
+                            </div>
+                            
+                        </div>
+
+                                                                }
+                   
+
+                </div>
+            </div>
+            <div class="grid__row survey_footer">
+                <div class="grid__column grid__column--12 grid__column--centered">
+                    @if (!string.IsNullOrWhiteSpace(Model.InquiryType.Bottomtext))
+                    {
+                        <p>@Model.InquiryType.Bottomtext</p>
+                    }
+                </div>
+            </div>
+                                                                    }
+                                                                }
+
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+@*<script>
+    docReady(function () {
+        jQuery('#ccsurveyinquriesform').submit(handleinquriessubmission);
+    });
+    function handleinquriessubmission(e) {
+        e.preventDefault();
+        $('.j105-drrg--loader').show();
+        $('.j105-drrg--loader').css('top', $(window).scrollTop());
+        $('body').removeClass('unscrollable').addClass('unscrollable');
+        $('#ccsurveyinquriesform').submit();
+        return false;
+    }
+</script>*@

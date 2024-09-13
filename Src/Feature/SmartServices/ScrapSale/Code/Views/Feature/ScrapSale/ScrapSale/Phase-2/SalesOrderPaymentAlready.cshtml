@@ -1,0 +1,105 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.ScrapSale.SalesOrderPaymentModel
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_SALESORDER_DASHBOARD)" class="button button--text button--back">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title"></h2>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                @if (Model.IsOnline)
+                {
+                    <div class="m40-status-message__title">@Translate.Text("SS_BD_P_PaidSuccess")</div>
+                }
+                else
+                {
+                    <div class="m40-status-message__title">@Translate.Text("TH.Success")</div>
+                }
+                <div class="m40-status-message__text">
+
+                    @if (Model.IsOnline)
+                    {
+                        <strong>@Html.Raw(string.Format("{0}<br/>{1}", Translate.Text("Reference Number"), Model.salesDocumentNo))</strong>
+                    }
+                    else
+                    {
+                        if (Model.ReferenceNo != "")
+                        {
+                            <strong>@Html.Raw(string.Format("{0}<br/>{1}", Translate.Text("Reference Number"), Model.ReferenceNo))</strong>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="success-summery">
+                <h2 class="summery-title">@Translate.Text("SS_PH_SalesOrderNo")</h2>
+                <h2 class="summery-value">@Model.salesDocumentNo</h2>
+            </div>
+            <div class="success-summery">
+                @if (Model.IsOnline)
+                {
+                    <h2 class="summery-title">@Translate.Text("SS_PH_AmountPaid")</h2>
+                    <h2 class="summery-value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Convert.ToDecimal(Model.SalesPaymentAmt) +Model.PaidSuqiaAmount)</h2>
+                }
+                else
+                {
+                    <h2 class="summery-title">@Translate.Text("SS_PH_AmounttobePaid")</h2>
+                    <h2 class="summery-value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.SalesPaymentAmt</h2>
+                }
+            </div>
+        </div>
+    </div>
+    @if (Model.IsOnline && Model.PaidSuqiaAmount>0)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content grid__column--centered">
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.PaidSuqiaAmount)
+            </div>
+        </div>
+    }
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+            <div class="m17-sectiontitle">
+                <h2 class="text__section-title"><strong>@Translate.Text("SS_BD_Whatbext")</strong></h2>
+                <div class="m14-richtext mb0">
+                    @if (Model.IsOnline)
+                    {
+                        <p class="text__content-copy">
+                            @Translate.Text("SOS_BD_SubmitDesc_On")
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text__content-copy">
+                            @Translate.Text("SOS_BD_SubmitDesc_Off")
+                        </p>
+                    }
+                    <div class="form-field__button">
+                        <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_SALESORDER_DASHBOARD)" class="button button--primary">
+                            @Translate.Text("SS_BD_Dashboard")
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

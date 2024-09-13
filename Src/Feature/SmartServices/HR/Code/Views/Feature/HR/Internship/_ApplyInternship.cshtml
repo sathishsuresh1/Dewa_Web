@@ -1,0 +1,1328 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.HR.Models.Internship.Internship
+
+@{
+    var now = DateHelper.DubaiNow().AddMonths(-1);
+    var nowTo = DateHelper.DubaiNow().AddMonths(-1);
+    var yearmax = DateHelper.DubaiNow().AddYears(14);
+    var yearmin = DateHelper.DubaiNow().AddYears(18);
+
+
+
+    var Nationalities = DEWAXP.Foundation.Helpers.Extensions.FormExtensions.GetNationalities(null, false);
+    int startage = 15;
+    int endage = 50;
+
+    bool isNational = false;
+    var maxvalue = 15;
+    var display = "hidden";
+    var review = "";
+    var queryString = "";
+
+    if (!String.IsNullOrEmpty(ViewBag.queryString))
+    {
+        queryString = ViewBag.queryString;
+    }
+    else
+    {
+        queryString = Request.QueryString["q"];
+    }
+
+    if (queryString == "yes")
+    {
+        display = "";
+        review = "review";
+        isNational = true;
+        maxvalue = 9;
+    }
+
+
+
+
+}
+
+
+<style>
+    .form-field__input--intnumber {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        margin-top: 0px;
+    }
+
+    .form-field__input--intcode {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+</style>
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div id="tracker">
+                @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+            </div>
+        </div>
+    </div>
+    <div class="grid__row activate-idlewatch" data-timer="20">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <p class="text__content-copy">@Translate.Text("INT.LBL.DESCRIPTION")</p>
+            <p class="text__content-copy">@Translate.Text("INT.LBL.NOTE")</p>
+
+
+
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "ApplyInternship", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+            {
+                @Html.Sitecore().FormHandler()
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+                <fieldset class="fieldset form-section" id="f1">
+                    <legend class="legend hidden">@Translate.Text("INT.LBL.PERSONAL.DETAILS")</legend>
+                    <div class="form-field form-field--text  ">
+
+                        <label for="Name" class="form-field__label">
+                            @Translate.Text("INT.LBL.FULLNAME")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(model => model.Name, new
+                           {
+                               @class = "form-field__input form-field__input--text review",
+                               @id = "Name",
+                               @maxlength = "25",
+                               @name = "Name",
+                               @type = "text",
+                               @placeholder = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.FULLNAME"),
+                               @aria_describedby = "description-for-wos5al3j9",
+                               @data_parsley_errors_container = "#description-for-wos5al3j9",
+                               @required = "",
+                               @data_parsley_error_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.FULLNAME"),
+                               @data_parsley_required_message = Translate.Text("INT.LBL.ENTER") + " " + Translate.Text("INT.LBL.FULLNAME"),
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_id = "8"
+                           }
+     )
+                        </span>
+
+                        <div id="description-for-wos5al3j9" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div id="datepicker-container-8z9a6rgcv" class="hidden form-field form-field--text  ">
+
+                        <label for="form-field-9wvspoer8" class="form-field__label">
+                            @Translate.Text("INT.LBL.DATE")
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            @Html.TextBoxFor(model => model.Date, new
+                           {
+                               @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                               @id = "form-field-9wvspoer8",
+                               @value = "@Model.Date",
+                               @name = "Date",
+                               @type = "text",
+                               @placeholder = Translate.Text("INT.LBL.PH.DATE"),
+                               @aria_describedby = "description-for-9wvspoer8",
+                               @data_parsley_errors_container = "#description-for-9wvspoer8",
+                               @required = "",
+                               @data_parsley_required_message = Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.DATE"),
+                               @data_el = "datepicker-future",
+                               @data_picker_options = "true",
+                               @data_parsley_trigger = "focusout",
+                               @data_parsley_id = "38",
+                               @readonly = "",
+                               @aria_haspopup = "true",
+                               @aria_expanded = "false",
+                              //@aria_readonly = "false",
+                               @aria_owns = "form-field-9wvspoer8_root",
+                           })
+                        </span>
+                        <div id="description-for-9wvspoer8" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--text  ">
+
+                        <label for="Address" class="form-field__label">
+                            @Translate.Text("INT.LBL.ADDRESS")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input class="review form-field__input form-field__input--text"
+                                   id="Address"
+                                   name="Address"
+                                   value="@Model.Address"
+                                   type="text"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.ADDRESS")"
+                                   aria-describedby="description-for-clw3wvh3f"
+                                   data-parsley-errors-container="#description-for-clw3wvh3f"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.ADDRESS")"
+                                   data-parsley-trigger="focusout" data-parsley-id="12">
+                        </span>
+
+                        <div id="description-for-clw3wvh3f" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+                    <div class="form-field form-field--select form-field--select-single">
+
+                        <label for="form-field-bc69xvs7a" class="form-field__label">
+                            @Translate.Text("INT.LBL.AGE")
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="review form-field__input form-field__input--select form-field__input--select-full"
+                                    id="form-field-bc69xvs7a"
+                                    name="Age"
+                                    value="@Model.Age"
+                                    required=""
+                                    data-parsley-required-message="@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.AGE")"
+                                    aria-describedby="description-for-bc69xvs7a"
+                                    data-parsley-errors-container="#description-for-bc69xvs7a"
+                                    data-parsley-trigger="change" data-parsley-id="14">
+                                <option value="" selected="selected">@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.AGE")</option>
+                                @{ for (int i = startage; i <= endage; i++)
+                                    {
+                                        if (i == Convert.ToInt16(Model.Age))
+                                        {
+                                            <option value="@i" selected>@i</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@i">@i</option>
+                                        }
+                                    }
+
+                                }
+                                }
+
+
+                            </select>
+                        </span>
+                        <div id="description-for-bc69xvs7a" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--select form-field--select-single">
+
+                        <label for="Nationality" class="form-field__label">
+                            @Translate.Text("INT.LBL.NATIONALITY")
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="review form-field__input form-field__input--select form-field__input--select-full"
+                                    id="Nationality"
+                                    required=""
+                                    name="Nationality"
+                                    aria-describedby="description-for-v62lm3tqa"
+                                    data-parsley-errors-container="#description-for-v62lm3tqa"
+                                    data-parsley-required-message="@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.NATIONALITY")"
+                                    data-parsley-trigger="change"
+                                    data-parsley-id="16">
+                                <option value="" selected="selected">@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.NATIONALITY")</option>
+                                @{ foreach (var item in Nationalities)
+                                    {
+                                        if (item.Value == Model.Nationality)
+                                        {
+                                            <option value="@item.Value" selected>@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            if (isNational)
+                                            {
+                                                if ((item.Value == "Utd.Arab Emir.") || (item.Value == "الإمارات العربية المتحدة"))
+                                                {
+                                                    <option value="@item.Value" selected>@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Value">@item.Text</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Value">@item.Text</option>
+                                            }
+                                        }
+
+                                    }
+
+
+
+                                }
+
+
+                            </select>
+                        </span>
+                        <div id="description-for-v62lm3tqa" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--select form-field--select-single @display">
+
+                        <label for="form-field-swyd9ia4x" class="form-field__label @display">
+                            @Translate.Text("INT.LBL.EMIRATES")
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select @display">
+                            <select class="@review form-field__input form-field__input--select form-field__input--select-full @display"
+                                    id="form-field-swyd9ia4x"
+                                    name="Emirates"
+                                    data-parsley-required-message="@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.EMIRATES")"
+                                    required=""
+                                    aria-describedby="description-for-swyd9ia4x"
+                                    data-parsley-errors-container="#description-for-swyd9ia4x"
+                                    data-parsley-trigger="change" data-parsley-id="18">
+                                <option value="" selected="selected">@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.EMIRATES")</option>
+                                @{ foreach (var item in Model.EmirateList)
+                                    {
+                                        if (item.Value == Model.Emirates)
+                                        {
+                                            <option value="@item.Text" selected>@item.Text</option>}
+                                        else
+                                        {
+                                            <option value="@item.Text"> @item.Text </option>}
+                                    }
+                                }
+                                }
+                            </select>
+                        </span>
+                        <div id="description-for-swyd9ia4x" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+                    <div class="form-field form-field--text form-field--6 forcefloat_left">
+
+                        <label for="CountryCode" id="M1" class="form-field__label">
+                            @Translate.Text("INT.LBL.MOBILENUMBER")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+
+                            <!-- country codes (ISO 3166) and Dial codes. -->
+                            @Html.DropDownListFor(model => model.CountryCode, Model.CountryCallingCodesList, Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.COUNTRY.CODE"), new
+                           {
+
+                               @class = "review form-field__input form-field__input--select form-field__input--select-full form-field__input--intcode",
+                               @id = "CountryCode",
+                               @required = "required",
+                               @data_parsley_error_message = Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.COUNTRY.CODE"),
+                               @data_parsley_errors_container = "#description-for-0fv5572k11",
+                               @aria_describedby = "description-for-0fv5572k11",
+                           })
+                        </span>
+                        <div id="description-for-0fv5572k11" class="form-field__messages">
+                        </div>
+                    </div>
+
+
+                    <div class="form-field form-field--text form-field--6 forcefloat_left">
+
+                        <label for="mobile_number" class="form-field__label" id="M2">
+                            @Translate.Text("INT.LBL.MOBILENUMBER")
+
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+
+
+                            <input class="form-field__input form-field__input--text form-field__input--intnumber"
+                                   id="mobile_number"
+                                   name="mobile_number"
+                                   value="@Model.Mobile_Number"
+                                   type="number"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MOBILENUMBER")"
+                                   aria-describedby="description-for-0fv5572k1"
+                                   data-parsley-errors-container="#description-for-0fv5572k1"
+                                   required=""
+                                   data-parsley-minlength="7"
+                                   @*minlength="7"*@
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MOBILENUMBER")"
+                                   data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MOBILENUMBER")"
+                                   data-parsley-trigger="focusout" data-parsley-id="20"
+                                   data-parsley-max_number="" data-max-length="@maxvalue">
+                        </span>
+
+                        <div id="description-for-0fv5572k1" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="form-field form-field--text clear_both">
+
+                        <label for="Email_Address" class="form-field__label">
+                            @Translate.Text("INT.LBL.EMAILADDRESS")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="review form-field__input form-field__input--text form-field--vanilla_email"
+                                   value="@Model.Email_Address"
+                                   id="Email_Address" name="Email_Address" type="email"
+                                   placeholder="@Translate.Text("email placeholder text")"
+                                   aria-describedby="description-for-k85z8qm3o"
+                                   data-parsley-errors-container="#description-for-k85z8qm3o"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.EMAILADDRESS")"
+                                   data-parsley-email=""
+                                   data-parsley-error-message="@Translate.Text("Please enter a valid email address")"
+                                   data-parsley-trigger="focusout" data-parsley-id="22">
+                        </span>
+
+                        <div id="description-for-k85z8qm3o" class="form-field__messages">
+                        </div>
+
+                    </div>
+                </fieldset>
+
+
+                <fieldset class="fieldset form-section" id="f2">
+                    <legend class="legend hidden">@Translate.Text("INT.LBL.PROFESSIONAL.DETAILS")</legend>
+                    <div class="form-field form-field--text  ">
+
+                        <label for="University" class="form-field__label">
+                            @Translate.Text("INT.LBL.UNIVERSITY")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input class="review form-field__input form-field__input--text"
+                                   maxlength="40"
+                                   data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.UNIVERSITY")"
+                                   id="University"
+                                   value="@Model.University"
+                                   name="University" type="text"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.UNIVERSITY")"
+                                   aria-describedby="description-for-9zybaad4r"
+                                   data-parsley-errors-container="#description-for-9zybaad4r"
+                                   required="" data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.UNIVERSITY")"
+                                   data-parsley-trigger="focusout" data-parsley-id="8">
+                        </span>
+
+                        <div id="description-for-9zybaad4r" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--text  ">
+
+                        <label for="Major" class="form-field__label">@Translate.Text("INT.LBL.MAJOR")</label>
+
+                        <span class="form-field__input-wrapper">
+                            <input class="review form-field__input form-field__input--text"
+                                   maxlength="60"
+                                   data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MAJOR")"
+                                   id="Major"
+                                   value="@Model.Major"
+                                   name="Major" type="text"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MAJOR")"
+                                   aria-describedby="description-for-18s6y7igm"
+                                   data-parsley-errors-container="#description-for-18s6y7igm"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.MAJOR")"
+                                   data-parsley-trigger="focusout" data-parsley-id="10">
+                        </span>
+
+                        <div id="description-for-18s6y7igm" class="form-field__messages">
+                        </div>
+
+                    </div>
+                    <div class="form-field form-field--text" style="">
+                        <label for="form-field-9jeb1o1en" class="form-field__label">@Translate.Text("INT.LBL.WORKPLACEMENTPERIOD")</label>
+                    </div>
+
+
+                    <div id="datepicker-container-p6f9s0uf" class="form-field form-field--text form-field--6 ">
+
+                        <label for="Date_From" class="form-field__label">
+                            @Translate.Text("INT.LBL.FROM")
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            @*@Html.TextBoxFor(x => x.WorkPlacement_From_Date, new
+                                {
+                                    @class="review form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                                    @id="Date_From",
+                                    @name="WorkPlacement_From_Date",
+                                    @type="text",
+                                    placeholder="@Translate.Text("INT.LBL.PH.DATE")",
+                                    aria-describedby="description-for-p6f9s0uf"
+                                            data-parsley-errors-container="#description-for-p6f9s0uf"
+                                            required=""
+                                            data-parsley-required-message="@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.FROM")"
+                                            data-el="datepicker" data-picker-options="true"
+                                            data-parsley-trigger="focusout" data-parsley-id="38"
+                                            data_picker_options = "{\"selectYears\": true ,\"max\": [" + yearmax.Year + "," + (yearmax.Month) + "," + yearmax.Day + "],\"min\": [" + yearmin.Year + "," + (yearmin.Month) + "," + yearmin.Day + "] }",
+                                            readonly=""
+                                            aria-haspopup="true" aria-expanded="false"
+                                            aria-readonly="false" aria-owns="form-field-9wvspoer8_root"
+                                     }*@
+
+                            @Html.TextBoxFor(x => x.WorkPlacement_From_Date, new
+                           {
+
+                           data_parsley_id = "6",
+                           @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input review",
+                           id = "Date_From",
+                           placeholder = Translate.Text("INT.LBL.PH.DATE"),
+                           required = "required",
+                           data_parsley_required_message = Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.FROM"),
+                           data_el = "datepicker-future",
+                           data_parsley_errors_container = "#description-for-p6f9s0uf",
+                           data_picker_options = "{\"disable\":[6,7],\"selectMonths\": true ,\"selectYears\": true , \"container\": \"#datecontainer\" , \"min\": [" + now.Year + "," + (now.Month) + "," + now.Day + "] }",
+                           type = "text",
+                           @data_initial_date = string.Empty
+                       })
+
+                        </span>
+
+                        <div id="description-for-p6f9s0uf" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div id="datepicker-container-p6f9s0ufr" class="form-field form-field--text form-field--6 ">
+
+                        <label for="Date_To" class="form-field__label">
+                            @Translate.Text("INT.LBL.TO")
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            @*<input class="review form-field__input form-field__input--text form-field__input--datepicker picker__input"
+                                id="Date_To"
+                                name="WorkPlacement_To_Date"
+                                value="@Model.WorkPlacement_To_Date"
+                                type="text"
+                                placeholder="@Translate.Text("INT.LBL.PH.DATE")"
+                                aria-describedby="description-for-p6f9s0ufr1"
+                                data-parsley-errors-container="#description-for-p6f9s0ufr1"
+                                required=""
+                                data-parsley-required-message="@Translate.Text("INT.LBL.SELECT") @Translate.Text("INT.LBL.TO")"
+                                data-el="datepicker-future" data-picker-options="true"
+                                data-parsley-trigger="focusout" data-parsley-id="38"
+                                readonly=""
+                                data_picker_options = "{&quot;container&quot;: &quot;#datecontainer&quot;}"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                aria-readonly="false"
+                                aria-owns="form-field-9wvspoer8_root">*@
+
+                            @Html.TextBoxFor(x => x.WorkPlacement_To_Date, new
+                           {
+
+                           data_parsley_id = "6",
+                           @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input review",
+                           id = "Date_To",
+                           placeholder = Translate.Text("INT.LBL.PH.DATE"),
+                           required = "required",
+                           data_parsley_required_message = Translate.Text("INT.LBL.SELECT") + " " + Translate.Text("INT.LBL.TO"),
+                           data_el = "datepicker-future",
+                           data_parsley_errors_container = "#description-for-p6f9s0ufr1",
+                           data_picker_options = "{\"disable\":[6,7],\"selectMonths\": true ,\"selectYears\": true , \"container\": \"#datecontainer\" , \"min\": [" + nowTo.Year + "," + (nowTo.Month) + "," + nowTo.Day + "] }",
+
+                               type = "text",
+                               @data_initial_date = string.Empty
+                           })
+
+                        </span>
+
+                        <div id="description-for-p6f9s0ufr1" class="form-field__messages">
+                        </div>
+
+                    </div>
+                    <div class="form-field__label form-field__messages">@Translate.Text("INT.MESSAGE.START.END")</div>
+                    <br />
+
+
+                    <div class="datecontainer clear_both" id="datecontainer" style="">
+                    </div>
+
+                    <div class="form-field form-field--text clear_both">
+
+                        <label for="form-field-wo66nctzy" class="form-field__label">
+                            @Translate.Text("INT.WORK.PLACEMENT.COORDINATOR.NAME")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input class="review form-field__input form-field__input--text form-field--vanilla_email"
+                                   maxlength="40"
+                                   data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.COORDINATOR")"
+                                   id="form-field-wo66nctzy"
+                                   value="@Model.WorkPlacement_Coordinator_Name"
+                                   name="WorkPlacement_Coordinator_Name"
+                                   type="text"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.COORDINATOR")"
+                                   aria-describedby="description-for-wo66nctzy"
+                                   data-parsley-errors-container="#description-for-wo66nctzy"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.LBL.COORDINATOR")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="16">
+                        </span>
+
+                        <div id="description-for-wo66nctzy" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--text  ">
+
+                        <label for="form-field-07f168n49" class="form-field__label">
+                            @Translate.Text("INT.WORK.PLACEMENT.COORDINATOR.EMAIL")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input class="review form-field__input form-field__input--text form-field--vanilla_email"
+                                   maxlength="40"
+                                   value="@Model.WorkPlacement_Coordinator_Email"
+                                   id="form-field-07f168n49"
+                                   name="WorkPlacement_Coordinator_Email"
+                                   type="email"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER")  @Translate.Text("INT.WORK.PLACEMENT.COORDINATOR.EMAIL")"
+                                   aria-describedby="description-for-07f168n49"
+                                   data-parsley-errors-container="#description-for-07f168n49"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER")  @Translate.Text("INT.WORK.PLACEMENT.COORDINATOR.EMAIL")"
+                                   data-parsley-email=""
+                                   data-parsley-email-message=""
+                                   data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.WORK.PLACEMENT.COORDINATOR.EMAIL")"
+                                   data-parsley-trigger="focusout" data-parsley-id="18">
+                        </span>
+
+                        <div id="description-for-07f168n49" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-field form-field--study @display">
+
+
+                        <div class="form-field form-field--text @display" style="">
+                            <label for="form-field-9jeb1o1en" class="form-field__label">@Translate.Text("INT.LBL.STUDY.DEWA")</label>
+                        </div>
+
+
+                        <p class="form-field__radio form-field--3 @display">
+                            <label>
+                                <input class="@review form-field__input form-field__input--radio"
+                                       id="Rdb_Scholarship_ID"
+                                       name="DEWA_Scholarship"
+                                       type="radio"
+                                       value="yes"
+                                       aria-label="Rdb_Scholarship_ID"
+                                       aria-describedby="description-for-wlz3dbt69"
+                                       data-parsley-errors-container="#description-for-wlz3dbt69"
+                                       data-parsley-multiple="radios_group3" data-parsley-id="21">
+                                <span class="form-field__fakeradio focus-enabled">
+
+                                    @Translate.Text("INT.LBL.YES")
+
+                                </span>
+                            </label>
+                        </p>
+
+                        <p class="form-field__radio form-field--3 @display">
+                            <label>
+                                <input class="@review form-field__input form-field__input--radio"
+                                       id="Rdb_Scholarship_ID1"
+                                       aria-label="Rdb_Scholarship_ID1"
+                                       name="DEWA_Scholarship"
+                                       type="radio"
+                                       value="no"
+                                       aria-describedby="description-for-wlz3dbt69"
+                                       data-parsley-errors-container="#description-for-wlz3dbt69"
+                                       checked=""
+                                       data-parsley-multiple="radios_group3">
+                                <span class="form-field__fakeradio focus-enabled">
+
+                                    @Translate.Text("INT.LBL.NO")
+
+                                </span>
+                            </label>
+                        </p>
+
+                        <div id="description-for-wlz3dbt69" class="form-field__messages">
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="form-field form-field--text hidden">
+
+                        <label for="DEWA_Scholarship_ID" class="form-field__label">
+                            @Translate.Text("INT.SCHOLARSHIP.ID.NUMBER")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            <input class="@review  form-field__input form-field__input--text"
+                                   value="@Model.DEWA_Scholarship_ID"
+                                   id="DEWA_Scholarship_ID"
+                                   name="DEWA_Scholarship_ID"
+                                   type="number"
+                                   data-parsley-max_number="" data-max-length="10"
+                                   placeholder="@Translate.Text("INT.LBL.ENTER")  @Translate.Text("INT.SCHOLARSHIP.ID.NUMBER")"
+                                   aria-describedby="description-for-07f168n"
+                                   data-parsley-errors-container="#description-for-07f168n"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("INT.LBL.ENTER")  @Translate.Text("INT.SCHOLARSHIP.ID.NUMBER")"
+                                   data-parsley-error-message="@Translate.Text("INT.LBL.ENTER") @Translate.Text("INT.SCHOLARSHIP.ID.NUMBER")"
+                                   data-parsley-trigger="focusout" data-parsley-id="18">
+                        </span>
+
+                        <div id="description-for-07f168n" class="form-field__messages">
+                        </div>
+
+                    </div>
+
+                    <fieldset class="fieldset clear_both">
+                        <legend class="legend-color">.</legend>
+                        <label class="legend">
+                            @Translate.Text("INT.LBL.DOCUMENT.UPLOADS")
+                        </label>
+                        <br />
+                        <br />
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+
+                                    <img src="/images/preview@2x.png"
+                                         data-src="/images/preview@2x.png"
+                                         data-success="../images/upload_success@2x.png"
+                                         class="form-field__preview"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="" data-uploader-image="xklg1vul2">
+
+                                </div>
+                                <div class="form-field__uploader-details">
+
+                                    <label for="form-field-xklg1vul2" class="form-field__label">
+                                        @Translate.Text("INT.LBL.OFFICIAL.LETTERS")
+                                    </label>
+
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   required=""
+                                                   data-parsley-required-message="@Translate.Text("Please select a file")"
+                                                   id="form-field-xklg1vul2" name="File_Official_Letter"
+                                                   type="file"
+                                                   aria-describedby="description-for-xklg1vul2"
+                                                   data-parsley-errors-container="#description-for-xklg1vul2"
+                                                   data-uploader-field="xklg1vul2"
+                                                   accept="image/png,,image/jpeg,,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000"
+                                                   data-parsley-trigger="focusout"
+                                                   data-parsley-id="25">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="xklg1vul2"></p>
+                                    <p><button class="button button--text button--remove hidden" data-uploader-remove="xklg1vul2">@Translate.Text("Remove")</button></p>
+                                </div>
+                            </div>
+                            <div id="description-for-xklg1vul2" class="form-field__messages">
+
+
+
+                                <p class="form-field__description">
+                                    @Translate.Text("INT.LBL.ATTACHMENT")
+                                </p>
+
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" data-success="../images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="ejq1zrill">
+
+                                </div>
+                                <div class="form-field__uploader-details">
+
+                                    <label for="form-field-ejq1zrill" class="form-field__label">
+                                        @Translate.Text("INT.LBL.TRANSCRIPT")
+                                    </label>
+
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   required=""
+                                                   data-parsley-required-message="@Translate.Text("Please select a file")"
+                                                   id="form-field-ejq1zrill" name="File_Transcript"
+                                                   type="file"
+                                                   aria-describedby="description-for-ejq1zrill"
+                                                   data-parsley-errors-container="#description-for-ejq1zrill"
+                                                   data-uploader-field="ejq1zrill"
+                                                   accept="image/png,,image/jpeg,,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="27">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="ejq1zrill"></p>
+                                    <p><button class="button button--text button--remove hidden" data-uploader-remove="ejq1zrill">@Translate.Text("INT.LBL.REMOVE")</button></p>
+                                </div>
+                            </div>
+                            <div id="description-for-ejq1zrill" class="form-field__messages">
+
+
+
+
+                                <p class="form-field__description">
+                                    @Translate.Text("INT.LBL.ATTACHMENT")
+                                </p>
+
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" data-success="../images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="c2naxkffs">
+
+                                </div>
+                                <div class="form-field__uploader-details">
+
+                                    <label for="form-field-c2naxkffs" class="form-field__label">
+                                        @Translate.Text("INT.LBL.CV")
+                                    </label>
+
+                                    <div>
+                                        <label>
+                                            <input class="form-field__input form-field__input--upload"
+                                                   required=""
+                                                   data-parsley-required-message="@Translate.Text("Please select a file")"
+                                                   id="form-field-c2naxkffs"
+                                                   name="File_CV"
+                                                   type="file"
+                                                   aria-describedby="description-for-c2naxkffs"
+                                                   data-parsley-errors-container="#description-for-c2naxkffs"
+                                                   data-uploader-field="c2naxkffs"
+                                                   accept="image/png,,image/jpeg,,application/pdf"
+                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                   data-size="2048000"
+                                                   data-parsley-trigger="focusout"
+                                                   data-parsley-id="29">
+                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("INT.LBL.UPLOAD.FORMAT")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("INT.LBL.UPLOAD.SIZE")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="c2naxkffs"></p>
+                                    <p><button class="button button--text button--remove hidden" data-uploader-remove="c2naxkffs">@Translate.Text("INT.LBL.REMOVE")</button></p>
+                                </div>
+                            </div>
+                            <div id="description-for-c2naxkffs" class="form-field__messages">
+
+
+
+
+                                <p class="form-field__description">
+                                    @Translate.Text("INT.LBL.ATTACHMENT")
+                                </p>
+
+
+                            </div>
+
+                        </div>
+
+
+                        
+
+
+                    </fieldset>
+
+
+
+
+
+
+                </fieldset>
+
+
+                <fieldset class="fieldset form-section" id="f3">
+                    <legend class="legend">@Translate.Text("INT.LBL.REVIEW")</legend>
+                    <div class="r1">
+
+                    </div>
+                    <br />
+                    <div class="g-recaptcha" data-sitekey="@ViewBag.SiteKey"></div>
+
+                </fieldset>
+
+                <div class="form-navigation form-field__button">
+                    <button type="button" class="button button--tertiary previous">@Translate.Text("Previous")</button>
+                    <button type="button" class="button button--primary button--next next">@Translate.Text("Next") </button>
+                    <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    <span class="clearfix"></span>
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+<script id="review-tem" type="text/x-handlebars-template">
+    <legend class="legend">@Translate.Text("INT.LBL.PERSONAL.DETAILS")</legend>
+    {{#fields}}
+    <div class="form-field form-field--text ">
+        <label for="form-field-full_name" class="form-field__label">
+            {{key}}
+        </label>
+        <span class="form-field__input form-field__input-wrapper--readonly form-field__input--readonly">
+            {{value}}
+        </span>
+    </div>
+    {{/fields}}
+    <br />
+
+    <legend class="legend">@Translate.Text("INT.LBL.PERSONAL.DETAILS")</legend>
+    {{#fields2}}
+    <div class="form-field form-field--text ">
+        <label for="form-field-full_name" class="form-field__label">
+            {{key}}
+        </label>
+        <span class="form-field__input form-field__input-wrapper--readonly form-field__input--readonly">
+            {{value}}
+        </span>
+    </div>
+    {{/fields2}}
+    <br />
+
+</script>
+<script type="text/javascript">
+    docReady(function () {
+
+
+        var q = '@queryString';
+
+        if (q == "yes") {
+            $('#CountryCode').prop("disabled", true);
+            $('#Nationality').prop("disabled", true);
+        } else {
+            $('#CountryCode').prop("disabled", false);
+            $('#Nationality').prop("disabled", false);
+
+        }
+
+        $("#ApplyInternship").submit(function (event) {
+            $('#CountryCode').prop("disabled", false);
+            $('#Nationality').prop("disabled", false);
+        });
+
+        var total = 4;
+        var current = 1;
+        var txt = jQuery("#f1").find('legend').text();
+        steptracker(total, current, txt);
+
+        var lang = '@Language.Current.Name.ToLowerInvariant()';
+        var mobile;
+
+        if (lang == "ar-ae") {
+            $('#M1').attr('style', 'visibility: hidden', 'display: block');
+        }
+        else {
+            $('#M2').attr('style', 'visibility: hidden', 'display: block');
+        }
+
+        //  window.initComponents('request-tracker');
+
+        var $sections = jQuery('.form-section');
+
+        $("#form-field-full_name").trigger("focusout");
+
+        function navigateTo(index) {
+            var txt = $sections
+             .hide()
+             .eq(index).find('legend').text();
+            steptracker(total, index + 1, txt);
+
+            // Mark the current section with the class 'current'
+            $sections
+             .removeClass('current')
+             .eq(index)
+               .addClass('current');
+            $sections
+              .hide()
+              .eq(index)
+                .show();
+
+
+            // Show only the navigation buttons that make sense for the current section:
+            jQuery('.form-navigation .previous').toggle(index > 0);
+            var atTheEnd = index >= $sections.length - 1;
+            jQuery('.form-navigation .next').toggle(!atTheEnd);
+            jQuery('.form-navigation [type=submit]').toggle(atTheEnd);
+            if (atTheEnd) {
+                //
+                var data = {};
+                var fields = [];
+                var fields2 = [];
+                var fields3 = [];
+
+
+                data.fields = fields;
+                data.fields2 = fields2;
+                data.fields3 = fields3;
+
+
+                jQuery("#ApplyInternship").find("#f1 .review").each(function () {
+                    // do something
+                    var field;
+                    var lang = '@Language.Current.Name.ToLowerInvariant()';
+
+
+                    if ($(this)[0].id == "CountryCode") {
+
+                        if (lang == "ar-ae") {
+                            var str = $("#CountryCode option:selected").text();
+
+                            var searchtoken = $("#CountryCode option:selected").val();
+
+                            var concatedText = "(" + searchtoken + "+)";
+
+                            var formatedvalue = str.replace(searchtoken, "").replace("+", "").replace("(", "").replace(")", "") + " " + $("#mobile_number").val() + concatedText;
+                        }
+                        else {
+
+                            var formatedvalue = $("#CountryCode option:selected").text() + $("#mobile_number").val();
+                        }
+
+
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: formatedvalue
+
+                        }
+                    }
+                    else if ($(this)[0].tagName == "SELECT") {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).closest(".form-field").find("select").find('option:selected').text(),
+
+                        }
+                    }
+
+                    else {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).val()
+                        }
+                    }
+                    data.fields.push(field);
+                });
+                jQuery("#ApplyInternship").find("#f2 .review").each(function () {
+                    // do something
+                    var field;
+
+                    if ($(this)[0].id == "mobile_number") {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).closest(".form-field").find("select").find('option:selected').text() + $(this).val(),
+
+                        }
+                    }
+                    else if ($(this)[0].tagName == "SELECT") {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).closest(".form-field").find("select").find('option:selected').text(),
+
+                        }
+                    }
+                    else if ($(this)[0].type == "radio") {
+                        if ($(this)[0].checked) {
+                            field = {
+                                key: $(this).closest(".form-field").find("label").html(),
+                                value: $(this).siblings().text().trim()
+
+                            }
+                            console.log($(this).val());
+                        }
+                    }
+                    else {
+                        field = {
+                            key: $(this).closest(".form-field").find("label").html(),
+                            value: $(this).val()
+                        }
+                    }
+                    data.fields2.push(field);
+                });
+                jQuery("#ApplyInternship").find("#f3 .review").each(function () {
+                    // do something
+                    var field = {
+                        key: $(this).closest(".form-field").find("label").html(),
+                        value: $(this).val()
+                    }
+                    data.fields3.push(field);
+                });
+
+                var markup = jQuery('#review-tem').html();
+                var template = Handlebars.compile(markup);
+
+
+
+                var rendering = template(data);
+                jQuery('.r1').empty().html(rendering);
+            }
+            $('html, body').animate({
+                scrollTop: $("#rs_area").offset().top
+            }, 2000);
+        }
+        function steptracker(total, current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', total);
+            $('.m38-step-tracker').attr('data-current-step', current + 1);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+
+            jQuery(window).trigger('reinit_m38');
+        }
+        function curIndex() {
+            // Return the current index by looking at which section has the class 'current'
+            return $sections.index($sections.filter('.current'));
+        }
+
+        // Previous button is easy, just go back
+        jQuery('.form-navigation .previous').click(function (e) {
+            e.preventDefault();
+
+            navigateTo(curIndex() - 1);
+        });
+
+        // Next button goes forward if current block valida5tes
+        jQuery('.form-navigation .next').click(function (e) {
+
+            require(['parsley'], function () {
+                jQuery('#ApplyInternship').parsley().whenValidate({
+                    group: 'block-' + curIndex()
+                }).done(function () {
+                    navigateTo(curIndex() + 1);
+                });
+            });
+
+
+        });
+
+        // Prepare sections by setting the `data-parsley-group` attribute to 'block-0', 'block-1', etc.
+        $sections.each(function (index, section) {
+            jQuery(section).find(':input').attr('data-parsley-group', 'block-' + index);
+        });
+        jQuery('.j105-drrg--loader').show();
+        $('body').addClass('unscrollable');
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        setTimeout(function () {
+            navigateTo(0);
+            jQuery('.j105-drrg--loader').hide();
+            $('body').removeClass('unscrollable');
+        }, 5000);
+        // Start at the beginning
+
+        require(['picker'], function () {
+            var from_$input = jQuery('#Date_From').pickadate(),
+                from_picker = from_$input.pickadate('picker')
+
+            var to_$input = jQuery('#Date_To').pickadate(),
+                to_picker = to_$input.pickadate('picker')
+
+
+            // Check if there’s a “from” or “to” date to start with.
+            if (from_picker.get('value')) {
+                to_picker.set('min', from_picker.get('select'))
+            }
+            if (to_picker.get('value')) {
+                from_picker.set('max', to_picker.get('select'))
+            }
+
+            // When something is selected, update the “from” and “to” limits.
+            from_picker.on('set', function (event) {
+                if (event.select) {
+                    to_picker.set('min', from_picker.get('select'))
+                } else if ('clear' in event) {
+                    to_picker.set('min', false)
+                }
+            })
+            to_picker.on('set', function (event) {
+                if (event.select) {
+                    from_picker.set('max', to_picker.get('select'))
+                } else if ('clear' in event) {
+                    from_picker.set('max', false)
+                }
+            });
+        });
+    });
+
+
+
+    jQuery('.form-field--study').find('input').each(function () {
+        jQuery(this).off('click.type').on('click.type', function () {
+            if (jQuery(this).val() == 'no' && jQuery(this).prop('checked')) {
+                var $input = jQuery('#DEWA_Scholarship_ID');
+
+                $input.closest('.form-field--text').hide();
+                $input.removeClass("review");
+
+            } else {
+                var $input = jQuery('#DEWA_Scholarship_ID');
+
+                $input.closest('.form-field--text').show();
+                $input.addClass('review');
+            }
+        });
+    });
+
+
+    var afile = [];
+
+    jQuery('.form-field__input--upload').each(function () {
+        jQuery(this).on('change', function (event) {
+            var obj = {};
+            var thisvar = jQuery(this);
+            var flag = false;
+            if (afile.length == 0) {
+                obj.index = jQuery(this)[0].id;
+                obj.name = jQuery(this)[0].files[0].name;
+                afile.push(obj);
+            }
+            else {
+                jQuery.each(afile, function (index, afileobj) {
+                    if (afileobj.name == thisvar[0].files[0].name) {
+                        thisvar.val('');
+                        var specificField = thisvar.closest('.form-field__input-wrapper').next().find('.parsley-required');
+                        specificField.html('@Translate.Text("INT.LBL.FILE.DUPLICATE")');
+                        flag = true;
+                        return;
+                    }
+                });
+                if (flag == false) {
+                    jQuery.each(afile, function (index, afileobj) {
+                        if (afileobj.index.indexOf(thisvar[0].id) == true) {
+                            afileobj.name = thisvar[0].files[0].name;
+                            //var index = afile.indexOf(x => x.index === thisvar[0].id);
+                            var index = function () {
+                                var i = 0;
+                                jQuery(afile).each(function () {
+                                    if (jQuery(this).index == thisvar[0].id) {
+                                        return i;
+                                    } else {
+                                        i++;
+                                    };
+                                });
+                            };
+                            afile.splice(index, 1);
+                            afile.push(afileobj);
+                            flag = true;
+                            return;
+                        }
+                    });
+                }
+                if (flag == false) {
+                    obj.index = jQuery(this)[0].id;
+                    obj.name = jQuery(this)[0].files[0].name;
+                    afile.push(obj);
+                }
+                else {
+                    return;
+                }
+            }
+        });
+
+
+    });
+
+    jQuery('.button--remove[data-uploader-remove]').each(function () {
+        jQuery(this).on('click', function () {
+            var id = jQuery(this).closest('.form-field--upload').find('.form-field__input--upload')[0].id;
+            var name = jQuery(this).parent().parent().find('.form-field__input--upload')[0].files[0].name;
+            //var index = afile.findIndex(x => x.index === id);
+            var index = function () {
+                var i = 0;
+                jQuery(afile).each(function () {
+                    if (jQuery(this).index == thisvar[0].id) {
+                        return i;
+                    } else {
+                        i++;
+                    };
+                });
+            };
+            afile.splice(index, 1);
+        });
+    });
+</script>
+
+<script>
+
+    function preventNumberInput(e) {
+        var keyCode = (e.keyCode ? e.keyCode : e.which);
+        if (keyCode > 47 && keyCode < 58 || keyCode > 95 && keyCode < 107) {
+            e.preventDefault();
+        }
+    }
+
+    $(function () {
+
+        $('#Name').keydown(function (e) {
+            preventNumberInput(e);
+        });
+        $('#University').keydown(function (e) {
+            preventNumberInput(e);
+        });
+        $('#Major').keydown(function (e) {
+            preventNumberInput(e);
+        });
+
+
+
+
+    })
+
+</script>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

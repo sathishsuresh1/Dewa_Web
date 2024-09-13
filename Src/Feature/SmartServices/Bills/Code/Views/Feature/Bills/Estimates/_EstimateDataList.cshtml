@@ -1,0 +1,264 @@
+﻿@using Sitecore.Globalization
+@using X.PagedList.Mvc;
+@using X.PagedList.Web.Common
+@using X.PagedList;
+@using X.PagedList.Mvc.Common
+@using DEWAXP.Foundation.Helpers
+@using SitecoreX = Sitecore.Context;
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.Estimates.EstimateHistoryData
+
+
+
+<!--EstimateDataList start-->
+@if (Model.EstimateDetails != null && Model.PagedEstimateDetails != null)
+{
+
+    foreach (var item in Model.PagedEstimateDetails)
+    {
+
+        string estimateNumber = item.estimatenumber;
+        string estTotalAmount = item.netvalueamount;
+        string estDate = Convert.ToDateTime(item.estimatevalidtodate).ToString(_commonUtility.DF_dd_MMM_yyyy, SitecoreX.Culture);
+
+        <!-- transaction-history-item - start -->
+        <div class="transaction-history" data-estimate="@(estimateNumber)">
+            <div class="transaction-history__item">
+                <div class="transaction-history__title">
+                    @Translate.Text("THI_EstimateNO")@(estimateNumber)
+                </div>
+                <span class="transaction-history__detail-amount--reciept">
+                    <span class="transaction-history__detail-item--content">@(Convert.ToDecimal(estTotalAmount).ToString("N2")) @Translate.Text("AED")</span>
+                </span>
+                <ul class="transaction-history__detail">
+                    <li class="transaction-history__detail-item">@(estDate)</li>
+                </ul>
+                <a class="button button--secondary button--next button--very_small btnViewReciept" href="#" data-accnt="@Model.Accountnumber" data-sdtype="@item.sdtype" data-est="@item.estimatenumber">@Translate.Text("THI_ViewReciept")</a>
+                @*<a class="button button--secondary button--next button--very_small" href="javascript:void(0);" onclick="ViewReciepts()">View Reciept</a>*@
+                @if (item.sdtype != "YEC" && item.sdtype != "YPCW ")
+                {
+
+                    <a href="javascript:void(0)" data-estno="@estimateNumber" data-sdtype="@item.sdtype" data-apiurl="/api/sitecore/Estimate/GetEstiamteTaxInvoicePDF" class="button button--text DownloadPDF">@Translate.Text("THI_DownloadTaxInvoice")</a>
+                    <script type="text/javascript">
+                        docReady(function () {
+                            $(".DownloadPDF").on("click", function () {
+                                //debugger;
+                                $(".m66-preloader-fullpage").show();
+                                $('#GetEstiamteTaxInvoicePDF_form').html("");
+                                $('#GetEstiamteTaxInvoicePDF_form').append('<input type="hidden" name="estNo" value="' + $(this).data("estno") + '"/>');
+                                $('#GetEstiamteTaxInvoicePDF_form').append('<input type="hidden" name="sdtype" value="' + $(this).data("sdtype") + '"/>');
+                                $('#GetEstiamteTaxInvoicePDF_form').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('.taxform input[name=__RequestVerificationToken]').val() + '">');
+                                $('#GetEstiamteTaxInvoicePDF_form').submit();
+                                $('#GetEstiamteTaxInvoicePDF_form').html('<input type="hidden" name="test" />');
+
+                                setTimeout(function () {
+                                    $(".m66-preloader-fullpage").hide();
+                                }, 3000)
+                                return false;
+                            })
+
+                            AddCustomForgeryToken = function (data, elementId) {
+                                data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                                return data;
+                            };
+                        });
+                    </script>
+                    @*<a class="button button--text" href="@Url.Action("GetEstiamteTaxInvoicePDF", "Estimate", new { estNo = estimateNumber, sdtype = item.sdtype })" target="_blank">@Translate.Text("THI_DownloadTaxInvoice")</a>*@
+                }
+            </div>
+        </div>
+        <!-- transaction-history-item - end -->
+    }
+
+    <!-- m34-pagination-start -->
+    if (Model.PagedEstimateDetails.PageCount > 1)
+    {
+        <div class="m34-pagination">
+            <div class="m34-pagination__content">
+                <div class="fix" id="pagerEstimate">
+                    @Html.PagedListPager(
+        Model.PagedEstimateDetails,
+        page => Url.Action(
+            "EstimateFilterList",
+            new
+            {
+                pageNo = page,
+                accountnumber = Model.Accountnumber,
+                estimateNo = Model.EstimateNo,
+                type = "subrender"
+            }
+        ),
+        //PagedListRenderOptions.,
+        new PagedListRenderOptions
+        {
+            LiElementClasses = new string[] { "m34-pagination__page-list-item" },
+            //LinkToFirstPageFormat = "|<",
+            LinkToPreviousPageFormat = "Prev",
+            LinkToNextPageFormat = "Next",
+            //LinkToLastPageFormat = ">|",
+            MaximumPageNumbersToDisplay = 3,
+            DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+            DisplayLinkToLastPage = PagedListDisplayMode.Never,
+            DisplayLinkToFirstPage = PagedListDisplayMode.Never,
+            UlElementClasses = new string[] { "m34-pagination__page-list" },
+            ContainerDivClasses = new string[] { "pagination-container-custom" },
+        }
+    )
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="taxform">
+        @Html.AntiForgeryToken()
+        <form action="/api/sitecore/Estimate/GetEstiamteTaxInvoicePDF" method="post" id="GetEstiamteTaxInvoicePDF_form">
+        </form>
+    </div>
+
+
+    <!-- m34-pagination-end -->
+    <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+        <button data-trigger="true" class="m39-modal__trigger button button--primary hidden button--fullwidth modal-btn" type="button" id="xcetvlagg_trigger" aria-controls="_xcetvlagg_content"></button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_xcetvlagg_content" aria-labelledby="xcetvlagg_trigger">
+            <div class="m39-modal__dialog recieptListModal">
+
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+
+
+    <!--HandlerBar View start-->
+
+    <script id="receipt-list-modal-template" class="receipt-list-modal-template" type="text/x-handlebars-template">
+        <div class="m39-modal__header">
+            <div class="m39-modal__title">Estimate No - {{EstimateNo}}</div>
+            <a data-close="true" class="m39-modal__button--close" id="_tpxydxhri_close" aria-controls="_xcetvlagg_content">Close</a>
+            <div class="m39-modal__subtitle">Download Receipt or Tax Invoice</div>
+        </div>
+        <div class="m39-modal__content" id="_xcetvlagg_content">
+            <!-- transaction-history - start -->
+            {{#PaymentHistoryDetails}}
+            <div class="transaction-history" data-estimate="{{EstimateNo}}">
+                <div class="transaction-history__item">
+                    <div class="transaction-history__title">
+                        Receipt Number - {{DocumentNumber}}
+                    </div>
+                    <span class="transaction-history__detail-amount--reciept">
+                        <span class="transaction-history__detail-item--content">{{Amount}} AED</span>
+                    </span>
+                    <ul class="transaction-history__detail">
+                        <li class="transaction-history__detail-item">{{FormattedDate}}</li>
+                    </ul>
+                    {{#if TransactionId}}
+                    <a class="button button--secondary button--next button--very_small" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EstimatePaymentDetail)?id={{TransactionId}}&d={{Timestamp}}&t={{PaymentMode}}">View Reciept</a>
+                    {{else}}
+                    <a class="button button--secondary button--next button--very_small" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EstimatePaymentDetail)?dNo={{DocumentNumber}}">View Reciept</a>
+                    {{/if}}
+                </div>
+            </div>
+
+            {{/PaymentHistoryDetails}}
+            <!-- transaction-history - end -->
+        </div>
+    </script>
+    <!--HandlerBar View end-->
+
+    <script type="text/javascript">
+        docReady(function () {
+          $(".m66-preloader-fullpage").hide();
+            $('#pagerEstimate a').on('click', function () {
+                event.preventDefault();
+                if (this.href != '' && this.href != null) {
+
+                    jQuery.ajax({
+                        url: this.href,
+                        type: 'GET',
+                        cache: false,
+                        beforeSend: function () {
+                            $(".m66-preloader-fullpage").hide();
+                        },
+                        complete: function () {
+                          $(".m66-preloader-fullpage").hide();
+                        },
+                        success: function (result) {
+                            $("._EstimateDataList").html(result);
+                          $(".m66-preloader-fullpage").hide();
+                        }
+                    });
+                }
+                return false;
+            });
+
+
+
+
+            $(".btnViewReciept").on('click', function () {
+               //debugger;
+                event.preventDefault();
+                var estimateNo = $(this).data("est");
+                var contractorAccountNo = $(this).data('accnt');
+                var _sdtype = $(this).data('sdtype');
+                var data = { PageNo: 1, Accountnumber: contractorAccountNo, EstimateNo: ('X-' + estimateNo), sdtype: _sdtype }
+                $(".m66-preloader-fullpage").hide();
+                $.ajax({
+                    url: "/api/sitecore/Estimate/GetTransactionList",
+                    data: data,
+                    type: "GET",
+                    beforeSend: function () {
+                        $(".m66-preloader-fullpage").show();
+                    },
+                    complete: function () {
+                      $(".m66-preloader-fullpage").hide();
+                    },
+                    success: function (response) {
+
+
+                        if (response != null && response.PaymentHistoryDetails != undefined && response.PaymentHistoryDetails.length == 1) {
+                            var _redirectUrl = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EstimatePaymentDetail)';
+                            var _payDetail = response.PaymentHistoryDetails[0];
+                            if (_payDetail.tTransactionIde != null && _payDetail.tTransactionIde != "") {
+                                _redirectUrl = _redirectUrl + "?id=" + _payDetail.TransactionId + "&d=" + _payDetail.Timestamp + "&t=" + _payDetail.PaymentMode;
+                            } else {
+                                _redirectUrl = _redirectUrl + "  ?dNo=" + _payDetail.DocumentNumber;
+                            }
+                            location.href = _redirectUrl;
+
+                        } else {
+                            jQuery('.recieptListModal').empty();
+                            jQuery('.recieptListModal').html(response);
+                            window.initComponents("transaction-wapper");
+                            setTimeout(function () {
+                                $(".modal-btn").click();
+                            }, 1000)
+                        }
+                        console.log(response)
+                      $(".m66-preloader-fullpage").hide();
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
+                return false;
+            })
+
+            //function renderHistory(context) {
+            //    var markup = jQuery("#receipt-list-modal-template").html();
+            //    console.log(markup);
+            //    var template = Handlebars.compile(markup);
+            //    console.log(template);
+            //    var rendering = template(context);
+            //    console.log(rendering);
+            //    jQuery('.recieptListModal').html(rendering);
+            //    window.initComponents('recieptListModal');
+
+            //}
+
+        })
+    </script>
+}
+
+
+<!--EstimateDataList end-->

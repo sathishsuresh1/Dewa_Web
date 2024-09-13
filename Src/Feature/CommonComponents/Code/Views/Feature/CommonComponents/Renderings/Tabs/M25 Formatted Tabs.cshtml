@@ -1,0 +1,225 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore
+@using Sitecore.Mvc
+@using Sitecore.Links
+@using System.Collections.Generic
+@using DEWAXP.Foundation.Content.Repositories
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.FormattedTabs
+
+
+@{
+    var totaltabs = 0;
+    var totaltabcontent = 0;
+    var loggedinparam = Html.Sitecore().CurrentRendering.Parameters["nonloggedin"] != null ? HttpUtility.UrlDecode(Html.Sitecore().CurrentRendering.Parameters["nonloggedin"]).Split(',').ToList<string>() : new List<string>();
+    var _cache = DependencyResolver.Current.GetService<ICacheProvider>();
+    bool isnavhide = false;
+    _cache.TryGet("HIDENAV", out isnavhide);
+}
+<div class="m25-tabs" data-component="m25-tabs" data-selected-tab-id="m25-tab-0" data-helper="toggle-menu" data-toggle-breakpoint="m">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--4 scrapsalemargin">
+                <div class="m25-tabs__menu" data-m25-tabs-menu="true">
+                    <ul aria-role="tablist">
+                        @if (!string.IsNullOrWhiteSpace(Model.TabTitle))
+                        {
+                            <li class="m25-tabs__title">@Html.Glass().Editable(x => x.TabTitle)</li>
+                        }
+                        @if (!isnavhide)
+                        {
+                            if (Model.Button && !string.IsNullOrWhiteSpace(Model.ButtonText) && Model.ButtonLink != null)
+                            {
+                                if (loggedinparam != null && (loggedinparam.Where(x => x.Equals("1")).Any() && User.Identity.IsAuthenticated))
+                                {
+                                }
+                                else
+                                {
+                                    <li><a href="@Model.ButtonLink.Url" class="m25-tabs__tab m25-tab_button button--next">@Html.Glass().Editable(x => x.ButtonText)</a></li>
+                                }
+                            }
+                            if (Model.Button2 && !string.IsNullOrWhiteSpace(Model.ButtonText2) && Model.ButtonLink2 != null)
+                            {
+                                if (loggedinparam != null && (loggedinparam.Where(x => x.Equals("2")).Any() && User.Identity.IsAuthenticated))
+                                {
+                                }
+                                else
+                                {
+                                    <li>
+                                        @using (@Html.Glass().BeginRenderLink(x => x.ButtonLink2, new { @class = "m25-tabs__tab m25-tab_button button--next" }))
+                                        {
+                                            @Html.Glass().Editable(x => x.ButtonText2)
+                                        }
+                                    </li>
+
+                                    @*<li><a href="@Model.ButtonLink2.Url" class="m25-tabs__tab m25-tab_button button--next">@Html.Glass().Editable(x => x.ButtonText2)</a></li>*@
+                                }
+                            }
+                            if (Model.Button3 && !string.IsNullOrWhiteSpace(Model.ButtonText3) && Model.ButtonLink3 != null)
+                            {
+                                if (loggedinparam != null && (loggedinparam.Where(x => x.Equals("3")).Any() && User.Identity.IsAuthenticated))
+                                {
+                                }
+                                else
+                                {
+                                    <li><a href="@Model.ButtonLink3.Url" class="m25-tabs__tab m25-tab_button button--next">@Html.Glass().Editable(x => x.ButtonText3)</a></li>
+                                }
+                            }
+                           
+                        }
+
+                        @foreach (var tab in Model.ExpanderChildren)
+                        {
+                            var index = Model.ExpanderChildren != null ? Model.ExpanderChildren.ToList().IndexOf(tab) : 0;
+                            totaltabs++;
+                            <li>
+                                <a href="#m25-panel-@index" aria-controls="m25-panel-@index" class="m25-tabs__tab  icon-close" data-m25-tabs-tab="true" id="m25-tab-totaltabs">@tab.ExpandTabTitle</a>
+                                <ul>
+                                    @foreach (var subtab in tab.Children)
+                                    {
+                                        var subindex = tab.Children != null ? tab.Children.ToList().IndexOf(subtab) : 0;
+                                        <li>
+                                            <a href="#subsec-@subindex" class="m25-tabs_subtab">@subtab.SubsectionTitle</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @foreach (var tab in Model.Children)
+                        {
+                            var index = Model.Children != null ? Model.Children.ToList().IndexOf(tab) : 0;
+
+                            var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                            bool isTarget = !string.IsNullOrWhiteSpace(tabTargetUrl);
+                            totaltabs += index;
+
+                            <li>
+                                <a href="#m25-panel-@totaltabs" data-turl="@(tabTargetUrl)" aria-controls="m25-panel-@totaltabs" class="@(isTarget ? "m25-tabs__tab-target" : "") m25-tabs__tab " data-m25-tabs-tab="true" id="m25-tab-@totaltabs">@tab.Title</a>
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+            </div>
+            <div class="m25-tabs__body grid__column grid__column--8">
+                <div class="m15-tabs--mobile">
+                    @if (!string.IsNullOrWhiteSpace(Model.TabTitle))
+                    {
+                        <div class="m25-tabs--title-mobile">
+                            @Html.Glass().Editable(x => x.TabTitle)
+                        </div>
+                    }
+
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-m25formattedtab" class="form-field__label"><span class="aria-only">select</span></label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select id="form-field-m25formattedtab" class="m25-tabs--select-mobile form-field__input form-field__input--select"></select>
+                        </span>
+                    </div>
+                    @if (!isnavhide)
+                    {
+                        if (Model.Button && !string.IsNullOrWhiteSpace(Model.ButtonText) && Model.ButtonLink != null)
+                        {
+                            if (loggedinparam != null && (loggedinparam.Where(x => x.Equals("1")).Any() && User.Identity.IsAuthenticated))
+                            {
+                            }
+                            else
+                            {
+                                <a href="@Model.ButtonLink.Url" class="m25-tabs__tab m25-tab_button--mobile button--next">@Html.Glass().Editable(x => x.ButtonText)</a>
+                            }
+                        }
+                        if (Model.Button2 && !string.IsNullOrWhiteSpace(Model.ButtonText2) && Model.ButtonLink2 != null)
+                        {
+                            if (loggedinparam != null && (loggedinparam.Where(x => x.Equals("2")).Any() && User.Identity.IsAuthenticated))
+                            {
+                            }
+                            else
+                            {
+                                <a href="@Model.ButtonLink2.Url" class="m25-tabs__tab m25-tab_button--mobile button--next">@Html.Glass().Editable(x => x.ButtonText2)</a>
+                            }
+                        }
+                        if (Model.Button3 && !string.IsNullOrWhiteSpace(Model.ButtonText3) && Model.ButtonLink3 != null)
+                        {
+                            if (loggedinparam != null && (loggedinparam.Where(x => x.Equals("3")).Any() && User.Identity.IsAuthenticated))
+                            {
+                            }
+                            else
+                            {
+                                <a href="@Model.ButtonLink3.Url" class="m25-tabs__tab m25-tab_button--mobile button--next">@Html.Glass().Editable(x => x.ButtonText3)</a>
+                            }
+                        }
+                    }
+                    <div class="m25-tabs--container-mobile">
+                    </div>
+                </div>
+
+                @foreach (var tab in Model.ExpanderChildren)
+                {
+                    var index = Model.ExpanderChildren != null ? Model.ExpanderChildren.ToList().IndexOf(tab) : 0;
+                    totaltabcontent++;
+                    <div class="toggle-menu__item toggle-menu__itemactive">
+                        <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                            <h2 class="m25-tabs__title toggle-menu__title icon-google">@tab.ExpandTabcontent</h2>
+                        </div>
+                        <div aria-labelledby="m25-tab-@index" aria-role="tabpanel" id="m25-panel-@index" class="m25-tabs__content toggle-menu__content" data-m25-tabs-content="true" data-toggle-content="true">
+                            <div class="m14-richtext">
+                                <h3>@tab.ExpandTabcontent</h3>
+                                @foreach (var subtab in tab.Children)
+                                {
+                                    var subindex = tab.Children != null ? tab.Children.ToList().IndexOf(subtab) : 0;
+                                    <div id="subsec-@subindex">
+                                    </div>
+                                    <h4>@subtab.SubsectionTitle</h4>
+                                    @Html.Raw(subtab.Subsectioncontent)
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @foreach (var tab in Model.Children)
+                {
+                    var index = Model.Children != null ? Model.Children.ToList().IndexOf(tab) : 0;
+                    totaltabcontent += index;
+                    <div class="toggle-menu__item">
+                        <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                            <h2 class="m25-tabs__title toggle-menu__title icon-share">@tab.Title</h2>
+                        </div>
+                        <div aria-labelledby="m25-tab-@totaltabcontent" id="m25-panel-@totaltabcontent" class="m25-tabs__content toggle-menu__content" data-m25-tabs-content="true" data-toggle-content="true">
+                            @if (tab.Module && !string.IsNullOrWhiteSpace(tab.ModulePlaceholder))
+                            {
+                                @Html.Sitecore().Placeholder(tab.ModulePlaceholder)
+                            }
+                            else if (tab.InterlinkTab != null && tab.InterlinkTab.Count() > 0)
+                            {
+                                <div class="m14-richtext">
+                                    @Html.Raw(tab.InterlinkTab.FirstOrDefault().Body)
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="m14-richtext">
+                                    @Html.Raw(tab.Body)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var url = window.location.href;
+    if (url.indexOf("#") > -1) {
+        var hash = url.substring(url.indexOf("#") + 1);
+        if (hash) {
+            jQuery('.m25-tabs').attr('data-selected-tab-id', hash);
+        }
+    }
+
+    setTimeout(function () {
+        jQuery(".m25-tabs__tab-target").on("click", function () {
+            window.location.href = jQuery(this).data("turl") + "#" + jQuery(this).prop("id");
+        });
+    }, 500)
+</script>

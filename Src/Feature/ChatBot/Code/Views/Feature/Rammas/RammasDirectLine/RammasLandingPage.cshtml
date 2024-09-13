@@ -1,0 +1,1289 @@
+﻿@using System.Web.Mvc.Razor
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Feature.ChatBot.Models.DirectLine.ChatModel
+
+<div class="box box--7">
+    <div class="grid j125-rammasui">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class='m55a-rammas @Html.Raw(Model.IsLoggedInUser? "post-logged" : "")' data-component="m55a-rammas" id="BotChatGoesHere" data-title="@Translate.Text("rammas title")">
+                    <div class="dewa-bot-message-wrapper list hide m55a-rammas--loading">
+                        <div class="dewa-bot-message wc-message-from-bot">
+                            <div class="dewa-bot-message-content">
+                                <div>
+                                    <div class="format-markdown">
+                                        <img class="m55a-rammas--loading-icon" alt="" src="../../images/rammas_loading.gif">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dewa-bot-message-from dewa-bot-message-from-bot"><span></span></div>
+                    </div>
+                    <div class="dewaBotChat" id="dvOuter">
+                        <div class="dewa-bot-grunt bumessage-panel" id="div_exp">
+                            <div class="dewa-bot-message-pane">
+                                <div class="dewa-bot-message-groups">
+                                    <div class="dewa-bot-message-group-content" id="bot_chat">
+                                        <div class="dewa-bot-message-group-welcome">
+                                            <img class="m55a-rammas--welcome_icon" alt="" src="/images/rammas_icon.png">
+                                            <div class="m5a-rammas--welcome_FL">@Translate.Text("rammas.FL")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dewa-bot-console">
+                            <input type="file" id="dewa-bot-upload-input" multiple="">
+                            <label class="dewa-bot-upload" for="dewa-bot-upload-input">
+                                <span class="aria-only">chat</span>
+                            </label>
+                            <div class="dewa-bot-textbox">
+                                <input type="text" class="dewa-bot-shellinput" value="" id="cid" placeholder="@Translate.Text("Rammas Ask Rammas")">
+                            </div>
+                            <label class="dewa-bot-send" id="btSend">
+                                <span class="aria-only">send</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="m39-modal m39-modal--new m55a-rammas--shareModal m39-modal--nofocus" data-component="m39-modal" id="modal_true">
+                        <button data-trigger="true" class="m39-modal__trigger export_modal">Trigger</button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                            <div class="m39-modal__dialog">
+                                <div class="j105-drrg hidden">
+                                    <div class="m66-preloader j105-drrg--loader fromloader">
+                                        <div class="grid">
+                                            <div class="grid__row">
+                                                <div class="grid__column grid__column--12">
+                                                    <h2 class="text__section-subtitle">@Translate.Text("Rammas Please Wait")</h2>
+                                                    <div class="loader"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="m39-modal__header">
+                                    <div class="m55a-rammas--disclaimer_prev icon-new-arrow-right"></div>
+                                    <div class="m39-modal__title">@Translate.Text("Rammas Export Chat")</div>
+                                    <a data-close="true" class="m39-modal__button--close"></a>
+                                </div>
+                                <div class="m39-modal__content msgcontent" style="overflow:auto !important;display: none">
+                                    <div class="m40v2-status-message m40v2-status-message--success icon icon-new-success-message hidden msgcontent" id="message" data-component="m40v2-status-message">
+                                        <div class="m40v2-status-message__title" id="message-text" data-errormsg="@Translate.Text("Rammas Error")" data-successmsg="@Translate.Text("Rammas Success Message")"></div>
+                                    </div>
+                                </div>
+                                <form action="POST" class="form rammasExportChat" data-parsley-focus="true" data-form="true">
+                                    @Html.AntiForgeryToken()
+                                    <div class="m39-modal__content" style="overflow:auto !important">
+                                        <div class="m55a-rammas--disclaimer_content m55a-rammas--disclaimer_contentactive">
+
+
+                                            <fieldset class="fieldset">
+                                                <legend class="legend-color">.</legend>
+                                                <div class="form-field form-field--text ">
+                                                    <label for="form-field-EmailAddress" class="form-field__label">
+                                                        @Translate.Text("Rammas Email Label")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        @Html.TextBoxFor(x => x.EmailAddress,
+                            new
+                            {
+                                @class = "form-field__input form-field__input--text",
+                                @id = "form-field-EmailAddress",
+                                @placeholder = @Translate.Text("Rammas Email Placeholder"),
+                                @required = "required",
+                                @data_parsley_error_message = Translate.Text("Rammas Enter Valid Email Address"),
+                                @data_parsley_required_message = Translate.Text("Rammas Field Required"),
+                                @data_parsley_errors_container = "#description-for-EmailAddress",
+                                @aria_describedby = "description-for-EmailAddress",
+                                @type = "email",
+                                @autocomplete = "off"
+                            })
+
+                                                    </span>
+                                                    <div id="description-for-EmailAddress" class="form-field__messages">
+                                                        @Html.ValidationMessageFor(x => x.EmailAddress, "", new { @class = "parsley-errors-list" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-field form-field--text ">
+                                                    <label for="form-field-Subject" class="form-field__label">
+                                                        @Translate.Text("Rammas Email Subject")
+                                                    </label>
+                                                    <span class="form-field__input-wrapper">
+                                                        @Html.TextBoxFor(x => x.Subject,
+                            new
+                            {
+                                @class = "form-field__input form-field__input--text",
+                                @id = "form-field-Subject",
+                                @placeholder = @Translate.Text("Rammas Email Subject Placeholder"),
+                                @required = "required",
+                                @data_parsley_maxlength = "100",
+                                @maxlength = "100",
+                                @data_parsley_required_message = Translate.Text("Rammas Field Required"),
+                                @data_parsley_error_message = Translate.Text("Rammas Subject Validation Error Message"),
+                                @data_parsley_errors_container = "#description-for-Subject",
+                                @aria_describedby = "description-for-Subject"
+                            })
+
+                                                    </span>
+                                                    <div id="description-for-Subject" class="form-field__messages">
+                                                        @Html.ValidationMessageFor(x => x.Subject, "", new { @class = "parsley-errors-list" })
+                                                    </div>
+                                                </div>
+
+                                                @Html.TextAreaFor(x => x.Chat, new { @class = "hidden m55a-rammas--share-html_container", id = "form-field-Chat" })
+
+
+                                            </fieldset>
+
+                                            <div class="m55a-rammas--shareModal_clone">
+
+                                            </div>
+
+                                            <div id="description-for-recaptcha" class="form-field__messages form-field__messages-recaptcha centered"><ul class="parsley-errors-list filled" id="parsley-id-6"><li class="parsley-custom-error-message">@Translate.Text("Rammas Captcha Error")</li></ul></div>
+
+                                            <div class="recaptcha_check" data-checked="false"></div>
+                                            <div class="g-recaptcha" @*data-callback="recaptchaCallback"*@ data-sitekey="@ReCaptchaHelper.RecaptchaSiteKey()"></div>
+                                        </div>
+                                        <div class="m55a-rammas--disclaimer_content">
+                                            <div class="m14-richtext">
+                                                <h4>@Translate.Text("Rammas Disclaimer Header")</h4>
+                                            </div>
+                                            <div class="m55a-rammas--disclaimer_text" style="margin-top:8px;">
+                                                @Html.Raw(Translate.Text("Rammas Disclaimer Text"))
+
+                                            </div>
+                                            <div class="form-field form-field--toggles mt24">
+                                                <div class="form-field__checkbox">
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" aria-label="form-field-checkbox_1_1" name="checkbox_1_1" type="checkbox" value="1" aria-describedby="description-for-d6fapsvnv" data-parsley-errors-container="#description-for-d6fapsvnv" data-parsley-multiple="checkbox_1_1" data-parsley-id="45" required="" data-parsley-error-message="@Translate.Text("Rammas Agree Validation Error Message")">
+                                                        <span class="form-field__fakecheckbox focus-enabled">
+                                                            <strong>
+                                                                @Html.Raw(Translate.Text("Rammas Agreement Text"))
+                                                            </strong>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                <div id="description-for-d6fapsvnv" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="m39-modal__footer">
+                                        <div class="button button--primary button--next m55a-rammas--disclaimer_next">
+                                            @Translate.Text("Next")
+                                        </div>
+                                        <button class="button button--primary hidden" type="submit" id="ExportSubmit" data-modal-confirm="true" data-submission-text="@Translate.Text("Rammas Sending Chat")...">@Translate.Text("Rammas Send Chat")</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="m55a-rammas--input-bg">
+        <div class="m55a-rammas--controls">
+            <button class="m55a-rammas--mute voice_muted icon-unmute tooltipstered" data-alt="@Translate.Text("Rammas Toggle mute")" id="btMute">
+                <span class="aria-only">@Translate.Text("Rammas Toggle mute")</span>
+            </button>
+            @*<button class="m55a-rammas--share icon-export tooltipstered" data-alt="@Translate.Text("Rammas Export Chat")" id="btExport">
+                    <span class="aria-only">@Translate.Text("Rammas Export Chat")</span>
+                </button>*@
+        </div>
+        <div class="m55a-rammas--input-bg--wrapper"></div>
+    </div>
+
+
+    <div class="rammas_disclaimer hidden">
+        <h3>@Html.Raw(Translate.Text("Rammas Disclaimer Header"))</h3>
+        @Html.Raw(Translate.Text("Rammas Disclaimer Text"))
+    </div>
+    <div id="fake_div" style="display:none"></div>
+</div>
+<div class="audio">
+    <audio hidden="hidden" id="rammasAudio" onended="PlayNext()" muted=""></audio>
+</div>
+<div id="happiness-indicator-wrapper" class="happiness">
+    <a id="btSurvey" data-type="sr" data-value="StartOverOndemandSurvey" href="#" class="btn">
+        <img src="/images/fancybox/SideIcon.png" alt="@Translate.Text("Happiness Icon")" title="@Translate.Text("Happiness Icon")" width="40" />
+    </a>
+</div>
+<style type="text/css">
+    .g-recaptcha div {
+        margin: auto;
+        padding-top: 15px;
+    }
+
+    @@media all and (-ms-high-contrast: none) {
+        .m55a-rammas--mute:before {
+            position: static;
+        }
+
+        .m55a-rammas--mute {
+            margin-top: -5px;
+        }
+    }
+
+    @@supports (-ms-ime-align:auto) {
+        .m55a-rammas--mute:before {
+            position: static;
+        }
+
+        .m55a-rammas--mute {
+            margin-top: -5px;
+        }
+    }
+
+    .chattimeelapsed {
+        margin-top: -15px;
+        font-family: Calibri;
+        font-weight: 100;
+        color: #cacaca;
+        font-size: smaller;
+    }
+
+    .right {
+        padding-right: 45px;
+        text-align: right;
+    }
+
+    .left {
+        padding-left: 45px;
+        text-align: left;
+    }
+</style>
+
+<script type="text/javascript" src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+   String.prototype.format = function() {
+    var a = arguments;
+    return this.replace(/{(\d+)}/g, function(e, t) {
+        return void 0 !== a[t] ? a[t] : e;
+    });
+};
+    var form = ".rammasExportChat";
+    var root_id = "#modal_true";
+    var waitingdiv = ".m55a-rammas--loading";
+    function recaptchaCallback() {
+        jQuery("#description-for-recaptcha").hide();
+        if (grecaptcha && grecaptcha.getResponse().length == 0) {
+            jQuery("#description-for-recaptcha").show();
+            jQuery(".recaptcha_check").attr("data-checked", "false");
+            return false;
+        } else {
+            jQuery(".recaptcha_check").attr("data-checked", "true");
+            return true;
+        }
+
+    };
+
+    var dv_inner = "#bot_chat";
+    var url = '@Url.Action("PostMessage","RammasDirectLine")';
+    var last_message = { msg: "", __RequestVerificationToken: GetAFToken() };
+    var idx = 0;
+    var a = { msg: "", __RequestVerificationToken: GetAFToken() };
+    var init_msg = @Html.Raw(Model.InitialJson);
+    var is_startup = true;
+
+    $(function () {
+        // export chat existing working code
+
+        require(['parsley'], function () {
+            function validateSRForm() {
+                var isValid = true;
+                jQuery(form).find('.form, input, select, textarea').each(function (i, o) {
+                    if (isValid) {
+                        isValid = jQuery(o).parsley().isValid();
+                        jQuery(o).trigger('focusout');
+                        if (jQuery(o).prop("type") != "file") {
+                            jQuery(o).trigger('change');
+                        }
+
+                    }
+                });
+                return isValid;
+            }
+            var _postUrl = '@Url.Content("~/api/sitecore/Rammas/ChatEmail")';
+            var msgContainer = jQuery("#message");
+            var msgText = jQuery("#message-text");
+            var msgcontent = jQuery(".msgcontent");
+            var rammasExportChat = jQuery(".rammasExportChat");
+            var _EmailAddress = $("#form-field-EmailAddress");
+            var _Subject = $("#form-field-Subject");
+            var _Chat = $("#form-field-Chat");
+
+            //We set our own custom submit function
+            jQuery(form).on("submit", function (e) {
+                //Prevent the default behavior of a form
+                e.preventDefault(); jQuery(".j105-drrg").removeClass("hidden");
+                //Get the values from the form
+                var _encodeChat = encodeURIComponent(_Chat.val());
+                //Get the values from the form
+                var fd = new FormData();
+                fd.append("EmailAddress", _EmailAddress.val());
+                fd.append("Subject", _Subject.val());
+                fd.append("Chat", _encodeChat);
+                fd.append("captcha", grecaptcha.getResponse());
+                fd.append("__RequestVerificationToken", $('input[name=__RequestVerificationToken]').val())
+                //console.log(fd);
+                //Our AJAX POST
+                $.ajax({
+                    type: "POST",
+                    url: _postUrl,
+                    data: fd,
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false /*,
+                    beforeSend: function () {
+                        jQuery(".fromloader").show();
+                        jQuery("#ExportSubmit").attr("disbaled", true);
+                    }*/,
+                    success: function (data) {
+                       msgcontent.show();
+                        rammasExportChat.hide();
+                        if (data.success) {
+                            msgContainer.addClass("m40v2-status-message--success");
+                            msgContainer.removeClass("m40v2-status-message--error");
+                            msgContainer.addClass("icon-new-success-message");
+                            msgContainer.removeClass("icon-new-annicon-new-announcement");
+                            msgText.text(msgText.data("successmsg"));
+                            _EmailAddress.val("");
+                            _Subject.val("");
+                        } else {
+                            msgContainer.removeClass("m40v2-status-message--success");
+                            msgContainer.addClass("m40v2-status-message--error");
+                            msgContainer.removeClass("icon-new-success-message");
+                            msgContainer.addClass("icon-new-annicon-new-announcement");
+                            msgText.text(msgText.data("errormsg"));
+                        }
+                        jQuery("#message").removeClass("hidden");
+                        //jQuery(".fromloader").hide();
+
+                    },
+                    complete: function () {
+                        jQuery(".j105-drrg").addClass("hidden");
+                        grecaptcha.reset();
+
+                        setTimeout(function () {
+                            jQuery("#ExportSubmit").attr("disbaled", true);
+                        }, 100);
+                        //jQuery("#ldrmsg").delay(4000).css("display", "none");
+                    }
+                })
+            });
+
+            jQuery(".m55a-rammas--share").click(function () {
+                rammasExportChat.show();
+                msgcontent.hide();
+                grecaptcha.reset();
+            });
+            jQuery(".m55a-rammas--disclaimer_next").click(function () {
+                return recaptchaCallback();
+            });
+        });
+    });
+    jQuery(document).ready(function () {
+        if (init_msg) { setTimeout(ProcessStartup(init_msg), 2000); /*AppendMessageDateTime(true);*/ }
+        //setInterval(UpdateElapsedTime, 30000);
+        $('input[id="cid"]').on('input', function () {$(this).val($(this).val().replace(/[<>]/gi, '')); });
+        $("#cid").on("keydown", function (e) {
+            if (13 == e.which) {
+                a.msg = $("#cid").val().trim();
+                if (a.msg) {
+                    $("#cid").val("");
+                    sendMessage(a, true, a.msg);
+                }
+                $("#cid").val("");
+            }
+        });
+
+        $(document).on("click", ".btn", function (e) {
+            e.preventDefault();
+            handleButtonClick($(this).attr("data-type"), $(this).attr("data-value"), $(this).text(), this);
+        });
+
+        $("#btSend").click(function (e) {
+            e.preventDefault();
+            a.msg = $("#cid").val().trim();
+            if (a.msg) {
+                sendMessage(a, true, a.msg);
+            }
+            $("#cid").val("");
+        });
+
+        var myacc_lnk = "[class*='m12-myaccount__link']";
+        var href = jQuery(myacc_lnk).attr("href");
+        if (href && href.indexOf('login') >= 0) {
+            jQuery(myacc_lnk).attr("href", href+'?returnUrl=' + window.location.pathname);
+            jQuery(myacc_lnk).attr("target", "_self");
+        }
+        jQuery(dv_inner).on("click", "button.btest", function (e) {
+            var txcom = ".txcom";
+            if (jQuery(txcom).last().hasClass('hide')) { jQuery(txcom).last().removeClass("hide"); } else { jQuery(txcom).last().addClass('hide'); }
+        });
+
+        jQuery(btMute).on("click", function (e) {
+
+            setTimeout(SetMuteState, 1000);
+        });
+        GetMuteState();
+    });
+    var btMute = ".m55a-rammas--mute";
+    var rmAudio = "#rammasAudio";
+    var audioFiles = [];
+    idx = 0;
+    var showLogin = false;
+    var focusDiv = ".dewa-bot-message-groups";
+    var messageProcessing = false;
+
+function ProcessStartup(r) {
+    r.sort(function (a, b) {
+        return parseInt(a.Order) - parseInt(b.Order);
+    });
+    jQuery.each(r, function (e, t) {
+        if (t.UserAction.trim().length > 0) {
+            $(dv_inner).append(formatMyText(t.UserAction)); if (t.ActivityDate) { AppendMessageDateTime(false, moment(t.ActivityDate).locale("en-ae").format()); }}
+        ProcessResponse(t.Responses);
+        if (t.ActivityDate) { AppendMessageDateTime(true, moment(t.ActivityDate).locale("en-ae").format()); }
+        else { AppendMessageDateTime(true,moment().locale("en-ae").format()); }
+    });
+    UpdateElapsedTime();
+    SetFocus();
+}
+
+function readSpeak() {
+    idx = 0;
+    if (audioFiles.length === 0) return;
+    if (jQuery(btMute).hasClass("voice_muted")) { return true; }
+
+    jQuery(rmAudio).attr("src", audioFiles[0]);
+    /*jQuery(rmAudio)[0].onended = function () {
+        if (idx < audioFiles.length) {
+            //var e = document.createElement("audio");
+            jQuery(rmAudio).attr("src", audioFiles[idx]);
+           PlayPromise(jQuery(rmAudio)), idx++;
+        }
+    }*/
+    idx++;
+    PlayPromise(jQuery(rmAudio));
+}
+
+function PlayNext() {
+    if (jQuery(btMute).hasClass("voice_muted")) { return true; }
+    if (idx < audioFiles.length) {
+        jQuery(rmAudio).attr("src", audioFiles[idx]);
+        PlayPromise(jQuery(rmAudio)), idx++;
+    }
+}
+
+function PlayPromise(e) {
+        var promise = e[0].play();
+
+        if (promise !== undefined) {
+            promise.then(function(e) {
+                // Autoplay started!
+            }).catch(function(e) {
+                console.log('Auto Play is disabled');
+            });
+        }
+    }
+
+    function EasyPayAmountBlur(txt) {
+        var _element = document.getElementById(txt);
+        var _val = _element.value;
+        if (_val.indexOf(".") == -1) {
+            _val = parseFloat(_val).toFixed(2);
+        }
+        document.getElementById(txt).value = _val;
+        return true;
+    }
+
+
+function handleButtonClick(e, t, d, btn) {
+        //console.log(e + " " + t);
+    switch (e) {
+        case "bt":
+            a.msg = unescape(t);
+            sendMessage(a, true,d);
+            break;
+        case "sb":
+            var el = jQuery(btn).closest(".dewa-bot-message-wrapper").find("input.txt_amount").val();
+
+            if (el) {
+                a.msg = 'EP_' + el;
+            } else {
+                //if (t === 'null') { a.msg = 'EP_' + jQuery(el).last().data("val");  }
+                a.msg = 'EP_' + unescape(t);
+            }
+            sendMessage(a, false,d);
+            break;
+        case "ln":
+            if (t.indexOf('api/Authentication/RedirectUrl') >= 0) {
+                window.open(t, "_self");
+            }
+            else {
+                if (t.indexOf('rammasepayment') >= 0) {
+                    setTimeout(CheckServerStatus, 25000);
+                }
+                var w = window.open(t, "_blank");
+                w ? w.focus() : alert("Please allow popups for this website");
+            }
+            break;
+        case "detail":
+            a.msg = 'DT_' + t;
+            sendMessage(a, false,d);
+            break;
+        case "ni":
+            a.msg = 'NI_' + t;
+            sendMessage(a, false,d);
+            break;
+        case "af":
+            a.msg = 'AF_' + t;
+            sendMessage(a, false,d);
+            break;
+        case "showmore":
+            a.msg = t;
+            sendMessage(a, false,d);
+            break;
+        case "sr":
+            a.msg = t;
+            sendMessage(a, false,d);
+            break;
+        case "sr1":
+            a.msg = 'SR_'+t;
+            sendMessage(a, false,d);
+            break;
+        case "sr2":
+            var vo = "";
+            $('.surveyfb').last().find('input[type=checkbox]').each(function () {
+                if ($(this).is(":checked")) {
+                    vo+="_" + $(this).val() + ":True";
+                } else { vo+="_" + $(this).val() + ":False"; }
+
+            });
+            if (jQuery('.ta_feedback').last().is(':visible')) { vo+='_feedbacktext:' + jQuery(".ta_feedback").last().val() ; }
+            //console.log(JSON.stringify(vo));
+            jQuery("#btsr2").prop("disabled", true);
+            a.msg = vo;
+            sendMessage(a, false,d);
+            break;
+    }
+}
+
+function sendMessage(e, t,d) {
+    if (!navigator.onLine) { alert('You are offline!'); return false; };
+    if (messageProcessing) { alert('@Translate.Text("Rammas Message Processing")'); return false; };
+    if (t) { var m = formatMyText(d); jQuery(dv_inner).append(m); AppendMessageDateTime(false, moment().locale("en-ae").format()); };
+    idx = 0, audioFiles = [], last_message = e.msg;
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        dataType: "json",
+        data: e, beforeSend: function () {
+            messageProcessing = true;
+            jQuery(dv_inner).append(jQuery(waitingdiv).clone().removeClass("hide"));
+            jQuery(focusDiv).animate({ scrollTop: jQuery(focusDiv)[0].scrollHeight }, 800);
+        },
+        complete: function () {
+            jQuery(waitingdiv).last().remove();
+            messageProcessing = false;
+        },
+        success: function (e) {
+            try {
+                ProcessResponse(e); AppendMessageDateTime(true, moment().locale("en-ae").format());
+            }
+            catch (err) {
+                console.log(err.message);
+            }
+            SetFocus();
+        },
+        fail: function (e) {
+            console.log(JSON.stringify(e));
+            alert('@Translate.Text("Rammas unable to reach server")');
+        }, statusCode: {
+            404: function () {
+                alert('@Translate.Text("Rammas page not found")');
+            },
+            500: function () {
+                location.reload(true);
+            },
+            410: function () {
+                alert('@Translate.Text("Rammas session timeout")'); location.reload(true);
+            },
+            417: function () { alert('@Translate.Text("Rammas backend error")'); location.reload(true);}
+        }
+    });
+}
+
+function RenderSurveyS2(a) {
+    var n = '<div class="dewa-bot-message-wrapper dewa-bot-survey"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content"><div class="format-markdown">{7}<h3 class="dewa-bot-message-content_title">{0}</h3></div><div class="dewa-bot-teaser_content-details"><div class="dewa-bot-survey_checkbox"><fieldset class="fieldset surveyfb" id="surveyfb"><legend class="form-field__label">{1}</legend>{2}</fieldset></div></div><div class="dewa-bot-list"><div class="dewa-bot-card dewa-bot-adaptive-card hero"><div class="ac-container"><div class="clear-height"></div><div class="buttons-container"><button type="button" class="ac-pushButton btest">{3}</button></div><div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="sr2" id="btsr2">{4}</button></div></div></div></div><div class="form-field form-field--text form-field--textarea hide txcom" id="txcom"><label  class="form-field__label">{5}</label><span class="form-field__input-wrapper"><textarea class="form-field__input form-field__input--text form-field__input--textarea ta_feedback" maxlength="500" name="textarea" id="ta_feedback" type="textarea" placeholder="{6}" ></textarea></span></div></div>';
+
+     var li = ' <div class="form-field__checkbox"><label><input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_{0}" name="checkbox_{0}" type="checkbox" value="{0}"><span class="form-field__fakecheckbox focus-enabled">{1}</span></label></div>';
+
+    var d = ""; var p = "";
+    if (a.Text) { p = "<p>" + a.Text + "</p>"; };
+
+   if (a.Attachments && 0 < a.Attachments.length) {
+            $.each(a.Attachments, function (e, tt) {
+                var s = a.Attachments[e];
+                switch (s.ContentType) {
+                    case 5:
+                        $.each(s.Content.surveyStage2, function (e, t) {
+                            $.each(t.items, function (i, v) {
+                                d += li.format(v.value, v.title)
+                            });
+                            d = n.format(t.text1, t.text2, d, t.sectionLabel, t.buttonLabel, t.textBoxLabel, t.textBoxPH, p);
+                        });
+                        break;
+                    case 3:
+                        s.Content.media && $.each(s.Content.media, function (e, t) {
+                            audioFiles.push(t.url);
+                        });
+                        break;
+                    default:
+                        console.log("unknown value returned: " + s.ContentType);
+                }
+
+            });
+    }
+
+    d += '</div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+    $(dv_inner).append(d);
+}
+
+function RenderSurveyS1(a) {
+    var n = '<div class="dewa-bot-message-wrapper dewa-bot-survey"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content"><div class="format-markdown"><h3 class="dewa-bot-message-content_title">{0}</h3></div><div class="dewa-bot-teaser_content-details"><div class="dewa-bot-survey_img"><div class="survey_img neutral_happy btn" data-type="sr1" data-value=\'{1}\'><img class="btn" src="{2}"><span class="survey_img_text">{3}</span></div><div class="survey_img neutral_sad btn" data-type="sr1" data-value=\'{4}\'><img class="btn" src="{5}"><span class="survey_img_text">{6}</span></div><div class="survey_img survey_sad btn" data-type="sr1" data-value=\'{7}\'><img class="btn" src="{8}"><span class="survey_img_text">{9}</span></div></div></div></div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+
+    var d = "";
+    if (a.Text) { RenderTextOnly(a.Text) };
+    if (a.Attachments && 0 < a.Attachments.length) {
+            $.each(a.Attachments, function (e, t) {
+                var s = a.Attachments[e];
+                switch (s.ContentType) {
+                    case 5:
+                        $.each(s.Content.surveyStage1, function (e, t) {
+                            d += n.format(t.text, t.happyValue, t.happyImageUrl, t.happyTitle, t.neutralValue, t.neutralImageUrl, t.neutralTitle, t.sadValue, t.sadImageUrl, t.sadTitle);
+                        });
+                        break;
+                    case 3:
+                        s.Content.media && $.each(s.Content.media, function (e, t) {
+                            audioFiles.push(t.url);
+                        });
+                        break;
+                    default:
+                        console.log("unknown value returned: " + s.ContentType);
+                }
+            });
+    }
+
+
+    $(dv_inner).append(d);
+
+}
+
+function RenderStoreDetails(a) {
+    var n = '<div class="dewa-bot-message-wrapper dewa-bot-slider-detail"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content"><div class="dewa-bot-teaser_content-details">';
+
+    var si = ' <div class="format-markdown"><h3 class="dewa-bot-teaser_title">{1}</h3><p>{2}</p></div><div class="dewa-bot-teaser_content-details"><div class="dewa-bot-teaser_img"><img src="{0}"></div><div class="dewa-bot-teaser_text"><h3 class="dewa-bot-teaser_text_title">{3}</h3><p>{4}</p><h3 class="dewa-bot-teaser_text_title">{5}</h3><p>{6}</p><h3 class="dewa-bot-teaser_text_title">{7}</h3><p>{8}</p></div></div>';
+    var d = "";
+    if (a.Text) { RenderTextOnly(a.Text) }; var rec_found = false;
+
+    if (a.Attachments && 0 < a.Attachments.length) {
+        $.each(a.Attachments, function (e, t) {
+            var s = a.Attachments[e];
+            switch (s.Content.text && (n += m.format(s.Content.text)), s.ContentType) {
+                case 5:
+                    $.each(s.Content.itemdetail, function (e, t) {
+                            rec_found = true;
+                            d += si.format(t.url,t.title1, prettifyText(t.body1), t.title2, prettifyText(t.body2), t.title3, prettifyText(t.body3), t.title4, prettifyText(t.body4));
+                    });
+
+                    break;
+                case 3:
+                    s.Content.media && $.each(s.Content.media, function (e, t) {
+                        //console.log(t.url);
+                        audioFiles.push(t.url);
+                    });
+                    break;
+            }
+        });
+    }
+
+    n += d + '</div></div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+    if (rec_found) { $(dv_inner).append(n); }
+
+    }
+
+function RenderStoreCarosel(a) {
+        var n = '<div class="dewa-bot-message-wrapper dewa-bot-slider"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content"><div class="dewa-bot-slider-wrapper">';
+        var m = '<div class="format-markdown"><p>{0}</p></div>';
+    var si = '<div class="dewa-bot-slider-item"><div class="dewa-bot-list-slide"><div class="format-markdown"><h3 class="dewa-bot-teaser_title">{0}</h3>{1}</div><div class="dewa-bot-teaser_content"><div class="dewa-bot-teaser_text">{2}</div><div class="dewa-bot-teaser_thumb"><img src="{3}"></div></div><div class="dewa-bot-list-slide"><div class="dewa-bot-card dewa-bot-adaptive-card hero"><div class="ac-container"><div class="clear-height"></div><div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="detail" data-value=\'{4}\'>{5}</button></div></div></div></div></div></div>';
+    var ni = '<button type="button" class="ac-pushButton btn" data-type="ni" data-value=\'{0}\'>{1}</button>';
+    var af = '<img src="{0}" class="btn" data-type="af" data-value=\'{1}\'>';
+
+    var sm = '<div class="dewa-bot-message-dir-button"><div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="showmore" data-value=\'{0}\'>{1}</button></div></div>';
+    var d = ""; var rec_found = false, showmore=false;
+    if (a.Text && 0 < a.Text.length) {
+        if (a.Text.indexOf("**") >= 0) {
+            a.Text = '<strong>' + a.Text.split("**").join("") + "</strong>";
+        }
+       RenderTextOnly(a.Text);
+    }
+
+        if (a.Attachments && 0 < a.Attachments.length) {
+
+            $.each(a.Attachments, function (e, t) {
+                var s = a.Attachments[e];
+                switch (s.Content.text && (n += m.format(s.Content.text)), s.ContentType) {
+                    case 5:
+                        $.each(s.Content.storeitems, function (e, t) {
+                            var sni = ''; var saf = ''; rec_found = true;
+                            if (t.showMore) {
+                                sm = sm.format(t.detail, t.title); showmore = true;
+                            } else {
+                                //if (t.showNI) { sni = ni.format(t.id+'_'+t.NIValue+'_'+t.category,t.NITitle); }
+                                if (t.showAF) { saf = af.format(t.AFImageUrl, t.id + "_" + t.AFValue + '_' + t.category); }
+                                d += si.format(t.title, saf, t.detail, t.url, t.id + '_' + t.VDValue + '_' + t.category,t.VDTitle);
+                            }
+                        });
+                        break;
+                    case 3:
+                        s.Content.media && $.each(s.Content.media, function (e, t) {
+                            //console.log(t.url);
+                            audioFiles.push(t.url);
+                        });
+                        break;
+
+                    default:
+                        console.log("unknown value returned: " + s.ContentType);
+                }
+            });
+    }
+
+    if (rec_found) {
+        n += d + '</div>';
+        if (showmore) { n += sm;  }
+        n += '</div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+        $(dv_inner).append(n);
+        /*try {
+            jQuery('.dewa-bot-slider-wrapper').slick({
+                infinite: false,
+                speed: 300,
+                slidesToShow: 4,
+                slidesToScroll: 4
+            });
+        } catch (e) {
+            console.log(JSON.stringify(e));
+        }*/
+    }
+}
+
+function RenderAdaptiveList(a) {
+        var n = '<div class="dewa-bot-message-wrapper list"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content">';
+        var o = '<div class="format-markdown"><p>{0}</p></div>';
+    var i = '<div class="dewa-bot-card dewa-bot-adaptive-card hero"><div class="ac-container"><div class="clear-height"></div><div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="{1}" data-value=\'{2}\'>{0}</button></div></div></div>';
+
+    var i1a = '<div class="dewa-bot-keys">{0}</div>';
+    var i1b = '<div class="dewa-bot-keys-row"><p><strong class="dewa-bot-keys-label">{0}</strong></p><p><span>{1}<span></span></span></span></p></div>';
+    var i2 = '<div class="dewa-bot-form"><div class="dewa-bot-form-field"><label>{0}</label><input class="form-control txt_amount" id="txt_amount" type="number" value="{3}" data-val=\'{1}\' placeholder="{2}" onkeyup="return EasyPayAmountKeypress(this.id);" onblur="return EasyPayAmountBlur(this.id);" min="0.01" max="999999.99"></div></div>';
+    var i3 = '<div class="dewa-bot-list">{0}</div>';
+
+    var r = false; var c = false; var d = ""; var submitFound = false;
+
+        if (a.Text && 0 < a.Text.length) {
+            if (a.Text.indexOf("**") >= 0) {
+                a.Text = '<strong>' + a.Text.split("**").join("") + "</strong>";
+                a.Text = prettifyText(a.Text);
+            }
+            n += o.format(a.Text); r = true;
+        }
+
+        if (a.Attachments && 0 < a.Attachments.length) {
+
+            $.each(a.Attachments, function (e, t) {
+                var s = a.Attachments[e];
+
+                switch (s.Content.text && (n += o.format(s.Content.text), r = true), s.ContentType) {
+                    case 1:
+                    case 0:
+                        s.Content.buttons && (c = true, $.each(s.Content.buttons, function (e, t) {
+                            var a = s.Content.buttons[e];
+                            switch (a.type) {
+                                case "TextBlock":
+                                    if (a.value === "-") {
+                                        d += o.format(a.title);
+                                    } else {
+                                        d += i1b.format(a.title.replace(/\*\*/g,""), a.value);
+                                    }
+                                    if (a.last===true) { d = i1a.format(d); }
+                                    break;
+                                case "Input.Text":
+                                    d = i1a.format(d);
+                                    var isPosVal = parseFloat(a.value);
+                                    if (isPosVal > 0) { d += i2.format(a.title, escape(a.value), a.ph, a.value); }
+                                    else { d += i2.format(a.title, escape(a.value), a.ph, ""); }
+                                    if (a.last) { d += i1a.format(d); }
+                                    break;
+                                case "imBack":
+                                    d += i.format(a.title, "bt",escape(a.value));
+                                    break;
+                                case "Action.Submit":
+                                    submitFound = true;
+                                    var ab = i.format(a.title, "sb", escape(a.value));
+                                    d+=i3.format(ab);
+                                    break;
+                                default:
+                                    d += i.format(a.title, "ln", a.value);
+
+                                    break;
+                            }
+
+                        }));
+                        break;
+                    case 4:
+                    case 2:
+                        s.Content.buttons && (c = true, $.each(s.Content.buttons, function (e, t) {
+                            c = true;
+                            var a = s.Content.buttons[e];
+                            if (a.type === "imBack") { d += i.format(a.title, "bt", escape(a.value)); }
+                            else {
+                                d += i.format(a.title, "ln", escape(a.value));
+                            }
+
+                        }));
+                        break;
+
+                    case 3:
+                        s.Content.media && $.each(s.Content.media, function (e, t) {
+                            //console.log(t.url);
+                            audioFiles.push(t.url);
+                        });
+                        break;
+
+                    default:
+                        console.log("unknown value returned: " + s.ContentType);
+                }
+            });
+    }
+
+    if (c) {
+        if (submitFound) {
+            n += '<div class="dewa-bot-list">{0}</div>'.format(d);}
+        else {
+            n += d;
+        }
+
+    }
+    n += '</div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest1</span></div></div>';
+
+    if (!c && !r) return ;
+
+    $(dv_inner).append(n);
+    }
+
+function RenderStoreOffersList(a) {
+    var n = '<div class="dewa-bot-message-wrapper list"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content">';
+    var o = '<div class="format-markdown"><p>{0}</p></div>';
+    var i = '<div class="dewa-bot-card dewa-bot-adaptive-card hero"><div class="clear-height"></div><div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="{1}" data-value=\'{2}\'>{0}</button></div></div>';
+
+    if (a.Text && 0 < a.Text.length) {
+        if (a.Text.indexOf("**") >= 0) {
+            a.Text = '<strong>' + a.Text.split("**").join("") + "</strong>";
+        }
+        n += o.format(a.Text);
+
+    }
+var rec_found = false;
+
+ if (a.Attachments && 0 < a.Attachments.length) {
+     var d = "";
+
+     $.each(a.Attachments, function (e, t) {
+         var s = a.Attachments[e];
+         switch (s.ContentType) {
+             case 0:
+             case 2:
+                 s.Content.buttons && (c = !0, $.each(s.Content.buttons, function (e, t) {
+                            rec_found = true;
+                            var a = s.Content.buttons[e];
+                            if (a.type === "imBack") { d += i.format(a.title, "bt", escape(a.value)); }
+                            else {
+                                d += i.format(a.title, "ln", a.value);
+                            }
+
+                 }));
+
+                 break;
+
+             case 3:
+                 s.Content.media && $.each(s.Content.media, function (e, t) {
+                     audioFiles.push(t.url);
+                 });
+
+                 break;
+             default:
+                 console.log("unknown value returned: " + s.ContentType);
+         }
+     });
+    }
+
+    var ls = '<div class="dewa-bot-list">{0}</div>';
+
+    n += ls.format(d) + '</div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest1</span></div></div>';
+    if (rec_found) {
+        $(dv_inner).append(n);
+    }
+}
+
+function RenderList(a) {
+    var n = '<div class="dewa-bot-message-wrapper list"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content">';
+    var bl = '<div class="dewa-bot-list"><div class="dewa-bot-card dewa-bot-adaptive-card hero"><div class="ac-container">';
+    var bl1 = '</div></div></div>';
+    var i = '<div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="{1}" data-value=\'{2}\'>{0}</button></div>';
+    var n1='</div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+    var m = '<div class="format-markdown">{0}</div>';
+    var m1 = '';
+    if (a.Text && 0 < a.Text.length) {
+        if (a.Text.indexOf("**") >= 0) {
+            var tx = a.Text.replace("**", "<strong>");
+            tx = tx.replace("**", "</strong>");
+
+            a.Text = tx;
+        }
+        //RenderTextOnly(a.Text);
+        m1 = '<p>' + prettifyText(a.Text)+ '</p>';
+    } //else { n=n.format("");}
+    var rec_found = false; var d = "";
+    if (a.Attachments && 0 < a.Attachments.length) {
+
+        $.each(a.Attachments, function(e, t) {
+            var s = a.Attachments[e];
+            if (s.Content.text) {
+               s.Content.text= s.Content.text.replace("**", "<strong>").replace("**", "</strong>");
+                m1 += '<br/><p>' + prettifyText(s.Content.text) + '</p>';
+            }
+            switch (s.ContentType) {
+                case 2:
+                case 0:
+                    s.Content.buttons && (rec_found = true) && ($.each(s.Content.buttons, function(e, t) {
+                    var a = s.Content.buttons[e];
+                    "imBack" === a.type ? d += i.format(a.title, "bt", escape(a.value)) : d += i.format(a.title, "ln", a.value);
+                }));
+                break;
+
+             case 3:
+                    s.Content.media && $.each(s.Content.media, function (e, t) {
+                        //console.log(t.url);
+                        audioFiles.push(t.url);
+                    });
+              break;
+
+              default:
+                console.log("unknown value returned: " + s.ContentType);
+            }
+        });
+    }
+    if (m1) { n += m.format(m1); }
+    //else { n = n.format("");}
+
+    if (rec_found) {
+        n = n + bl + d + bl1 + n1;
+        $(dv_inner).append(n);
+    } else if (m1) {
+        n = n + n1;
+        $(dv_inner).append(n);
+    }
+}
+
+function RenderCarousel(a) {
+    var n = '<div class="dewa-bot-message-wrapper carousel"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content"><div class="dewa-bot-carousel"><div class="dewa-bot-hscroll-outer"><div class="dewa-bot-hscroll" style="margin-bottom: 0px;"><ul>';
+    var i = '<li class="dewa-bot-carousel-item"><div class="dewa-bot-card dewa-bot-adaptive-card hero"><div class="ac-container"><div class="clear-height"></div><div class="buttons-container"><button type="button" class="ac-pushButton btn" data-type="{1}" data-value=\'{2}\'>{0}</button></div></div></div></li>';
+    var n1 = '</ul></div></div></div></div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+
+    if (a.Text && 0 < a.Text.length) {
+        if (a.Text.indexOf("**") >= 0) {
+            a.Text = '<strong>' + a.Text.split("**").join("") + "</strong>";
+            a.Text = prettifyText(a.Text);
+        }
+        RenderTextOnly(a.Text);
+    }
+    var rec_found = false;
+    if (a.Attachments && 0 < a.Attachments.length) {
+        var d = "";
+        $.each(a.Attachments, function (e, t) {
+            var s = a.Attachments[e];
+            if (s.Content.text) { RenderTextOnly(s.Content.text); }
+            switch (s.ContentType) {
+                case 0:
+                case 1:
+                case 2:
+                    s.Content.buttons &&(rec_found=true) &&  (c = !0, $.each(s.Content.buttons, function (e, t) {
+                        var a = s.Content.buttons[e];
+                        "imBack" === a.type ? d += i.format(a.title, "bt", escape(a.value)) : d += i.format(a.title, "ln", a.value);
+                    }));
+                    break;
+                case 3:
+                    s.Content.media && $.each(s.Content.media, function (e, t) {
+                        audioFiles.push(t.url);
+                    });
+                    break;
+                default:
+                    console.log("unknown value returned: " + s.ContentType);
+                }
+        });
+    }
+    n = n + d + n1;
+    if(rec_found) $(dv_inner).append(n);
+}
+
+function RenderTextOnly(txt)
+{
+    txt = prettifyText(txt);
+    var n = '<div class="dewa-bot-message-wrapper list"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content"><div class="format-markdown"><p>{0}</p></div></div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest1</span></div></div>'.format(txt);
+    $(dv_inner).append(n);
+}
+
+function prettifyText(str) {
+    var regex = /((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g;
+    var emailregex=/(\w+([-+.']\w+)*@@\w+([-.]\w+)*\.\w+([-.]\w+)*)/ig;
+    // Replace plain text links by hyperlinks
+    var s = str.replace(regex, "<a href='$1' target='_blank'>$1</a>");
+    s = s.replace(emailregex, "<a href=\"mailto:$1\">$1</a>");
+    s = s.replace(/\r\n/g, "<br />");
+    s = s.replace(/\n\n/g, "<br />");
+    s = s.replace(/\n/g, "<br />");
+
+    return s;
+}
+
+function formatMyText(e)
+{
+    if (e && e.length > 0) { return '<div class="dewa-bot-message-wrapper list"><div class="dewa-bot-message dewa-bot-message-from-me"><div class="dewa-bot-message-content"><span class="format-plain"><span>' + e + '</span></span></div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>'; }
+}
+
+
+function GetAFToken() {
+    return jQuery('input[name="__RequestVerificationToken"]').val();
+}
+
+function ProcessResponse(e) {
+    e.sort(function (a, b) {
+        return parseInt(a.Order) - parseInt(b.Order);
+    });
+   $.each(e, function (e, t) {
+            switch (t.RenderType) {
+                case 1:
+                case 4:
+                case 5:
+                case 12: //render easy pay
+                    RenderList(t);
+                    break;
+                case 13:
+                    RenderAdaptiveList(t);
+                    break;
+                case 7:
+                    RenderStoreOffersList(t);
+                    break;
+                case 8:
+                    RenderStoreCarosel(t);
+                    break;
+                case 81:
+                    RenderStoreDetails(t);
+                    break;
+                case 9:
+                    RenderSurveyS1(t);
+                    break;
+                case 10:
+                    RenderSurveyS2(t);
+                    break;
+                case 2:
+                case 3:
+                    RenderCarousel(t);
+                    break;
+                case 6:
+                    if (t.Text) {
+                        var m = formatMyText(t.Text);
+                        jQuery(dv_inner).append(m);
+                    }
+                    break;
+       }
+       if (is_startup) {
+           setTimeout(function () { /*$(document).bind("click.a keydown.a keyup.a mousemove.a", playAudio)*/ readSpeak(); }, 2000);
+           is_startup = false;
+       } else {
+           readSpeak();
+       }
+       //playAudioFiles();
+    });
+}
+
+function compare(a, b)
+{
+   let comparison = 0;
+  if (a.Order > b.Order) {
+     comparison = 1;
+  }
+  else if (bandA < bandB) {
+      comparison = -1;
+  }
+  return comparison;
+}
+    var ival = null; var ivalCounter = 0; var ivalWorking = false;
+function CheckServerStatus() {
+    ival = setInterval(CheckState, 6000);
+}
+
+function CheckState() {
+    if (ivalWorking) return;
+    if (ivalCounter > 50) {
+        clearInterval(ival); ivalCounter = 0; return;
+    };
+
+    ivalCounter++; ivalWorking = true;
+
+    $.ajax({
+        url: '@Url.Action("CheckState", "RammasDirectLine")',
+        type: "GET",
+        dataType: "json",
+        data: null,
+        success: function (e) {
+            //var j = JSON.parse(e);
+            if (e.status === 1 && e.data) {
+                clearInterval(ival); ivalCounter = 0;
+                ProcessResponse(e.data);
+                SetFocus();
+            } else {
+                console.log("No data found");
+            }
+
+        },
+        complete: function () {
+            ivalWorking = false;
+        },
+        error: function(e) {
+            console.log(JSON.stringify(e));
+            clearInterval(ival); ivalCounter = 0;
+        }
+        });
+        //return ret;
+    }
+
+function SetFocus() {
+    setTimeout(function () { jQuery(focusDiv).animate({ scrollTop: jQuery(focusDiv)[0].scrollHeight }, 1200); }, 500);
+    }
+
+function SetMuteState() {
+    if (localStorage !== "undefined") {
+        var m = "voice_muted", rammasMute ="rammasMute";
+        if (jQuery(btMute).hasClass(m)) {
+            console.log("i reach here");
+            localStorage.setItem(rammasMute, m);
+        } else {
+            localStorage.setItem(rammasMute, "");
+        }
+  }
+}
+    function GetMuteState() {
+        var cls = "", scls ="voice_muted";
+    if (localStorage !== "undefined" && localStorage.getItem("rammasMute")) {
+        cls= localStorage.getItem("rammasMute");
+        }
+        jQuery(btMute).removeClass(cls);
+        if (cls === scls) {
+            jQuery(btMute).addClass(cls);
+            jQuery(btMute).prop("muted", true);
+        }
+        else {
+            jQuery(btMute).prop("muted", false);
+        }
+}
+
+    var _lastAmount = null;
+function EasyPayAmountKeypress(txt)
+{
+    var charCode = (event.which) ? event.which : event.keyCode;
+	 if ((charCode >= 37 && charCode <= 40) || charCode === 8) {
+        return true;
+    }
+
+	// Ctrl+V or Cmd+V pressed?
+	var isCopyPaste = ((event.ctrlKey || event.metaKey) && event.keyCode == 86) ;
+
+    var _element = document.getElementById(txt);
+    var _val = _element.value;
+    var _billamount = _element.getAttribute("data-val");
+     if (_lastAmount == null || _lastAmount == undefined|| isNaN(_lastAmount)) {
+        _lastAmount = _billamount;
+    }
+
+	if(isCopyPaste && !isNaN(_val)){
+		return true;
+	}
+    var _billmaxamount = _element.getAttribute("max");
+    var _billminamount = _element.getAttribute("min");
+    if (charCode!=190 && charCode != 46 && charCode > 31 &&  (charCode < 48 || charCode > 57)) {
+        _element.value = _lastAmount;
+        return false;
+    }
+    //handle +
+    if (charCode == 16 && _val == "") {
+        _val = _lastAmount;
+    }
+    if (charCode == 46 && _val.indexOf(".") !== -1) {
+        //_element.value = _lastAmount;
+        return false;
+    }
+
+    if (_val.indexOf(".") !== -1) {
+        var number = _val.split('.');
+        if (number.length == 2 && number[1].length > 1) {
+            _val = _val.slice(0, _val.indexOf('.') + 3)
+        }
+    } else {
+        //_val = parseFloat(_val).toFixed(2);
+    }
+
+    if (parseFloat(_val) > parseFloat(_billmaxamount) || parseFloat(_val) < parseFloat(_billminamount)) {
+        _val = _billamount;
+    }
+    document.getElementById(txt).value = _val;
+    _lastAmount = _val;
+    return true;
+}
+
+
+function AppendMessageDateTime(isleft, dt)
+{
+    var a = new Date();
+    var dv = '<div class="dewa-bot-message-wrapper dewa-bot-slider"><div class="dewa-bot-message dewa-bot-message-from-bot"><div class="dewa-bot-message-content">';
+    dv += '<div class="chattimeelapsed ' + (isleft === true ? "left" : "right") + '" data-date="' + dt + '">'+ moment(a).format('hh:mm A')+'</div>';
+    dv += '</div></div><div class="dewa-bot-message-from dewa-bot-message-from-bot"><span>RammasBotTest</span></div></div>';
+     $(dv_inner).append(dv);
+
+}
+
+function UpdateElapsedTime()
+{
+    jQuery(".chattimeelapsed").each(function (i) {
+        var b = new Date(jQuery(this).data("date"));
+        jQuery(this).text(moment(b).format('hh:mm A'));
+
+    });
+
+}
+</script>
+
+
+

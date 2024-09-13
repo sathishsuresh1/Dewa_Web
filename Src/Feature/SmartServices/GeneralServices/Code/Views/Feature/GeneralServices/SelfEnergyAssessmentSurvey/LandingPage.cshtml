@@ -1,0 +1,176 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey.LandingPageViewModel
+
+<div class="box--news" id="dvseas">
+    @*@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "seasform", @class = "form form-dynamic", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+    {*@
+        @*@Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()*@
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+        <div class="grid" id="dvMainGrid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+                        <h3 class="m17-sectiontitle__title  text__section-title green">@Translate.Text("j154_SEA")</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__row mb32">
+                <div class="grid__column grid__column--10">
+                    <div class="j69-dashboard--card">
+                        @*<div class="j69-dashboard--card_title">
+                            @Translate.Text("j154_SEAF")
+                        </div>*@
+
+                        <div class="j154-sea-intro" data-journey="j154-self-energy-assessment">
+                            @Translate.Text("j154_Intro_Text")
+                            <div class="j154-sea-intro_progress j154-sea-donut-progress" data-donut-rate="@Model.PercentageDone" id="dvProgress">
+                                <div class="j154-sea-donut-text">
+                                    @Translate.Text("j154_Completed")
+                                    <div class="j154-sea-donut-number">
+                                        <span data-donut-number="" id="spdn">@Model.PercentageDone</span>%
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 34 34">
+                                    <circle cx="16" cy="16" r="16" class="progress-bar__background" stroke="#EAEAEA" stroke-width="4" />
+                                    <circle cx="16" cy="16" r="16" class="progress-bar__progress js-progress-bar" stroke="#007560" stroke-width="4" stroke-dasharray="100 100" stroke-dashoffset="@(Model.PercentageDone==0 ? 100 : Model.PercentageDone)" style="stroke-dashoffset:@(Model.PercentageDone==0 ? 100 : (100-Model.PercentageDone))" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="j154-sea-intro_buttons">
+                            <a href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" class="button button--outline">@Translate.Text("j154_BTSL")</a>                   @if (Model.IsStarted)
+                            {
+                                <button class="button button--primary button--next" type="button" id="btStart">@Translate.Text("j154_RTA")</button>
+                            }
+                            else
+                            {
+                                <button class="button button--primary button--next" type="button" id="btStart">@Translate.Text("j154_STA")</button>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*@if (Model.Downloads != null && Model.Downloads.Count >= 1)
+            {*@
+            <div class="grid__row mb32">
+                <div class="grid__column grid__column--10">
+                    <div class="j69-dashboard--card" id="dvdnld">
+                        <div class="j69-dashboard--card_title">
+                            @Translate.Text("j154_PAR")
+                        </div>
+                        @*@foreach (var d in Model.Downloads)
+                        {
+                            <div class="j154-sea-prevrep icon-new-pdf">
+                                <span>@d.Key</span>
+                                <a href="@Url.Action("Download", new { key = d.Value })" target="_blank" class="link">@Translate.Text("j154_DPDF")</a>
+                            </div>
+                        }*@
+                    </div>
+                </div>
+            </div>
+            @*}*@
+        </div>
+    @*}*@
+</div>
+
+<script type="text/javascript">
+
+    var btnStart = '#btStart', resume =@(Model.IsStarted ? "true" : "false"), loader2 = ".m66-preloader-fullpage";
+
+    jQuery(document).ready(function ($) {
+        jQuery('#form-account-selector').submit(GetAccountSurveys());
+        //jQuery('#form-account-selector').off("submit").submit();
+        jQuery('#form-account-selector').submit();
+       //jQuery(document).on("submit","#form-account-selector",function (e) { e.preventDefault(); return false; });
+        jQuery(".m43-accountsel:first").find('.button--primary[data-accountupdate=true]').on("click", function (e) { e.preventDefault(); GetAccountSurveys(); });
+        jQuery(btnStart).on("click", function (e) {
+            window.location.href =  '@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J54_SURVEY_PAGE)?a=' + GetSelectedAccount();
+        });
+
+    });
+
+    function GetAccountSurveys()
+    {
+        try {
+            var url = '@Url.Action("UserSurveys")';
+            var data = { __RequestVerificationToken: GetAFToken(), account: GetSelectedAccount() };
+            CallBackend(url, data,'json');
+        }
+        catch (error) {
+            console.log(error);
+        }
+        return false;
+    }
+
+    function CallBackend(url, data,datatype) {
+            jQuery.ajax({
+                url: url, data: data,
+                beforeSend: function () {
+                    $(loader2).show();
+                },
+                complete: function () {
+                    $(loader2).hide();
+                },
+                dataType: datatype,
+                type: 'POST',
+                success: function (res) {
+                    ListUserSurveys(res);
+                },
+                fail: function (error) {
+                   console.log(error);
+                }
+            });
+    }
+
+    function GetAFToken() {
+        return jQuery('input[name="__RequestVerificationToken"]').val()
+    }
+    function GetSelectedAccount() {
+        return $('input[name="SelectedAccountNumber"]:checked').val();
+    }
+
+    function ListUserSurveys(data) {
+        var res = JSON.parse(JSON.stringify(data));
+        var dv_el = "#dvdnld";
+        try {
+            $("div.icon-new-pdf").remove();
+            if (res.pdf.length === 0) {
+                $(dv_el).hide();
+            } else {
+                $.each(res.pdf, function (i, v) {
+                    var el = '<div class="j154-sea-prevrep icon-new-pdf"><span>' + v.Key + '</span>';
+                    el = el + '<a href="' + '@Url.Action("Download")' + '?key=' + v.Value + '" target="_blank"  class="link">@Translate.Text("j154_DPDF")</a></div>';
+                    $(dv_el).append(el);
+                });
+                $(dv_el).show();
+            }
+            if (res.started) {
+                SetProgress(res.percentage);
+                $(btnStart).text('@Translate.Text("j154_RTA")'); resume = true;
+            } else {
+                SetProgress(0);
+                $(btnStart).text('@Translate.Text("j154_STA")');
+                resume = false;
+            }
+        } catch (err) { console.log(err);}
+    }
+
+    function SetProgress(o) {
+        $("#dvProgress").attr("data-donut-rate", o);
+        $("#spdn").text(o);
+        var p = 100;
+        if (o !== 0 || o !== '0') {
+            p = p - o;
+        }
+        $("#dvProgress").find("svg").find("circle:last").attr("style", "stroke-dashoffset:" + p);
+    }
+</script>

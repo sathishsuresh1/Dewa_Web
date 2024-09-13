@@ -1,0 +1,143 @@
+﻿@model DEWAXP.Feature.SupplyManagement.Models.Track.TrackRequestAnonymous
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content
+
+@{
+
+    string msg = @Translate.Text("TRA_NoRecord_Found");
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+
+<div class="j141-tracking-anonymous j120-smart-response-status" data-journey="j141-tracking-anonymous">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TRACK_REQUEST_ANONYMOUS)" class="j120-smart-response--button">@Translate.Text("TRA_Back")</a>
+            <h2 class="j120-smart-response--track_title">@Translate.Text("TRA_TrackRequests")</h2>
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            <div class="j120-smart-response-status-vert">
+                <div class="j120-smart-response-statusbox j120-smart-response--track track-content-box">
+                    <div class="j120-smart-response--track-head">
+                        <div class="j120-smart-response--track-head-title">
+                            <div class="j120-smart-response--track_title">@Model.NotificationShortText</div>
+                            <div class="j120-smart-response--track_subtitle">@Translate.Text("TRA_NotificationNo") @Model.NotificationNumber</div>
+                            @if (!string.IsNullOrWhiteSpace(Model.EvStatusDescription))
+                            {<div class="j120-smart-response--track_subtitle mt12"><span class="mt12 green">@Model.EvStatusDescription</span></div>}
+                        </div>
+                    </div>
+                    <div class="track-status-content">
+                        @if (Model.TrackStatusList != null && Model.TrackStatusList.Count > 0)
+                        {
+
+                            bool CurrentState = true;
+                            <ul class="j120-smart-response--track_list" data-msg="@(msg)">
+
+                                @foreach (var item in Model.TrackStatusList)
+                                {
+                                    string extClass = string.Format("j120-smart-response--track_item--current {0}j120-smart-response--track_item--done", (item.notificationstatus == "S002" ? "j120-smart-response--track_item--location " : ""));
+                                    <li data-nid="@(item.notificationnumber)" class="j120-smart-response--track_item @(CurrentState?extClass:"")">
+                                        <div class="j120-smart-response--track_item-content">
+                                            <span class="j120-smart-response--track_item-status-title">@_commonHelper.GetSMTranslation(item.notificationtextstatus, lang)</span>
+                                            @if (item.notificationdate != "0000-00-00")
+                                            {
+                                                string mnth = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "MMM"), lang);
+                                                string dd = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "dd"), lang);
+                                                string yyyy = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "yyyy"), lang);
+                                                string fromattedDate = string.Format("{0} {1} {2}", dd, mnth, yyyy);
+                                                if (item.notificationtime != "00:00:00")
+                                                {
+                                                    <span class="date-time">@string.Format("{0} {1}", fromattedDate, item.notificationtime) </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="date-time">@string.Format("{0}", fromattedDate) </span>
+                                                }
+                                            }
+                                        </div>
+                                    </li>
+                                    if (item.currentstatus == "X" && CurrentState)
+                                    {
+                                        CurrentState = false;
+                                    }
+                                }
+
+                            </ul>
+
+                        }
+                        else
+                        {
+                            <p style="padding-right:2px;padding-left:2px;padding-top:10px;font-weight:bold">@(msg)</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@*<div class="grid j141-tracking-anonymous" data-journey="j141-tracking-anonymous">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TRACK_REQUEST_ANONYMOUS)" class="j120-smart-response--button">@Translate.Text("TRA_Back")</a>
+                <div class="j141-tracking--legend">
+                    @Translate.Text("TRA_TrackRequests")
+                </div>
+                @if (Model.TrackStatusList != null && Model.TrackStatusList.Count > 0)
+                {
+                    bool CurrentState = true;
+                    <div class="j141-tracking--card">
+                        <div class="j141-tracking--card_title">
+                            @Model.NotificationShortText
+                        </div>
+                        <div class="j141-tracking--card_subtitle">
+                            @Translate.Text("TRA_RequestReferenceNumber") @Model.ReferenceNumber
+                        </div>
+                        <div class="m70-status-tracker m70-status-tracker-new" data-component="m70-status-tracker">
+                            @foreach (var item in Model.TrackStatusList)
+                            {
+                                <div class="m70-status-tracker--item @(CurrentState?"m70-status-tracker--green":"m70-status-tracker--dashed")">
+                                    <div class="m70-status-tracker--item_inner">
+                                        <div class="m70-status-tracker--item_title">
+                                            <div class="m70-status-tracker--item_icon icon-pagination_active" style="color: @(CurrentState?"#007560":"#939598");"></div>
+                                            @item.notificationtextstatus
+                                        </div>
+                                        <div class="m70-status-tracker--item_desc">
+                                            @if (item.notificationdate != "0000-00-00")
+                                            {
+                                                string mnth = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "MMM"));
+                                                string dd = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "dd"));
+                                                string yyyy = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.notificationdate, "yyyy-MM-dd", "yyyy"));
+                                                string fromattedDate = string.Format("{0} {1} {2}", dd, mnth, yyyy);
+                                                <span class="date-time">@string.Format("{0} {1}", fromattedDate, item.notificationtime) </span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                if (item.currentstatus == "X" && CurrentState)
+                                {
+                                    CurrentState = false;
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="j141-tracking--card">
+                        @Translate.Text("TRA_NoRecord_Found")
+                    </div>
+                }
+            </div>
+        </div>
+    </div>*@
+<script type="text/javascript">
+    docReady(function () {
+        if ('@lang' == 'ar') {
+            jQuery(".j141-tracking-anonymous").parent("div").addClass("j120-smart-response--rtl");
+        }
+    });
+</script>

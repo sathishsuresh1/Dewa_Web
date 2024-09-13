@@ -1,0 +1,368 @@
+﻿@model DEWAXP.Feature.HR.Models.CareerPortal.CandidateProfile
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.HR.Models.CareerPortal
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.HR.Helpers.CareerPortal
+@{
+
+    var genderList = CareerPortalHelper.GetGender();
+    var MaritalStatusList = CareerPortalHelper.GetMaritalStatus();
+}
+
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { }, FormMethod.Post, new { @id = "candidateprofile" + Model.Section, @name = "j126-career-portal-profile", @data_parsley_focus = "true", @data_form = "true", @data_submit_validate = "enabled", @novalidate = string.Empty, @autocomplete = "off" }))
+{
+    @Html.Sitecore().FormHandler("CareerPortal", "PersonalInformation")
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Section)
+    <input id="mobileno" name="mobileno" value="@Model.MobileNo" type="hidden" />
+    <p>@Translate.Text("personal data intro")</p>
+    <div class="form-field form-field--text form-field--12 ">
+        <label for="form-field-firstname" class="form-field__label">
+            @Translate.Text("registration firstname label")
+            <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+        </label>
+        <span class="form-field__input-wrapper">
+            @Html.TextBoxFor(x => x.FirstName, new
+            {
+                @class = "form-field__input form-field__input--text",
+                @type = "text",
+                @id = "form-field-firstname",
+                @placeholder = Translate.Text("registration firstname label"),
+                @required = "required",
+                @data_parsley_error_message = Translate.Text("register firstname validation message"),
+                @data_parsley_errors_container = "#description-for-firstname",
+                @aria_describedby = "description-for-firstname",
+                @data_parsley_trigger = "focusout",
+            })
+            @*<input class="form-field__input form-field__input--text"
+                id="form-field-firstname"
+                name="first_name"
+                type="text"
+                placeholder="Enter First Name"
+                aria-describedby="description-for-firstname"
+                data-parsley-errors-container="#description-for-firstname"
+                required
+                data-parsley-required-message="This field is required" />*@
+        </span>
+        <div id="description-for-firstname" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--text     form-field--12 ">
+        <label for="form-field-lastname" class="form-field__label">
+            @Translate.Text("registration lastname label")
+            <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+        </label>
+        <span class="form-field__input-wrapper">
+            @Html.TextBoxFor(x => x.LastName, new
+            {
+                @class = "form-field__input form-field__input--text",
+                @type = "text",
+                @id = "form-field-lastname",
+                @placeholder = Translate.Text("registration lastname label"),
+                //@aria_required = "true",
+                @required = "required",
+                @data_parsley_error_message = Translate.Text("register lastname validation message"),
+                @data_parsley_errors_container = "#description-for-lastname",
+                @aria_describedby = "description-for-lastname",
+            })
+            @*<input class="form-field__input form-field__input--text"
+                id="form-field-pjaytm05w"
+                name="last_name"
+                type="text"
+                placeholder="Enter Last Name"
+                aria-describedby="description-for-pjaytm05w"
+                data-parsley-errors-container="#description-for-pjaytm05w"
+                required
+                data-parsley-required-message="This field is required" />*@
+        </span>
+        <p class="import-text">
+            @Translate.Text("first last name instruction text")
+        </p>
+        <div id="description-for-lastname" class="form-field__messages">
+        </div>
+    </div>
+    <div id="datepicker-container-DOB" class="form-field form-field--text form-field--12">
+        <label for="form-field-DOB" class="form-field__label">
+            @Translate.Text("dob label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+            @Html.TextBoxFor(x => x.DOB, new
+              {
+                  data_parsley_id = "6",
+                  @class = "form-field__input form-field__input--text form-field__input--datepicker",
+                  id = "form-field-DOB",
+                  placeholder = Translate.Text("Select date"),
+                  required = "required",
+                  data_parsley_required_message = Translate.Text("dob validation message"),
+                  data_el = "datepicker",
+                  data_parsley_errors_container = "#description-for-DOB",
+                  type = "text",
+                  @data_initial_date = string.Empty
+              })
+        </span>
+        <div id="description-for-DOB" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--text form-field--6 nopadding">
+        <label for="form-field-educationtype" class="form-field__label form-field__label_large">
+            Current Address
+        </label>
+    </div>
+    <div class="form-field form-field--select form-field--select-single  form-field--6">
+        <label for="form-field-Nationality" class="form-field__label">
+            @Translate.Text("registration nationality label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                    id="form-field-Nationality"
+                    name="Nationality"
+                    required
+                    aria-describedby="description-for-Nationality"
+                    data-parsley-required-message="@Translate.Text("register nationality validation message")"
+                    data-parsley-errors-container="#description-for-Nationality">
+                <option value="" selected>@Translate.Text("select nationality")</option>
+                @{
+                    foreach (var item in Model.NationalityList)
+                    {
+                        if (!string.IsNullOrWhiteSpace(Model.Nationality) && item.Value == Model.Nationality)
+                        {
+                            <option value="@item.Value" selected>@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                }
+            </select>
+        </span>
+        <div id="description-for-Nationality" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--select form-field--select-single  form-field--6  nopadding">
+        <label for="form-field-Religion" class="form-field__label">
+            @Translate.Text("religion label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            @if (Model.ReligionList != null && Model.ReligionList.Count > 0)
+            {
+                @Html.DropDownListFor(x => x.Religion, new SelectList(Model.ReligionList, "Value", "Text"), Translate.Text("Select Religion"), new
+               {
+                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                   @data_parsley_id = "1",
+                   @id = "form-field-Religion",
+                   @required = "required",
+                   @aria_describedby = "description-for-Religion",
+                   @data_parsley_errors_container = "#description-for-Religion",
+                   @data_parsley_error_message = Translate.Text("religion validation message"),
+               })
+            }
+        </span>
+        <div id="description-for-Religion" class="form-field__messages">
+        </div>
+    </div>
+
+
+
+    <div class="form-field form-field--text   form-field--6   ">
+        <label for="form-field-PassportNo" class="form-field__label">
+            @Translate.Text("registration passport label")
+            <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+        </label>
+        <span class="form-field__input-wrapper">
+            @Html.TextBoxFor(x => x.PassportNo, new
+               {
+                   @class = "form-field__input form-field__input--text",
+                   @type = "text",
+                   @maxlength = "15",
+                   @data_parsley_maxlength = "15",
+                   @id = "form-field-PassportNo",
+                   @placeholder = Translate.Text("registration passport label"),
+                   @required = "required",
+                   @data_parsley_error_message = Translate.Text(DictionaryKeys.Global.Forms.PassportValidationMessage),
+                   @data_parsley_errors_container = "#description-for-PassportNo",
+                   @aria_describedby = "description-for-PassportNo",
+                   @data_parsley_trigger = "focusout",
+               })
+        </span>
+        <div id="description-for-PassportNo" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--select form-field--select-single  form-field--6  nopadding">
+        <label for="form-field-IsUAEResident" class="form-field__label">
+            @Translate.Text("uae resident label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                    id="form-field-IsUAEResident"
+                    name="IsUAEResident"
+                    aria-describedby="description-for-IsUAEResident"
+                    data-parsley-errors-container="#description-for-IsUAEResident">
+                <option value="1" selected>No</option>
+                <option value="0">Yes</option>
+            </select>
+        </span>
+        <div id="description-for-IsUAEResident" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--text form-field--6">
+        <label for="form-field-EmiratesID" class="form-field__label">
+            @Translate.Text("emirates id label")
+            <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+        </label>
+        <span class="form-field__input-wrapper">
+            @*<input class="form-field__input form-field__input--text"
+                id="form-field-zlhzjnwlg"
+                name="eid"
+                type="text"
+                placeholder="Enter emiremirated id no."
+                aria-describedby="description-for-zlhzjnwlg"
+                data-parsley-errors-container="#description-for-zlhzjnwlg"
+                required
+                data-parsley-required-message="This field is required" />*@
+            @*@Html.TextBoxFor(x => x.EmiratesID, new
+                {
+                    @class = "form-field__input form-field__input--text",
+                    @id = "form-field-EmiratesID",
+                    @placeholder = Translate.Text("emiratesId placeholder text"),
+                    @required = "required",
+                    @aria_required = "true",
+                    @data_parsley_error_message = Translate.Text("emiratesid validation message"),
+                    @data_parsley_errors_container = "#description-for-EmiratesID",
+                    @aria_describedby = "description-for-EmiratesID",
+                    @data_parsley_emiratesid = ""
+                })*@
+            <input class="form-field__input form-field__input--text"
+                   value="@Model.EmiratesID"
+                   id="form-field-EmiratesID"
+                   name="EmiratesID"
+                   maxlength="15"
+                   data-parsley-maxlength="15"
+                   type="text"
+                   data-parsley-emiratesid="true"
+                   placeholder="@Translate.Text("emiratesId placeholder text")"
+                   data-parsley-emiratesid-message="@Translate.Text("emiratesid validation message")"
+                   aria-describedby="description-for-EmiratesID"
+                   data-parsley-errors-container="#description-for-EmiratesID"
+                   data-parsley-required-message="@Translate.Text("emiratesid validation message")" />
+        </span>
+        <div id="description-for-EmiratesID" class="form-field__messages">
+            @Html.ValidationMessageFor(x => x.EmiratesID, "", new { @class = "parsley-errors-list" })
+        </div>
+    </div>
+    <div class="form-field form-field--text form-field--6 nopadding">
+        <label for="form-field-DisabilityId" class="form-field__label">
+            @Translate.Text("disable id label")
+            <span class="form-field__label-required aria-only">(@Translate.Text("required text"))</span>
+        </label>
+        <span class="form-field__input-wrapper">
+            @*<input class="form-field__input form-field__input--text"
+                id="form-field-mrferdoeo"
+                name="dis-id"
+                type="text"
+                placeholder="Enter disability id no."
+                aria-describedby="description-for-mrferdoeo"
+                data-parsley-errors-container="#description-for-mrferdoeo"
+                required
+                data-parsley-required-message="This field is required" />*@
+            @Html.TextBoxFor(x => x.DisabilityId, new
+               {
+                   @class = "form-field__input form-field__input--text",
+                   @type = "text",
+                   @maxlength = "15",
+                   @data_parsley_maxlength = "15",
+                   @id = "form-field-DisabilityId",
+                   @placeholder = Translate.Text("disable id placeholder text"),
+                   @data_parsley_error_message = Translate.Text("disabilityId validation message"),
+                   @data_parsley_errors_container = "#description-for-DisabilityId",
+                   @aria_describedby = "description-for-DisabilityId",
+               })
+        </span>
+        <div id="description-for-DisabilityId" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--select form-field--select-single  form-field--6  ">
+        <label for="form-field-YearsOfExperience" class="form-field__label">
+            @Translate.Text("year experience label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                    id="form-field-YearsOfExperience"
+                    name="YearsOfExperience"
+                    required
+                    data-parsley-required-message="@Translate.Text("year experience validation message")"
+                    aria-describedby="description-for-YearsOfExperience"
+                    data-parsley-errors-container="#description-for-YearsOfExperience">
+                <option value="" selected>@Translate.Text("select experience text")</option>
+                @{
+                    for (var i = 1; i < 51; i++)
+                    {
+                        if (!string.IsNullOrWhiteSpace(Model.YearsOfExperience) && i.ToString() == Model.YearsOfExperience)
+                        {
+                            <option value="@i" selected>@i</option>
+                        }
+                        else
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    }
+
+                }
+            </select>
+        </span>
+        <div id="description-for-YearsOfExperience" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field form-field--select form-field--select-single  form-field--6  nopadding">
+        <label for="form-field-HighestQualificationLevel" class="form-field__label">
+            @Translate.Text("highest qualification label")
+        </label>
+        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                    id="form-field-HighestQualificationLevel"
+                    name="HighestQualificationLevel"
+                    required
+                    aria-describedby="description-for-HighestQualificationLevel"
+                    data-parsley-required-message="@Translate.Text("highest qualification validation message")"
+                    data-parsley-errors-container="#description-for-HighestQualificationLevel">
+                <option value="" selected>@Translate.Text("select qualification text")</option>
+                @{
+                    foreach (var item in Model.EducationLevel)
+                    {
+                        if (!string.IsNullOrWhiteSpace(Model.HighestQualificationLevel) && item.Value == Model.HighestQualificationLevel)
+                        {
+                            <option value="@item.Value" selected>@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                }
+            </select>
+        </span>
+        <div id="description-for-HighestQualificationLevel" class="form-field__messages">
+        </div>
+    </div>
+    <div class="form-field__button save-continue-btns form-field--12">
+        @Html.HiddenFor(x => x.SaveandContinueButtonClicked, new { id = "saveandcontinuebuttonclicked" })
+        <button id="btnPersonalInfoSave" data-text="True" type="submit" class="button button--primary">@Translate.Text("save continue text")</button>
+        <button id="btnPersonalInfoContinue" data-text="False" type="submit" class="button button--quaternary">@Translate.Text("save exit text")</button>
+    </div>
+}
+
+<script type="text/javascript">
+    var $saveandcontinuebuttonclicked = jQuery('#saveandcontinuebuttonclicked');
+    $("form button[type=submit]").click(function (e) {
+        if ($(this).attr("data-text") == "True") {
+            $saveandcontinuebuttonclicked[0].value = true;
+        }
+        else {
+            $saveandcontinuebuttonclicked[0].value = false;
+        }
+    });
+</script> 

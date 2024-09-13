@@ -1,0 +1,57 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.User
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@{
+    var btnDisabled = "";
+    var message = Translate.Text("J106.PleaseCompleteStep1Label");
+    var _totalVideosWatched = Model.VideoResponses.Select(x => x.NameValue.AllKeys.Count()).FirstOrDefault();
+    var _totalVideos = Model.Videos.VideoGallery.Count();
+    var _showstatus = true;
+    var _btnText = Translate.Text("J106.ContinueLabel");
+
+
+    if (Model.VideoResponses.FirstOrDefault().IsCompleted)
+    {
+        btnDisabled = string.Empty;
+        message = Translate.Text("J106.PleaseProceedTo") + " " + Translate.Text("J106.Step3Label");
+        _btnText = Translate.Text("J106.CompletedLabel");
+
+    }
+    else if (!Model.SurveyResponses.FirstOrDefault().IsFirstAttemptCompleted)
+    {
+        btnDisabled = "disabled";
+        _showstatus = false;
+    }
+    else
+    {
+        btnDisabled = string.Empty;
+        message = string.Empty;
+        _showstatus = true;
+    }
+
+
+}
+<div class="grid__column grid__column--6">
+    <div class="j106-ideal-home__stat-card">
+        <div class="j106-ideal-home__stat-step">@Translate.Text("J106.Step2Label")</div>
+        <div class="j106-ideal-home__stat-title">@Translate.Text("J106.WorkShopMaterial")</div>
+        <div class="j106-ideal-home__stat-progress">
+
+            @message<br /><br />
+            @if (_showstatus)
+            {
+                <span class="j106-ideal-home__stat-progress--correct" style="width:50%;float:left">@Translate.Text("J106.TotalLabel")  @_totalVideos</span>
+                <span class="j106-ideal-home__stat-progress--wrong" style="width:50%;float:left">@Translate.Text("J106.WatchedLabel")  @_totalVideosWatched</span>
+            }
+        </div>
+        <div class="j106-ideal-home__buttons">
+            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_DISPLAY_VIDEO_PAGE)" @btnDisabled class="@btnDisabled button button--primary button--small">
+                @_btnText
+            </a>
+        </div>
+    </div>
+</div>

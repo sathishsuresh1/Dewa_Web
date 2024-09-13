@@ -1,0 +1,1409 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.USC.Models.SmartCommunications
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content.Models.Common
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using Sitecore.Data.Items
+@using DEWAXP.Foundation.Content.Repositories
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    //var sitecoreService = new Glass.Mapper.Sc.SitecoreContext();
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    //var CommunicationChannels = sitecoreService.GetItem<ListDataSources>(DataSources.SC_Preferred_Communication_Channel, false).Items;
+    var Discussion_Area = _contentRepository.GetItem<ListDataSources>(new GetItemByPathOptions(DataSources.SC_Discussion_Area)).Items;
+    var Inquiry_Type = _contentRepository.GetItem<ListDataSources>(new GetItemByPathOptions(DataSources.SC_Inquiry_Type)).Items;
+    var General_Information = _contentRepository.GetItem<ListDataSources>(new GetItemByPathOptions(DataSources.SC_General_Information)).Items;
+    var NOC_Category = _contentRepository.GetItem<ListDataSources>(new GetItemByPathOptions(DataSources.SC_NOC_Category)).Items;
+    // var Discussion_Subject = sitecoreService.GetItem<ListDataSources>(DataSources.SC_Discussion_Subject, false).Items;
+    SmartCommunicationSettings settings = _contentRepository.GetItem<SmartCommunicationSettings>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.SMARTCOMMUNICATIONS_CONFIG)));
+    var dir = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    if (ReCaptchaHelper.Recaptchasetting())
+    {
+        ViewBag.SiteKey = ReCaptchaHelper.RecaptchaSiteKey();
+        ViewBag.Recaptcha = true;
+    }
+    else
+    {
+        ViewBag.Recaptcha = false;
+    }
+}
+
+
+<div class="m2-card-form-card m2-card-form-countdown level-2" id="inquiry">
+    <div class="m2-card-form-card-body">
+        <div class="m2-card-form-card-header">
+            <div class="m2-card-form--trigger m2-card-form-card-back icon-new-arrow-right"></div>
+            <div class="m2-card-form-card-title green">
+                @Translate.Text("Sc.Submit an Inquiry")
+            </div>
+            <div class="m2-card-form-card-close icon-cancel" data-closeCard="true"></div>
+        </div>
+
+        <div class="m2-card-form-card-content inquiry-form">
+            <div class="form-field form-field__radio--toggle m2-card-form-card-inquiryRadio">
+                <fieldset class="fieldset">
+                    <legend class="form-field__label">
+                        @Translate.Text("Sc.My Inquiry is Related To")
+                    </legend>
+                    <p class="form-field__radio form-field__radio--pill">
+                        <label>
+                            <input class="form-field__input form-field__input--radio"
+                                   toggle-target="#consumerInquiry"
+                                   is-clear="true"
+                                   checked=""
+                                   id="form-field-radio_1_1"
+                                   name="radios_group1"
+                                   type="radio"
+                                   value="1"
+                                   aria-describedby="description-for-inquirytype"
+                                   data-parsley-errors-container="#description-for-inquirytype"
+                                   data-parsley-multiple="radios_group1"
+                                   data-parsley-id="35"
+                                   data-inquiryType="consumer">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("Sc.Consumer")
+                            </span>
+                        </label>
+                    </p>
+                    <p class="form-field__radio form-field__radio--pill">
+                        <label>
+                            <input class="form-field__input form-field__input--radio"
+                                   toggle-target="#builderInquiry"
+                                   is-clear="true"
+                                   id="form-field-radio_1_2"
+                                   name="radios_group1"
+                                   type="radio"
+                                   value="2"
+                                   aria-describedby="description-for-inquirytype"
+                                   data-parsley-errors-container="#description-for-inquirytype"
+                                   data-parsley-multiple="radios_group1"
+                                   data-inquiryType="builder">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("Sc.Builder")
+                            </span>
+                        </label>
+                    </p>
+                    <p class="form-field__radio form-field__radio--pill">
+                        <label>
+                            <input class="form-field__input form-field__input--radio"
+                                   toggle-target="#generalInquiry"
+                                   is-clear="true"
+                                   id="form-field-radio_1_3"
+                                   name="radios_group1"
+                                   type="radio"
+                                   value="3"
+                                   aria-describedby="description-for-inquirytype"
+                                   data-parsley-errors-container="#description-for-inquirytype"
+                                   data-parsley-multiple="radios_group1"
+                                   data-inquiryType="visitor">
+                            <span class="form-field__fakeradio focus-enabled">
+                                @Translate.Text("Sc.General")
+                            </span>
+                        </label>
+                    </p>
+                    <div id="description-for-inquirytype" class="form-field__messages">
+                    </div>
+                </fieldset>
+            </div>
+
+
+            <div class="form-field" id="consumerInquiry">
+                <form id="form-consumerinquiry" class="form" data-form="true" action="#" method="POST">
+                    @Html.AntiForgeryToken()
+                    <div class="form-field form-field--text">
+                        <label for="form-field-consumerinquiryacnumber" class="form-field__label">
+                            @Translate.Text("Sc.Account Number")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-consumerinquiryacnumber"
+                                   name="text"
+                                   type="number"
+                                   @*maxlength="10"*@
+                                   data-parsley-minlength="10"
+                                   data-parsley-maxnumber="10"
+                                   autocomplete="off"
+                                   @*data-parsley-type="number"*@
+                                   placeholder="@Translate.Text("Sc.Account Number placeholder")"
+                                   aria-describedby="description-for-consumerinquiryacnumber"
+                                   data-parsley-errors-container="#description-for-consumerinquiryacnumber"
+                                   required=""
+                                   value=""
+                                   data-parsley-required-message="@Translate.Text("Sc.Account Number Error message")"
+                                   data-parsley-error-message="@Translate.Text("Sc.Enter a valid 10 digit account number")"
+                                   data-parsley-trigger="focusout">
+                        </span>
+                        <div id="description-for-consumerinquiryacnumber" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field__button" id="divconsumerinquirynxtbutton">
+                        <button class="button button--primary  button--fullwidth" id="consumerinquirynxtbutton" name="Submittedby" type="button" value="">@Translate.Text("Next")</button>
+                    </div>
+                    <div id="consumerinquiry-verify-form" class="form-field" style="display:none">
+                        <div class="form-field form-field--text">
+                            <label for="form-field-ddconsumermobilenum" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("Sc.To help us verify")
+                            </label>
+                            @*<div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                    <input class="form-field__input form-field__input--readonly"
+                                           readonly=""
+                                           id="form-field-ddconsumermobilenum"
+                                           name="ddconsumermobilenum"
+                                           type="text"
+                                           value=""
+                                           aria-describedby="description-for-ddconsumermobilenum"
+                                           data-parsley-errors-container="#description-for-ddconsumermobilenum"
+                                           data-parsley-trigger="focusout">
+                                </div>*@
+                            <strong dir="ltr" id="form-field-ddconsumermobilenum"></strong>
+                            <div id="description-for-ddconsumermobilenum" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text">
+                            <label for="form-field-consumerinquiryverifymnumber" class="form-field__label">
+                                @Translate.Text("Sc.Mobile Number")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-consumerinquiryverifymnumber"
+                                       name="text"
+                                       type="number"
+                                       placeholder="@Translate.Text("Sc.Mobile Number Verification Placholder")"
+                                       aria-describedby="description-for-consumerinquiryverifymnumber"
+                                       data-parsley-errors-container="#description-for-consumerinquiryverifymnumber"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("Sc.Mobile Number Error message required")"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-minlength="1"
+                                       data-parsley-maxnumber="10"
+                                       autocomplete="off"
+                                       data-parsley-id="4">
+                            </span>
+                            <div id="description-for-consumerinquiryverifymnumber" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field__button" id="divconsumerinquiryverifybutton">
+                            <button class="button button--primary  button--fullwidth" id="consumerinquiryverifybutton" name="Submittedby" type="button" value="">@Translate.Text("SS_UP_Verify")</button>
+                        </div>
+                    </div>
+                    <div id="consumerinquiry-form" class="form-field" style="display:none">
+                        <div class="form-field form-field--text hidden">
+                            <label for="form-field-consumerinquiryname" class="form-field__label">
+                                @Translate.Text("Sc.Requester Name")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-consumerinquiryname"
+                                       name="text"
+                                       type="text"
+                                       placeholder="@Translate.Text("Sc.Requester Name placeholder")"
+                                       aria-describedby="description-for-consumerinquiryname"
+                                       data-parsley-errors-container="#description-for-consumerinquiryname"
+                                       required=""
+                                       data-parsley-pattern="/^[أ-يa-zA-Z ]*$/"
+                                       data-parsley-pattern-message="@Translate.Text("Sc.Requester Name Error message")"
+                                       data-parsley-required-message="@Translate.Text("Sc.Requester Name Error message")"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="4">
+                            </span>
+                            <div id="description-for-consumerinquiryname" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text">
+                            <label for="form-field-consumerinquryemail" class="form-field__label">
+                                @Translate.Text("Sc.Email")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-consumerinquryemail"
+                                       name="consumerinquryemail"
+                                       type="email"
+                                       placeholder="@Translate.Text("Sc.Emailplaceholder")"
+                                       aria-describedby="description-for-consumerinquryemail"
+                                       data-parsley-errors-container="#description-for-consumerinquryemail"
+                                       required=""
+                                       data-parsley-error-message="@Translate.Text("Sc.Emailerrormessage")"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="4">
+                            </span>
+                            <div id="description-for-consumerinquryemail" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-consumermobilenumber" class="form-field__label">
+                                @Translate.Text("Sc.Mobile Number")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                                <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                       id="form-field-consumermobilenumber"
+                                       name="consumermobilenumber"
+                                       type="tel"
+                                       placeholder="@Translate.Text("Sc.Mobile Number Placholder")"
+                                       aria-describedby="description-for-consumermobilenumber"
+                                       data-parsley-errors-container="#description-for-consumermobilenumber"
+                                       required=""
+                                       data-parsley-required-message="@Translate.Text("Sc.Mobile Number Error message required")"
+                                       data-parsley-mobile_number=""
+                                       data-parsley-mobile_number-message="@Translate.Text("Sc.Mobile Number Error message invalid")"
+                                       data-parsley-trigger="focusout" data-parsley-id="14">
+                            </span>
+                            <div id="description-for-consumermobilenumber" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-consumerInquiryType" class="form-field__label">
+                                @Translate.Text("Sc.Discussion area")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                        id="form-field-consumerInquiryType"
+                                        name="consumerInquiryType"
+                                        required=""
+                                        aria-describedby="description-for-consumerInquiryType"
+                                        data-parsley-errors-container="#description-for-consumerInquiryType"
+                                        data-parsley-required-message="@Translate.Text("Sc.Please select inquiry area")"
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="30">
+                                    <option value="" selected>@Translate.Text("Sc.Please select inquiry area")</option>
+                                    @{ var inquirycount = 1;}
+                                    @foreach (DataSourceItems dataSource in Inquiry_Type)
+                                    {
+                                        <option value="@dataSource.Value" @(inquirycount == 0 ? "selected=\"\"" : "")>@dataSource.Text</option>
+                                        inquirycount++;
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-consumerInquiryType" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text form-field--textarea">
+                            <label for="form-field-CinquiryDetails" class="form-field__label">
+                                @Translate.Text("Sc.Inquiry Details")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                          maxlength="500"
+                                          data-textarea="CinquiryDetails"
+                                          data-parsley-pattern="^[^<>;]+$"
+                                          data-parsley-trigger="focusout"
+                                          data-parsley-pattern-message="@Translate.Text("Sc.Inquiry Details Error Message")"
+                                          id="form-field-CinquiryDetails" name="CinquiryDetails" type="textarea" placeholder="@Translate.Text("Sc.Inquiry Details Placeholder")"
+                                          aria-describedby="description-for-CinquiryDetails" data-parsley-errors-container="#description-for-CinquiryDetails" required="" data-parsley-required-message="@Translate.Text("Sc.Inquiry Details Error Message")" data-parsley-id="22"></textarea>
+                            </span>
+                            <div id="description-for-CinquiryDetails" class="form-field__messages">
+                                <p class="form-field__charcount">
+                                    @Translate.Text("Sc.Max")
+                                    <span data-charcount="CinquiryDetails">0</span>/500 @Translate.Text("Sc.Characters")
+                                </p>
+                            </div>
+                        </div>
+                        <div id="description-for-submissionfailed" class="form-field__messages mb12">
+                        </div>
+                        @if (ViewBag.Recaptcha != null && (bool)ViewBag.Recaptcha)
+                        {
+                            <div class="form-field clear_both">
+                                <div class="g-recaptcha" id="cpatchform-consumerinquiry" data-callback="recaptchaConsumerInquiryCallback" data-sitekey="@(ViewBag.SiteKey)"></div>
+                                <span id='errorContainer-consumerinquiry' class="parsley-errors-list"></span>
+                            </div>
+                        }
+                        <div class="form-field__button">
+                            <button class="button button--primary  button--fullwidth" id="consumerinquirybutton" name="Submittedby" type="button" value="consumer">@Translate.Text("Sc.Submit")</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-field" id="builderInquiry">
+                <form id="form-builderTD" class="form" data-form="true" action="#" method="POST">
+                    @Html.AntiForgeryToken()
+                    <div class="form-field form-field__radio--toggle">
+                        <fieldset class="fieldset">
+                            <legend class="form-field__label">
+                                @Translate.Text("Sc.Please specify")
+                            </legend>
+
+                            @foreach (DataSourceItems dataSource in Discussion_Area)
+                            {
+                                <p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio"
+                                               data-inquirytype="@dataSource.Text"
+                                               id="radios_group2"
+                                               toggle-target=".nocCategoryList-@dataSource.Value"
+                                               is-clear="true"
+                                               name="radios_group2"
+                                               type="radio"
+                                               required="required"
+                                               value="@dataSource.Value"
+                                               aria-describedby="description-for-Discussion"
+                                               data-parsley-errors-container="#description-for-Discussion"
+                                               data-parsley-required-message="@Translate.Text("Sc.Please select inquiry type")"
+                                               data-parsley-multiple="radios_group2"
+                                               data-parsley-id="35">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @dataSource.Text
+                                        </span>
+                                    </label>
+                                </p>
+                            }
+                            <div id="description-for-Discussion" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="form-field form-field--select form-field--select-single nocCategoryList-3">
+                        <label for="form-field-builderTDnoccategory" class="form-field__label">
+                            @Translate.Text("Sc.NOC Category")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            <select class="form-field__input form-field__input--select form-field__input--select-full "
+                                    id="form-field-builderTDnoccategory"
+                                    name="builderTDnoccategory"
+                                    required=""
+                                    aria-describedby="description-for-builderTDnoccategory"
+                                    data-parsley-errors-container="#description-for-builderTDnoccategory"
+                                    data-parsley-required-message="@Translate.Text("Sc.Please select Noc Category")"
+                                    data-parsley-trigger="change"
+                                    data-parsley-id="30">
+                                <option value="" selected>@Translate.Text("Sc.Please select Noc Category")</option>
+                                @{ var noccount = 1;}
+                                @foreach (DataSourceItems dataSource in NOC_Category)
+                                {
+                                    <option value="@dataSource.Value" @(noccount == 0 ? "selected=\"\"" : "")>@dataSource.Text</option>
+                                    noccount++;
+                                }
+                            </select>
+                        </span>
+                        <div id="description-for-builderTDnoccategory" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-builderinquiryTDname" class="form-field__label">
+                            @Translate.Text("Sc.Requester Name")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-builderinquiryTDname"
+                                   name="text"
+                                   type="text"
+                                   placeholder="@Translate.Text("Sc.Requester Name placeholder")"
+                                   aria-describedby="description-for-builderinquiryTDname"
+                                   data-parsley-errors-container="#description-for-builderinquiryTDname"
+                                   required=""
+                                   data-parsley-pattern="/^[أ-يa-zA-Z ]*$/"
+                                   data-parsley-required-message="@Translate.Text("Sc.Requester Name Error message")"
+                                   data-parsley-pattern-message="@Translate.Text("Sc.Requester Name Error message")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="4">
+                        </span>
+                        <div id="description-for-builderinquiryTDname" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-builderinquiryTDemail" class="form-field__label">
+                            @Translate.Text("Sc.Email")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-builderinquiryTDemail"
+                                   name="builderinquiryTDemail"
+                                   type="email"
+                                   placeholder="@Translate.Text("Sc.Emailplaceholder")"
+                                   aria-describedby="description-for-builderinquiryTDemail"
+                                   data-parsley-errors-container="#description-for-builderinquiryTDemail"
+                                   required=""
+                                   data-parsley-error-message="@Translate.Text("Sc.Emailerrormessage")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="28">
+                        </span>
+                        <div id="description-for-builderinquiryTDemail" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-builderinquiryTDmobile" class="form-field__label">
+                            @Translate.Text("Sc.Mobile Number")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                   id="form-field-builderinquiryTDmobile"
+                                   name="builderinquiryTDmobile"
+                                   type="tel"
+                                   placeholder="@Translate.Text("Sc.Mobile Number Placholder")"
+                                   aria-describedby="description-for-builderinquiryTDmobile"
+                                   data-parsley-errors-container="#description-for-builderinquiryTDmobile"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("Sc.Mobile Number Error message required")"
+                                   data-parsley-mobile_number=""
+                                   data-parsley-mobile_number-message="@Translate.Text("Sc.Mobile Number Error message invalid")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="30">
+                        </span>
+                        <div id="description-for-builderinquiryTDmobile" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text form-field--textarea">
+                        <label for="form-field-builderinquryinquirydetails" class="form-field__label">
+                            @Translate.Text("Sc.Inquiry Details")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                      maxlength="500"
+                                      data-textarea="builderinquryinquirydetails"
+                                      id="form-field-builderinquryinquirydetails"
+                                      name="builderinquryinquirydetails"
+                                      type="textarea"
+                                      placeholder="@Translate.Text("Sc.Inquiry Details Placeholder")"
+                                      aria-describedby="description-for-builderinquryinquirydetails"
+                                      data-parsley-errors-container="#description-for-builderinquryinquirydetails"
+                                      required=""
+                                      data-parsley-pattern="^[^<>;]+$"
+                                      data-parsley-trigger="focusout"
+                                      data-parsley-pattern-message="@Translate.Text("Sc.Inquiry Details Error Message")"
+                                      data-parsley-required-message="@Translate.Text("Sc.Inquiry Details Error Message")"
+                                      data-parsley-id="22"></textarea>
+                        </span>
+                        <div id="description-for-builderinquryinquirydetails" class="form-field__messages">
+                            <p class="form-field__charcount">
+                                @Translate.Text("Sc.Max")
+                                <span data-charcount="builderinquryinquirydetails">0</span>/500 @Translate.Text("Sc.Characters")
+                            </p>
+                        </div>
+                    </div>
+                    <div id="description-for-builderTD-submissionfailed" class="form-field__messages mb12">
+                    </div>
+
+                    @if (ViewBag.Recaptcha != null && (bool)ViewBag.Recaptcha)
+                    {
+                        <div class="form-field clear_both">
+                            <div class="g-recaptcha" id="cpatchform-builderinquiry" data-callback="recaptchaBuilderInquiryCallback" data-sitekey="@(ViewBag.SiteKey)"></div>
+                            <span id='errorContainer-builderinquiry' class="parsley-errors-list"></span>
+                        </div>
+                    }
+                    <div class="form-field__button">
+                        <button class="button button--primary  button--fullwidth" name="Submittedby" type="submit" value="builder">@Translate.Text("Sc.Submit")</button>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="form-field" id="generalInquiry">
+                <form id="form-generalinquiry" class="form" data-form="true" action="#" method="POST">
+                    @Html.AntiForgeryToken()
+                    <div class="form-field">
+                        <fieldset class="fieldset">
+                            <legend class="form-field__label">
+                                @Translate.Text("Sc.Please specify")
+                            </legend>
+
+                            @foreach (DataSourceItems dataSource in General_Information)
+                            {
+                                <p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio"
+                                               data-inquirytype="@dataSource.Text"
+                                               id="radios_group3"
+                                               name="radios_group3"
+                                               type="radio"
+                                               value="@dataSource.Value"
+                                               aria-describedby="description-for-General_Information"
+                                               data-parsley-errors-container="#description-for-General_Information"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("Sc.Please select inquiry type")"
+                                               data-parsley-multiple="radios_group3"
+                                               data-parsley-id="35">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @dataSource.Text
+                                        </span>
+                                    </label>
+                                </p>
+
+                            }
+                            <div id="description-for-General_Information" class="form-field__messages">
+                            </div>
+                            @*<p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" checked="" id="form-field-radio_3_1" name="radios_group3" type="radio" value="@Translate.Text("Sc.Contracts Procurement")" aria-describedby="description-for-dhf64g35w" data-parsley-errors-container="#description-for-dhf64g35w" data-parsley-multiple="radios_group3" data-parsley-id="35">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.Contracts Procurement")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_3_2" name="radios_group3" type="radio" value="@Translate.Text("Sc.DEWA Academy")" aria-describedby="description-for-dhf64g35w" data-parsley-errors-container="#description-for-dhf64g35w" data-parsley-multiple="radios_group3">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.DEWA Academy")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_3_3" name="radios_group3" type="radio" value="@Translate.Text("Sc.Media Center")" aria-describedby="description-for-dhf64g35w" data-parsley-errors-container="#description-for-dhf64g35w" data-parsley-multiple="radios_group3">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.Media Center")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_3_4" name="radios_group3" type="radio" value="@Translate.Text("Sc.POD Team")" aria-describedby="description-for-dhf64g35w" data-parsley-errors-container="#description-for-dhf64g35w" data-parsley-multiple="radios_group3">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.POD Team")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio form-field__radio--pill">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio" id="form-field-radio_3_5" name="radios_group3" type="radio" value="@Translate.Text("Sc.Benchmarking Requests")" aria-describedby="description-for-dhf64g35w" data-parsley-errors-container="#description-for-dhf64g35w" data-parsley-multiple="radios_group3">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.Benchmarking Requests")
+                                        </span>
+                                    </label>
+                                </p>*@
+
+                        </fieldset>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-generalinquryname" class="form-field__label">
+                            @Translate.Text("Sc.Requester Name")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-generalinquryname"
+                                   name="text"
+                                   type="text"
+                                   placeholder="@Translate.Text("Sc.Requester Name placeholder")"
+                                   aria-describedby="description-for-generalinquryname"
+                                   data-parsley-errors-container="#description-for-generalinquryname"
+                                   required=""
+                                   data-parsley-pattern="/^[أ-يa-zA-Z ]*$/"
+                                   data-parsley-required-message="@Translate.Text("Sc.Requester Name Error message")"
+                                   data-parsley-pattern-message="@Translate.Text("Sc.Requester Name Error message")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="4">
+                        </span>
+                        <div id="description-for-generalinquryname" class="form-field__messages">
+                        </div>
+                    </div>
+                    <div class="form-field form-field--text">
+                        <label for="form-field-generalinquryemail" class="form-field__label">
+                            @Translate.Text("Sc.Email")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-generalinquryemail"
+                                   name="generalinquryemail"
+                                   type="email"
+                                   placeholder="@Translate.Text("Sc.Emailplaceholder")"
+                                   aria-describedby="description-for-generalinquryemail"
+                                   data-parsley-errors-container="#description-for-generalinquryemail"
+                                   required=""
+                                   data-parsley-error-message="@Translate.Text("Sc.Emailerrormessage")"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="4">
+                        </span>
+                        <div id="description-for-generalinquryemail" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-generalmobilenumber" class="form-field__label">
+                            @Translate.Text("Sc.Mobile Number")
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                                   id="form-field-generalmobilenumber"
+                                   name="generalmobilenumber"
+                                   type="tel"
+                                   placeholder="@Translate.Text("Sc.Mobile Number Placholder")"
+                                   aria-describedby="description-for-generalmobilenumber"
+                                   data-parsley-errors-container="#description-for-generalmobilenumber"
+                                   required=""
+                                   data-parsley-required-message="@Translate.Text("Sc.Mobile Number Error message required")"
+                                   data-parsley-mobile_number=""
+                                   data-parsley-mobile_number-message="@Translate.Text("Sc.Mobile Number Error message invalid")"
+                                   data-parsley-trigger="focusout" data-parsley-id="14">
+                        </span>
+                        <div id="description-for-generalmobilenumber" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text form-field--textarea">
+                        <label for="form-field-VinquiryDetails" class="form-field__label">
+                            @Translate.Text("Sc.Inquiry Details")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                      maxlength="500"
+                                      data-textarea="VinquiryDetails"
+                                      data-parsley-pattern="^[^<>;]+$"
+                                      data-parsley-trigger="focusout"
+                                      data-parsley-pattern-message="@Translate.Text("Sc.Inquiry Details Error Message")"
+                                      id="form-field-VinquiryDetails" name="VinquiryDetails" type="textarea" placeholder="@Translate.Text("Sc.Inquiry Details Placeholder")"
+                                      aria-describedby="description-for-VinquiryDetails" data-parsley-errors-container="#description-for-VinquiryDetails" required="" data-parsley-required-message="@Translate.Text("Sc.Inquiry Details Error Message")" data-parsley-id="22"></textarea>
+                        </span>
+                        <div id="description-for-VinquiryDetails" class="form-field__messages">
+                            <p class="form-field__charcount">
+                                @Translate.Text("Sc.Max")
+                                <span data-charcount="VinquiryDetails">0</span>/500 @Translate.Text("Sc.Characters")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="description-for-generalinquiry-submissionfailed" class="form-field__messages mb12">
+                    </div>
+                    @if (ViewBag.Recaptcha != null && (bool)ViewBag.Recaptcha)
+                    {
+                        <div class="form-field clear_both">
+                            <div class="g-recaptcha" id="cpatchform-generalinquiry" data-callback="recaptchaGeneralinquiryCallback" data-sitekey="@(ViewBag.SiteKey)"></div>
+                            <span id='errorContainer-generalinquiry' class="parsley-errors-list"></span>
+                        </div>
+                    }
+                    <div class="form-field__button">
+                        <button class="button button--primary  button--fullwidth" name="Submittedby" type="submit" value="consumer">@Translate.Text("Sc.Submit")</button>
+                    </div>
+                </form>
+            </div>
+            <div class="form-field__button hidden">
+                <div class="button button--primary m2-card-form--trigger-form m2-card-form--trigger button--fullwidth radioToggled" id="successdiv" data-cardtarget="#inquirySuccess">@Translate.Text("Sc.Submit")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="m2-card-form-card m2-card-form-countdown level-2" id="consumptVerify">
+    <div class="m2-card-form-card-body">
+        <div class="m2-card-form-card-header">
+            <div class="m2-card-form--trigger m2-card-form-card-back icon-new-arrow-right" data-cardtarget="#consumer1"></div>
+            <div class="m2-card-form-card-title green">
+                @Translate.Text("Sc.Welcome DEWA")
+            </div>
+            <div class="m2-card-form-card-close icon-cancel" data-closecard="true"></div>
+        </div>
+
+        <div class="m2-card-form-card-content inquiry-form" id="consumptverifyform ">
+            <form id="form-consumptverify" class="form" data-form="true" action="#" method="POST">
+                @Html.AntiForgeryToken()
+                <div class="form-field form-field__radio--toggle">
+                    <fieldset class="fieldset">
+                        <legend class="form-field__label">
+                            @Translate.Text("Sc.Login with")
+                        </legend>
+                        <p class="form-field__radio form-field__radio--pill">
+                            <label>
+                                <input class="form-field__input form-field__input--radio"
+                                       toggle-target="#otp"
+                                       id="form-field-radio_onetimepwd"
+                                       name="radios_group4"
+                                       type="radio"
+                                       value="2"
+                                       aria-describedby="description-for-onetimepwd"
+                                       data-parsley-errors-container="#description-for-onetimepwd"
+                                       data-parsley-multiple="radios_group4">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("Sc.One Time Password")
+                                </span>
+                            </label>
+                        </p>
+                        <p class="form-field__radio form-field__radio--pill m2-card-form--triggerModal" data-iframecontent="@(settings.ConsumptionVerificationLink !=null ? settings.ConsumptionVerificationLink.Url+"?se=0x00x&mobid=cMDyFwiSeqD3h75tNCf87ENPvnrbv2S8ql3i0Bq0R9s=" : string.Empty)">
+                            <label>
+                                <input class="form-field__input form-field__input--radio"
+                                       toggle-target="#uaepass"
+                                       id="form-field-radio_UAEpassOrDewaId"
+                                       name="radios_group4"
+                                       type="radio"
+                                       value="1"
+                                       aria-describedby="description-for-UAEpassOrDewaId"
+                                       data-parsley-errors-container="#description-for-UAEpassOrDewaId"
+                                       data-parsley-multiple="radios_group4" data-parsley-id="68">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("Sc.UAE Dewa ID")
+                                </span>
+                            </label>
+                        </p>
+                        <div id="description-for-onetimepwd" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="form-field" id="otp" style="display: none;">
+                    <div class="form-field" id="ConsumptionVerification">
+                        <div class="form-field form-field--text">
+                            <label for="form-field-alsdkjas734" class="form-field__label">
+                                @Translate.Text("Sc.DEWA Account Number")
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-consumptverifyacnumber"
+                                       name="text"
+                                       type="number"
+                                       @*maxlength="10"*@
+                                       data-parsley-minlength="10"
+                                       data-parsley-maxnumber="10"
+                                       autocomplete="off"
+                                       @*data-parsley-type="number"*@
+                                       placeholder="@Translate.Text("Sc.Account Number placeholder")"
+                                       aria-describedby="description-for-consumptverifyacnumber"
+                                       data-parsley-errors-container="#description-for-consumptverifyacnumber"
+                                       required=""
+                                       value=""
+                                       data-parsley-required-message="@Translate.Text("Sc.Account Number Error message")"
+                                       data-parsley-error-message="@Translate.Text("Sc.Enter a valid 10 digit account number")"
+                                       data-parsley-trigger="focusout">
+                            </span>
+                            <div id="description-for-consumptverifyacnumber" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field__button" id="divconsumptverifynxtbutton">
+                            <button class="button button--primary  button--fullwidth" id="consumptverifynxtbutton" name="Submittedby" type="button" value="">@Translate.Text("Sc.Next")</button>
+
+                        </div>
+                        <div id="consumpt-sendotp-form" class="form-field" style="display:none">
+                            <fieldset class="fieldset">
+                                <legend class="form-field__label">
+                                    @Translate.Text("Sc.Choose Verify Account")
+                                </legend>
+                                <p class="form-field__radio" id="pmaskmail">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio"
+                                               id="SelectedOptions"
+                                               aria-label="SelectedOptions"
+                                               name="SelectedOptions"
+                                               type="radio"
+                                               value="email"
+                                               aria-describedby="description-for-consumptverifymaskemail"
+                                               data-parsley-errors-container="#description-for-consumptverifymaskemail"
+                                               checked>
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.Email Consumpt") <strong id="consumptverifymaskemail"></strong>
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio" id="pmaskmobile">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio"
+                                               id="SelectedOptions"
+                                               aria-label="SelectedOptions"
+                                               name="SelectedOptions"
+                                               type="radio"
+                                               value="mobile"
+                                               aria-describedby="description-for-consumptverifymaskmobile"
+                                               data-parsley-errors-container="#description-for-consumptverifymaskmobile">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("Sc.Phone Consumpt") <strong dir="ltr" id="consumptverifymaskmobile"></strong>
+                                        </span>
+                                    </label>
+                                </p>
+                                <div id="description-for-consumptverifyerror" class="form-field__messages">
+                                </div>
+                                <div class="form-field__button" id="divconsumptsendotpnxtbutton">
+                                    <button class="button button--primary  button--fullwidth" id="consumptsendotpnxtbutton" name="Submittedby" type="button" value="">@Translate.Text("Sc.Send Verification Code")</button>
+                                    <div class="m14-richtext mt24 centered">
+                                        <p>
+                                            @Html.Raw(Translate.Text("Sc.Customer Care Desc"))
+                                        </p>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div id="consumpt-verifyotp-form" class="form-field" style="display:none">
+                            <input type="text" style="display:none;" id="otpstring" name="otp" value="" />
+                            <div class="form-field form-field--text">
+                                <label for="form-field-lblotpmsg" id="lblotpmsg" class="form-field__label form-field__label--readonly">
+                                    @Translate.Text("Sc.One Time Pwd Desc")
+                                </label>
+                                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                    @*<input class="form-field__input form-field__input--readonly"
+                                        readonly=""
+                                        id="form-field-verifymobemail"
+                                        name="otp"
+                                        type="text"
+                                        value="mXXXXXXXXim@dewa.gov.ae"
+                                        aria-describedby="description-for-dyet3632"
+                                        data-parsley-errors-container="#description-for-dyet3632"
+                                        data-parsley-trigger="focusout">*@
+                                    <strong id="form-field-verifymobemail" dir="ltr"></strong>
+                                </div>
+                                <div id="description-for-dyet3632" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="form-field form-field--otp">
+                                <label for="form-field-azcterkh" class="form-field__label">
+                                    @Translate.Text("Sc.Enter OTP")
+                                </label>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp" id="form-field-otp1" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-sessionlogin" required="" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="79">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp" id="form-field-otp2" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-sessionlogin" required="" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="81">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp" id="form-field-otp3" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-sessionlogin" required="" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="83">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp" id="form-field-otp4" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-sessionlogin" required="" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="85">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp" id="form-field-otp5" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-sessionlogin" required="" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="87">
+                                </span>
+                                <span class="form-field__input-wrapper_otp">
+                                    <input class="form-field__input form-field__input--otp" id="form-field-otp6" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-sessionlogin" required="" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="89">
+                                </span>
+                                <input class="form-field__input form-field__input--otp_main" id="form-field-azcterkhmain" name="text" type="number" aria-describedby="description-for-sessionlogin" data-parsley-maxnumber="6" data-parsley-errors-container="#description-for-sessionlogin" data-parsley-required-message="@Translate.Text("Sc.Required Field")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                <div class="form-field--otp_timer mt12" data-otptimer="60">
+                                    <div class="form-field--otp_timer_inactive">
+                                        @Translate.Text("Sc.Resent OTP In") <span class="form-field--otp_time"></span>
+                                    </div>
+                                    <div class="form-field--otp_timer_active">
+                                        @Translate.Text("Sc.Resend")
+                                    </div>
+                                </div>
+                                <div id="description-for-sessionlogin" class="form-field__messages">
+                                </div>
+                            </div>
+                            <div class="form-field__button">
+                                <button class="button button--primary  button--fullwidth" id="btnloginconsumption" name="Submittedby" type="button" value="">@Translate.Text("Sc.Login")</button>
+                                <div id="consupmtionmodalpopup" class="button button--primary m2-card-form--trigger-form m2-card-form--trigger button--fullwidth radioToggled m2-card-form--triggerModal hide" data-iframecontent="@(settings.ConsumptionVerificationLink !=null ? settings.ConsumptionVerificationLink.Url+"?se=0x00x&mobid=cMDyFwiSeqD3h75tNCf87ENPvnrbv2S8ql3i0Bq0R9s=" : string.Empty)">@Translate.Text("Sc.Login")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="m2-card-form-card m2-card-form-countdown level-2" id="inquirySuccess">
+    @Html.Partial("~/Views/Feature/USC/SmartCommunications/InquirySucessForm.cshtml")
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        jQuery("#form-field-radio_onetimepwd").prop("checked", true);
+        jQuery("#otp").show();
+        require(['parsley'], function () {
+            jQuery("#consumptverifynxtbutton").on('click', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-consumptverify').parsley().validate();
+                if (jQuery('#form-consumptverify').parsley().isValid()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumptVerifyNxtSubmitForm";
+                    data = { AccountNumber: jQuery('#form-field-consumptverifyacnumber').val() }
+                    consumptverifynxtsubmit(url, 'form-consumptverify', data);
+                }
+            });
+            jQuery("#consumptsendotpnxtbutton").on('click', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-consumptverify').parsley().validate();
+                if (jQuery('#form-consumptverify').parsley().isValid()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumptSendOtpSubmitForm";
+                    data = { SelectedOptions: jQuery('input[name="SelectedOptions"]:checked').val(), AccountNumber: jQuery('#form-field-consumptverifyacnumber').val() }
+                    consumptverifysendotpsubmit(url, 'form-consumptverify', data, 0);
+                }
+            });
+
+            jQuery(".form-field--otp_timer_active").on("click", function (event) {
+                var url = "/api/sitecore/SmartCommunications/ConsumptSendOtpSubmitForm";
+                data = { SelectedOptions: jQuery('input[name="SelectedOptions"]:checked').val(), AccountNumber: jQuery('#form-field-consumptverifyacnumber').val() }
+                consumptverifysendotpsubmit(url, 'form-consumptverify', data, 1);
+            });
+            jQuery("#btnloginconsumption").on("click", function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-consumptverify').parsley().validate();
+                if (jQuery('#form-consumptverify').parsley().isValid()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumptSessionLogin";
+                    data = { SelectedOptions: jQuery('input[name="SelectedOptions"]:checked').val(), AccountNumber: jQuery('#form-field-consumptverifyacnumber').val(), OTPKey: jQuery('#otpstring').val() }
+                    consumptverifysessionlogin(url, 'form-consumptverify', data)
+                }
+            });
+
+            jQuery("#consumerinquirynxtbutton").on('click', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-consumerinquiry').parsley().validate();
+                if (jQuery('#form-consumerinquiry').parsley().isValid()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumerInquiryNxtSubmitForm";
+                    data = { Type: 1, AccountNumber: jQuery('#form-field-consumerinquiryacnumber').val() }
+                    consumerinquirynxtsubmit(url, 'form-consumerinquiry', data);
+                }
+            });
+
+            jQuery("#consumerinquiryverifybutton").on('click', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-consumerinquiry').parsley().validate();
+                if (jQuery('#form-consumerinquiry').parsley().isValid()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumerInquiryVerifySubmitForm";
+                    data = { Type: 1, vMobile: jQuery('#form-field-consumerinquiryverifymnumber').val() }
+                    consumerinquiryverifysubmit(url, 'form-consumerinquiry', data);
+                }
+            });
+
+            jQuery("#consumerinquirybutton").on('click', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-consumerinquiry').parsley().validate();
+                if (jQuery('#form-consumerinquiry').parsley().isValid() && recaptchaConsumerInquiryCallback()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumerInquiryForm";
+                    data = { Type: 1, AccountNumber: jQuery('#form-field-consumerinquiryacnumber').val(), Name: jQuery('#form-field-consumerinquiryname').val(), EmailId: jQuery('#form-field-consumerinquryemail').val(), Mobile: jQuery('#form-field-consumermobilenumber').val(), InquiryType: jQuery("#form-field-consumerInquiryType option:selected").val(), InquiryTypetxt: jQuery("#form-field-consumerInquiryType option:selected").html(), InquiryDetails: jQuery('#form-field-CinquiryDetails').val(), recaptcha: grecaptcha.getResponse(0) }
+                    inquiryformsubmission(url, 'form-consumerinquiry', data);
+                }
+            });
+            jQuery("#form-builderEGI").on('submit', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-builderEGI').parsley().validate();
+                if (jQuery('#form-builderEGI').parsley().isValid()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumerInquiryForm";
+                    data = { Type: 2, SubType: $('input[name=radios_group2]:radio:checked').val(), EmailId: jQuery('#form-field-builderinquryemail').val(), Mobile: jQuery('#form-field-builderinqurymobile').val(), InquiryDetails: jQuery('#form-field-builderinquryinquirydetails').val(), recaptcha: grecaptcha.getResponse() }
+                    inquiryformsubmission(url, 'form-builderEGI', data);
+                }
+            });
+            jQuery("#form-generalinquiry").on('submit', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-generalinquiry').parsley().validate();
+                if (jQuery('#form-generalinquiry').parsley().isValid() && recaptchaGeneralinquiryCallback()) {
+                    var url = "/api/sitecore/SmartCommunications/ConsumerInquiryForm";
+                    data = {
+                        Type: 3, SubType: $('input[name=radios_group3]:radio:checked').val(), Name: jQuery('#form-field-generalinquryname').val(), EmailId: jQuery('#form-field-generalinquryemail').val(), Mobile: jQuery('#form-field-generalmobilenumber').val(), InquiryDetails: jQuery('#form-field-VinquiryDetails').val(), Generalinquirytype: jQuery('input[name="radios_group3"]:checked').attr("data-inquirytype"), recaptcha: grecaptcha.getResponse(2)
+                    }
+                    inquiryformsubmission(url, 'form-generalinquiry', data);
+                }
+            });
+            jQuery("#form-builderTD").on('submit', function (event) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                jQuery('#form-builderTD').parsley().validate();
+                if (jQuery('#form-builderTD').parsley().isValid() && recaptchaBuilderInquiryCallback()) {
+                    var url = "/api/sitecore/SmartCommunications/BuilderTDInquiryForm";
+                    //data = { Name: jQuery('#form-field-builderinquiryTDname').val(), EmailId: jQuery('#form-field-builderinquiryTDemail').val(), Mobile: jQuery('#form-field-builderinquiryTDmobile').val(), Discussionarea: jQuery("#form-field-builderTDDiscussionArea option:selected").val(), Discussionareatxt: jQuery("#form-field-builderTDDiscussionArea option:selected").html(), InquiryDetails: jQuery('#form-field-builderinquryinquirydetails').val() }
+                    data = { BuilderSubType: $('input[name=radios_group2]:radio:checked').val(), NOCCategory: jQuery("#form-field-builderTDnoccategory option:selected").val(), NOCCategorytxt: jQuery("#form-field-builderTDnoccategory option:selected").html(), Name: jQuery('#form-field-builderinquiryTDname').val(), EmailId: jQuery('#form-field-builderinquiryTDemail').val(), Mobile: jQuery('#form-field-builderinquiryTDmobile').val(), Discussionarea: jQuery('input[name="radios_group2"]:checked').attr("data-inquirytype"), InquiryDetails: jQuery('#form-field-builderinquryinquirydetails').val(), recaptcha: grecaptcha.getResponse(1) }
+                    inquiryformsubmission(url, 'form-builderTD', data);
+                }
+            });
+        });
+		jQuery('input[name="radios_group1"]').change("click", function () {
+            fnInitialLoad();
+        });
+        // Intialise page on close click event
+        jQuery('[data-closeCard]').on("click", function () {
+            fnInitialLoad();
+        });
+
+        // Intialise page on back click event
+        jQuery(".m2-card-form-card-back").on("click", function () {
+            fnInitialLoad();
+        });
+
+
+    });
+    AddForgeryToken = function (data, formid) {
+        data.__RequestVerificationToken = jQuery('#' + formid + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+    function inquiryformsubmission(url, form, data) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: AddForgeryToken(data, form),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null && response.status) {
+                    jQuery("#successdiv").click();
+                    fnInitialLoad();
+                    console.log(response);
+                    jQuery("#submitanotherinquiry").on("click", function () {
+						 window.location.reload();
+					});
+					jQuery("#submitbacktohome").on("click", function () {
+						 window.location.reload();
+					});
+
+					if (form == "form-consumerinquiry") {
+                       grecaptcha.reset(0);
+                    }
+                    if (form == "form-generalinquiry") {
+                        grecaptcha.reset(2)
+                    }
+                    if (form == "form-builderTD") {
+                       grecaptcha.reset(1);
+                    }
+
+                }
+                else {
+                    if (form == "form-consumerinquiry") {
+                        jQuery("#description-for-submissionfailed").html('');
+                        jQuery("#description-for-submissionfailed").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                    }
+                    if (form == "form-generalinquiry") {
+                        jQuery("#description-for-generalinquiry-submissionfailed").html('');
+                        jQuery("#description-for-generalinquiry-submissionfailed").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                    }
+                    if (form == "form-builderTD") {
+                        jQuery("#description-for-builderTD-submissionfailed").html('');
+                        jQuery("#description-for-builderTD-submissionfailed").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                    }
+                }
+            },
+            error: function (response) {
+                console.log(response.desc);
+            }
+        });
+    }
+
+    // Next button function
+    function consumerinquirynxtsubmit(url, form, data) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: AddForgeryToken(data, form),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null && response.status) {
+                    jQuery("#description-for-consumerinquiryacnumber").html('');
+                    jQuery("#divconsumerinquirynxtbutton").hide();
+                    jQuery("#form-field-consumerinquiryacnumber").attr('readonly', true);
+                    jQuery("#consumerinquiry-verify-form").show();
+                    jQuery("#form-field-ddconsumermobilenum").html(response.data);
+                }
+                else {
+                    jQuery("#description-for-consumerinquiryacnumber").html('');
+                    if (response.desc != null && response.desc != "" && response.desc != undefined)
+                        jQuery("#description-for-consumerinquiryacnumber").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                    else
+                        jQuery("#description-for-consumerinquiryacnumber").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + '@Translate.Text("Sc.Mobile doesnt exist")' + '</li></ul>');
+                }
+            }
+        });
+    }
+
+    // Verify button function
+    function consumerinquiryverifysubmit(url, form, data) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: AddForgeryToken(data, form),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null && response.status) {
+                    jQuery("#consumerinquiry-verify-form").hide();
+                    jQuery("#consumerinquiry-form").show();
+                    jQuery("#form-field-consumerinquryemail").val(response.email);
+                    jQuery("#form-field-consumermobilenumber").val(response.mobile);
+                    jQuery("#form-field-consumerinquiryacnumber").attr('readonly', true);
+                    jQuery("#form-field-consumermobilenumber").attr('readonly', true);
+                }
+                else {
+                    jQuery("#description-for-consumerinquiryverifymnumber").html('');
+                    jQuery("#description-for-consumerinquiryverifymnumber").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                }
+            }
+        });
+    }
+
+    //Consumption Verify Next Function
+    function consumptverifynxtsubmit(url, form, data) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: AddForgeryToken(data, form),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null && response.status) {
+                    jQuery("#divconsumptverifynxtbutton").hide();
+                    jQuery("#consumpt-sendotp-form").show();
+                    jQuery("#description-for-consumptverifyacnumber").html('');
+                    if (response.data.mobilelist != null) {
+                        jQuery("#consumptverifymaskmobile").html(response.data.mobilelist[0].maskedmobile);
+                        jQuery("#pmaskmobile").show();
+                    }
+                    else
+                        jQuery("#pmaskmobile").hide();
+
+                    if (response.data.emaillist != null) {
+                        jQuery("#consumptverifymaskemail").html(response.data.emaillist[0].maskedemail);
+                        jQuery("#pmaskmail").show();
+                    }
+                    else
+                        jQuery("#pmaskmail").hide();
+                }
+                else {
+                    jQuery("#description-for-consumptverifyacnumber").html('');
+                    jQuery("#description-for-consumptverifyacnumber").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                }
+            }
+        });
+    }
+
+    // Consumption Send OTP Function
+    function consumptverifysendotpsubmit(url, form, data, resend) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: AddForgeryToken(data, form),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null && response.status) {
+                    if (resend == 0) {
+                        jQuery("#consumpt-verifyotp-form").show();
+                        jQuery("#consumpt-sendotp-form").hide();
+                        jQuery("#description-for-consumptverifyerror").html('');
+                        if (jQuery('input[name="SelectedOptions"]:checked').val() == "mobile") {
+                            jQuery("#form-field-verifymobemail").html(jQuery("#consumptverifymaskmobile").html());
+                            jQuery("label[for = form-field-lblotpmsg]").text('@Translate.Text("Sc.One Time Pwd Mobile Desc")');
+
+                        }
+                        else {
+                            jQuery("#form-field-verifymobemail").html(jQuery("#consumptverifymaskemail").html());
+                            jQuery("label[for = form-field-lblotpmsg]").text('@Translate.Text("Sc.One Time Pwd Email Desc")');
+
+                        }
+                        jQuery("#form-field-consumptverifyacnumber").attr('readonly', true);
+                        jQuery("#SelectedOptions").attr('disabled', true);
+                        InitateOTP();
+                    }
+                    else {
+                        jQuery("#description-for-sessionlogin").html('');
+                        clearOTP();
+                        jQuery("#btnloginconsumption").attr('disabled', false);
+                    }
+                }
+                else {
+                    jQuery("#description-for-consumptverifyerror").html('');
+                    jQuery("#description-for-consumptverifyerror").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                }
+            }
+        });
+    }
+
+    function consumptverifysessionlogin(url, form, data) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: AddForgeryToken(data, form),
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                if (response != null && response.status) {
+                    jQuery("#consupmtionmodalpopup").trigger('click');
+                    jQuery("#description-for-sessionlogin").html('');
+                    jQuery("#btnloginconsumption").attr('disabled', true);
+                    //sessionLogout();
+                }
+                else {
+                    jQuery("#description-for-sessionlogin").html('');
+                    jQuery("#description-for-sessionlogin").html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.desc + '</li></ul>');
+                    if (response != null && response.maxattempt == "X") {
+                        jQuery("#btnloginconsumption").attr('disabled', true);
+                    }
+                }
+            }
+        });
+    }
+    function sessionLogout() {
+        jQuery(".m39-modal__button--close").on("click", function (event) {
+            jQuery.ajax({
+                url: "/api/sitecore/SmartCommunications/LogOut",
+                type: 'GET',
+                datatype: 'application/json',
+                success: function (response) {
+                    if (response != null && response.Success) {
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+    }
+    function InitateOTP() {
+        jQuery(window).trigger('otp_time');
+        var _this = this,
+            $field = $('.form-field--otp'),
+            $input = $field.find('.form-field__input--otp'),
+            i,
+            $inputMain = $field.find('.form-field__input--otp_main');
+
+        $input.each(function (index) {
+            var $i = $(this);
+
+            $i.off('keyup.otp').on('keyup.otp', function () {
+                if ($i.val().length > 0) {
+                    $i.focusout();
+                    $i.closest('.form-field__input-wrapper_otp').next().find('.form-field__input--otp').focus();
+                    i = index
+                };
+            });
+        });
+
+        var submitting = false;
+        $(".form-field__input--otp").on('keyup blur', function () {
+            if (submitting === true) { return false; }
+            var OTPValue = '';
+
+            $.each($(".form-field__input--otp"), function () {
+                OTPValue += $(this).val();
+            });
+
+            $(".form-field__input--otp_main").val(OTPValue);
+            if (i == $input.length - 1) {
+                jQuery('#otpstring').val(OTPValue);
+            };
+        });
+
+    }
+    function clearOTP() {
+        jQuery(window).trigger('otp_time');
+        var _this = this,
+            $field = $('.form-field--otp'),
+            $input = $field.find('.form-field__input--otp'),
+            i,
+            $inputMain = $field.find('.form-field__input--otp_main');
+
+        $input.each(function (index) {
+            var $i = $(this);
+            $i.val('');
+            i = index;
+        });
+    }
+    // Initial Page Load
+    function fnInitialLoad() {
+        jQuery("#consumerinquiry-verify-form").hide();
+        jQuery("#consumerinquiry-form").hide();
+        jQuery("#divconsumerinquirynxtbutton").show();
+        jQuery("#form-field-consumerinquiryacnumber").attr('readonly', false);
+        jQuery("#form-field-consumerInquiryType").val('');
+        jQuery("input[name='radios_group3']").each(function () {
+            jQuery(this).prop("checked", false);
+        });
+        jQuery("input[name='radios_group2']").each(function () {
+            jQuery(this).prop("checked", false);
+        });
+
+        jQuery("#description-for-consumptverifyacnumber").html('');
+        jQuery("#description-for-consumerinquiryverifymnumber").html('');
+        jQuery("#description-for-sessionlogin").html('');
+        jQuery("#description-for-consumptverifyerror").html('');
+        jQuery("#consumpt-sendotp-form").hide();
+        jQuery("#divconsumptverifynxtbutton").show();
+        jQuery("#consumpt-verifyotp-form").hide();
+        jQuery("#form-field-consumptverifyacnumber").attr('readonly', false);
+        jQuery("#SelectedOptions").attr('disabled', false);
+        jQuery("#form-field-radio_onetimepwd").prop("checked", true);
+        jQuery("#otp").show();
+        clearOTP();
+		grecaptcha.reset(0);
+		grecaptcha.reset(1);
+		grecaptcha.reset(2);
+	}
+
+    //recaptcha callback function
+
+    function recaptchaGeneralinquiryCallback() {
+        if (jQuery("#cpatchform-generalinquiry").length > 0) {
+            var v = grecaptcha.getResponse(2);
+            if (v.length == 0) {
+                jQuery('#errorContainer-generalinquiry').text('@Translate.Text("Sc.Captcha Valid")');
+                return false;
+            }
+            else {
+                jQuery('#errorContainer-generalinquiry').text("");
+                return true;
+            }
+        }
+        return true;
+    }
+    function recaptchaBuilderInquiryCallback() {
+        if (jQuery("#cpatchform-builderinquiry").length > 0) {
+            var v = grecaptcha.getResponse(1);
+            if (v.length == 0) {
+                jQuery('#errorContainer-builderinquiry').text('@Translate.Text("Sc.Captcha Valid")');
+                return false;
+            }
+            else {
+                jQuery('#errorContainer-builderinquiry').text("");
+                return true;
+            }
+        }
+        return true;
+    }
+
+    function recaptchaConsumerInquiryCallback() {
+        if (jQuery("#cpatchform-consumerinquiry").length > 0) {
+            var v = grecaptcha.getResponse(0);
+            if (v.length == 0) {
+                jQuery('#errorContainer-consumerinquiry').text('@Translate.Text("Sc.Captcha Valid")');
+                return false;
+            }
+            else {
+                jQuery('#errorContainer-consumerinquiry').text("");
+                return true;
+            }
+        }
+        return true;
+    }
+    //recaptchaConsumerInquiryCallback
+</script>

@@ -1,0 +1,346 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.WorkPermit.WorkPermitPass
+
+
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    var nowmax = DateHelper.DubaiNow().AddMonths(-1).AddDays(30);
+    var FromToTime = EpassHelper.WPGetFromToTime();
+    DateTime nowoneyear;
+    var _visaExpiry = "";
+
+    nowoneyear = DateHelper.DubaiNow().AddMonths(-1).AddMonths(7);
+}
+
+<style type="text/css">
+    .my-error-msg {
+        font-size: 1.0em;
+        font-weight: 600;
+        text-align: center;
+    }
+</style>
+<div class="form multiple mt24">
+    <div class="j113-epass--permPass__form-page2">
+        <input type="hidden" name="PassSubmitType" value="multiple" id="PassSubmitType" />
+        @*<div class="form-field form-field--select form-field--select-single">
+                <label for="SubContractorID" class="form-field__label">
+                    @Translate.Text("Epass.Subcontractor")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select j113-epass--select_wrapper">
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.SubContractorID, new SelectList(Model.SubcontractorList, "work_permit_pass_number", "sub_contractor_name"), Translate.Text("None"), new
+                   {
+                       @class = "form-field__input form-field__input--select form-field__input--select-full",
+                       @aria_describedby = "description-for-SubContractorID",
+                       @data_parsley_id = "18",
+                       @id = "form-field-SubContractorID"
+                   })
+                    </span>
+                </span>
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.WP_ADDSUBCONTRACTOR)"
+                   class="j113-epass--add_item"><span>+</span>@Translate.Text("Epass.Add")</a>
+                <div id="description-for-SubContractorID" class="form-field__messages">
+                </div>
+            </div>*@
+        <div class="form-field form-field--readonly">
+            <label class="form-field__label form-field__label--readonly" for="form-field-projectname">@Translate.Text("Epass.IndProjectName")</label>
+            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-projectname" aria-describedby="description-for-projectname" type="text" readonly="" value="@(!string.IsNullOrWhiteSpace(Model.POName) ? Model.POName : " N/A")" data-parsley-errors-container="#description-for-name" data-parsley-trigger="focusout">
+            </div>
+        </div>
+        <div class="form-field form-field--readonly">
+            <label class="form-field__label form-field__label--readonly"
+                   for="form-field-projectstatus">@Translate.Text("Epass.Project")</label>
+                <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                    <input name="segment" class="form-field__input form-field__input--readonly"
+                           id="form-field-projectstatus"
+                           aria-describedby="description-for-projectstatus"
+                           type="text" readonly=""
+                           value="@(!string.IsNullOrWhiteSpace(Model.projectId) ? Model.projectId : " N/A")"
+                           data-parsley-errors-container="#description-for-projectstatus" data-parsley-trigger="focusout">
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.SubContractorID))
+            {
+                <div class="form-field form-field--readonly">
+                    <label class="form-field__label form-field__label--readonly" for="form-field-Subcontractor">@Translate.Text("Epass.Subcontractor")</label>
+                    <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                        <input name="segment" class="form-field__input form-field__input--readonly" id="form-field-Subcontractor"
+                               aria-describedby="description-for-Subcontractor" type="text" readonly=""
+                               value="@(!string.IsNullOrWhiteSpace(Model.SubContractorID) ? Model.SubContractorID : " N/A")" data-parsley-errors-container="#description-for-Subcontractor" data-parsley-trigger="focusout">
+                    </div>
+                </div>
+            }
+            <div id="datepicker-container-PassIssue" class="form-field form-field--text  ">
+                <label for="form-field-PassIssue" class="form-field__label">
+                    @Translate.Text("Epass.Passissuedate")
+                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    <input value="@Model.PassIssue"
+                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                           id="form-field-PassIssue"
+                           name="PassIssue"
+                           type="text"
+                           placeholder="@Translate.Text("Epass.SelectPassissuedate")"
+                           aria-describedby="description-for-PassIssue"
+                           data-parsley-errors-container="#description-for-PassIssue"
+                           required=""
+                           data-parsley-required-message="@Translate.Text("Epass.SelectPassissuedate")"
+                           data-el="datepicker-future"
+                           data-parsley-trigger="focusout"
+                           data-parsley-id="46"
+                           readonly=""
+                           data-bindingID="passbinding"
+                           aria-haspopup="true"
+                           aria-expanded="false"
+                           aria-readonly="false"
+                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; , &quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day] }' />
+                </span>
+                <div id="description-for-PassIssue" class="form-field__messages">
+                </div>
+            </div>
+
+            <div id="datepicker-container-PassExpiry" class="form-field form-field--text  ">
+                <label for="form-field-PassExpiry" class="form-field__label">
+                    @Translate.Text("Epass.Passexpirydate")
+                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                    <input value="@Model.PassExpiry"
+                           class="form-field__input form-field__input--text   form-field__input--datepicker     picker__input form-field__binding"
+                           id="form-field-PassExpiry"
+                           name="PassExpiry"
+                           type="text"
+                           placeholder="@Translate.Text("Epass.SelectPassexpirydate")"
+                           aria-describedby="description-for-PassExpiry"
+                           data-parsley-errors-container="#description-for-PassExpiry"
+                           required=""
+                           data-parsley-required-message="@Translate.Text("Epass.SelectPassexpirydate")"
+                           data-el="datepicker-future"
+                           data-parsley-trigger="focusout"
+                           data-parsley-id="46"
+                           readonly=""
+                           data-bindingID="passbinding"
+                           aria-haspopup="true"
+                           aria-expanded="false"
+                           aria-readonly="false"
+                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 , &quot;format&quot;: &quot;yyyy/mm/dd&quot; ,&quot;max&quot;: [@nowoneyear.Year,@nowoneyear.Month,@nowoneyear.Day] }' />
+                </span>
+                <div id="description-for-PassExpiry" class="form-field__messages">
+                </div>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-FromTime" class="form-field__label">
+                    @Translate.Text("Epass.Fromtime")
+                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-FromTime"
+                            name="FromTime" aria-describedby="description-for-FromTime" data-parsley-errors-container="#description-for-FromTime"
+                            required data-parsley-required-message="@Translate.Text("Epass.Chooseanoption")">
+                        <option value="" selected>@Translate.Text("Epass.Chooseanoption")</option>
+                        @{
+                            foreach (var item in FromToTime)
+                            {
+                                <option value="@item.Value" @(!string.IsNullOrWhiteSpace(Model.FromTime) && Model.FromTime.Equals(item.Value) ? "selected" : string.Empty)>@item.Text</option>
+                            }
+
+                        }
+
+                    </select>
+                </span>
+            </div>
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-ToTime" class="form-field__label">
+                    @Translate.Text("Epass.Totime")
+                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-ToTime" name="ToTime" aria-describedby="description-for-ToTime"
+                            data-parsley-errors-container="#description-for-ToTime" required data-parsley-required-message="@Translate.Text("Epass.Chooseanoption")">
+                        <option value="" selected>@Translate.Text("Epass.Chooseanoption")</option>
+                        @{
+                            foreach (var item in FromToTime)
+                            {
+                                <option value="@item.Value" @(!string.IsNullOrWhiteSpace(Model.ToTime) && Model.ToTime.Equals(item.Value) ? "selected" : string.Empty)>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </span>
+            </div>
+
+            <div class="form-field form-field--select form-field--select-single">
+                <label for="form-field-locations" class="form-field__label">
+                    @Translate.Text("Epass.Location")
+                </label>
+                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--select2">
+                    <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2"
+                            id="form-field-locations"
+                            name="SelectedLocation"
+                            multiple="multiple"
+                            required=""
+                            aria-describedby="description-for-locations"
+                            data-parsley-errors-container="#description-for-locations"
+                            data-placeholder="@Translate.Text("Epass.SelectLocation")"
+                            data-parsley-required-message="@Translate.Text("Epass.SelectLocation")">
+                        @{
+                            foreach (var item in Model.LocationList)
+                            {
+                                <option value="@item.Value" @(Model.SelectedLocation != null && Model.SelectedLocation.Contains(item.Value) ? "selected" : string.Empty)>@item.Text</option>
+                            }
+                        }
+                    </select>
+                </span>
+                <div id="description-for-locations" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.SelectedLocation)
+                </div>
+            </div>
+
+
+            <div class="form-field form-field--text  ">
+                <label for="form-field-Projectcoordinatorname" class="form-field__label">
+                    @Translate.Text("wp.ProjectCoordinatorName")
+                    <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <input maxlength="50"
+                           data-parsley-maxlength="50"
+                           value="@Model.Projectcoordinatorname"
+                           data-parsley-pattern="/^[^0-9/:,\()]*$/"
+                           class="form-field__input form-field__input--text"
+                           id="form-field-Projectcoordinatorname"
+                           type="text"
+                           name="Projectcoordinatorname"
+                           placeholder="@Translate.Text("wp.ProjectCoordinatorName")"
+                           aria-describedby="description-for-Projectcoordinatorname"
+                           data-parsley-errors-container="#description-for-Projectcoordinatorname"
+                           required=""
+                           data-parsley-required-message="@Translate.Text("wp.ProjectCoordinatorNamevalid")"
+                           data-parsley-trigger="focusout"
+                           data-parsley-id="30">
+                </span>
+                <div id="description-for-Projectcoordinatorname" class="form-field__messages">
+                </div>
+            </div>
+
+            <div class="form-field form-field--text ">
+                <label for="form-field-ProjectCoordinatorEmailaddress" class="form-field__label">
+                    @Translate.Text("wp.ProjectCoordinatorEmail")
+                </label>
+                <label class="form-field__input-wrapper">
+                    @Html.TextBoxFor(x => x.ProjectCoordinatorEmailaddress,
+                    new
+                    {
+                    @class = "form-field-EmailAddress form-field__input form-field__input--text",
+                    @id = "form-field-ProjectCoordinatorEmailaddress",
+                    @placeholder = Translate.Text("wp.ProjectCoordinatorEmail"),
+                    @data_parsley_error_message = Translate.Text("wp.ProjectCoordinatorEmailvalid"),
+                    @data_parsley_errors_container = "#description-for-ProjectCoordinatorEmailaddress",
+                    @aria_describedby = "description-for-ProjectCoordinatorEmailaddress",
+                    @data_parsley_id = "14",
+                    @step = "any",
+                    @type = "email",
+                    @maxlength = "50",
+                    @required = "",
+                    @data_parsley_trigger = "focusout",
+                    @data_parsley_maxlength = "50"
+                    })
+
+                </label>
+                <div id="description-for-ProjectCoordinatorEmailaddress" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.ProjectCoordinatorEmailaddress, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+
+            <div class="form-field form-field--text ">
+                <label for="form-field-ProjectCoordinatorMobile" class="form-field__label">
+                    @Translate.Text("wp.ProjectCoordinatorMobileNumber")
+                    @*<span class="form-field__label-required">(@Translate.Text("Epass.Optional"))</span>*@
+                </label>
+
+                <label class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                    @Html.TextBoxFor(x => x.ProjectCoordinatorMobile,
+                    new
+                    {
+                    @type = "tel",
+                    @class = "form-field__input form-field__input--text form-field__input--prefixed",
+                    @name = "ProjectCoordinatorMobile",
+                    @id = "form-field-ProjectCoordinatorMobile",
+                    @placeholder = Translate.Text("Enter UAE mobile number"),
+                    @data_parsley_error_message = Translate.Text("Please enter a valid UAE mobile number"),
+                    @data_parsley_errors_container = "#description-for-ProjectCoordinatorMobile",
+                    @aria_describedby = "description-for-ProjectCoordinatorMobile",
+                    @data_parsley_id = "14",
+                    @data_parsley_type = "digits",
+                    @required = "",
+                    @data_parsley_mobilenumber = "",
+                    @step = "any"
+                    })
+
+                </label>
+                <div id="description-for-ProjectCoordinatorMobile" class="form-field__messages">
+                    @Html.ValidationMessageFor(x => x.ProjectCoordinatorMobile, "", new { @class = "parsley-errors-list" })
+                </div>
+            </div>
+            <div class="form-field form-field--text form-field--textarea">
+                <label for="form-field-PurposeofVisit" class="form-field__label">
+                    @Translate.Text("wp.Purpose of the visit")
+                    <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                </label>
+                <span class="form-field__input-wrapper">
+                    <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                              maxlength="100"
+                              data-textarea="PurposeofVisit"
+                              id="form-field-PurposeofVisit"
+                              name="PurposeofVisit"
+                              type="textarea"
+                              aria-describedby="description-for-PurposeofVisit"
+                              data-parsley-errors-container="#description-for-PurposeofVisit"
+                              required=""
+                              data-parsley-required-message="@Translate.Text("Epass.EnterPurposeofVisit")">@Model.PurposeofVisit</textarea>
+                </span>
+                <div id="description-for-PurposeofVisit" class="form-field__messages">
+                    <p class="form-field__charcount">@Translate.Text("Max") <span data-charcount="PurposeofVisit">0</span>/100 @Translate.Text("Characters")</p>
+                </div>
+            </div>
+
+            <div class="form-field form-field--toggles inline-terms mt24" id="TermsConditions1">
+                <div class="form-field__checkbox  last">
+                    <label>
+                        <input class="form-field__input form-field__input--checkbox"
+                               id="form-field-checkbox_1_1_terms1"
+                               aria-label="form-field-checkbox_1_1_terms"
+                               name="AgreedToTerms"
+                               type="checkbox"
+                               value="true"
+                               aria-describedby="description-for-accept-terms1"
+                               required=""
+                               data-parsley-error-message="@Translate.Text("Error Terms Agreement")"
+                               data-parsley-errors-container="#description-for-accept-terms1"
+                               data-parsley-multiple="form-field-checkbox_1_1_terms1"
+                               data-parsley-id="23">
+                        <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                    </label>
+                </div>
+                <fieldset class="fieldset m39-modal__tnc">
+                    <legend class="legend-color">.</legend>
+                    <span class="text">@Translate.Text("updateiban.Iagree")</span>
+                    @Html.Sitecore().Placeholder("termsandcondition")
+                </fieldset>
+                <div id="description-for-accept-terms1" class="form-field__messages"></div>
+                <input type="hidden" name="AgreedToTerms" value="false" />
+            </div>
+            <div class="form-field__button">
+                <button class="button button--primary button--next j113-epass--permPass__form-page--next2" type="submit" data-submission-text="@Translate.Text("Epass.Updating")...">@Translate.Text("Epass.Continue")</button>
+            </div>
+        </div>
+    </div>

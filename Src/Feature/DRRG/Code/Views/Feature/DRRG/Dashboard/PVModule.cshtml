@@ -1,0 +1,1522 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Feature.DRRG.Models;
+@model DEWAXP.Feature.DRRG.Models.PVModule
+
+@{
+    /**/
+
+    var srcModelDataSheet = (!string.IsNullOrWhiteSpace(Model.ModelDataSheetFilename) && !Model.ModelDataSheetFilename.Contains(".pdf")) ? (Model.ModelDataSheetBinary != null ? "data:image;base64," + Convert.ToBase64String(Model.ModelDataSheetBinary) : "/images/preview@2x.png") : (Model.ModelDataSheetBinary != null ? "/images/upload_success@2x.png" : "/images/preview_pdf@2x.png");
+    var srctxtModelDataSheet = !string.IsNullOrWhiteSpace(Model.ModelDataSheetFilename) ? Model.ModelDataSheetFilename : "";
+
+    var srcDocument1 = (!string.IsNullOrWhiteSpace(Model.Document1Filename) && !Model.Document1Filename.Contains(".pdf")) ? (Model.Document1Binary != null ? "data:image;base64," + Convert.ToBase64String(Model.Document1Binary) : "/images/preview@2x.png") : (Model.Document1Binary != null ? "/images/upload_success@2x.png" : "/images/preview_pdf@2x.png");
+    var srcDocument2 = (!string.IsNullOrWhiteSpace(Model.Document2Filename) && !Model.Document2Filename.Contains(".pdf")) ? (Model.Document2Binary != null ? "data:image;base64," + Convert.ToBase64String(Model.Document2Binary) : "/images/preview@2x.png") : (Model.Document2Binary != null ? "/images/upload_success@2x.png" : "/images/preview_pdf@2x.png");
+    var srcDocument3 = (!string.IsNullOrWhiteSpace(Model.Document3Filename) && !Model.Document3Filename.Contains(".pdf")) ? (Model.Document3Binary != null ? "data:image;base64," + Convert.ToBase64String(Model.Document3Binary) : "/images/preview@2x.png") : (Model.Document3Binary != null ? "/images/upload_success@2x.png" : "/images/preview_pdf@2x.png");
+    var srcDocument4 = (!string.IsNullOrWhiteSpace(Model.Document4Filename) && !Model.Document4Filename.Contains(".pdf")) ? (Model.Document4Binary != null ? "data:image;base64," + Convert.ToBase64String(Model.Document4Binary) : "/images/preview@2x.png") : (Model.Document4Binary != null ? "/images/upload_success@2x.png" : "/images/preview_pdf@2x.png");
+    var srcDocument5 = (!string.IsNullOrWhiteSpace(Model.Document5Filename) && !Model.Document5Filename.Contains(".pdf")) ? (Model.Document5Binary != null ? "data:image;base64," + Convert.ToBase64String(Model.Document5Binary) : "/images/preview@2x.png") : (Model.Document5Binary != null ? "/images/upload_success@2x.png" : "/images/preview_pdf@2x.png");
+
+    var srctxtDocument1 = !string.IsNullOrWhiteSpace(Model.Document1Filename) ? Model.Document1Filename : "";
+    var srctxtDocument2 = !string.IsNullOrWhiteSpace(Model.Document2Filename) ? Model.Document2Filename : "";
+    var srctxtDocument3 = !string.IsNullOrWhiteSpace(Model.Document3Filename) ? Model.Document3Filename : "";
+    var srctxtDocument4 = !string.IsNullOrWhiteSpace(Model.Document4Filename) ? Model.Document4Filename : "";
+    var srctxtDocument5 = !string.IsNullOrWhiteSpace(Model.Document5Filename) ? Model.Document5Filename : "";
+    var disabledField = !string.IsNullOrWhiteSpace(Model.PVId) && Model.Status.Equals("Approved") ? "disabled" : "";
+
+    bool showRemoveFileLink = (string.IsNullOrWhiteSpace(Model.PVId) || (Model.Status != null || Model.Status.Equals("ReviewerRejected") || Model.Status.Equals("Approved")));
+}
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j03-drrg-addnew" data-journey="j03-drrg-addnew">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+            </div>
+            <div id="timer"></div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "drrgpvmoduleform", @class = "form", data_form = "true", @data_submit_validate = "enabled", @novalidate = "novalidate", enctype = "multipart/form-data" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionErrorV2.cshtml")
+
+                    <input type="hidden" id="SelectedNominalPowerEntry" name="SelectedNominalPowerEntry" value="@Model.NominalPower" />
+                    <fieldset class="pageclass" data-page="0">
+                        <legend class="legend hidden">@Translate.Text("DRRG_ProductDetails") </legend>
+
+                        @*<div class="text-block">
+                                <p class="text__content-copy">
+                                    @Translate.Text("All fields are mandatory, unless marked optional.")
+                                </p>
+                            </div>*@
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-ModelName" class="form-field__label">
+                                @Translate.Text("DRRG.ModelofPVModule.label")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField) class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-ModelName"
+                                       name="ModelName"
+                                       value="@Model.ModelName"
+                                       type="text"
+                                       placeholder="@Translate.Text("DRRG.ModelofPVModule.placeholder")"
+                                       aria-describedby="description-for-ModelName"
+                                       data-parsley-errors-container="#description-for-ModelName"
+                                       required=""
+                                       maxlength="100"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-ModelName" class="form-field__messages">
+                            </div>
+                            <input type="hidden" name="Manufacturer_Code" id="Manufacturer_Code" value="@Model.Manufacturer_Code" />
+                            <input type="hidden" name="PVId" id="PVId" value="@Model.PVId" />
+                            <input type="hidden" name="Id" id="Id" value="@Model.Id" />
+                            <input type="hidden" name="Status" id="Status" value="@Model.Status" />
+                            <input type="hidden" name="signatureCopy" id="signatureCopy" value="" />
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-Nominalpower" class="form-field__label">
+                                @Translate.Text("DRRG.NominalPowerEntryType.Label")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class=" form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-Nominalpower"
+                                        name="NominalPower"
+                                        aria-describedby="description-for-Nominalpower"
+                                        data-parsley-errors-container="#description-for-Nominalpower"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    @foreach (SelectListItem item in Model.NominalPowerEntries)
+                                    {
+                                        <option value="@item.Value" @(Model.NominalPower == item.Value ? "selected" : string.Empty) toggle-target=".@item.Value.Replace(" ","")">@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-Nominalpower" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text SingleNominalPowerEntry" style="display: none;">
+                            <label for="form-field-Singlenominalpower" class="form-field__label">
+                                @Translate.Text("DRRG.NominalPower.Label")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field--hasunit">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-Singlenominalpower"
+                                       name="Singlenominalpower"
+                                       value="@(Model.Singlenominalpower != null ? Model.Singlenominalpower : "")"
+                                       type="number"
+                                       step="0.0001"
+                                       data-parsley-maxnumber="10"
+                                       placeholder=" @Translate.Text("DRRG.NominalPower.placeholder")"
+                                       aria-describedby="description-for-Singlenominalpower"
+                                       data-parsley-errors-container="#description-for-Singlenominalpower"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                                <span class="form-field--unit">W<sub>p</sub></span>
+                            </span>
+                            <div id="description-for-Singlenominalpower" class="form-field__messages">
+                            </div>
+                        </div>
+
+
+                        <div class="form-field form-field--text form-field--4 NominalPowerRange" style="display: none;">
+                            <label for="form-field-nominalpowerrange1" class="form-field__label">
+                                @Translate.Text("Nominal Power Range")<span class="required--asterisk">*</span>
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field--hasunit">
+                                <input class="form-field__input form-field__input--text" id="form-field-nominalpowerrange1"
+                                       name="MultinominalPower[0]"
+                                       type="number"
+                                       value="@((Model.pVMultiNominals != null && Model.pVMultiNominals.Count > 0) ? Model.pVMultiNominals[0].wp1 : "")"
+                                       placeholder="Min Value (Wp)"
+                                       aria-describedby="description-for-nominalpowerrange1"
+                                       data-parsley-errors-container="#description-for-nominalpowerrange1"
+                                       required=""
+                                       step="0.0001"
+                                       data-parsley-maxnumber="10"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="12">
+                                <span class="form-field--unit">W<sub>p</sub> - </span>
+                            </span>
+                            <div id="description-for-nominalpowerrange1" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text form-field--4 NominalPowerRange" style="display: none;">
+                            <label for="form-field-nominalpowerrange2" class="form-field__label">
+                                <span class="legend-color">Label</span>
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field--hasunit">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-nominalpowerrange2"
+                                       name="MultinominalPower[1]"
+                                       value="@(Model.pVMultiNominals != null ? Model.pVMultiNominals[0].wp2 : "")"
+                                       type="number" placeholder="Max Value (Wp)"
+                                       aria-describedby="description-for-nominalpowerrange2"
+                                       data-parsley-errors-container="#description-for-nominalpowerrange2"
+                                       required=""
+                                       step="0.0001"
+                                       data-parsley-maxnumber="10"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="14">
+                                <span class="form-field--unit">W<sub>p</sub> , </span>
+                            </span>
+                            <div id="description-for-nominalpowerrange2" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text form-field--4 NominalPowerRange" style="display: none;">
+                            <label for="form-field-nominalpowerrange3" class="form-field__label">
+                                <span class="form-field__label-required aria-only">(required)</span>
+                                In step of
+                            </label>
+                            <span class="form-field__input-wrapper form-field--hasunit">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-nominalpowerrange3"
+                                       name="MultinominalPower[2]"
+                                       value="@(Model.pVMultiNominals != null ? Model.pVMultiNominals[0].wp3 : "")"
+                                       type="number"
+                                       placeholder="Scale of Increment (W)"
+                                       aria-describedby="description-for-nominalpowerrange3"
+                                       data-parsley-errors-container="#description-for-nominalpowerrange3"
+                                       required=""
+                                       step="0.0001"
+                                       data-parsley-maxnumber="10"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout" data-parsley-id="16">
+                                <span class="form-field--unit">W<sub></sub></span>
+                            </span>
+                            <div id="description-for-nominalpowerrange3" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field MultipleNominalPowerEntries" style="display: none;">
+                            <div class="form-field form-field--select form-field--select-single clear_both">
+                                <label for="form-field-nominalpowermultiple" class="form-field__label">
+                                    @Translate.Text("Number of Entries (Max. of 5 Entries per Application)")
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                    <select class="form-field__input form-field__input--select form-field__input--select-full j03-drrg-addnew_multiple parsley-success"
+                                            id="form-field-nominalpowermultiple"
+                                            name="NumberofMultinominals"
+                                            aria-describedby="description-for-nominalpowermultiple"
+                                            data-parsley-errors-container="#description-for-nominalpowermultiple"
+                                            required=""
+                                            data-j03-multiple="{&quot;inputs&quot;:[{&quot;label&quot;:&quot;Nominal Power <span class=\&quot;required--asterisk\&quot;>*</span>&quot;, &quot;step&quot;: &quot;true&quot;, &quot;type&quot;: &quot;number&quot;, &quot;placeholder&quot;: &quot;Enter Minimum Value (Wp)&quot;, &quot;required_msg&quot;:&quot;This field is required&quot;,&quot;groupname&quot;:&quot;pVMultiNominals&quot;, &quot;name&quot;:&quot;wp1&quot;, &quot;maxlength&quot;:&quot;10&quot;,&quot;unit&quot;:&quot;W<sub>p</sub>&quot;,&quot;onkeydown&quot;:&quot;javascript: return event.keyCode == 69 ? false : true&quot;}]}"
+                                            data-parsley-trigger="change" data-parsley-id="18" aria-invalid="false">
+                                        <option value="1" @(Model.NumberofMultinominals == "1" ? "selected" : string.Empty)>1</option>
+                                        <option value="2" @(Model.NumberofMultinominals == "2" ? "selected" : string.Empty)>2</option>
+                                        <option value="3" @(Model.NumberofMultinominals == "3" ? "selected" : string.Empty)>3</option>
+                                        <option value="4" @(Model.NumberofMultinominals == "4" ? "selected" : string.Empty)>4</option>
+                                        <option value="5" @(Model.NumberofMultinominals == "5" ? "selected" : string.Empty)>5</option>
+                                    </select>
+                                </span>
+                                <div id="description-for-nominalpowermultiple" class="form-field__messages">
+                                </div>
+                            </div>
+
+                            <div class="j03-drrg-addnew_multiple--container">
+                                @if ((string.IsNullOrEmpty(Model.PVId) && Model.pVMultiNominals != null && Model.pVMultiNominals.Count > 0) || (!string.IsNullOrEmpty(Model.PVId) && Model.pVMultiNominals != null && Model.pVMultiNominals.Count > 0))
+                                {
+                                    var i = 0;
+                                    foreach (var item in Model.pVMultiNominals)
+                                    {
+                                        <div class="j03-drrg-addnew_multiple--item">
+                                            <div class="form-field form-field--text">
+                                                <label for="form-field-_phlaikrd_@i" class="form-field__label">@Translate.Text("Nominal Power") <span class="required--asterisk">*</span></label>
+                                                <span class="form-field__input-wrapper form-field--hasunit">
+                                                    <input class="form-field__input form-field__input--text" id="form-field-_phlaikrd1" name="pVMultiNominals[@i].wp1"
+                                                           type="number"
+                                                           placeholder="Enter Minimum Value (Wp)"
+                                                           aria-describedby="description-for-_phlaikrd_@i"
+                                                           data-parsley-errors-container="#description-for-_phlaikrd_@i"
+                                                           required=""
+                                                           step="0.0001"
+                                                           data-parsley-maxnumber="10"
+                                                           value="@(Model.pVMultiNominals != null ? Model.pVMultiNominals[i].wp1 : "")"
+                                                           data-parsley-required-message="This field is required"
+                                                           data-parsley-trigger="focusout" data-parsley-id="20">
+                                                    <span class="form-field--unit">W<sub>p</sub></span>
+                                                </span><div id="description-for-_phlaikrd_@i" class="form-field__messages">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        i++;
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="j03-drrg-addnew_multiple--item">
+                                        <div class="form-field form-field--text">
+                                            <label for="form-field-_phlaikrd1" class="form-field__label">@Translate.Text("Nominal Power") <span class="required--asterisk">*</span></label>
+                                            <span class="form-field__input-wrapper form-field--hasunit">
+                                                <input class="form-field__input form-field__input--text" id="form-field-_phlaikrd1" name="pVMultiNominals[0].wp1"
+                                                       type="number"
+                                                       placeholder="Enter Minimum Value (Wp)"
+                                                       aria-describedby="description-for-_phlaikrd1"
+                                                       data-parsley-errors-container="#description-for-_phlaikrd1"
+                                                       required=""
+                                                       step="0.0001"
+                                                       data-parsley-maxnumber="10"
+                                                       value="@(Model.pVMultiNominals != null ? Model.pVMultiNominals[0].wp1 : "")"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-parsley-trigger="focusout" data-parsley-id="20">
+                                                <span class="form-field--unit">W<sub>p</sub></span>
+                                            </span><div id="description-for-_phlaikrd1" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-ModuleLength" class="form-field__label">
+                                @Translate.Text("DRRG.ModuleLength.Label")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field--hasunit">
+                                <input @(disabledField) class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-ModuleLength"
+                                       name="ModuleLength"
+                                       value="@Model.ModuleLength"
+                                       type="number"
+                                       placeholder=" @Translate.Text("DRRG.ModuleLength.Placeholder")"
+                                       aria-describedby="description-for-ModuleLength"
+                                       data-parsley-errors-container="#description-for-ModuleLength"
+                                       required=""
+                                       step="0.0001"
+                                       data-parsley-maxnumber="10"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                                <span class="form-field--unit">cm<sub></sub></span>
+                            </span>
+                            <div id="description-for-ModuleLength" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-ModuleWidth" class="form-field__label">
+                                @Translate.Text("DRRG.ModuleWidth.Label")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field--hasunit">
+                                <input @(disabledField) class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-ModuleWidth"
+                                       name="ModuleWidth"
+                                       value="@Model.ModuleWidth"
+                                       type="number"
+                                       placeholder=" @Translate.Text("DRRG.ModuleWidth.Placeholder")"
+                                       aria-describedby="description-for-ModuleWidth"
+                                       data-parsley-errors-container="#description-for-ModuleWidth"
+                                       required=""
+                                       step="0.0001"
+                                       data-parsley-maxnumber="10"
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                                <span class="form-field--unit">cm<sub></sub></span>
+                            </span>
+                            <div id="description-for-ModuleWidth" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-CellTechnology" class="form-field__label">
+                                @Translate.Text("Cell Technology")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-CellTechnology"
+                                        name="CellTechnology"
+                                        aria-describedby="description-for-CellTechnology"
+                                        data-parsley-errors-container="#description-for-CellTechnology"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.CellTechnologies)
+                                    {
+                                        <option value="@item.Value" @((Model.CellTechnology != null && Model.CellTechnology.ToLower() == item.Value.ToLower()) ? "selected" : string.Empty) toggle-target=".CellTechnology@(item.Value.Replace(" ",""))">@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-CellTechnology" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text CellTechnologyOther" style="display: none;">
+                            <label for="form-field-OtherCellTechnology" class="form-field__label">
+                                @Translate.Text("DRRG.OtherCellTechnology")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherCellTechnology"
+                                       name="OtherCellTechnology"
+                                       value="@Model.OtherCellTechnology"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherCellTechnologyPlaceholder")"
+                                       aria-describedby="description-for-OtherCellTechnology"
+                                       data-parsley-errors-container="#description-for-OtherCellTechnology"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherCellTechnology" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-SelectedCellStructure" class="form-field__label">
+                                @Translate.Text("DRRG.CellStructure")
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select  form-field__input-wrapper--select2">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full form-field__input--select2"
+                                        id="form-field-CellStructure"
+                                        name="CellStructure"
+                                        aria-describedby="description-for-SelectedCellStructure"
+                                        data-parsley-errors-container="#description-for-SelectedCellStructure"
+                                        data-placeholder="@Translate.Text("DRRG.CellStructurePlaceholder")"
+                                        required=""
+                                        multiple="multiple"
+                                        data-parsley-required-message="@Translate.Text("DRRG.CellStructurePlaceholder")"
+                                        tabindex="-1"
+                                        aria-hidden="true"
+                                        data-parsley-trigger="change">
+                                    <option value="">@Translate.Text("Select")</option>
+
+                                    @{
+                                        if (Model.CellStructureOptions != null)
+                                        {
+                                            foreach (var item in Model.CellStructureOptions)
+                                            {
+                                                if (!string.IsNullOrWhiteSpace(Model.SelectedCellStructure) && Model.SelectedCellStructure.Contains(item.Value))
+                                                {
+                                                    <option value="@item.Value" selected toggle-target=".CellStructure@(item.Value.Replace(" ",""))">@item.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Value" toggle-target=".CellStructure@(item.Value.Replace(" ",""))">@item.Text</option>
+                                                }
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-SelectedCellStructure" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text CellStructureOthers" style="display: none;">
+                            <label for="form-field-OtherCellStructure" class="form-field__label">
+                                @Translate.Text("DRRG.OtherCellStructure")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherCellStructure"
+                                       name="OtherCellStructure"
+                                       value="@Model.OtherCellStructure"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherCellStructurePlaceholder")"
+                                       aria-describedby="description-for-OtherCellStructure"
+                                       data-parsley-errors-container="#description-for-OtherCellStructure"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherCellStructure" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-Framed" class="form-field__label">
+                                @Translate.Text("Framed")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-Framed"
+                                        name="Framed"
+                                        aria-describedby="description-for-Framed"
+                                        data-parsley-errors-container="#description-for-Framed"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstFramed)
+                                    {
+                                        if (Model.Framed != null && Model.Framed.ToLower() == item.Value.ToLower())
+                                        {
+                                            <option value="@item.Value" selected>@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-Framed" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-FrontSuperstrate" class="form-field__label">
+                                @Translate.Text("Front Superstrate")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-FrontSuperstrate"
+                                        name="FrontSuperstrate"
+                                        aria-describedby="description-for-FrontSuperstrate"
+                                        data-parsley-errors-container="#description-for-FrontSuperstrate"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstFrontSuperstrate)
+                                    {
+                                        if (Model.FrontSuperstrate != null && Model.FrontSuperstrate.ToLower() == item.Value.ToLower())
+                                        {
+                                            <option value="@item.Value" selected toggle-target=".FrontSuperstrate@(item.Value.Replace(" ",""))">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value" toggle-target=".FrontSuperstrate@(item.Value.Replace(" ",""))">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-FrontSuperstrate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text FrontSuperstrateOther" style="display: none;">
+                            <label for="form-field-OtherFrontSuperstrate" class="form-field__label">
+                                @Translate.Text("DRRG.OtherFrontSuperstrate")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherFrontSuperstrate"
+                                       name="OtherFrontSuperstrate"
+                                       value="@Model.OtherFrontSuperstrate"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherFrontSuperstratePlaceholder")"
+                                       aria-describedby="description-for-OtherFrontSuperstrate"
+                                       data-parsley-errors-container="#description-for-OtherFrontSuperstrate"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherFrontSuperstrate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-BackSuperstrate" class="form-field__label">
+                                @Translate.Text("Back Superstrate")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-BackSuperstrate"
+                                        name="BackSuperstrate"
+                                        aria-describedby="description-for-BackSuperstrate"
+                                        data-parsley-errors-container="#description-for-BackSuperstrate"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstFrontSuperstrate)
+                                    {
+                                        if (Model.BackSuperstrate != null && Model.BackSuperstrate.ToLower() == item.Value.ToLower())
+                                        {
+                                            <option value="@item.Value" selected toggle-target=".BackSuperstrate@(item.Value.Replace(" ",""))">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value" toggle-target=".BackSuperstrate@(item.Value.Replace(" ",""))">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-BackSuperstrate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text BackSuperstrateOther" style="display: none;">
+                            <label for="form-field-OtherBackSuperstrate" class="form-field__label">
+                                @Translate.Text("DRRG.OtherBackSuperstrate")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherBackSuperstrate"
+                                       name="OtherBackSuperstrate"
+                                       value="@Model.OtherBackSuperstrate"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherBackSuperstratePlaceholder")"
+                                       aria-describedby="description-for-OtherBackSuperstrate"
+                                       data-parsley-errors-container="#description-for-OtherBackSuperstrate"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherBackSuperstrate" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-Encapsulant" class="form-field__label">
+                                @Translate.Text("Encapsulant")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-Encapsulant"
+                                        name="Encapsulant"
+                                        aria-describedby="description-for-Encapsulant"
+                                        data-parsley-errors-container="#description-for-Encapsulant"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstEncapsulant)
+                                    {
+                                        if (Model.Encapsulant != null && Model.Encapsulant.ToLower() == item.Value.ToLower())
+                                        {
+                                            <option value="@item.Value" selected toggle-target=".Encapsulant@(item.Value.Replace(" ","").Replace("/",""))">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value" toggle-target=".Encapsulant@(item.Value.Replace(" ","").Replace("/",""))">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-Encapsulant" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text EncapsulantOther" style="display: none;">
+                            <label for="form-field-OtherEncapsulant" class="form-field__label">
+                                @Translate.Text("DRRG.OtherEncapsulant")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherEncapsulant"
+                                       name="OtherEncapsulant"
+                                       value="@Model.OtherEncapsulant"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherEncapsulantPlaceholder")"
+                                       aria-describedby="description-for-OtherEncapsulant"
+                                       data-parsley-errors-container="#description-for-OtherEncapsulant"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherEncapsulant" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-DCSystemGroupMandatory" class="form-field__label">
+                                @Translate.Text("DRRG.DCSystemGroundingMadatory")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-DCSystemGroupMandatory"
+                                        name="DCSystemGroupMandatory"
+                                        aria-describedby="description-for-DCSystemGroupMandatory"
+                                        data-parsley-errors-container="#description-for-DCSystemGroupMandatory"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstFramed)
+                                    {
+                                        if (Model.DCSystemGroupMandatory != null && Model.DCSystemGroupMandatory.ToLower() == item.Value.ToLower())
+                                        {
+                                            <option value="@item.Value" selected toggle-target=".DCSystemGroupMandatory@(item.Value.Replace(" ",""))">@item.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Value" toggle-target=".DCSystemGroupMandatory@(item.Value.Replace(" ",""))">@item.Text</option>
+                                        }
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-DCSystemGroupMandatory" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single DCSystemGroupMandatoryYes" style="display:none;">
+                            <label for="form-field-DCSystemGroup" class="form-field__label">
+                                @Translate.Text("DRRG.DCSystemGrounding")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-DCSystemGroup"
+                                        name="DCSystemGroup"
+                                        aria-describedby="description-for-DCSystemGroup"
+                                        data-parsley-errors-container="#description-for-DCSystemGroup"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstDCSystemgroup)
+                                    {
+                                        <option value="@item.Value" @((Model.DCSystemGroup != null && Model.DCSystemGroup.ToLower() == item.Value.ToLower()) ? "selected" : string.Empty)>@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-DCSystemGroup" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-PositionofJunctionBox" class="form-field__label">
+                                @Translate.Text("Position of the Junction Box")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-PositionofJunctionBox"
+                                        name="PositionofJunctionBox"
+                                        aria-describedby="description-for-PositionofJunctionBox"
+                                        data-parsley-errors-container="#description-for-PositionofJunctionBox"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstPositionofJunctionBox)
+                                    {
+                                        <option value="@item.Value" @((Model.PositionofJunctionBox != null && Model.PositionofJunctionBox.ToLower() == item.Value.ToLower()) ? "selected" : string.Empty)>@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-PositionofJunctionBox" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-MaterialofJunctionBox" class="form-field__label">
+                                @Translate.Text("Material of the Junction Box Enclosure")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-MaterialofJunctionBox"
+                                        name="MaterialofJunctionBox"
+                                        aria-describedby="description-for-MaterialofJunctionBox"
+                                        data-parsley-errors-container="#description-for-MaterialofJunctionBox"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstMaterialofJunctionBox)
+                                    {
+                                        <option value="@item.Value" @((Model.MaterialofJunctionBox != null && Model.MaterialofJunctionBox.ToLower() == item.Value.ToLower()) ? "selected" : string.Empty) toggle-target=".MaterialofJunctionBox@(item.Value.Replace(" ",""))">@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-MaterialofJunctionBox" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text MaterialofJunctionBoxOther" style="display: none;">
+                            <label for="form-field-OtherMaterialofJunctionBox" class="form-field__label">
+                                @Translate.Text("DRRG.OtherMaterialofJunctionBox")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherMaterialofJunctionBox"
+                                       name="OtherMaterialofJunctionBox"
+                                       value="@Model.OtherMaterialofJunctionBox"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherMaterialofJunctionBoxPlaceholder")"
+                                       aria-describedby="description-for-OtherMaterialofJunctionBox"
+                                       data-parsley-errors-container="#description-for-OtherMaterialofJunctionBox"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherMaterialofJunctionBox" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-Terminations" class="form-field__label">
+                                @Translate.Text("Terminations")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-Terminations"
+                                        name="Terminations"
+                                        aria-describedby="description-for-Terminations"
+                                        data-parsley-errors-container="#description-for-Terminations"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstTerminations)
+                                    {
+                                        <option value="@item.Value" @((Model.Terminations != null && Model.Terminations.ToLower() == item.Value.ToLower()) ? "selected" : string.Empty) toggle-target=".Terminations@(item.Value.Replace(" ",""))">@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-Terminations" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text TerminationsOther" style="display: none;">
+                            <label for="form-field-OtherTerminations" class="form-field__label">
+                                @Translate.Text("DRRG.OtherTerminations")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherTerminations"
+                                       name="OtherTerminations"
+                                       value="@Model.OtherTerminations"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherTerminationsPlaceholder")"
+                                       aria-describedby="description-for-OtherTerminations"
+                                       data-parsley-errors-container="#description-for-OtherTerminations"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherTerminations" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-FeaturesofJunctionBox" class="form-field__label">
+                                @Translate.Text("Features of the Junction Box")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select @(disabledField) class="@(disabledField) form-field__input form-field__input--select form-field__input--select-full form-field__input--select--toggle"
+                                        id="form-field-FeaturesofJunctionBox"
+                                        name="FeaturesofJunctionBox"
+                                        aria-describedby="description-for-FeaturesofJunctionBox"
+                                        data-parsley-errors-container="#description-for-FeaturesofJunctionBox"
+                                        required=""
+                                        data-parsley-trigger="change"
+                                        data-parsley-id="8">
+                                    <option value="">@Translate.Text("Select")</option>
+                                    @foreach (SelectListItem item in Model.LstFeaturesofJunctionBox)
+                                    {
+                                        <option value="@item.Value" @((Model.FeaturesofJunctionBox != null && Model.FeaturesofJunctionBox.ToLower() == item.Value.ToLower()) ? "selected" : string.Empty) toggle-target=".FeaturesofJunctionBox@(item.Value.Replace(" ",""))">@item.Text</option>
+                                    }
+                                </select>
+                            </span>
+                            <div id="description-for-FeaturesofJunctionBox" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text FeaturesofJunctionBoxOther" style="display: none;">
+                            <label for="form-field-OtherFeaturesofJunctionBox" class="form-field__label">
+                                @Translate.Text("DRRG.OtherFeaturesofJunctionBox")<span class="required--asterisk">*</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input @(disabledField)
+                                       class="@(disabledField) form-field__input form-field__input--text"
+                                       id="form-field-OtherFeaturesofJunctionBox"
+                                       name="OtherFeaturesofJunctionBox"
+                                       value="@Model.OtherFeaturesofJunctionBox"
+                                       type="text"
+                                       oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                       maxlength="70"
+                                       placeholder="@Translate.Text("DRRG.OtherFeaturesofJunctionBoxPlaceholder")"
+                                       aria-describedby="description-for-OtherFeaturesofJunctionBox"
+                                       data-parsley-errors-container="#description-for-OtherFeaturesofJunctionBox"
+                                       required=""
+                                       data-parsley-required-message="This field is required"
+                                       data-parsley-trigger="focusout"
+                                       data-parsley-id="6">
+                            </span>
+                            <div id="description-for-OtherFeaturesofJunctionBox" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@srcModelDataSheet"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@srctxtModelDataSheet"
+                                         data-uploader-image="ModelDataSheet">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-ModelDataSheet" class="form-field__label">
+                                        @Translate.Text("Model Data Sheet")<span class="required--asterisk">*</span>
+                                    </label>
+                                    @if ((string.IsNullOrWhiteSpace(Model.PVId) && Model.Status == null) || (Model.Status != null && Model.Status.Equals("ReviewerRejected")) || (Model.Status != null && Model.Status.Equals("Approved")))
+                                    {
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-ModelDataSheet"
+                                                       name="ModelDataSheet" type="file"
+                                                       aria-describedby="description-for-ModelDataSheet"
+                                                       data-parsley-errors-container="#description-for-ModelDataSheet"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-uploader-field="ModelDataSheet"
+                                                       @((srcModelDataSheet == null || srcModelDataSheet == "/images/preview@2x.png") ? "required=\"=\"" : "")
+                                                       accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="ModelDataSheet" @(!string.IsNullOrWhiteSpace(srctxtModelDataSheet) ? "style=display:block !important" : "")>@srctxtModelDataSheet</p>
+                                    @if (showRemoveFileLink)
+                                    {
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="ModelDataSheet" @(!string.IsNullOrWhiteSpace(srctxtModelDataSheet) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-ModelDataSheet" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field__button">
+                            <div class="button button--next button--primary nextbutton">Next</div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="pageclass hidden" data-page="1">
+                        <legend class="legend">
+                            <strong>
+                                @Translate.Text("DRRG_ComplianceCertification")
+                            </strong>
+                        </legend>
+                        @Html.Sitecore().Placeholder("Compliancetext")
+
+                        <div class="form-field mb0 mt24">
+                            <div class="form-field__label">
+                                Standards marked with <span class="required--asterisk">*</span> are mandatory
+                            </div>
+                        </div>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@srcDocument1"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@srctxtDocument1"
+                                         data-uploader-image="Document1">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document1" class="form-field__label">
+                                        @Translate.Text("IEC 61215-1-x/2")
+                                        <span class="required--asterisk">*</span>
+                                    </label>
+                                    @if ((string.IsNullOrWhiteSpace(Model.PVId) && Model.Status == null) || (Model.Status != null && Model.Status.Equals("ReviewerRejected")) || (Model.Status != null && Model.Status.Equals("Approved")))
+                                    {
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-Document1"
+                                                       name="Document1" type="file"
+                                                       aria-describedby="description-for-Document1"
+                                                       data-parsley-errors-container="#description-for-Document1"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-uploader-field="Document1"
+                                                       @(string.IsNullOrWhiteSpace(srctxtDocument1) ? "required=\"=\"" : "")
+                                                       accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document1" @(!string.IsNullOrWhiteSpace(srctxtDocument1) ? "style=display:block !important" : "")>@srctxtDocument1</p>
+                                    @if (showRemoveFileLink)
+                                    {
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="Document1" @(!string.IsNullOrWhiteSpace(srctxtDocument1) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document1" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@srcDocument2"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@srctxtDocument2"
+                                         data-uploader-image="Document2">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document2" class="form-field__label">
+                                        @Translate.Text("IEC 61730-1/2")
+                                        <span class="required--asterisk">*</span>
+                                    </label>
+                                    @if ((string.IsNullOrWhiteSpace(Model.PVId) && Model.Status == null) || (Model.Status != null && Model.Status.Equals("ReviewerRejected")) || (Model.Status != null && Model.Status.Equals("Approved")))
+                                    {
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-Document2"
+                                                       name="Document2" type="file"
+                                                       aria-describedby="description-for-Document2"
+                                                       data-parsley-errors-container="#description-for-Document2"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-uploader-field="Document2"
+                                                       @(string.IsNullOrWhiteSpace(srctxtDocument2) ? "required=\"=\"" : "")
+                                                       accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document2" @(!string.IsNullOrWhiteSpace(srctxtDocument2) ? "style=display:block !important" : "")>@srctxtDocument2</p>
+                                    @if (showRemoveFileLink)
+                                    {
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="Document2" @(!string.IsNullOrWhiteSpace(srctxtDocument2) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document2" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@srcDocument3"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@srctxtDocument3"
+                                         data-uploader-image="Document3">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document3" class="form-field__label">
+                                        @Translate.Text("IEC 61701")
+                                        <span class="required--asterisk">*</span>
+                                    </label>
+                                    @if ((string.IsNullOrWhiteSpace(Model.PVId) && Model.Status == null) || (Model.Status != null && Model.Status.Equals("ReviewerRejected")) || (Model.Status != null && Model.Status.Equals("Approved")))
+                                    {
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-Document3"
+                                                       name="Document3" type="file"
+                                                       aria-describedby="description-for-Document3"
+                                                       data-parsley-errors-container="#description-for-Document3"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-uploader-field="Document3"
+                                                       @(string.IsNullOrWhiteSpace(srctxtDocument3) ? "required=\"=\"" : "")
+                                                       accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document3" @(!string.IsNullOrWhiteSpace(srctxtDocument3) ? "style=display:block !important" : "")>@srctxtDocument3</p>
+                                    @if (showRemoveFileLink)
+                                    {
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="Document3" @(!string.IsNullOrWhiteSpace(srctxtDocument3) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document3" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@srcDocument4"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@srctxtDocument4"
+                                         data-uploader-image="Document4">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document4" class="form-field__label">
+                                        @Translate.Text("IEC 62716")
+                                        <span class="form-field__label-required aria-only">(required)</span>
+                                    </label>
+                                    @if ((string.IsNullOrWhiteSpace(Model.PVId) && Model.Status == null) || (Model.Status != null && Model.Status.Equals("ReviewerRejected")) || (Model.Status != null && Model.Status.Equals("Approved")))
+                                    {
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-Document4"
+                                                       name="Document4" type="file"
+                                                       aria-describedby="description-for-Document4"
+                                                       data-parsley-errors-container="#description-for-Document4"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-uploader-field="Document4"
+                                                       accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document4" @(!string.IsNullOrWhiteSpace(srctxtDocument4) ? "style=display:block !important" : "")>@srctxtDocument4</p>
+                                    @if (showRemoveFileLink)
+                                    {
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="Document4" @(!string.IsNullOrWhiteSpace(srctxtDocument4) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document4" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="@srcDocument5"
+                                         data-src="/images/preview_pdf@2x.png"
+                                         data-success="/images/upload_success@2x.png"
+                                         class="form-field__preview tooltipstered"
+                                         aria-hidden="true"
+                                         role="presentation"
+                                         alt="@srctxtDocument5"
+                                         data-uploader-image="Document5">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Document5" class="form-field__label">
+                                        @Translate.Text("IEC 60068-2-68")
+                                        <span class="form-field__label-required aria-only">(required)</span>
+                                    </label>
+                                    @if ((string.IsNullOrWhiteSpace(Model.PVId) && Model.Status == null) || (Model.Status != null && Model.Status.Equals("ReviewerRejected")) || (Model.Status != null && Model.Status.Equals("Approved")))
+                                    {
+                                        <div>
+                                            <label>
+                                                <input class="form-field__input form-field__input--upload"
+                                                       id="form-field-Document5"
+                                                       name="Document5" type="file"
+                                                       aria-describedby="description-for-Document5"
+                                                       data-parsley-errors-container="#description-for-Document5"
+                                                       data-parsley-required-message="This field is required"
+                                                       data-uploader-field="Document5"
+                                                       accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf"
+                                                       data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;"
+                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="24">
+                                                <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                    }
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Document5" @(!string.IsNullOrWhiteSpace(srctxtDocument5) ? "style=display:block !important" : "")>@srctxtDocument5</p>
+                                    @if (showRemoveFileLink)
+                                    {
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="Document5" @(!string.IsNullOrWhiteSpace(srctxtDocument5) ? "style=display:block !important" : "")>@Translate.Text("Remove")</button>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                            <div id="description-for-Document5" class="form-field__messages">
+                                <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field__button">
+                            <button class="button button--outline button--back backbutton"
+                                    type="button">
+                                @Translate.Text("Back")
+                            </button>
+                            <div class="button button--next button--primary nextbutton">@Translate.Text("Next")</div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="pageclass hidden declaration" data-page="2">
+                        @Html.Sitecore().Placeholder("Declaration")
+                        <div class="j103-drrg-signature--outer mt24 mb12">
+                            <div class="j103-drrg-signature--label">
+                                @Translate.Text("DRRG_Signature")
+                            </div>
+                            <div data-signature data-labels='{"undo": "Undo Last Stroke"}' class="j103-drrg-signature"></div>
+                        </div>
+                        <div id="signature-error-message" class="hidden parsley-errors-list">
+                            <p>@Translate.Text("DRRG_SignatureRequired")</p>
+                        </div>
+                        <div class="form-field__button">
+                            <button class="button button--outline button--back backbutton"
+                                    type="button">
+                                @Translate.Text("Back")
+                            </button>
+                            <button class="button button--primary" id="btSubmit" type="submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("DRRG_SignSubmit")</button>
+                        </div>
+                    </fieldset>
+                }
+            </div>
+            <input type="hidden" id="hdnSessionTimeout" value="1200" />
+            <input type="hidden" id="hdnSessionExpNotice" value="60" />
+            <div class="m39-modal m39-modal--success m39-modal--nofocus" data-component="m39-modal" id="SessionExpNotice">
+                <button data-trigger="true" class="m39-modal__trigger" type="button" id="_hcuvgdv8vSessionExpNotice_trigger" aria-controls="_hcuvgdv8vSessionExpNotice_content"></button>
+                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_hcuvgdv8vlock_content" aria-labelledby="_hcuvgdv8vSessionExpNotice_trigger">
+                    <div class="m39-modal__dialog ">
+                        <div class="m39-modal__header">
+                            <button data-close="true" class="m39-modal__button--close SessionExpNoticeBtn" id="_hcuvgdv8vSessionExpNotice_close" aria-controls="_hcuvgdv8vSessionExpNotice_content">
+                                <span class="aria-only">Close</span>
+                            </button>
+                        </div>
+                        <div class="m39-modal__content" style="top: 10px;">
+                            <div class="icon icon-new-success-message green"></div>
+                            <p id="successMessage">
+                                <strong>
+                                    Your session will expire in 60 seconds, Click Continue to remain logged in or click Cancel to log off.
+                                    If you are logged off any changes will be lost.
+                                </strong>
+                            </p>
+                            <p id="responseMessage"></p>
+                            <a class="button button--primary" onclick="return SessionOKClick()" href="#" id="_hcuvgdv8vSessionExpNotice_close" aria-controls="_hcuvgdv8vSessionExpNotice_content">
+                                @Translate.Text("Continue")
+                            </a>
+                            <a class="button button--primary" onclick="return SessionCancelClick()" href="#" id="_hcuvgdv8vSessionExpNotice_close" aria-controls="_hcuvgdv8vSessionExpNotice_content">
+                                @Translate.Text("Cancel")
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="m39-modal__overlay" style="display: none;"> </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@if (Model.Id > 0)
+{
+    var cell = Model.CellTechnologies.Find(e => e.Value == Model.CellTechnology);
+    var frame = Model.LstFramed.Find(e => e.Text == Model.Framed);
+    var frontsuperstrate = Model.LstFrontSuperstrate.Find(e => e.Text == Model.FrontSuperstrate);
+    var backsuperstrate = Model.LstFrontSuperstrate.Find(e => e.Text == Model.BackSuperstrate);
+    var encapsulant = Model.LstEncapsulant.Find(e => e.Text == Model.Encapsulant);
+    var DCSystemGroup = Model.LstDCSystemgroup.Find(e => e.Text == Model.DCSystemGroup);
+    var positionJunction = Model.LstPositionofJunctionBox.Find(e => e.Text == Model.PositionofJunctionBox);
+    var MaterialofJunctionBox = Model.LstMaterialofJunctionBox.Find(e => e.Text == Model.MaterialofJunctionBox);
+    var Terminations = Model.LstTerminations.Find(e => e.Text == Model.Terminations);
+    var FeaturesofJunctionBox = Model.LstFeaturesofJunctionBox.Find(e => e.Value == Model.FeaturesofJunctionBox);
+
+    <script type="text/javascript">
+        @*jQuery('#form-field-nominalpowermultiple').val('@(Model.NumberofMultinominals!= null ? Model.NumberofMultinominals : "")');
+    jQuery('#form-field-CellTechnology').val('@(cell != null ? cell.Value : "")');
+    jQuery('#form-field-Framed').val('@(frame!= null ? frame.Value : "")');
+    jQuery('#form-field-FrontSuperstrate').val('@(frontsuperstrate != null ? frontsuperstrate.Value : "")');
+    jQuery('#form-field-BackSuperstrate').val('@(backsuperstrate != null ? backsuperstrate.Value : "")');
+    jQuery('#form-field-Encapsulant').val('@(encapsulant != null ? encapsulant.Value : "")');
+    jQuery('#form-field-DCSystemGroup').val('@(DCSystemGroup != null ? DCSystemGroup.Value : "")');
+    jQuery('#form-field-PositionofJunctionBox').val('@(positionJunction != null ? positionJunction.Value : "")');
+    jQuery('#form-field-MaterialofJunctionBox').val('@(MaterialofJunctionBox!= null ? MaterialofJunctionBox.Value : "")');
+    jQuery('#form-field-Terminations').val('@(Terminations != null ? Terminations.Value : "")');
+    jQuery('#form-field-FeaturesofJunctionBox').val('@(FeaturesofJunctionBox != null ? FeaturesofJunctionBox.Value : "")');*@
+
+        $('#form-field-nominalpowermultiple')
+            .val('@Model.pVMultiNominals.Count')
+            .trigger('change');
+    </script>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var totalstep = 3;
+        var current = 1;
+        var txt = jQuery('.pageclass[data-page=0]').find('.legend').text();
+        steptracker(current, txt);
+        var modelName = jQuery("#form-field-ModelName");
+        var errModelname = jQuery("#description-for-ModelName");
+        var $submitBtn = jQuery("#btSubmit");
+        jQuery('#form-field-CellStructure').on('select2:selecting', function (e) {
+            if (e.params.args.data.id == "Others") {
+                jQuery(".CellStructureOthers").show();
+            }
+        });
+        jQuery('#form-field-CellStructure').on('select2:unselecting', function (e) {
+            if (e.params.args.data.id == "Others") {
+                jQuery(".CellStructureOthers").hide();
+            }
+        });
+        function steptracker(current, txt) {
+            $('.m38-step-tracker').attr('data-total-steps', totalstep);
+            $('.m38-step-tracker').attr('data-current-step', current);
+            $('.m38-step-tracker__progressbar').attr('aria-valuetext', txt);
+            $('.m38-step-tracker').attr('data-hasInfo', "true");
+            jQuery(window).trigger('reinit_m38');
+        }
+        jQuery('.nextbutton').click(function (e) {
+            e.preventDefault();
+            var pagenumber = parseInt(jQuery(this).closest('.pageclass').attr("data-page"));
+            require(['parsley'], function () {
+                jQuery('#drrgpvmoduleform').parsley().validate();
+                if (jQuery('#drrgpvmoduleform').parsley().isValid()) {
+                    nexpageload(pagenumber);
+                };
+            });
+        });
+        function nexpageload(pagenumber) {
+            jQuery('.pageclass[data-page=' + (pagenumber) + ']').addClass('hidden');
+            jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']').removeClass('hidden');
+            jQuery('.pageclass').not(jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']')).addClass('hidden');
+            var txt = jQuery('.pageclass[data-page=' + (pagenumber + 1) + ']').find('.legend').text();
+            steptracker(pagenumber + 2, txt);
+            if (pagenumber == 1) {
+                jQuery(window).trigger('resize');
+                jQuery('.modelname').html(HtmlSanitizer.SanitizeHtml(jQuery('#form-field-ModelName').val()));
+                if (jQuery('#form-field-Nominalpower').val() == '@Translate.Text("DRRG_SingleNominalPowerEntry")') {
+                    jQuery('.nominalpower').html("" + jQuery('#form-field-Singlenominalpower').val() + " Wp");
+                }
+                else if (jQuery('#form-field-Nominalpower').val() == '@Translate.Text("DRRG_NominalPowerRange")') {
+                    //form-field-nominalpowerrange1
+                    jQuery('.nominalpower').html("" + jQuery('#form-field-nominalpowerrange1').val() + " Wp - " + jQuery('#form-field-nominalpowerrange2').val() + " Wp , in step of " + jQuery('#form-field-nominalpowerrange3').val() + " W");
+                }
+                else {
+                    if (jQuery('#form-field-nominalpowermultiple').val() == '1') {
+                        jQuery('.nominalpower').html("" + jQuery('input[name="pVMultiNominals[0].wp1"]').val() + " Wp");
+                    }
+                    else if (jQuery('#form-field-nominalpowermultiple').val() == '2') {
+                        jQuery('.nominalpower').html("" + jQuery('input[name="pVMultiNominals[0].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[1].wp1"]').val() + " Wp");
+                    }
+                    else if (jQuery('#form-field-nominalpowermultiple').val() == '3') {
+                        jQuery('.nominalpower').html("" + jQuery('input[name="pVMultiNominals[0].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[1].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[2].wp1"]').val() + " Wp");
+                    }
+                    else if (jQuery('#form-field-nominalpowermultiple').val() == '4') {
+                        jQuery('.nominalpower').html("" + jQuery('input[name="pVMultiNominals[0].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[1].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[2].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[3].wp1"]').val() + " Wp");
+                    }
+                    else if (jQuery('#form-field-nominalpowermultiple').val() == '5') {
+                        jQuery('.nominalpower').html("" + jQuery('input[name="pVMultiNominals[0].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[1].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[2].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[3].wp1"]').val() + " Wp, " + jQuery('input[name="pVMultiNominals[4].wp1"]').val() + " Wp");
+                    }
+                }
+
+                jQuery('.celltechnology').html(HtmlSanitizer.SanitizeHtml(jQuery('#form-field-CellTechnology').val()));
+                var selected = [];
+                var selectedStr = "";
+                selected = jQuery('#form-field-CellStructure').val();
+                for (var i = 0; i < selected.length; i++) {
+                    if (selected[i] != "Others")
+                        selectedStr += selected[i] + ", ";
+                    else
+                        selectedStr += jQuery("#form-field-OtherCellStructure").val() + ", ";
+                }
+
+                jQuery('.pvcellstructure').html(HtmlSanitizer.SanitizeHtml(selectedStr.replace(/,\s*$/, "")));
+
+            }
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+        }
+        jQuery('.backbutton').click(function (e) {
+            e.preventDefault();
+            var pagenumber = parseInt(jQuery(this).closest('.pageclass').attr("data-page"));
+            jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']').removeClass('hidden');
+            jQuery('.pageclass[data-page=' + (pagenumber) + ']').addClass('hidden');
+            jQuery('.pageclass').not(jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']')).addClass('hidden');
+            var txt = jQuery('.pageclass[data-page=' + (pagenumber - 1) + ']').find('.legend').text();
+            steptracker(pagenumber, txt);
+            jQuery('html,body').animate({ scrollTop: 0 }, 1000);
+        });
+        $('#btSubmit').click(function (e) {
+            e.preventDefault();
+            if (jQuery("#drrgpvmoduleform").parsley().validate()) {
+                if (jQuery(".j103-drrg-signature").attr("sig-data") != '' && jQuery(".j103-drrg-signature").attr("sig-data") != undefined) {
+                    jQuery("#signature-error-message").hide();
+                    jQuery("#signatureCopy").val(jQuery(".j103-drrg-signature").attr("sig-data"));
+                    jQuery("#btSubmit").html("@Translate.Text("Submitting")...");
+                    jQuery("#btSubmit").attr("disabled", true);
+                    $('#drrgpvmoduleform').submit();
+                    return true;
+                }
+                else {
+                    jQuery("#signature-error-message").show();
+                    jQuery("#btSubmit").attr("disabled", false);
+                    jQuery("#btSubmit").html("@Translate.Text("DRRG_SignSubmit")");
+                    return false;
+                }
+            }
+            return false;
+        });
+        modelName.on('focusout', function () {
+            if (modelName.val() != '') {
+                checkDuplicateModelName("@FileEntity.PVmodule");
+            }
+        });
+        function checkDuplicateModelName(equipment_type) {
+            var form = jQuery("#drrgpvmoduleform");
+            var token = $('input[name="__RequestVerificationToken"]', form).val();
+            var url = "/api/sitecore/DRRGDashboard/CheckDuplicateApplication";
+
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                data: {
+                    __RequestVerificationToken: token,
+                    equipmentType: equipment_type,
+                    modelname: modelName.val()
+                },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                    $submitBtn.attr('disabled', true);
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                dataType: 'json',
+                type: 'POST',
+                success: function (response) {
+                    if (response != null) {
+                        if (response.errorCode != "000") {
+                            valid = false;
+                            errModelname.html('');
+                            errModelname.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                            jQuery("#form-field-ModelName").removeClass("parsley-success");
+                            jQuery("#form-field-ModelName").addClass("form-field__input--error parsley-error");
+                            jQuery("#form-field-ModelName").parent('span').removeClass("form-field__input-wrapper--validated");
+                            jQuery("#form-field-ModelName").parent('span').addClass("form-field__input-wrapper--error");
+
+                        }
+                        else {
+                            errModelname.html('');
+                            valid = true;
+                            $submitBtn.attr('disabled', false);
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+<script type="text/javascript" language="javascript">
+    var SessionTimer = parseInt($("#hdnSessionTimeout").val());
+    $(document).ready(function () {
+        setInterval("fnSessionRun()", 1000);
+    });
+    function fnSessionRun() {
+        SessionTimer -= 1;
+        if (SessionTimer == 0) {
+            window.location.href ='@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG_HOME)';
+        }
+        if ($("#hdnSessionExpNotice").val() == SessionTimer) {
+            jQuery('#SessionExpNotice').find('.m39-modal__trigger').trigger('click');
+        }
+    }
+    function SessionCancelClick() {
+        jQuery('#SessionExpNoticeBtn').trigger('click');
+    }
+    function SessionOKClick() {
+        //ajax call to reset session
+        $.ajax({
+            url: '/api/Sitecore/DRRGDashboard/ResetSession',
+            contentType: 'application/json',
+            dataType: 'json',
+            type: 'POST',
+            data: {},
+            traditional: true,
+            success: function (data) {
+                SessionTimer = parseInt($("#hdnSessionTimeout").val());
+                //$("#hdnSessionTimeout").val(parseInt(data));
+                $(".SessionExpNoticeBtn").trigger('click');
+            }
+        });
+    }
+    $('body').ajaxStart(function (event, jqxhr, settings) {
+        SessionTimer = parseInt($("#hdnSessionTimeout").val());
+    });
+</script>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>

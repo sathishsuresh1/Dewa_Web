@@ -1,0 +1,71 @@
+﻿@model DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint.TrackingResponse
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using System.Globalization;
+@using DEWAXP.Foundation.Content
+@{
+    if (Model.TrackNotificationDetails != null && Model.TrackNotificationDetails.Count > 0)
+    {
+        foreach (var item in Model.TrackNotificationDetails)
+        {
+            var datetime = item.notificationdate + " " + item.notificationtime;
+            DateTime _startDate = DateTime.MinValue;
+            DateTime.TryParseExact(datetime, _commonUtility.DF_yyyy_MM_dd_HHmmss, CultureInfo.InvariantCulture, DateTimeStyles.None, out _startDate);
+
+            <div class="j120-smart-response--track" data-notiftype="@item.notificationtype">
+                <div class="j120-smart-response--track_title">@item.text </div>
+                <div class="m42-keyvalue j120-smart-response--track_details">
+                    <dl>
+                        @if (_startDate != null)
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@_commonHelper.GetSMTranslation("Created on")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@_startDate.ToString(_commonUtility.DF_dd_MM_yyyy_hhmmtt)</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.notificationnumber))
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@_commonHelper.GetSMTranslation("Notification #")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.notificationnumber</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.contractaccount))
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@_commonHelper.GetSMTranslation("Affected Account #")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.contractaccount</dd>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.city))
+                        {
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@_commonHelper.GetSMTranslation("Location")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.city</dd>
+                        }
+
+                    </dl>
+                </div>
+                <ul class="j120-smart-response--track_list">
+                    @foreach (var status in item.statuslist)
+                    {
+                        var active = status.statusflag == "X" ? "j120-smart-response--track_item--done" : "";
+                        <li class="j120-smart-response--track_item @active">@_commonHelper.GetSMTranslation(status.statusdescription)</li>
+                    }
+                </ul>
+                @if (!string.IsNullOrWhiteSpace(item.surveyflag))
+                {
+                    <a href="/srv?n=@item.surveyflag" class="j120-smart-response--button">@_commonHelper.GetSMTranslation("Rate It")</a>
+                }
+                else
+                {
+                    <button class="j120-smart-response--button disabled" disabled>@_commonHelper.GetSMTranslation("Rate It")</button>
+                }
+
+            </div>
+        }
+
+    }
+    else
+    {
+        <div class="j120-smart-response--track" data-notiftype="">
+            <div class="j120-smart-response--track_title">@_commonHelper.GetSMTranslation("No Record Found")</div>
+        </div>
+    }
+
+
+
+}

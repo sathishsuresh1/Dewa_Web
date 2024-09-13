@@ -1,0 +1,69 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Foundation.Content.Models.MoveOut.v3.MoveOutAnonymous
+
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+        
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form m14-richtext">
+        <h2>@Translate.Text("Review Summary")</h2>
+        @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+    </div>
+</div>
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form" }))
+{
+    @Html.Sitecore().FormHandler()
+    @Html.AntiForgeryToken()
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        <div class="m42-keyvalue">
+            <dl class="mb24">
+                @if (!string.IsNullOrWhiteSpace(Model.BusinessPartnerName))
+                {
+                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("J85.CustName")</dt>
+                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.BusinessPartnerName</dd>
+                }
+                
+                @if (!string.IsNullOrWhiteSpace(Model.Refundthrough))
+                {
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("updateiban.refundthrough")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.Refundthrough</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Ibannumber))
+                {
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("updateiban.ibannumber")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.Ibannumber</dd>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.DisconnectionDateReview))
+                {
+                    var timeFromInput = DateTime.ParseExact(Model.DisconnectionTime, "H:m:s", null, System.Globalization.DateTimeStyles.None);
+
+                    string timeIn12HourFormatForDisplay = timeFromInput.ToString("hh:mm tt", Sitecore.Context.Culture).Replace("ص", "صباحاً").Replace("م", "مساءً");
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("MoveOut.Disconnection Date")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.DisconnectionDateReview @timeIn12HourFormatForDisplay</dd>
+                }
+            </dl>
+        </div>
+        <div class="form-field__button">
+            <button type="submit" class="button--submit button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Confirm")</button>
+        </div>
+    </div>
+</div>
+}
+<script>
+           $('.m38-step-tracker').attr('data-total-steps', "5");
+        $('.m38-step-tracker').attr('data-current-step', "5");
+        $('.m38-step-tracker__progressbar').attr('aria-valuetext', '@Translate.Text("Moveout.Anonymous.Step5.Info")');
+        $('.m38-step-tracker').attr('data-hasinfo', "true");
+</script>

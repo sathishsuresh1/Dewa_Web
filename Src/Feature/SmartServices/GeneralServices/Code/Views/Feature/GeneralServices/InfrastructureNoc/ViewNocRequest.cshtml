@@ -1,0 +1,425 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GeneralServices.Models.Infrastructure_Noc
+@using DEWAXP.Foundation.Content.Models
+@model InfrastructureNocReqModel
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid j134-infrastructure-noc" data-journey="j134-infrastructure-noc">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title title_message">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink j113-epass--main_controls">
+                        <a class="button button--text button--back back-noc hidden">
+                            @Translate.Text("NOC_Back")
+                        </a>
+                    </p>
+                </div>
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink  back-noc-status">
+                        <a class="button button--text button--back" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.INFRASTRUCTURE_NOC_STATUS)">
+                            @Translate.Text("NOC_Back")
+                        </a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">@Translate.Text("NOC_Title")</h2>
+                @*<p class="intro-text mt12">@Translate.Text("NOC_SubDescription")</p>*@
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div id="tracker">
+                @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+            </div>
+        </div>
+    </div>
+    <div class="grid__row">
+
+        <div class="grid__column grid__column--12 grid__column--form">
+            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "NocRequestForm", @class = "nocRequestForm", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.BusinessPartner)
+                @Html.HiddenFor(m => m.ContractAccount)
+                @Html.HiddenFor(m => m.TransactionId)
+
+                <div id="step1">
+                    <div class="m43-accountsel mb32" data-component="m43-account-selector">
+                        <div class="m66-preloader small" style="display: none;">
+                            <div class="loader-small"></div>
+                        </div>
+
+                        <div class="errordiv">@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")</div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.TransactionId) && Model.selectedAccounts != null)
+                        {
+                            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_ViewSelectedAccount.cshtml", new SelectedAccountViewModel(Model.selectedAccounts) { FieldLabel = "" })
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.TransactionId))
+                    {
+                        <fieldset class="fieldset">
+                            <legend class="legend">@Translate.Text("NOC_GeneralDetails")</legend>
+                        </fieldset>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-lblrevision" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("NOC_VerNo")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly=""
+                                       id="form-field-lblrevision"
+                                       name="Revision"
+                                       type="text"
+                                       value="@Model.Revision" />
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-lblapplicationnumber" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("NOC_DewaApplicationNumber")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly=""
+                                       id="form-field-lblapplicationnumber"
+                                       name="applicationnumber"
+                                       type="number"
+                                       value="@Model.TransactionId" />
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-lblstatus" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("NOC_Status")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly=""
+                                       id="form-field-lblstatus"
+                                       name="status"
+                                       type="text"
+                                       value="@Model.StatusDescription" />
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--text">
+                            <label for="form-field-lblsubmissiondate" class="form-field__label form-field__label--readonly">
+                                @Translate.Text("NOC_DateOfSubmissionToDewa")
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                                <input class="form-field__input form-field__input--readonly"
+                                       readonly=""
+                                       id="form-field-lblsubmissiondate"
+                                       name="submissiondate"
+                                       type="text"
+                                       value="@Model.SubmittedDate" />
+                            </div>
+                        </div>
+                    }
+
+                    <fieldset class="fieldset">
+                        <legend class="legend">@Translate.Text("NOC_ProjectDetails")</legend>
+                    </fieldset>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-lblplotnumber" class="form-field__label form-field__label--readonly">
+                            @Translate.Text("NOC_Plotnumber")
+                        </label>
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                            <input class="form-field__input form-field__input--readonly"
+                                   readonly=""
+                                   id="form-field-lblplotnumber"
+                                   name="PlotNumber"
+                                   type="text"
+                                   value="@Model.PlotNumber" />
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text">
+                        <label for="form-field-lblworktype" class="form-field__label form-field__label--readonly">
+                            @Translate.Text("NOC_ProposedWorkType")
+                        </label>
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                            @if (Model.WorkTypeList != null)
+                            {
+                                foreach (var item in Model.WorkTypeList)
+                                {
+                                    if (item.Value == Model.SelectedWorkType)
+                                    {
+                                        <label for="form-field-lblcustomernotes" class="form-field__input form-field__input--readonly">
+                                            @item.Text
+                                        </label>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text form-field--textarea">
+                        <label for="form-field-lbldescproposedWorktype" class="form-field__label form-field__label--readonly">
+                            @Translate.Text("NOC_DescProposedWorkType")
+                        </label>
+                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly font-normal">
+                            <label for="form-field-lblcustomernotes" class="form-field__input form-field__input--readonly">
+                                @Model.DescProposedWorkYype
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-field__button">
+                        <button type="button" id="nocNext" class="button button--primary button--fullwidth-mobile">@Translate.Text("NOC_Next")</button>
+                    </div>
+
+                </div>
+                <div id="step2" class="hidden">
+                    @if (!string.IsNullOrWhiteSpace(Model.TransactionId))
+                    {
+                        if (Model.nocReqAttachments != null)
+                        {
+                            var prev = string.Empty;
+                            <fieldset class="fieldset">
+                                <legend class="legend">@Translate.Text("NOC_UploadDocuments")</legend>
+                                <div class="form-field form-field--text">
+                                    @foreach (NocRequestAttachments item in Model.nocReqAttachments)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(item.Folder) && !item.Folder.Equals(prev))
+                                        {
+                                            <p class="form-field__helplink">
+                                                <a data-trigger="true" data-transactionid="@Model.TransactionId" data-doctype="@item.DocType" data-revision="@item.Folder" class="view_modal link">@item.Folder  @Translate.Text("NOC_ViewDocuments")</a>
+                                            </p>
+                                            prev = item.Folder;
+
+                                        }
+                                    }
+                                </div>
+
+                            </fieldset>
+                        }
+                        if (Model.nocReqDewaAttachments != null)
+                        {
+                            var prev = string.Empty;
+                            <fieldset class="fieldset">
+                                <legend class="legend">@Translate.Text("NOC_DewaDocuments")</legend>
+                                <div class="form-field form-field--text">
+                                    @foreach (NocRequestAttachments item in Model.nocReqDewaAttachments)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(item.Folder) && !item.Folder.Equals(prev))
+                                        {
+                                            <p class="form-field__helplink">
+                                                <a data-trigger="true" data-transactionid="@Model.TransactionId" data-doctype="@item.DocType" data-revision="@item.Folder" class="view_modal link">@((item.Folder.Equals("DEWA_APPROVED")) ? item.Folder.Replace("DEWA_APPROVED", "") + " " + Translate.Text("NOC_DewaViewDocuments") : item.Folder + " " + Translate.Text("NOC_ViewDocuments"))</a>
+                                            </p>
+                                            prev = item.Folder;
+                                        }
+                                    }
+                                </div>
+                            </fieldset>
+                        }
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.TransactionId))
+                    {
+                        <fieldset class="fieldset">
+                            <div class="form-field form-field--text form-field--textarea">
+                                <label for="form-field-lblcustomernotes" class="form-field__label">
+                                    @Translate.Text("NOC_CustomerNotes")
+                                </label>
+                                @*<span class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                        <label for="form-field-lblcustomernotes" class="form-field__label">
+                                            @Model.CustomerNotes
+                                        </label>
+                                    </span>*@
+                                <p class="form-field__helplink">
+                                    <a class="link view_status" data-transactionid="@Model.TransactionId">@Translate.Text("NOC_InteractionHistory")</a>
+                                </p>
+                            </div>
+                        </fieldset>
+                    }
+                    <div class="form-field__button">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J22_TRACK_COMPLAINTS)" class="button button--primary button--next" role="button">@Translate.Text("NOC_TrackApplication")</a>
+                    </div>
+                </div>
+                <!-- View Download Modal Popup -->
+                <div class="m39-modal m39-modal--new j134-infrastructure-noc-modal" data-component="m39-modal" id="modal_true">
+                    <button data-trigger="true" class="m39-modal__trigger hidden view_modal__trigger" id="_sm7xs93q5_trigger" type="button" aria-controls="_sm7xs93q5_content">MODAL TRIGGER FOR VIEW</button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_sm7xs93q5_content" aria-labelledby="_sm7xs93q5_trigger">
+                        <div class="m39-modal__dialog">
+                            <div class="m39-modal__header">
+                                <div class="m39-modal__title" id="viewdocument_title">@Model.Revision</div>
+                                <a data-close="true" class="m39-modal__button--close" id="_sm7xs93q5_close" aria-controls="_sm7xs93q5_content">@Translate.Text("NOC_Close")</a>
+                                <div class="m39-modal__subtitle">@Translate.Text("NOC_Documents")</div>
+                            </div>
+                            <div class="m39-modal__content" id="viewdocuments">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay" style="display: block;"> </div>
+                </div>
+                <!-- End -->
+
+                <!-- View Status/Comments Modal Popup -->
+                <div class="m39-modal m39-modal--new j134-infrastructure-noc-tab-modal" data-component="m39-modal" id="modal_true">
+                    <button data-trigger="true" class="m39-modal__trigger hidden status_modal__trigger" id="_sm7xs93q5a_trigger" type="button" aria-controls="_sm7xs93q5a_content">MODAL TRIGGER FOR VIEW</button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_sm7xs93q5a_content" aria-labelledby="_sm7xs93q5a_trigger">
+                        <div class="m39-modal__dialog">
+                            <div class="m39-modal__header">
+                                <div class="m39-modal__title">@Translate.Text("NOC_ApplicationDetails")</div>
+                                <a data-close="true" class="m39-modal__button--close" id="_sm7xs93q5a_close" aria-controls="_sm7xs93q5a_content">@Translate.Text("NOC_Close")</a>
+                                <div class="m39-modal__subtitle">@Translate.Text("NOC_ApplicationNumber") @Model.TransactionId</div>
+                            </div>
+                            <div class="m39-modal__content" id="viewstatus">
+                                <div class="m39-modal__tabs">
+                                    <ul>
+                                        <li class="tab-status" data-tab="status">@Translate.Text("NOC_Status")</li>
+                                        <li class="tab-comment" data-tab="comment">@Translate.Text("NOC_Comments")</li>
+                                    </ul>
+                                </div>
+                                <div id="viewcomment_content">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay" style="display: block;"> </div>
+                </div>
+                <!-- End -->
+            }
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+         steptrackerwithinpage(2, 1, "@Translate.Text("NOC_GeneralDetails")", "true");
+        jQuery(".view_status").on("click", function () {
+            var formId = "NocRequestForm";
+            var url = "/api/sitecore/InfrastructureNoc/GetStatusComment";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                traditional: true,
+                data: AddForgeryToken({ transactionId: $(this).attr("data-transactionid") }, formId),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    jQuery("#viewcomment_content").html('');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                jQuery("#viewcomment_content").html(response);
+                jQuery(".status_modal__trigger").trigger("click");
+                jQuery(".tab-status").removeClass("active");
+                jQuery(".tab-status").addClass("hidden");
+                jQuery(".tab-comment").addClass("active");
+            });
+        });
+        jQuery(".view_modal").on("click", function () {
+            var formId = "NocRequestForm";
+            var revision = $(this).attr("data-revision");
+            var url = "/api/sitecore/InfrastructureNoc/GetDocuments";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                traditional: true,
+                data: AddForgeryToken({ transactionId: $(this).attr("data-transactionid"), folderName: $(this).attr("data-revision"), docType: $(this).attr("data-doctype") }, formId),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                    jQuery("#viewdocuments").html('');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                },
+            }).done(function (response) {
+                jQuery("#viewdocuments").html('');
+                jQuery("#viewdocuments").html(response);
+                if (revision == 'DEWA_APPROVED')
+                    jQuery("#viewdocument_title").html('@Translate.Text("NOC_DewaViewDocuments")');
+                else
+                    jQuery("#viewdocument_title").html(revision);
+                jQuery(".view_modal__trigger").trigger("click");
+            });
+        });
+        jQuery('.nocRequestForm').submit(function (e) {
+            e.preventDefault();
+            if (jQuery(".nocRequestForm").parsley().validate()) {
+                //alert();
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+                var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+                var bpNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+                if (accountNumber != "" && bpNumber != "") {
+                    jQuery("#ContractAccount").val(accountNumber);
+                    jQuery("#BusinessPartner").val(bpNumber);
+                    $('.nocRequestForm').submit();
+                }
+                return true;
+            }
+            return false;
+        });
+        $('.m38-step-tracker__progressbar').attr('aria-valuetext', "@Translate.Text("NOC_GeneralDetails")");
+        jQuery('.back-noc').on('click', function () {
+            var $page = jQuery('#NocRequestForm').find('#step2'),
+                good = 0;
+
+            if (good == 0) {
+                $page.prev().show();
+                $page.hide();
+                steptrackerwithinpage(2, 1, "@Translate.Text("NOC_GeneralDetails")", "true");
+                jQuery('#step2').hide();
+                jQuery('.back-noc').hide();
+                jQuery('.back-noc-status').show();
+            }
+        });
+        jQuery('#nocNext').on('click', function () {
+            var $page = jQuery(this).closest('#step1'),
+                good = 0;
+
+            jQuery('.nocRequestForm').parsley().validate();
+            $page.find('.form-field__input').each(function () {
+                if (jQuery(this).parsley().validate() == true) {
+
+                } else {
+                    good++;
+                }
+            });
+
+            if (good == 0) {
+
+                $page.next().show();
+                $page.hide();
+                steptrackerwithinpage(2, 2, "@Translate.Text("NOC_Attachments")", "true");
+                jQuery('#step1').hide();
+                jQuery('.back-noc').show();
+                jQuery('.back-noc-status').hide();
+            }
+        });
+    });
+
+</script>

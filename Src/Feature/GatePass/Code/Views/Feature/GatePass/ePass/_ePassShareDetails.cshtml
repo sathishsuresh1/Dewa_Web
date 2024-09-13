@@ -1,0 +1,328 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GatePass.Models.ePass.SecurityPassViewModel
+
+@{
+    /**/
+
+    Sitecore.Data.Items.Item ePassConfig = Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.ePass_CONFIG);
+    int chkDownloadLimit = Convert.ToInt32(ePassConfig["Download Limit"]);
+}
+
+@*<form method="post" action="#" id="SharePassDetails" class="form static-form" data-form="true" novalidate="">*@
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "SharePassDetails", @data_form = "true", @enctype = "multipart/form-data", @data_submit_validate = "enabled", @novalidate = string.Empty }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="data_check_mobile" id="data_check_mobile" value="@(@Model.mobile != null ? "true" : "false")" />
+    <input type="hidden" name="data_check_email" id="data_check_email" value="@(@Model.email != null ? "true" : "false")" />
+
+    <div class="m39-modal__header">
+        <div class="m39-modal__title">
+            @Translate.Text("Epass.Sharepass") - @Model.passNumber
+        </div>
+        <a data-close="true" class="m39-modal__button--close" id="_8gguopjrg_close" aria-controls="_8gguopjrg_content">@Translate.Text("Epass.Close")</a>
+    </div>
+    <div class="m39-modal__content" style="top: 64px;" id="_8gguopjrg_content">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="form-field j113-epass-shareradios">
+                    <fieldset class="fieldset">
+                        <legend class="form-field__label">
+                            @Translate.Text("Epass.Sharemethod")
+                        </legend>
+                        <p class="form-field__radio">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="rbMobile" name="radios_group1" type="radio" value="sms" aria-describedby="description-for-c3ydrrns1" data-parsley-errors-container="#description-for-c3ydrrns1" checked="" data-parsley-multiple="radios_group1" data-parsley-id="35">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("Epass.Sendviasms")
+                                </span>
+                            </label>
+                        </p>
+                        <p class="form-field__radio ">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="rbEmail" name="radios_group1" type="radio" value="email" aria-describedby="description-for-c3ydrrns1" data-parsley-errors-container="#description-for-c3ydrrns1" data-parsley-multiple="radios_group1">
+                                <span class="form-field__fakeradio focus-enabled">
+                                    @Translate.Text("Epass.Sendviaemail")
+                                </span>
+                            </label>
+                        </p>
+                        <p class="form-field__radio ">
+                            <label>
+                                <input class="form-field__input form-field__input--radio" id="rbDownload" name="radios_group1" type="radio" value="download" aria-describedby="description-for-c3ydrrns1" data-parsley-errors-container="#description-for-c3ydrrns1" data-parsley-multiple="radios_group1">
+                                <span class="form-field__fakeradio focus-enabled"> @Translate.Text("Epass.Download")</span>
+                            </label>
+                        </p>
+                        <div id="description-for-c3ydrrns1" class="form-field__messages">
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="form-field form-field--text j113-epass-sharefield sms">
+                    <label for="form-field-mobile" class="form-field__label  @(string.IsNullOrWhiteSpace(Model.mobile) ? "" : "form-field__label--readonly")">
+                        @Translate.Text("movein.mobilenumber")
+                    </label>
+                    <span class="form-field__input-wrapper @(string.IsNullOrWhiteSpace(Model.mobile) ? "form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number" : "form-field__input-wrapper form-field__input-wrapper--readonly")">
+                        @*<input class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-4s3lxgkkr" name="mobile" type="tel" value="@Model.mobile" placeholder="Enter mobile number" aria-describedby="description-for-4s3lxgkkr" data-parsley-errors-container="#description-for-4s3lxgkkr" required="" data-parsley-required-message="This field is required" data-parsley-mobilenumber="" data-parsley-mobilenumber-message="Please enter a valid UAE mobile number" data-parsley-trigger="focusout" data-parsley-id="10">*@
+                        @if (string.IsNullOrEmpty(Model.email))
+                        {
+                            @Html.TextBoxFor(x => x.mobile, new
+                       {
+                           @class = "form-field__input  " + (string.IsNullOrWhiteSpace(Model.mobile) ? "form-field__input--text form-field__input--prefixed" : "form-field__input form-field__input--readonly"),
+                           @id = "form-field-mobile",
+                           @placeholder = Translate.Text("Enter UAE mobile number"),
+                           @name = "mobile",
+                           @type = "tel",
+                           @required = "",
+                           @aria_describedby = "description-for-4s3lxgkkr",
+                           @data_parsley_errors_container = "#description-for-4s3lxgkkr",
+                           @data_parsley_required_message = Translate.Text("Please enter a valid UAE mobile number"),
+                           @data_parsley_mobilenumber = "",
+                           @data_parsley_mobilenumber_message = Translate.Text("Please enter a valid UAE mobile number"),
+                           @data_parsley_trigger = "focusout",
+                           @data_parsley_id = "10",
+                       })
+                        }
+                        else
+                        {
+                            @Html.TextBoxFor(x => x.mobile, new
+                       {
+                           @class = "form-field__input  " + (string.IsNullOrWhiteSpace(Model.mobile) ? "form-field__input--text form-field__input--prefixed" : "form-field__input form-field__input--readonly"),
+                           @id = "form-field-mobile",
+                           @placeholder = Translate.Text("Enter UAE mobile number"),
+                           @name = "mobile",
+                           @type = "tel",
+                           @required = "",
+                           @aria_describedby = "description-for-4s3lxgkkr",
+                           @data_parsley_errors_container = "#description-for-4s3lxgkkr",
+                           @data_parsley_required_message = Translate.Text("Please enter a valid UAE mobile number"),
+                           @data_parsley_mobilenumber = "",
+                           @data_parsley_mobilenumber_message = Translate.Text("Please enter a valid UAE mobile number"),
+                           @data_parsley_trigger = "focusout",
+                           @data_parsley_id = "10",
+                           @readonly = "readonly"
+                       })
+                        }
+                    </span>
+                    <div id="description-for-4s3lxgkkr" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field form-field--text j113-epass-sharefield email">
+                    <label for="form-field-email" class="form-field__label @(string.IsNullOrWhiteSpace(Model.email) ? "" : "form-field__label--readonly")">
+                        @Translate.Text("Epass.emailaddress")
+                    </label>
+                    <div class="@(string.IsNullOrWhiteSpace(Model.email) ? "form-field__input form-field__input-wrapper--prefixed form-field__input-wrapper--email" : "form-field__input-wrapper form-field__input-wrapper--readonly") form-field__input-wrapper--readonly">
+                        @*<input class="form-field__input form-field__input--readonly" readonly="" id="form-field-sbhn1bggo" name="business_partner_number" value="@Model.email" type="text" aria-describedby="description-for-sbhn1bggo" data-parsley-errors-container="#description-for-sbhn1bggo" data-parsley-trigger="focusout">*@
+                        @if (string.IsNullOrEmpty(Model.email))
+                        {
+                            @Html.TextBoxFor(x => x.email, new
+                       {
+                           @class = "form-field__input  " + (string.IsNullOrWhiteSpace(Model.email) ? "form-field__input--text" : "form-field__input form-field__input--readonly"),
+                           @id = "form-field-email",
+                           @placeholder = Translate.Text("Epass.Enteremailid"),
+                           @name = "business_partner_number",
+                           @type = "email",
+                           @required = "",
+                           @aria_describedby = "description-for-sbhn1bggo",
+                           @data_parsley_required_message = Translate.Text("Epass.Entervalidemail"),
+                           @data_parsley_email = "",
+                           @data_parsley_email_message = Translate.Text("Epass.Entervalidemail"),
+                           @data_parsley_trigger = "focusout",
+                           @data_parsley_maxlength = "50"
+                       })
+                        }
+                        else
+                        {
+                            @Html.TextBoxFor(x => x.email, new
+                       {
+                           @class = "form-field__input  " + (string.IsNullOrWhiteSpace(Model.email) ? "form-field__input--text" : "form-field__input form-field__input--readonly"),
+                           @id = "form-field-email",
+                           @placeholder = Translate.Text("Enter email address"),
+                           @name = "business_partner_number",
+                           @type = "email",
+                           @required = "",
+                           @aria_describedby = "description-for-sbhn1bggo",
+                           @data_parsley_required_message = Translate.Text("Epass.Entervalidemail"),
+                           @data_parsley_email = "",
+                           @data_parsley_email_message = Translate.Text("Epass.Entervalidemail"),
+                           @data_parsley_trigger = "focusout",
+                           @readonly = "readonly"
+                       })
+                        }
+                    </div>
+                    <div id="description-for-sbhn1bggo" class="form-field__messages">
+                    </div>
+                </div>
+                <div id="description-for-validmessage" class="form-field__messages red">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal__footer">
+        <button class="button button--primary j113-epass-sharebutton" id="ShareDetailButton" type="button" data-submission-text="@Translate.Text("Sharing")...">
+            @Translate.Text("Epass.Share")
+        </button>
+    </div>
+}
+@*</form>*@
+<script language="javascript" type="text/javascript">
+    // truncation and input rules
+    function truncateVal(target, len) {
+        if (target.val().length >= len) {
+            window.setTimeout(function () {
+                target.val(target.val().substring(0, (len)));
+            }, 5);
+        }
+    }
+    function constrainNumerals(ev) {
+        var keyCode = ev.which,
+            character = String.fromCharCode(keyCode);
+        // Allow: special keys and specifically backspace, delete, tab, escape, enter
+        if (($.inArray(keyCode, [0, 8, 9, 13, 27, 190]) !== -1 && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+A
+            (character === 'a' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+C
+            (character === 'c' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+V
+            (character === 'v' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+X
+            (character === 'x' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: home, end, left, right
+            (keyCode >= 35 && keyCode <= 38 && !ev.shiftKey) ||
+            // if allowed character
+            /[0-9]/.test(character)) {
+            return;
+        }
+        ev.preventDefault();
+    }
+    $("#ShareDetailButton").click(function () {
+        var model = @Html.Raw(Json.Encode(Model));
+        var formData = $("#SharePassDetails").serialize();
+        //debugger;
+        $radios = $('.j113-epass-shareradios').find('.form-field__input--radio');
+
+        $radios.each(function () {
+            if ($(this).prop('checked') == true) {
+                var $method = $(this).val();
+                var passNumber = '@Model.passNumber';
+                $("#description-for-validmessage").html('');
+                if ($method.toLowerCase() == 'download') {
+                    var modelDownloadLimit = '@Model.downloadLimit';
+
+                    if (parseInt(modelDownloadLimit) < parseInt('@chkDownloadLimit')) {
+                        //debugger;
+                        var ajaxCallURL = '/api/sitecore/ePass/DownloadPDF';
+                        jQuery('.j113-epass--loader').show();
+                        jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+
+                        window.location.href = "/api/sitecore/ePass/DownloadPDF?passNumber=" + passNumber;
+                        setTimeout(function () {
+                            jQuery('.j113-epass--loader').hide();
+                            jQuery('.j113-epass-sharemodal').find('.m39-modal__button--close').trigger('click');
+                        }, 10000);
+                    }
+                    else {
+                        var msg = '@Translate.Text("epassdownload.limit")';
+                        $("#description-for-validmessage").html(msg);
+                    }
+                } else {
+                    //debugger;
+                    var valid = false;
+                    if ($method == 'sms') {
+                        if (jQuery("#form-field-mobile").parsley().isValid()) {
+                            valid = true;
+                        }
+                        else {
+                            jQuery("#form-field-mobile").parsley().validate();
+                        }
+                    }
+                    else if ($method == 'email') {
+                        if (jQuery("#form-field-email").parsley().isValid()) {
+                            valid = true;
+                        }
+                        else {
+                            jQuery("#form-field-email").parsley().validate();
+                        }
+                    }
+
+                    //jQuery('#SharePassDetails').parsley().validate();
+                    if (valid) {
+                        var token = $('#SharePassDetails input[name="__RequestVerificationToken"]').val();
+                        var ajaxCallURL = '/api/sitecore/ePass/ePassShareDetails';
+                        jQuery.ajax({
+                            type: "POST",
+                            url: ajaxCallURL,
+                            data: { "__RequestVerificationToken": token, passNumber: passNumber, shareType: $method.toLowerCase(), emailId: jQuery("#form-field-email").val(), mobileNo: jQuery("#form-field-mobile").val() },
+                            //contentType: 'application/json; charset=utf-8',
+                            //dataType: "json",
+                            //cache: false,
+                            //model:true,
+                            beforeSend: function () {
+                                jQuery('.j113-epass--loader').show();
+                                jQuery('.j113-epass--loader').css('top', $(window).scrollTop());
+                                $("#description-for-validmessage").html('');
+                            },
+                            complete: function () {
+                                jQuery('.j113-epass--loader').hide();
+                            },
+                            success: function (response) {
+                                $("#description-for-validmessage").html(response);
+                                if ($method == 'sms' && jQuery("#form-field-mobile").val() != "" && jQuery("#form-field-mobile").val() != undefined) {
+                                    $("#form-field-mobile").parent('span').removeAttr("class");
+                                    $("#form-field-mobile").removeAttr("class");
+                                    $("#form-field-mobile").attr("class", "form-field__input  form-field__input form-field__input--readonly");
+                                    $("#form-field-mobile").parent().attr("class", "form-field__input-wrapper form-field__input-wrapper form-field__input-wrapper--readonly");
+                                    $("#form-field-mobile").attr("readonly", "readonly");
+                                }
+                                else if ($method == 'email' && jQuery("#form-field-email").val() != "" && jQuery("#form-field-email").val() != undefined) {
+                                    $("#form-field-email").parent('span').removeAttr("class");
+                                    $("#form-field-email").removeAttr("class");
+                                    $("#form-field-email").attr("class", "form-field__input  form-field__input form-field__input--readonly");
+                                    $("#form-field-email").parent().attr("class", "form-field__input-wrapper form-field__input-wrapper form-field__input-wrapper--readonly");
+                                    $("#form-field-email").attr("readonly", "readonly");
+                                }
+                            },
+                            //failure: function (response) {
+                            //    $("#description-for-validmessage").html(response.responseText);
+                            //},
+                            error: function (response) {
+                                $("#description-for-validmessage").html(response.responseText);
+                            }
+                        });
+                    }
+                };
+            };
+        })
+    });
+
+    $('.j113-epass-shareradios').find('.form-field__input--radio').each(function () {
+        $(this).off('click.share').on('click.share', function () {
+            sharePass();
+            $("#description-for-validmessage").html('');
+        });
+    });
+    function sharePass() {
+        var _this = this,
+            $labels = $('.j113-epass-sharemodal').data('labels'),
+            $radios = $('.j113-epass-shareradios').find('.form-field__input--radio');
+
+        $radios.each(function () {
+            if ($(this).prop('checked') == true) {
+                var $method = $(this).val();
+
+                $('.j113-epass-sharefield').each(function () {
+                    $(this).fadeOut();
+                });
+                $("#description-for-validmessage").html('');
+                if ($method.toLowerCase() == 'download') {
+                    $('.j113-epass-sharebutton').html($labels.download)
+                } else {
+                    $('.j113-epass-sharebutton').html($labels.share)
+                    $('.j113-epass-sharefield.' + $method).fadeIn()
+                };
+            };
+        })
+    }
+</script>

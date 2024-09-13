@@ -1,0 +1,49 @@
+trigger:
+- main
+
+pool:
+  name: 'DEWASERV10564'
+
+variables:
+  buildConfiguration: 'Release'
+
+stages:
+- stage: PreBuild
+  displayName: PreBuild 
+  jobs:
+  - job: PreBuild
+    displayName: PreBuild
+
+    steps:
+    # - task: UseDotNet@2
+    #   displayName: 'Install .NET Core SDK'
+    #   inputs:
+    #     version: 8.x
+    #     packageType: sdk
+    #     performMultiLevelLookup: true
+    #     includePreviewVersions: true # Required for preview versions
+
+
+
+    
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'restore'
+        feedsToUse: 'select'
+        vstsFeed: 'my-vsts-feed' # A series of numbers and letters
+    - task: Npm@1
+      inputs:
+        command: 'install'
+   
+    - task: NuGetCommand@2
+      inputs:
+        command: 'restore'
+        restoreSolution: '**/*.sln'
+        feedsToUse: 'select'
+    - task: DotNetCoreCLI@2
+      displayName: Build
+      inputs:
+        command: build
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration)' # Update this to match your needs
+    

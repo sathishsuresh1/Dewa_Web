@@ -1,0 +1,139 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@*<div class="j113-epass">
+        <div class="m66-preloader j113-epass--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">Please wait .....</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<div id="my_idmodal">
+    <div class="m39-modal m39-modal--new j113-epass-sharemodal" data-component="m39-modal" id="modal_true" data-labels='{"share":"@Translate.Text("Epass.Share")", "download": "@Translate.Text("Epass.Download")"}'>
+        <button data-trigger="true" class="m39-modal__trigger" type="button" id="_8gguopjrg_trigger" aria-controls="_8gguopjrg_content"></button>
+        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_8gguopjrg_content" aria-labelledby="_8gguopjrg_trigger">
+            <div class="m39-modal__dialog" id="ShareDetailForm">
+
+            </div>
+        </div>
+        <div class="m39-modal__overlay"> </div>
+    </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+    // truncation and input rules
+    function truncateVal(target, len) {
+        if (target.val().length >= len) {
+            window.setTimeout(function () {
+                target.val(target.val().substring(0, (len)));
+            }, 5);
+        }
+    }
+    function constrainNumerals(ev) {
+        var keyCode = ev.which,
+            character = String.fromCharCode(keyCode);
+        // Allow: special keys and specifically backspace, delete, tab, escape, enter
+        if (($.inArray(keyCode, [0, 8, 9, 13, 27, 190]) !== -1 && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+A
+            (character === 'a' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+C
+            (character === 'c' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+V
+            (character === 'v' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: Ctrl/Cmd+X
+            (character === 'x' && (ev.ctrlKey || ev.metaKey) && !ev.shiftKey) ||
+            // Allow: home, end, left, right
+            (keyCode >= 35 && keyCode <= 38 && !ev.shiftKey) ||
+            // if allowed character
+            /[0-9]/.test(character)) {
+            return;
+        }
+        ev.preventDefault();
+    }
+    docReady(function () {
+        $(".j113-epass-sharelink").click(function () {
+            $('#ShareDetailForm').html('');
+            var passNo = $(this).data('id');
+            var ajaxCallURL = '/api/sitecore/ePass/SharePassDetails';
+            $.ajax({
+                type: "POST",
+                url: ajaxCallURL,
+                traditional: true,
+                //contentType: "application/json; charset=utf-8",
+                beforeSend: function () {
+                    jQuery('.j113-epass--loader').show();
+                    jQuery('.j113-epass--loader').css({ position: 'fixed', top: '0px' });
+                },
+                data: {
+                    passNo: passNo,
+                    __RequestVerificationToken: $('form input[name=__RequestVerificationToken]').val()
+                },
+                //data: $('form input[name=__RequestVerificationToken]').val(),
+                complete: function () {
+                    jQuery('.j113-epass--loader').hide();
+                },
+                success: function (data) {
+                    $('#ShareDetailForm').html(data);
+                    sharePass();
+                    window.initComponents('my_idmodal');
+                    require(['parsley'], function () {
+                        jQuery('#ShareDetailForm1').parsley();
+                    });
+                    $('[ data-parsley-mobilenumber ], ' +
+                        '[ data-parsley-mobilenumber ]').on('keypress.truncate', function () {
+                            truncateVal($(this), 9);
+                        });
+                    $('[ data-parsley-mobilenumber ], ' +
+                        '[ data-parsley-mobilenumber ]').on('keypress.numbers', constrainNumerals);
+                },
+                error: function () {
+                    console.log("Content load failed.");
+                }
+            });
+        });
+
+        $('.j113-epass-shareradios').find('.form-field__input--radio').each(function () {
+            $(this).off('click.share').on('click.share', function () {
+                sharePass();
+            });
+        });
+        $('.j113-epass-sharelink').off('click.share').on('click.share', function () {
+            $('.j113-epass-sharemodal').find('.m39-modal__trigger').click();
+        });
+        setTimeout(function () {
+            window.initComponents('sharedetailsdiv');
+        }, 750)
+
+    });
+    function sharePass() {
+        var _this = this,
+            $labels = $('.j113-epass-sharemodal').data('labels'),
+            $radios = $('.j113-epass-shareradios').find('.form-field__input--radio');
+
+        $radios.each(function () {
+            if ($(this).prop('checked') == true) {
+                var $method = $(this).val();
+
+                $('.j113-epass-sharefield').each(function () {
+                    $(this).fadeOut();
+                });
+
+                if ($method.toLowerCase() == 'download') {
+                    $('.j113-epass-sharebutton').html($labels.download)
+                } else {
+                    $('.j113-epass-sharebutton').html($labels.share)
+                    $('.j113-epass-sharefield.' + $method).fadeIn()
+                };
+            };
+        })
+    }
+
+</script>

@@ -1,0 +1,112 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.HR.Models.CareerPortal.JobDetails
+@{
+    /**/
+
+
+    var redirectURL = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_APPLICATION_WIZARD) + "?q=";
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid j126-career-portal" data-journey="j126-career-portal" id="jobDetailDiv">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title title_message">
+                @*<div class="m26-page-title__links">
+                        <p class="m26-page-title__backlink">
+                            <a href="" class="button button--text button--back">All articles</a>
+                        </p>
+                        <!-- m30-share start -->
+                        <!-- m30-share end -->
+                    </div>*@
+                <h2 class="text__page-title">Job Details</h2>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <!-- m42-key-value-start -->
+            <div class="m42-keyvalue">
+                <dl>
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("job posting title")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.JobTitle</dt>
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("employment posted date")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.EndDate</dt>
+                    @*<dd class="m42-keyvalue__value--stacked mb0">Reference Code</dd>
+                        <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.ReferenceCode</dt>*@
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("job title label")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.JobTitle</dt>
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("companyName label")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.Company</dt>
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("Website label")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.Department</dt>
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("Industry label")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.Project</dt>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Task))
+                    {
+                        <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("Type label")</dd>
+                        <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.Task</dt>
+                    }
+
+                    <dd class="m42-keyvalue__value--stacked mb0">@Translate.Text("requirements label")</dd>
+                    <dt class="m42-keyvalue__key--stacked mt0 mb24">@Model.Requirement</dt>
+                </dl>
+            </div>
+            <!-- m42-key-value-end -->
+            <a id="applyJob" class="link button--text button mt0" onclick='selectJob()'><strong>@Translate.Text("apply job label")</strong></a><a class="button--text button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_PORTAL_TELL_FRIEND)?q=@Model.PostingGUID"><strong>@Translate.Text("tell friend")</strong></a>
+        </div>
+    </div>
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered">
+            <a role="button" aria-label="Add more" class="button button--primary" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CAREER_POTAL_JOBSEARCH)">@Translate.Text("return to the search page")</a>
+        </div>
+    </div>
+</div>
+<script language="javascript" type="text/javascript">
+    function selectJob() {
+        var jobId = '@Model.JobId';
+        if (@ViewBag.IsLoggedIn== true) {
+            jQuery('.j105-drrg--loader').show();
+            window.location.href = '@(redirectURL)' + jobId;
+        }
+        else {
+            //debugger;
+            var url = "/api/sitecore/CareerPortal/ApplyJob";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'application/json',
+                data: { jobDesc: '', jobId: '@Model.JobId' },
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+            }).success(function (response) {
+                jQuery('#jobDetailDiv').html('');
+                jQuery('#jobDetailDiv').html(response);
+            });
+        }
+    }
+</script>

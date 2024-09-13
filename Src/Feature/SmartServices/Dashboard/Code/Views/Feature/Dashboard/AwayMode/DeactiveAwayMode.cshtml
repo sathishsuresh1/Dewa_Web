@@ -1,0 +1,89 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content 
+@using DEWAXP.Feature.Dashboard.Models.AwayMode
+@model CreateModel
+@{
+    var now = DateHelper.DubaiNow().AddMonths(-1).AddDays(1);
+
+    string Type = Model.IsLoggedIn ? "L" : "A";
+}
+
+<style type="text/css">
+    .mt12{
+        margin-top:12px !important;
+    }
+
+</style>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+
+        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @id = "AwayModeCreateFrom", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+        {
+
+            @Html.AntiForgeryToken()
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+            if (!string.IsNullOrWhiteSpace(Model.RequestId))
+            {
+
+                <div class="grid__row mb0">
+                    <div class="grid__column grid__column--12">
+                        <!-- m42-key-value--start -->
+                        <div class="j120-smart-response--confirm m42-keyvalue" data-inputs='{"RequestId":"@Model.RequestId","ContractAccount":"@Model.ContractAccount","BeginDate":"@Model.BeginDate","EndDate":"@Model.EndDate","Frequency":"@Model.Frequency","Email":"@Model.Email"}'>
+                            <dl>
+                                @if (!string.IsNullOrWhiteSpace(Model.ContractAccount))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary"> @Translate.Text("AMW_ContractAccount"):</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.ContractAccount</dd>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(Model.BeginDate) && !string.IsNullOrWhiteSpace(Model.EndDate))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("AMW_DateInfoText"):</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@string.Format(Translate.Text("AWM_ActivationPeriod"), Model.BeginDate, Model.EndDate)</dd>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(Model.Frequency))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("AMW_Frequency"):</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.FrequencyText</dd>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(Model.Email))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary">@Translate.Text("AMW_EmailID"):</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary">@Model.Email</dd>
+                                }
+                            </dl>
+                        </div>
+                        <!-- m42-key-value--end -->
+                    </div>
+                </div>
+                @Html.HiddenFor(x => x.key)
+                <div class="form-field__button mt0">
+                    @if (Model.IsLoggedIn)
+                    {
+                        <button type="submit" class="button button--primary button--fullwidth-mobile mt12" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+
+                    }
+                    else
+                    {
+                        <button type="submit" name="ActionType" value="get_otp" class="button button--primary button--fullwidth-mobile mt12" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("AWM_Deactive")</button>
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" role="button" data-m51-next="" aria-label="@Translate.Text("Cancel")" class="button button--quaternary button--fullwidth-mobile mt12">@Translate.Text("Cancel")</a>
+                    }
+                </div>
+            }
+            else
+            {
+
+                <div class="form-field__button mt0">
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" role="button" data-m51-next="" aria-label="@Translate.Text("Cancel")" class="button button--primary previous button--fullwidth-mobile mt12">@Translate.Text("Cancel")</a>
+                </div>
+            }
+
+            <script src="~/scripts/External/nml/form-submit-validate.js"></script>
+        }
+    </div>
+</div>

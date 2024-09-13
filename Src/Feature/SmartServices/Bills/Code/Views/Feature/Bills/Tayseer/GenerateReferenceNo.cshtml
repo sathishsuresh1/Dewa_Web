@@ -1,0 +1,133 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@model DEWAXP.Feature.Bills.Models.Tayseer.TayseerPayModel
+@{
+    var easyPayURL = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EASYPAY) + "?ac=" + Session["DewaReference"];
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+<div class="j102-tayseer-service" data-journey="j102-tayseer-service">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                @Html.Sitecore().Placeholder("j87/m26-page-title")
+                @*<div class="count-tayseer" style="text-align:center;">@Translate.Text("Total Accounts"): <strong>@Session["TotalAccounts"]</strong> @Translate.Text("Total Amount"): <strong class="j102-tayseer-service--outstanding">@Session["TotalAmount"] @Translate.Text("Currency")</strong></div>*@
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12  grid__column--form">
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                    <div class="m40-status-message__title">@Translate.Text("Submission Successful")</div>
+                    <div class="m40-status-message__text">
+                        <p>@Translate.Text("Your Ref Number") <strong>@Session["DewaReference"]</strong></p>
+                        <p class="j102-tayseer-service--easypay">@Html.Raw(Translate.Text("Easy Pay Logo"))</p>
+                    </div>
+                    <p><button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print")</button></p>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m42-keyvalue">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("DateTime")</dt>
+                        <dd class="m42-keyvalue__value--stacked" data-acc-detail="">@(lang == "ar" && Session["DateTime"] != null ? Session["DateTime"].ToString().Replace("AM", "صباحا").Replace("PM", "مساء") : Session["DateTime"])</dd>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total Amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked j102-tayseer-service--outstanding" data-acc-detail="">@Session["TotalAmount"] @Translate.Text("AED")</dd>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total Accounts")</dt>
+                        <dd class="m42-keyvalue__value--stacked" data-acc-detail="">@Session["TotalAccounts"]</dd>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Reference Number")</dt>
+                        <dd class="m42-keyvalue__value--stacked" data-acc-detail="">@Session["DewaReference"]</dd>
+                    </dl>
+                    <p class="j102-tayseer-service--easypay">@Html.Raw(Translate.Text("Easy Pay Logo"))</p>
+                </div>
+                <div class="centered mt48">
+                    <button role="button" type="button" class="button button--primary button--small continue-button-popup">@Translate.Text("Pay") <span class="amount-pay-button-text">@Session["TotalAmount"]</span> @Translate.Text("AED")</button>
+                </div>
+                <div class="mt48">
+                    <h2 class="text__section-title centered mt48">@Translate.Text("WhatNext")</h2>
+                    <div class="m14-richtext">
+                        @if (Session["chequePaymentAllowed"] != null)
+                        {
+                            if (Session["chequePaymentAllowed"].ToString() == "True")
+                            {
+                            @*@Html.Raw(Translate.Text("Generate Reference Note Cheque"))*@
+                            @Html.Raw(Translate.Text("ChequePayment"))
+                            }
+                            else
+                            {
+                            @*@Html.Raw(Translate.Text("Generate Reference Note"))*@
+                            @Html.Raw(Translate.Text("CashPayment"))
+                            }
+                        }
+                        else
+                        {
+                            if (lang == "ar")
+                            {
+                                Response.Redirect("/ar-AE/consumer/billing/tayseer");
+                            }
+                            else
+                            {
+                                Response.Redirect("/en/consumer/billing/tayseer");
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                <button role="button" type="button" class="button button--primary button--small continue-button-popup">@Translate.Text("Pay") <span class="amount-pay-button-text">@Session["TotalAmount"]</span> @Translate.Text("AED")</button>
+            </div>
+        </div>*@
+    </div>
+</div>
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @data_parsley_focus = "true", @data_form = "true", @class = "form" }))
+{
+    @Html.Sitecore().FormHandler()
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.TotalAmount)
+    @Html.HiddenFor(m => m.EasyPayNumber)
+    @* Payment Type Popup module *@
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+}
+<script>
+    $.fn.digits = function () {
+        return this.each(function () {
+            $(this).text($(this).text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"));
+        })
+    }
+    $('.j102-tayseer-service--outstanding').digits();
+    $('.amount-pay-button-text').digits();
+    
+
+    jQuery('.continue-button-popup').on('click', function () {
+        if (!jQuery('.continue-button-popup').parent().hasClass('disabled')) {
+            var currency = '@Translate.Text("AED")';
+            var total = '@Model.TotalAmount';
+
+            jQuery('#divPaymentAmountVal').attr('data-value', total);
+            jQuery('#divPaymentAmountVal').data('value', total)
+
+            if (numeral(total) > 0) {
+                //Set payment method based on paid amount
+                setPaymentMethod(total);
+
+                jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+                jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+                jQuery('.btnmodaltrigger').trigger('click');
+
+            }
+        }
+    });
+</script>
+
+
+
+
+
+
+

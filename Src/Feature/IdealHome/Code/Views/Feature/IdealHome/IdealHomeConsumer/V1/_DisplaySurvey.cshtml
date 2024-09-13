@@ -1,0 +1,180 @@
+﻿@model DEWAXP.Feature.IdealHome.Models.IdealHomeConsumer.SectionList
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid j143-ideal-home" data-journey="j143-ideal-home">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="m17-sectiontitle " data-component="m17-sectiontitle">
+                <div class="m17-sectiontitle__colors">
+                    <span class="title-colors-green"></span>
+                    <span class="title-colors-red"></span>
+                    <span class="title-colors-blue"></span>
+                    <span class="title-colors-purple"></span>
+                    <span class="title-colors-brown"></span>
+                </div>
+                <h3 class="m17-sectiontitle__title  text__section-title">
+                    @if (Model.IsStepComplete)
+                    {
+                        @Translate.Text("IDH_Step3") @Translate.Text("IDH_Step3Title")
+                    }
+                    else
+                    {
+                        @Translate.Text("IDH_Step1") @Translate.Text("IDH_Step1Title")
+                    }
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="grid__row j143-ideal-home_progress-form">
+        <div class="grid__column grid__column--4 progress-section-column">
+            <div class="progress-section j143-ideal-home-box">
+                <div class="progress-section-stage-num">
+                    @Translate.Text("IDH_Section") @(Model.CurrentStep + 1) @Translate.Text("IDH_of") @Model.TotalStep
+                </div>
+                <div class="progress-section-stage-title">@Model.SelectedSection.SectionTitle</div>
+                <div class="progress-section-chart">
+                    <div class="m94-progress-chart" data-component="m94-progress-chart" data-progress-text="@Translate.Text("IDH_Completed")" data-completed="@Model.isProgress" data-completed-color="#007560">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__column grid__column--8 form-section-column">
+            <div class="form-section j143-ideal-home-box">
+                @*<h4>@Translate.Text("IDH_AssessmentTitle")</h4>
+                    <p>@Translate.Text("IDH_AssessmentSubTitle")</p>*@
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { returnUrl = "" }, FormMethod.Post,
+                new
+                {
+                    @data_parsley_focus = "true",
+                    @data_form = "true",
+                    @class = "form",
+                    @data_submit_validate = "enabled",
+                    @novalidate = true,
+                    @id = "IdDisplaySurvey",
+                    @autocomplete = "off"
+                }))
+                {
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+                    if (Model.SelectedSection != null)
+                    {
+                        <div class="form-section-group">
+                            @foreach (var questionlist in Model.SelectedSection.QuestionsList)
+                            {
+                                string isSelCount = DateTime.Now.ToString("yyyymmhhssfff");
+                                <div class="form-field">
+                                    <fieldset class="fieldset">
+                                        <legend class="form-field__label">
+                                            @questionlist.Question
+
+                                            @{
+                                                var id = questionlist.Item.ID;
+                                            }
+                                        </legend>
+
+                                        @foreach (var answersList in questionlist.AnswersList)
+                                        {
+                                            bool isSelected = Model.StoredAnsList.Where(x => Convert.ToString(answersList.Item.ID).Equals(x)).Count() > 0;
+
+                                            <p class="form-field__radio ">
+                                                <label>
+                                                    <input class="form-field__input form-field__input--radio"
+                                                           id="form-field-radio_@(isSelCount)"
+                                                           aria-label="form-field-radio_@(isSelCount)"
+                                                           name="Radio|@id"
+                                                           type="radio"
+                                                           value="@id|@answersList.Item.ID"
+                                                           aria-describedby="description-for-@(isSelCount)"
+                                                           data-parsley-errors-container="#description-for-@(isSelCount)"
+                                                           data-parsley-multiple="Radio|@id"
+                                                           data-parsley-required-message="@Translate.Text("J106.FieldRequired")"
+                                                           @(isSelected ? "checked" : "")
+                                                           required="">
+                                                    <span class="form-field__fakeradio focus-enabled">
+                                                        @answersList.Text
+                                                    </span>
+                                                </label>
+                                            </p>
+                                        }
+                                        <div id="description-for-@(isSelCount)" class="form-field__messages">
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            }
+                        </div>
+                        <script>
+                            $(".j106-ideal-home__survey-section").html("@Model.SelectedSection.SectionTitle");
+                        </script>
+                    }
+                    @Html.AntiForgeryToken()
+                    @Html.Sitecore().FormHandler()
+                    @Html.HiddenFor(m => m.SelectedSection.ItemIndex, Request.QueryString["Item"]);
+                    <div class="form-field__button">
+                        @if (Model.CurrentStep > 0)
+                        {
+
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.IDEALHOMECONSUMER_SURVEY)?pre=@(Model.CurrentStep)" onclick="triggerDownload()" class="button">
+                                @Translate.Text("IDH_PreviousSection")
+                            </a>
+                        }
+                        @*<button type="submit" value="btnBack" id="btnPrevious" class="button">Previous Section</button>*@
+                        <button type="submit" value="btnNext" id="btSaveNext" data-submission-text="@Translate.Text("Submitting")..." class="button button--primary button--next">@Translate.Text("IDH_SaveNext")</button>
+                    </div>
+                    <p class="link-save">
+                        <button type="submit" name="isSaveExist" value="isSaveExist" onclick="triggerDownload()" class="button--text button--printer">
+                            @Translate.Text("IDH_SaveExit")
+                        </button>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+    @Html.Sitecore().Placeholder("ideal-home/bottom-section")
+</div>
+<script type="text/javascript">
+    function triggerDownload() {
+        jQuery('.j105-drrg--loader').show();
+        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+        jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+        setTimeout(function () {
+            jQuery('.j105-drrg--loader').hide();
+            jQuery('body').removeClass('unscrollable');
+        }, 500);
+    }
+
+    // submit button click event
+    jQuery('.button--next').off('click.submit').on('click.submit', function (e) {
+        try {
+            if (!jQuery('#IdDisplaySurvey').parsley().validate()) {
+                e.preventDefault();
+                return false;
+            }
+            else {
+                triggerDownload();
+                return true;
+            }
+        } catch (e) {
+            console.log(e);
+            jQuery('.j105-drrg--loader').hide();
+            $('body').removeClass('unscrollable');
+        }
+        return false;
+    });
+
+</script>

@@ -1,0 +1,57 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@model  DEWAXP.Foundation.Content.Models.AccountModel.LoggedInAvatarDetail
+@if (Model != null)
+{
+    <div class="m21-avatar">
+        <div class="m21-avatar__content">
+            <div class="m21-avatar__image" style='background-image: url(@(Model.ProfileImage.HasProfilePhoto?"data:image;base64,"+ Convert.ToBase64String(Model.ProfileImage.ProfilePhoto):Url.Content(ImageHelper.GetAccountImage(DEWAXP.Foundation.Integration.Enums.BillingClassification.Unknown))))'>
+                <a id="lnkProfilePic">
+                    <div class="m21-avatar__image--control icon-photo">
+                        @if (Model.ProfileImage.HasProfilePhoto)
+                        {
+                            @Translate.Text("change photo label");
+                        }
+                        else
+                        {
+                            @Translate.Text("add photo label");
+                        }
+                    </div>
+                </a>
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, new { id = Model.BPNumber }, FormMethod.Post, new { @id = "UpdateAvtar", @name = "customer-profilepic", @data_parsley_focus = "true", @data_form = "true", @data_submit_validate = "enabled", enctype = "multipart/form-data", @novalidate = string.Empty, @autocomplete = "off" }))
+                {
+                    @Html.Sitecore().FormHandler("Account", "UpdateAvtar")
+                    @Html.AntiForgeryToken()
+                    <input id="profilePic"
+                           name="profilePic"
+                           type="file"
+                           style="display:none"
+                           aria-describedby="description-for-profilePic"
+                           data-parsley-errors-container="#description-for-profilePic"
+                           required=""
+                           data-parsley-required-message="This field is required"
+                           accept="image/*"
+                           data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;"
+                           data-size="2048000"
+                           data-parsley-trigger="focusout"
+                           data-parsley-id="6"
+                           aria-invalid="false"
+                           onchange="this.form.submit();">
+                }
+            </div>
+            <div class="m21-avatar__details">
+                <h2 class="m21-avatar__name">@Model.UserName</h2>
+                <p class="m21-avatar__bp mb12">@Translate.Text("Business Partner Avatar") @Model.BPNumber</p>
+            </div>
+        </div>
+    </div>
+
+}
+<script language="javascript" type="text/javascript">
+    $("#lnkProfilePic").click(function () {
+        var $input = $('#profilePic');
+        $input.trigger('click');
+    });
+</script>

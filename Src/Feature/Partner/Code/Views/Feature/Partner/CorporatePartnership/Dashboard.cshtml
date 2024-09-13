@@ -1,0 +1,343 @@
+﻿@using DEWAXP.Foundation.Integration.CorporatePortal
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@using DEWAXP.Feature.Partner.Models.CorporatePartnership
+@using DEWAXP.Foundation.Content
+@model InboxViewModel
+
+
+
+<div class="grid">
+    @if (Model.taskDetailsExternalResponse != null && Model.taskDetailsExternalResponse.serviceCounts != null)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--4">
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalJointServices)">
+                    <div class="m8-dashboardQL">
+                        <div class="m8-dashboardQL__image" style="background-image: url('/Content/cp-content/images/joint_services.png');"></div>
+                        <div class="m8-dashboardQL__content m8-dashboardQL__content--image">
+                            <h2>@(Model.taskDetailsExternalResponse.serviceCounts.jointServicesCount != null ? Model.taskDetailsExternalResponse.serviceCounts.jointServicesCount : 0)</h2>
+                            <p class="teaser__title">@Translate.Text("cpportal.Joint Services")</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="grid__column grid__column--4">
+                <!-- m8-dashboardQL-start -->
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalProjectandInitiatives)">
+                    <div class="m8-dashboardQL">
+                        <div class="m8-dashboardQL__image" style="background-image: url('/Content/cp-content/images/proj_init.png');"></div>
+                        <div class="m8-dashboardQL__content m8-dashboardQL__content--image">
+                            <h2>@(Model.taskDetailsExternalResponse.serviceCounts.projectInitiativeCount != null ? Model.taskDetailsExternalResponse.serviceCounts.projectInitiativeCount : 0)</h2>
+                            <p class="teaser__title">@Translate.Text("cpportal.Projects and Initiatives")</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- m8-dashboardQL-end -->
+            </div>
+
+            <div class="grid__column grid__column--4">
+                <!-- m8-dashboardQL-start -->
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalapproveddocuments)">
+                    <div class="m8-dashboardQL">
+                        <div class="m8-dashboardQL__image" style="background-image: url('/Content/cp-content/images/msa.png');"></div>
+                        <div class="m8-dashboardQL__content m8-dashboardQL__content--image">
+                            <h2>@(Model.taskDetailsExternalResponse.serviceCounts.MOUs_SLAs_count != null ? Model.taskDetailsExternalResponse.serviceCounts.MOUs_SLAs_count : 0)</h2>
+                            <p class="teaser__title">@Translate.Text("cpportal.MOUs/SLAs/Agreements")</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- m8-dashboardQL-end -->
+            </div>
+
+            <div class="grid__column grid__column--4">
+                <!-- m8-dashboardQL-start -->
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalsubmittedideas)">
+                    <div class="m8-dashboardQL">
+                        <div class="m8-dashboardQL__image" style="background-image: url('/Content/cp-content/images/bulb.png');"></div>
+                        <div class="m8-dashboardQL__content m8-dashboardQL__content--image">
+                            <h2 id="submittedideascount">@(Model.taskDetailsExternalResponse.serviceCounts.submittedIdeasCount != null ? Model.taskDetailsExternalResponse.serviceCounts.submittedIdeasCount : 0)</h2>
+                            <p class="teaser__title">@Translate.Text("cpportal.Submitted Ideas")</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- m8-dashboardQL-end -->
+            </div>
+
+            <div class="grid__column grid__column--4">
+                <!-- m8-dashboardQL-start -->
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalsubmittedrequests)">
+                    <div class="m8-dashboardQL">
+                        <div class="m8-dashboardQL__image" style="background-image: url('/Content/cp-content/images/requests.png');"></div>
+                        <div class="m8-dashboardQL__content m8-dashboardQL__content--image">
+                            <h2 id="submittedrequestcount">@(!string.IsNullOrWhiteSpace(Model.taskDetailsExternalResponse.serviceCounts.submittedRequest) ? Model.taskDetailsExternalResponse.serviceCounts.submittedRequest : "0")</h2>
+                            <p class="teaser__title">@Translate.Text("cpportal.Submitted Requests")</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- m8-dashboardQL-end -->
+            </div>
+
+            <div class="grid__column grid__column--4">
+                <!-- m8-dashboardQL-start -->
+                <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalReportedIssues)">
+                    <div class="m8-dashboardQL">
+                        <div class="m8-dashboardQL__image" style="background-image: url('/Content/cp-content/images/joint_services.png');"></div>
+                        <div class="m8-dashboardQL__content m8-dashboardQL__content--image">
+                            <h2 id="submittedissuescount">@(!string.IsNullOrWhiteSpace(Model.taskDetailsExternalResponse.serviceCounts.reportedIssue) ? Model.taskDetailsExternalResponse.serviceCounts.reportedIssue : "0")</h2>
+                            <p class="teaser__title">@Translate.Text("cpportal.Reported Issues")</p>
+                        </div>
+                    </div>
+                </a>
+                <!-- m8-dashboardQL-end -->
+            </div>
+        </div>
+    }
+
+
+    @if (Model.sentAndPipeLineTaskResponse != null && Model.sentAndPipeLineTaskResponse.Count > 0)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m64-inbox" data-component="m64-inbox">
+                    <div class="m64-inbox--title">@Translate.Text("cpportal.inbox")</div>
+                    <div class="m64-inbox--tab">
+                        @*<div data-control="receieved" data-viewall="received" class="m64-inbox--tab_item m64-inbox--tab_recv m64-inbox--tab_active">
+                                received
+                            </div>*@
+
+                        <div data-control="sent" data-viewall="sent" class="m64-inbox--tab_item m64-inbox--tab_recv m64-inbox--tab_active">
+
+                        </div>
+                    </div>
+                    @*<div data-controlled="receieved" data-viewall="received"  class="m64-inbox--content m64-inbox--received__content hidden" style="display: block;">
+                            @if (Model.taskDetailsExternalResponse.taskDetails != null && Model.taskDetailsExternalResponse.taskDetails.Count() > 0)
+                            {
+                            foreach (taskDetailExternalEntity task in Model.taskDetailsExternalResponse.taskDetails.Take(5))
+                            {
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalMessageDetails)?id=@task.workitem_Id"
+                               class="m64-inbox--received__mail @(!string.IsNullOrWhiteSpace(task.task_status) && task.task_status.Equals("acquired") ? "m64-inbox--received__mail-read" : string.Empty)">
+                                <div class="m64-inbox--received__mail--sender icon-pagination_active">
+                                    @task.taskSubject
+                                </div>
+                                <div class="m64-inbox--received__mail--desc">
+                                    <span class="m64-inbox--received__mail--subj">@task.title</span>- <span>@task.objectName</span>
+                                </div>
+                                <div class="m64-inbox--received__mail--date">
+                                    @(!string.IsNullOrWhiteSpace(task.date_sent) ? (Convert.ToDateTime(task.date_sent) != null ? Convert.ToDateTime(task.date_sent).ToString("dd MMM") : string.Empty) : string.Empty)
+                                </div>
+                            </a>
+                                }
+                            }
+                            else
+                            {
+                                <p class="centered">There is no Task</p>
+                            }
+                        </div>*@
+                    <div data-controlled="sent" data-viewall="sent" class="m64-inbox--content m64-inbox--sent__content hidden" style="display: none;">
+                        @foreach (CP_MSG_IDS_ISS senttask in Model.sentAndPipeLineTaskResponse)
+                        {
+
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalMessageDetails)?objid=@senttask.Efolderid" class="m64-inbox--sent__mail">
+                                <div class="m64-inbox--sent__mail--receipient">
+                                    @senttask.RequesterName
+                                </div>
+                                <div class="m64-inbox--sent__mail--desc">
+                                    <span class="m64-inbox--sent__mail--subj">@senttask.Subject</span>
+                                </div>
+                                <div class="m64-inbox--sent__mail--date">
+                                    @DEWAXP.Foundation.Content.Helpers.DateHelper.ConvertLocalDateFormate(senttask.CreatedDate, "dd MMM yyyy", "dd MMM yyyy")
+                                </div>
+                            </a>
+                        }
+                    </div>
+
+                    <div class="button--container">
+                        <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalmyInbox)" class="button button--outline" id="viewallbutton">@Translate.Text("cpportal.View all")</a>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    }
+    @*else
+        {
+            <p class="centered ">@Translate.Text("cpportal.no sent task")</p>
+        }*@
+    <div class="grid__row">
+        <div class="grid__column grid__column--8">
+            <div class="m64-inbox--title">@Translate.Text("cpportal.HappinessResultTitle")</div>
+            @if (Model.taskDetailsExternalResponse.happinessResults != null && Model.taskDetailsExternalResponse.happinessResults.Count() > 0)
+            {
+
+                var gdata = Model.taskDetailsExternalResponse.happinessResults.ToList().OrderBy(x => x.year).ToList();
+                var actualcount = gdata.Select(x => x.actualCount.ToString()).Aggregate((i, j) => i + "," + j);
+                var dewatarget = gdata.Select(x => x.dewaTargetCount.ToString()).Aggregate((i, j) => i + "," + j);
+                var year = gdata.Select(x => x.year.ToString()).Aggregate((i, j) => i + "," + j);
+
+                <div dir="ltr" class="m28-happiness-results"
+                     data-component="m28-happiness-results"
+                     data-chart-data='[{"name": "@Translate.Text("cpportal_data1text")","color": "#008542","data": [@actualcount]}, {"name": "@Translate.Text("cpportal_data2text")","color": "#007ac7","data": [@dewatarget]}]'
+                     data-axes-data='[@year]'
+                     data-axes-legend-x='@Translate.Text("cpportal_HappinessResultXTitle")'
+                     data-axes-legend-y='@Translate.Text("cpportal_HappinessResultYTitle")'>
+
+                    <div class="m28-happiness-results__chart" data-chart-container="true"></div>
+
+                </div>
+            }
+            else
+            {
+                <p class="mt24 centered">@Translate.Text("cpportal.No Information Available")</p>
+            }
+            @*#007ac7, #ac631c, #a58c1a*@
+
+        </div>
+        <div class="m66-preloader j1-CP--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid__column grid__column--4">
+            <div class="m64-inbox--title">@Translate.Text("cpportal.Quick Services")</div>
+
+            <div class="m5-quick-services" data-component="m5-quick-services">
+
+                <div class="m5-quick-services--item link m5-quick-services--item_mail" modal_type="mail">
+                    @Translate.Text("cpportal.Compose Message")
+                </div>
+
+                <div class="m5-quick-services--item link m5-quick-services--item_request" modal_type="request">
+                    @Translate.Text("cpportal.Submit Request")
+                </div>
+
+                <div class="m5-quick-services--item link m5-quick-services--item_ideas" modal_type="ideas">
+                    @Translate.Text("cpportal.Submit Ideas")
+                </div>
+
+                <div class="m5-quick-services--item link m5-quick-services--item_issues" modal_type="issues">
+                    @Translate.Text("cpportal.Submit Issues")
+                </div>
+
+                <div class="m39-modal m39-modal--new m5-quick-services--mail_modal" data-component="m39-modal" id="composemessage">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="composemessage_trigger" aria-controls="composemessage_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="composemessage_content" aria-labelledby="composemessage_trigger">
+                        <div class="m39-modal__dialog">
+                            @Html.Partial("~/Views/Feature/Partner/CorporatePartnership/_ComposeMessage.cshtml")
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+
+                <div class="m39-modal m39-modal--new m5-quick-services--request_modal" data-component="m39-modal" id="meetingrequest">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="meetingrequest_trigger" aria-controls="meetingrequest_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="meetingrequest_content" aria-labelledby="meetingrequest_trigger">
+                        <div class="m39-modal__dialog">
+                            @Html.Partial("~/Views/Feature/Partner/CorporatePartnership/_MeetingRequest.cshtml", true)
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+
+                <div class="m39-modal m39-modal--new m5-quick-services--ideas_modal" data-component="m39-modal" id="submitideasmodal">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="submitideasmodal_trigger" aria-controls="submitideasmodal_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="submitideasmodal_content" aria-labelledby="submitideasmodal_trigger">
+                        <div class="m39-modal__dialog">
+                            @Html.Partial("~/Views/Feature/Partner/CorporatePartnership/_SubmitIdeas.cshtml")
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+
+                <div class="m39-modal m39-modal--new m5-quick-services--issues_modal" data-component="m39-modal" id="submitissuesmodal">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="submitissuesmodal_trigger" aria-controls="submitissuesmodal_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="submitissuesmodal_content" aria-labelledby="submitissuesmodal_trigger">
+                        <div class="m39-modal__dialog">
+                            @Html.Partial("~/Views/Feature/Partner/CorporatePartnership/_SubmitIssues.cshtml")
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+
+                <div class="m39-modal m39-modal--new m5-quick-services--mail_success" data-component="m39-modal" id="successmodal">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="successmodal_trigger" aria-controls="successmodal_content">fdytdsyrstrstr</button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="successmodal_content" aria-labelledby="successmodal_trigger">
+                        <div class="m39-modal__dialog">
+                            @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", @id = "form-successmessage", data_form = "true", enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="m39-modal__header">
+                                    <div class="m39-modal__title" id="successtitlemessage"></div>
+                                    <a data-close="true" class="m39-modal__button--close" id="success_close" aria-controls="success_content"></a>
+                                </div>
+                                <div class="m39-modal__content" id="success_content">
+                                    <div class="grid__row">
+                                        <span id="successtextmessage"></span>
+                                    </div>
+                                </div>
+                                <div class="m39-modal__footer">
+                                    <div class="button button--primary m5-quick-services--mail_success-close">@Translate.Text("cpportal_ok")</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var href = "@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CorporatePortalmyInbox)",
+            status;
+
+        //$('#viewallbutton').on('click', function () {
+        //    $('.m64-inbox--content').each(function () {
+        //        if ($(this).css('display') == 'block') {
+        //            status = $(this).attr('data-viewall');
+        //            window.location.href = href+'#'+status
+        //        }
+        //    });
+        //});
+
+        $('.m64-inbox--content').each(function () {
+            if ($(this).css('display') == 'block') {
+                if ($(this).find('.m64-inbox--sent__mail').length != 0 || $(this).find('.m64-inbox--received__mail ').length != 0) {
+                    $('#viewallbutton').css('display', 'inline-block');
+                } else {
+                    $('#viewallbutton').fadeOut();
+                }
+                return false
+            }
+        });
+
+        $('.m64-inbox--tab_item').on('click.check', function () {
+            setTimeout(function () {
+                $('.m64-inbox--content').each(function () {
+                    if ($(this).css('display') == 'block') {
+                        if ($(this).find('.m64-inbox--sent__mail').length != 0 || $(this).find('.m64-inbox--received__mail ').length != 0) {
+                            $('#viewallbutton').css('display', 'inline-block');
+                        } else {
+                            $('#viewallbutton').fadeOut();
+                        }
+                        return false
+                    }
+                });
+            }, 50)
+        });
+
+    });
+</script>

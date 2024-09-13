@@ -1,0 +1,79 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@model DEWAXP.Feature.Bills.Models.Estimates.EsitimateRefundViewModel
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+
+<!--_Confirmation.cshtml-->
+<div class="grid">
+    <div class="grid__row noprint">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("payment-confirmation/page-title")
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message " data-component="m40-status-message">
+                <div class="m40-status-message__title icon--success">@Translate.Text("ER_SuccessTitle")</div>
+                <div class="m40-status-message__text">@Translate.Text("ER_SuccesSubTitle").Replace("{{notif}}", Model.ReferenceNo)</div>
+                @*
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                    </p>
+                *@
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <h2 class="text__section-title success-subtitle__h2">@Translate.Text("ER_SuccessHeading")</h2>
+
+            <div class="m42-keyvalue success-page">
+                <dl>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_ApplicationNumberLabel")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@string.Format("{0}/{1}", @Model.ApplicationNumber, Model.EstimateNo)</dd>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_ReferenceLabel")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.ReferenceNo</dd>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_RefundToLabel")</dt>
+                    @if (Model.RefundMode == "I")
+                    {
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Translate.Text("IBAN") @*@(Model.IBANNoMasked)*@</dd>
+                    }
+                    else
+                    {
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Translate.Text("CHEQUE") @*@Model.ChequeNO*@</dd>
+                    }
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_DateLabel")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@DateTime.Now.ToString("dd MMM yyyy hh:mm tt", Sitecore.Context.Culture)</dd>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("ER_CustomerNameLabel")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.CustomerName</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--centered grid__column--form">
+            @Html.Sitecore().Placeholder("content-transreciept-placeholder")
+            <h2 class="summary-footer__title noprint">@Sitecore.Globalization.Translate.Text("Whats Next")</h2>
+            @Html.Sitecore().Placeholder("content-er_bottom-placeholder")
+            @*<a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J14_PAY_BILLS)" class="button button--primary button--next">@Translate.Text("Pay another bill")</a>*@
+        </div>
+    </div>
+</div>

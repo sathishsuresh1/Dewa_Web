@@ -1,0 +1,78 @@
+﻿@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.SmartSurvey.Questiontypeslist
+@{
+    string groupnumber = ViewData["group"].ToString();
+    var countrylist = (List<SelectListItem>)ViewData["countrylist"];
+    string status = ViewData["status"] != null ? ViewData["status"].ToString() : string.Empty;
+    bool displayonly = ((!string.IsNullOrWhiteSpace(Model.Displayonly) && Model.Displayonly.Equals("X")) || (!string.IsNullOrWhiteSpace(status) && status.Equals("D")));
+}
+@if (!displayonly)
+{
+    <div class="form-field form-field--text  ">
+        <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label @(displayonly ? " form-field__label--readonly" : string.Empty)">
+            @Model.Question
+            <span class="form-field__label-required aria-only">(@(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : "optional"))</span>
+        </label>
+        <span class="form-field__input-wrapper">
+            <span class="form-field__input-wrapper--mobile-numberNEW">
+                <select class="form-field__input-prefix--mobile-number"
+                        id="form-field-group@(groupnumber)_question@(Model.Questionnumber)_code"
+                        name="form-field-group@(groupnumber)_question@(Model.Questionnumber)_code"
+                        data-parsley-trigger="change" data-parsley-id="8">
+                    @foreach (SelectListItem selectListItem in countrylist)
+                    {
+                        <option value="@selectListItem.Value" @(selectListItem.Selected ? "selected" : string.Empty)>@selectListItem.Text</option>
+                    }
+                </select>
+                <input class="form-field__input form-field__input--text form-field__input--prefixed"
+                       id="form-field-group@(groupnumber)_question@(Model.Questionnumber)_number"
+                       name="form-field-group@(groupnumber)_question@(Model.Questionnumber)_number"
+                       type="tel"
+                       value="@(displayonly || (!string.IsNullOrWhiteSpace(Model.Backendvalue) && Model.Backendvalue.Equals("X")) ? Model.Surveyfeedback : string.Empty)"
+                       placeholder="@Model.Questionplaceholder"
+                       aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                       data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                       @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                       data-parsley-required-message="@Model.Questionplaceholder"
+                       data-parsley-error-message="@Model.Questionplaceholder"
+                       data-parsley-trigger="focusout" data-parsley-id="10"
+                       data-parsley-minlength="7"
+                       data-max-length="15"
+                       data-parsley-maxlength="15"
+                       aria-invalid="true">
+            </span>
+            <div id="description-for-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+                <p class="form-field__description">@Model.Questionnote</p>
+            </div>
+        </span>
+    </div>
+}
+else
+{
+    <div class="form-field form-field--text">
+        @if (!string.IsNullOrWhiteSpace(Model.Asheading) && !Model.Asheading.Equals("X")) { }
+        else
+        {
+            <label for="form-field-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__label form-field__label--readonly">
+                @Model.Question
+                <span class="form-field__label-required aria-only">(@(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : "optional"))</span>
+            </label>
+        }
+        <span class="form-field__input-wrapper form-field__input-wrapper--mobile-numberNEW-outer">
+            <input class="form-field__input form-field__input--text form-field__input--readonly @(displayonly ? "disabled" : string.Empty)"
+                   id="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                   name="form-field-group@(groupnumber)_question@(Model.Questionnumber)"
+                   type="text" placeholder="@Model.Questionplaceholder"
+                   value="@Model.Surveyfeedback"
+                   @(displayonly ? "disabled" : string.Empty)
+                   aria-describedby="description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                   data-parsley-errors-container="#description-for-group@(groupnumber)_question@(Model.Questionnumber)"
+                   @(!string.IsNullOrWhiteSpace(Model.Mandatory) && Model.Mandatory.Equals("X") ? "required" : string.Empty)
+                   data-parsley-required-message="@Model.Questionplaceholder"
+                   data-parsley-trigger="focusout"
+                   data-parsley-id="6">
+        </span>
+        <div id="description-for-group@(groupnumber)_question@(Model.Questionnumber)" class="form-field__messages">
+            <p class="form-field__description">@Model.Questionnote</p>
+        </div>
+    </div>
+}

@@ -1,0 +1,192 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@model DEWAXP.Foundation.Content.Models.Bills.RequestCollectiveAccount
+
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+<div class="grid__row">
+	<div class="grid__column grid__column--12 grid__column--form">
+        <form id="form-account-selector" action="/api/businesspartnerselection/account/{id}" data-form="true" method="POST" class="form" form-skipvalidation="true">
+            @Html.AntiForgeryToken()
+            <fieldset class="fieldset ">
+                <legend class="legend">@Translate.Text("associate business partner text")</legend>
+                <div class="form-field form-field--account-details">
+                    @Html.Sitecore().Placeholder("j11/m43-account-selector")
+                </div>
+            </fieldset>
+        </form>
+
+		@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", @data_form = "true", @data_parsley_focus = "none", @enctype = "multipart/form-data", @data_submit_validate = "enabled" }))
+		{
+			@Html.Sitecore().FormHandler()
+			@Html.AntiForgeryToken()
+			@Html.HiddenFor(m => m.BusinessPartnerNumber, new { @id = "BusinessPartnerNumber" })
+
+			
+			<fieldset class="fieldset ">
+				<legend class="legend">@Translate.Text("request details text")</legend>
+				<div class="form-field form-field--select form-field--select-single">
+					<label for="form-field-category" class="form-field__label">
+						@Translate.Text("category label")
+						<span class="form-field__label-required aria-only">@Translate.Text("generic required label")</span>
+					</label>
+					<span class="form-field__input-wrapper form-field__input-wrapper--select">
+						@Html.HiddenFor(x => x.SelectedCategoryValue)
+						@Html.DropDownListFor(x => x.SelectedCategoryKey, new SelectList(Model.Categories, "Key", "Value"), Translate.Text("select category text"), new
+						{
+							@aria_describedby = "description-for-category",
+							@required = "",
+							@name = "select_optgropus",
+							@data_parsley_error_message = Translate.Text("generic validation message"),
+							@data_parsley_errors_container = "#description-for-category",
+							@class = "form-field__input form-field__input--select form-field__input--select-full",
+							@id = "form-field-category"
+						})
+					</span>
+					<div id="description-for-category" class="form-field__messages">
+						@Html.ValidationMessageFor(x => x.SelectedCategoryValue, "", new { @class = "parsley-errors-list" })
+					</div>
+				</div>
+				<div class="form-field form-field--text ">
+					<label for="form-field-contactname" class="form-field__label">
+						@Translate.Text("contact name label")
+						<span class="form-field__label-required aria-only">@Translate.Text("generic required label")</span>
+					</label>
+					<span class="form-field__input-wrapper">
+						@Html.TextBoxFor(x => x.ContactName, new
+						{
+							@class = "form-field__input form-field__input--text",
+							@id = "form-field-contactname",
+							@placeholder = Translate.Text("contact name placeholder"),
+							@required = "required",
+							@type = "text",
+							@data_parsley_error_message = Translate.Text("generic validation message"),
+							@data_parsley_errors_container = "#description-for-contactname",
+							@aria_describedby = "description-for-contactname"
+						})
+					</span>
+					<div id="description-for-contactname" class="form-field__messages">
+						@Html.ValidationMessageFor(x => x.ContactName, "", new { @class = "parsley-errors-list" })
+					</div>
+				</div>
+				<div class="form-field form-field--text ">
+					<label for="form-field-mobile-number" class="form-field__label">
+						@Translate.Text("mobile label")
+						<span class="form-field__label-required aria-only">@Translate.Text("generic required label")</span>
+					</label>
+					<span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+						@*@Html.TextBoxFor(x => x.Mobile, new
+						{
+							@class = "form-field__input form-field__input--text form-field__input--prefixed",
+							@id = "form-field-mobile-number",
+							@placeholder = Translate.Text("mobile number placeholder"),
+							@aria_required = "true",
+							@required = "required",
+                       @name = "mobile_number",
+							@type = "tel",
+							@data_parsley_type = "digits",
+                       @data_parsley_trigger = "focusout",
+							@data_parsley_error_message = Translate.Text("uae mobile number validation message"),
+							@data_parsley_errors_container = "#description-for-mobile-number",
+							@aria_describedby = "description-for-mobile-number"
+						})*@
+						
+						<span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+							<input type="tel" name="Mobile" value="@Model.Mobile"
+                                   @*aria-required="true"*@
+                                   aria-describedby="description-for-mobile-number"
+								   required="required" placeholder="@Translate.Text("mobile number placeholder")"
+								   data-parsley-error-message="@Translate.Text("uae mobile number validation message")"
+								   data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number=""
+								   data-parsley-errors-container="#description-for-mobile-number" class="form-field__input form-field__input--text form-field__input--prefixed" />
+						</span>
+					</span>
+					<div id="description-for-mobile-number" class="form-field__messages">
+						@Html.ValidationMessageFor(x => x.Mobile, "", new { @class = "parsley-errors-list" })
+					</div>
+				</div>
+				<div class="form-field form-field--text ">
+					<label for="form-field-email-address" class="form-field__label">
+						@Translate.Text("email address label")
+						<span class="form-field__label-required aria-only">@Translate.Text("generic required label")</span>
+					</label>
+					<span class="form-field__input-wrapper">
+						@Html.TextBoxFor(x => x.EmailAddress, new
+						{
+							@class = "form-field__input form-field__input--text",
+							@id = "form-field-email-address",
+							@placeholder = Translate.Text("email placeholder"),
+							@required = "required",
+                       @name = "EmailAddress",
+							@type = "email",
+                       @data_parsley_trigger = "focusout",
+							@data_parsley_error_message = Translate.Text("email validation message"),
+							@data_parsley_errors_container = "#description-for-email-address",
+							@aria_describedby = "description-for-email-address"
+						})
+					</span>
+					<div id="description-for-email-address" class="form-field__messages">
+						@Html.ValidationMessageFor(x => x.EmailAddress, "", new { @class = "parsley-errors-list" })
+					</div>
+				</div>
+			</fieldset>
+			<fieldset class="fieldset ">
+				<legend class="legend">@Translate.Text("upload documentation label")</legend>
+				@Html.Sitecore().Placeholder("j11/official-letter-uploader")
+				<div class="form-field form-field--expander">
+					@Html.Sitecore().Placeholder("j11/official-letter-expander")
+				</div>
+				@Html.Sitecore().Placeholder("j11/trade-licence-uploader")
+				<div class="form-field form-field--expander">
+					@Html.Sitecore().Placeholder("j11/trade-licence-expander")
+				</div>
+			</fieldset>
+			<div class="form-field__button">
+				<button type="submit" class="button button--primary button--next">@Translate.Text("Submit")</button>
+			</div>
+		}
+	</div>
+</div>
+
+<script>
+    var acbtn = jQuery(".m43-accountsel-hidden .m39-modal__footer .button--primary");
+    var acForm = jQuery('#form-account-selector');
+    docReady(function () {
+      
+        setTimeout(function () {
+            jQuery("input[name='Mobile']").attr('data-parsley-mobile_number', "");
+            jQuery(acbtn).on("click", handleAccountSelection);
+            jQuery(acbtn).click();
+        }, 500)
+
+		jQuery("select[name='SelectedCategoryKey']").on("change", function () {
+			jQuery("input[name='SelectedCategoryValue']").val(jQuery("select[name='SelectedCategoryKey'] :selected").text());
+		});
+	});
+
+    function handleAccountSelection(e) {
+
+        var accountNumber = $("input[name='SelectedAccountNumber']:checked").val();
+		//var accountNumber = $(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+		if (accountNumber) {
+			//alert(accountNumber);
+            var url = jQuery(acForm).attr('action').replace("{id}", accountNumber);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (response) {
+                    jQuery("#BusinessPartnerNumber").val(response.BusinessPartnerNumber);
+                }
+            });
+
+
+			
+		}
+		return false;
+	}
+
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+

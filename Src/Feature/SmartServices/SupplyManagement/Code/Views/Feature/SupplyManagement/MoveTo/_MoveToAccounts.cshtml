@@ -1,0 +1,206 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.SupplyManagement.Models.MoveTo.MoveToAccount
+@using SitecoreX = Sitecore.Context;
+
+@{
+    var now = DateHelper.DubaiNow().AddMonths(-1);
+    var threeinfuture = DateHelper.DubaiNow().AddDays(89).AddMonths(-1);
+}
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m26-page-title")
+
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+        @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form j104_1-move-out" data-journey="j104-move-out">
+            <div class="form-field form-field--account-details">
+                <!-- m43-account-selector-start -->
+                <fieldset class="fieldset ">
+                    <legend class="legend-color">.</legend>
+                    <div class="form-field form-field--account-details">
+                        <form id="form-account-selector" data-form="true" action="#" method="POST" form-skipvalidation="true">
+                            @Html.Sitecore().Placeholder("j18/m43-account-selector")
+                        </form>
+
+                    </div>
+                </fieldset>
+                <!-- m42-account-selector-end -->
+            </div>
+            <br />
+            <div id="movetoregister-error" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;">
+            </div>
+            <br />
+
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @data_form = "true", @data_parsley_focus = "none", @id = "movetoform", @data_submit_validate = "enabled" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Sitecore().FormHandler()
+                @Html.HiddenFor(m => m.AccountNumber)
+                <input id="hiddenAccountNumber" name="hiddenAccountNumber" type="hidden" value="@Model.AccountNumber">
+                <fieldset class="fieldset ">
+                    <legend class="legend-color">.</legend>
+                    <div id="datepicker-container-movedate" class="form-field form-field--text ">
+                        <label for="form-field-movedate" class="form-field__label">
+                            @Translate.Text("When to disconnect")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                            @Html.TextBoxFor(x => x.DisconnectDate, new
+                       {
+                           @readonly = "",
+                           data_parsley_id = "6",
+                           @class = "form-field__input form-field__input--text form-field__input--datepicker picker__input",
+                           id = "form-field-movedate",
+                           placeholder = Translate.Text("Select date"),
+                           required = "required",
+                           data_parsley_required_message = Translate.Text("Please enter a value"),
+                           data_el = "datepicker-future",
+                           data_parsley_errors_container = "#description-for-movedate",
+                           data_parsley_cannotbebeforetoday_message = Translate.Text(DictionaryKeys.MoveOut.DisconnectDateNotInPast),
+                           data_parsley_cannotbeafterthreemonth_message = Translate.Text(DictionaryKeys.MoveOut.DisconnectDateNotthreemonths),
+                           data_picker_options = "{ \"max\": [" + threeinfuture.Year + "," + (threeinfuture.Month) + "," + threeinfuture.Day + "] }",
+                           type = "text",
+                           @data_initial_date = Model.DisconnectDateAsDateTime.HasValue ? Model.DisconnectDateAsDateTime.Value.ToString("MMMM dd, yyyy", SitecoreX.Culture) : string.Empty
+                       })
+                        </span>
+                        <div id="description-for-movedate" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.DisconnectDate)
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text ">
+                        <label for="movetophonenumber" class="form-field__label">
+                            @Translate.Text("Enter a mobile number")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                            <input id="movetophonenumber" type="tel" name="MobileNumber" value="@Model.MobileNumber" @*aria-required="true"*@ aria-describedby="description-for-mobilenumber" required="required" placeholder="@Translate.Text("Mobile number placeholder")" data-parsley-error-message="@Translate.Text("Please enter a valid UAE mobile number")" data-parsley-type="digits" data-parsley-trigger="focusout" data-parsley-mobile_number data-parsley-errors-container="#description-for-mobilenumber" class="form-field__input form-field__input--text form-field__input--prefixed" />
+                        </span>
+                        <div id="description-for-mobilenumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.MobileNumber)
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="form-field__button">
+                    <button type="submit" id="movetofromnext" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveto.continue")</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    docReady(function () {
+        var $detailsWrapper = '[ data-acc-detail="wrapper" ]';
+        var $selectedAccount = jQuery('div.m43-accountsel').find('[ data-accountselector ]');
+        this.$selectedAccountDetails = $selectedAccount.find($detailsWrapper);
+        var $selectedAccountAdditionalsDetails = jQuery('div.m43-accountsel').find('[ data-accountsel-additional-details ]');
+        var $movetoregistererror = jQuery('#movetoregister-error');
+        var $additionalDetails = {
+            'accType': '[ data-acc-detail="acc_type" ]',
+            'accPremise': '[ data-acc-detail="acc_premise" ]',
+            'accBusinessPartner': '[ data-acc-detail="acc_businesspartner" ]'
+        };
+        jQuery('#form-account-selector').submit(handleAccountSelection);
+        jQuery('#form-account-selector').submit();
+        //if (jQuery('input[name="hiddenAccountNumber"]').val() == "") {
+        //    jQuery('#form-account-selector').submit(handleAccountSelection);
+        //    jQuery('#form-account-selector').submit();
+        //}
+        //else {
+        //    var accountNumber = jQuery('input[name="hiddenAccountNumber"]').val();
+        //    jQuery('form#form-account-selector').find('[value$=' + accountNumber + ']')[0].click();
+        //    var $updateAccount = jQuery('form#form-account-selector').find('[value$=' + accountNumber + ']').parent().find($detailsWrapper).clone();
+        //    for (var key in $additionalDetails) {
+        //        if ($additionalDetails.hasOwnProperty(key)) {
+        //            var k = $additionalDetails[key],
+        //                $newDetailNode = $updateAccount.find(k);
+
+        //            $selectedAccountAdditionalsDetails.find(k).text($newDetailNode.text());
+        //            $updateAccount.find($newDetailNode).parent().remove();
+        //        }
+        //    }
+        //    $selectedAccountDetails.html($updateAccount);
+        //    jQuery('#form-account-selector').submit(handleAccountSelection);
+        //    jQuery('#form-account-selector').submit();
+        //}
+        function handleAccountSelection(e) {
+            //if (jQuery('input[name="hiddenAccountNumber"]').val() != "")
+            //{
+            //    jQuery(e.target).find('input[name="SelectedAccountNumber"]').attr("value", jQuery('input[name="hiddenAccountNumber"]').val()).click();
+            //}
+            //var accountNumber = jQuery('input[name="hiddenAccountNumber"]').val() == "" ? jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val() : jQuery('input[name="hiddenAccountNumber"]').val();
+            //jQuery('input[name="hiddenAccountNumber"]').val("");
+            var accountNumber = jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val();
+            //jQuery(e.target).find('input[name="SelectedAccountNumber"]').click(function (event) {
+            //    console.log(event);
+            //});
+            if (accountNumber) {
+                var url = "/api/MoveTo/Get";
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    data: "accountnumber=" + accountNumber,
+                    beforeSend: function () {
+                        $("#movetoform").hide();
+                        $("#form-field-movedate").val("");
+                        $("#movetophonenumber").val("");
+                        $('#movetoregister-error').hide();
+                    },
+                    success: function (response) {
+                        if (response.Succeeded) {
+                            $("#movetoform").show();
+                            $('#movetoregister-error').hide();
+                        }
+                        else {
+                            $("#movetoform").hide();
+                            $('#movetoregister-error').show();
+                            $movetoregistererror.html(response.Message);
+                        }
+                    },
+                    error: function (error) {
+                        //console.log(error);
+                    }
+                });
+            }
+            return false;
+        }
+        //function handleAccountSelectionback(e) {
+        //    //if (jQuery('input[name="hiddenAccountNumber"]').val() != "")
+        //    //{
+        //    //    jQuery(e.target).find('input[name="SelectedAccountNumber"]').attr("value", jQuery('input[name="hiddenAccountNumber"]').val()).click();
+        //    //}
+        //    //var accountNumber = jQuery('input[name="hiddenAccountNumber"]').val() == "" ? jQuery(e.target).find('input[name="SelectedAccountNumber"]:checked').val() : jQuery('input[name="hiddenAccountNumber"]').val();
+        //    //jQuery('input[name="hiddenAccountNumber"]').val("");
+        //    var accountNumber = jQuery('input[name="hiddenAccountNumber"]').val();
+        //    //jQuery(e.target).find('input[name="SelectedAccountNumber"]').click(function (event) {
+        //    //    console.log(event);
+        //    //});
+        //    if (accountNumber) {
+        //        var url = "/api/MoveTo";
+        //        $.ajax({
+        //            url: url,
+        //            type: "GET",
+        //            data: "accountnumber=" + accountNumber,
+        //            success: function (response) {
+        //                // jQuery('input[name="AccountNumber"]').val(accountNumber);
+        //            },
+        //            error: function (error) {
+        //                console.log(error);
+        //            }
+        //        });
+        //    }
+        //    return false;
+        //}
+    });
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

@@ -1,0 +1,62 @@
+﻿@using DEWAXP.Foundation.Integration.CorporatePortal
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using Sitecorex = Sitecore
+@using DEWAXP.Foundation.Helpers.Extensions
+@model getDocumentListEntity
+<div class="grid">
+    @Html.Sitecore().Placeholder("placeholder-back")
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    @if (Model != null && Model.approvedDocs != null && Model.approvedDocs.Count() > 0)
+    {
+
+        @*<div class="grid__row">
+                <div class="grid__column grid__column--12">
+                </div>
+            </div>*@
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m4-teaser--heading_wrapper">
+                    <span class="m4-teaser--title">@Translate.Text("cpportal.MOUs/SLAs/Agreements")</span>
+                    <span class="m4-teaser--count" dir="ltr"><span class="m4-teaser--count_catch"></span> @Translate.Text("cpportal.Total")</span>
+                </div>
+            </div>
+            @foreach (documetsExternalEntity documents in Model.approvedDocs)
+            {
+                if (documents != null)
+                {
+                    <div class="grid__column grid__column--4">
+                        <div class="m4-teaser--wrapper" data-component="m4-teaser">
+                            <a href="/api/sitecore/CorporatePartnership/DownloadAttachment?objectid=@documents.objectID" class="m4-teaser">
+                                <div class="m4-teaser--icon_wrapper">
+                                    <img class="m4-teaser--icon_image" alt="" src="@(MimeExtensions.GetExtension(documents.mimeType).Contains("pdf")?"/Content/cp-content/images/pdf_file.png" : "/Content/cp-content/images/word_file.png")">
+                                    <div class="m4-teaser--icon_caption">@documents.docSize KB</div>
+                                </div>
+                                <div class="m4-teaser--detail_wrapper">
+                                    <div class="m4-teaser--detail_date">@(!string.IsNullOrWhiteSpace(documents.creation_date) ? (Convert.ToDateTime(documents.creation_date) != null ? DEWAXP.Foundation.Content.Helpers.DateHelper.ConvertLocalDateFormate(Convert.ToDateTime(documents.creation_date).ToString("dd MMM yyyy"), "dd MMM yyyy", "dd MMM yyyy")  : string.Empty) : string.Empty)</div>
+                                    <div class="m4-teaser--detail_desc">@documents.object_name</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+    }
+    else
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <p class="centered">
+                    @Translate.Text("cpportal.There is no Mou/SLA Agreement list documents")
+                </p>
+            </div>
+        </div>
+    }
+</div>

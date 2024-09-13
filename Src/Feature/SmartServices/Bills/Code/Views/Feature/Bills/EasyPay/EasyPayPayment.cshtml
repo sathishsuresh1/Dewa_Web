@@ -1,0 +1,105 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content.Models.Bills
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.Payment.PaymentCompletionModel
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="grid">
+    <div class="grid__row noprint">
+        <div class="grid__column grid__column--12">
+            <div class="m26-page-title title_message">
+                <h2 class="text__page-title">@Translate.Text("EasyPay")</h2>
+            </div>
+        </div>
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="3" data-current-step="3">
+                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="Verify Document">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Succeeded)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div data-component="m40-status-message" class="m40-status-message m40-status-message--success ">
+                    <div class="m40-status-message__title icon--success">@Translate.Text("easypay.completed")</div>
+                    <div class="m40-status-message__text">@Html.Raw(Translate.Text("easypay.successfully")) </div>
+                    <p>
+                        <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                    </p>
+                    @*<div class="m40-status-message__text">@Html.Raw(Translate.Text("easypay.reference")) </div>*@
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m42-keyvalue success-page">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("payment date and time label")</dt>
+                        @if (Language.Current.Name.ToLowerInvariant() == "ar-ae")
+                        {
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "ss:" + timeFix + "mm:" + timeFix + "HH", Sitecore.Context.Culture)</dd>
+                        }
+                        else
+                        {
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+                        }
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("easypay.servicetype")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.Eptype</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("easypay.number")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.Epnumber</dd>
+
+                        @*<dt class="m42-keyvalue__key--stacked">@Translate.Text("receipt id label")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.ReceiptIdentifiers</dd>*@
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("deg transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Model.Total+ Model.SuqiaAmount)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+                @Html.Sitecore().Placeholder("content-transreciept-placeholder")
+
+            </div>
+
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="form-field__button noprint">
+                    <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_PAST_BILLS)#paymenthistory" class="button button--primary mb12">@Translate.Text("easypay.transaction")</a>
+                    <a role="button" href="@(Model.TayseerHistoryPayment ? LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TAYSEER_REF_NO_HISTORY) : LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EasyPay_Enquire))" class="button button--primary mb12">@Translate.Text("easypay.makepayment")</a>
+                    <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.ADD_BENEFICIARY)?ac=@Model.Epnumber" class="button button--primary mb12">@Translate.Text("Add to Beneficiary Account List")</a>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    }
+
+</div>

@@ -1,0 +1,1 @@
+jQuery(function(n){function i(i){i.preventDefault();var o=n("#hiform");o.submit()}n(".fancybox").fancybox(),n("#hitrigger").on("click",i),n(".non_arabic_link").on("click",function(i){return n(i.id).is("#modal2")||(n(".dewa_noar").trigger("click"),window.setTimeout(function(){window.location.href=i.target},3e3)),!1})});

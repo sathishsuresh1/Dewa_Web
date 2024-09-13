@@ -1,0 +1,126 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.Estimates.FriendsEstimatePaymentConfirmationModel
+
+@Html.Sitecore().Placeholder("j82/m26-page-title")
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+            <div class="m40-status-message__title icon--success">@Sitecore.Globalization.Translate.Text("Payment completed")</div>
+            <div class="m40-status-message__text">@Sitecore.Globalization.Translate.Text("Success Message")</div>
+            <p><button class="button button--text button--printer noprint" data-print="page">@Sitecore.Globalization.Translate.Text("Print Page")</button></p>
+        </div>
+    </div>
+</div>
+
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        @if (Model.Estimate != null)
+        {
+            <div class="grid__column grid__column--6 noprint">
+                <div class="m45-estimate-selector" data-component="m45-estimate-selector" data-selectable="">
+                    <p class="m45-estimate-selector-trigger__label" id="m45-bill_selector_label"></p>
+                    <div class="m45-estimate-selector__estimate">
+                        <div class=" m45-estimate-selector__summary">
+                            <p class="m45-estimate-selector__id">@Translate.Text("J81.Est") @Model.Estimate.estimateno</p>
+                            <p class="m45-estimate-selector__amount">
+                                @Translate.Text("Total Estimate"):
+                                <span data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@Model.Estimate.netvalue1</span>
+                                (@Sitecore.Globalization.Translate.Text("Valid up to"): @Convert.ToDateTime(Model.Estimate.estimatevalidtodate).ToString("dd MMM yyyy", Sitecore.Context.Culture))
+                            </p>
+                        </div>
+
+                        <div class="m37-expander" data-component="m37-expander">
+                            <button data-toggle="true" class="m37-expander__trigger" id="_gwnnmavws_trigger" aria-controls="_gwnnmavws_content">@Sitecore.Globalization.Translate.Text("Estimate details")</button>
+                            <div data-content="true" class="m37-expander__content" role="region" aria-expanded="true" id="_gwnnmavws_content" aria-labelledby="_gwnnmavws_trigger">
+
+                                <dl class="m45-estimate-selector__keyvalues">
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Application No"):</dt>
+                                    <dd class="m45-estimate-selector__value">@Model.Estimate._ca_number</dd>
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Estimate Date"):</dt>
+                                    <dd class="m45-estimate-selector__value">@Convert.ToDateTime(Model.Estimate.estimatevalidfromdate).ToString("dd MMM yy", Sitecore.Context.Culture)</dd>
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Plot Number"):</dt>
+                                    <dd class="m45-estimate-selector__value">@Model.Estimate.plot</dd>
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Area Name"):</dt>
+                                    <dd class="m45-estimate-selector__value">@Model.Estimate.area</dd>
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Owner Name"):</dt>
+                                    <dd class="m45-estimate-selector__value">@Model.Estimate.ownername</dd>
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Consultant Contractor Name"):</dt>
+                                    <dd class="m45-estimate-selector__value">@Model.Estimate.con_name</dd>
+                                    <dt class="m45-estimate-selector__key">@Sitecore.Globalization.Translate.Text("Outstanding Amount"):</dt>
+                                    <dd class="m45-estimate-selector__value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Model.Estimate.netvalue3)</dd>
+                                </dl>
+                                <p class="help-text downloadestPdf">
+                                    @Html.AntiForgeryToken()
+                                    <a href="javascript:void(0)" data-estno="@Model.Estimate.estimateno" data-apiurl="/api/sitecore/Estimate/DisplayPDF" class="link DisplayPDF">@Sitecore.Globalization.Translate.Text("View PDF version of Estimate")</a>
+                                    <form action="/api/sitecore/Estimate/DisplayPDF" method="post" id="DisplayPFDFrom">
+                                        <input type="hidden" name="test" />
+                                    </form>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (Model.EstimateHistory != null)
+        {
+            <div class="grid__column grid__column--6">
+                <div class="m42-keyvalue success-page">
+                    <dl>
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("payment date and time label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.EstimateHistory.Date</dd>
+
+                        @*<dt class="m42-keyvalue__key--stacked">@Translate.Text("receipt id label")</dt>
+                            <dd class="m42-keyvalue__value--stacked tran-details">@Model.EstimateHistory.ReceiptID</dd>*@
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("deg transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.EstimateHistory.DegTransID</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.EstimateHistory.DewaTransId</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("business partner label")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.EstimateHistory.BPDetails</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text(DictionaryKeys.Global.Account.ContractAccountNumber)</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.EstimateHistory.ContractAccount</dd>
+
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">
+                            @(Model.Estimate.PartialPayment+ Model.SuqiaAmount)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    }
+    </div>
+</div>
+<script type="text/javascript">
+    docReady(function () {
+        $(".DisplayPDF").on("click", function () {
+            $('#DisplayPFDFrom').html("");
+            $('#DisplayPFDFrom').append('<input type="hidden" name="estimateNumber" value="' + $(this).data("estno") + '"/>');
+            $('#DisplayPFDFrom').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('.downloadestPdf input[name=__RequestVerificationToken]').val() + '">');
+            $('#DisplayPFDFrom').submit();
+            $('#DisplayPFDFrom').html('<input type="hidden" name="test" />');
+            return false;
+        })
+    });
+</script>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--content">
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+    </div>
+    <div class="grid__column grid__column--12 noprint mt12">
+        <h2 class="summary-footer__title">@Sitecore.Globalization.Translate.Text("Whats Next")</h2>
+        <ul class="summary-footer__buttons">
+            <li class="summary-footer__button">
+                <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J82_ESTIMATE_LANDING)" class="button button--primary button--next">@Sitecore.Globalization.Translate.Text("Pay another Estimate")</a>
+            </li>
+        </ul>
+    </div>
+</div>

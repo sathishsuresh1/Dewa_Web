@@ -1,0 +1,106 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Links
+@using Sitecore.Resources.Media
+@using DEWAXP.Foundation.Content
+@using System.Linq
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.ThumbnailGallery
+@{
+    var mainCounter = 0;
+    var thumbnailCounter = 0;
+}
+<div class="m33-thumbnail-gallery" data-component="m33-thumbnail-gallery">
+    <div class="m33-thumbnail-gallery__title-bar">
+        @if (Model.RedirectLink != null)
+        {
+            <a href="@LinkManager.GetItemUrl(Model.RedirectLink)" role="link" class="m33-thumbnail-gallery__button--back button button--text button--back">@Translate.Text("Albums")</a>
+        }
+        <div class="m33-thumbnail-gallery__title-container">
+            @if (Model.PublishDate != DateTime.MinValue)
+            {
+                <p class="m33-thumbnail-gallery__date">@Html.Glass().Editable(x => x.PublishDate, x => x.PublishDate.ToString("d MMMM yyyy", global::Sitecore.Context.Language.CultureInfo))</p>
+            }
+            @if (!string.IsNullOrEmpty(Model.Header))
+            {
+                <h2 class="gallery__title">@Html.Glass().Editable(x => x.Header)</h2>
+            }
+            @if (!string.IsNullOrEmpty(Model.Summary))
+            {
+                <p class="m33-thumbnail-gallery__caption">@Html.Glass().Editable(x => x.Summary)</p>
+            }
+        </div>
+    </div>
+    <div class="m33-thumbnail-gallery__main-carousel-container">
+        <div class="m33-thumbnail-gallery__main-carousel">
+            @foreach (var image in Model.Images)
+            {
+                <div class="m33-thumbnail-gallery__main-carousel-slide" data-index="@mainCounter" data-caption="@image.Title">
+                    <div class="m33-thumbnail-gallery__main-carousel-slide-inner">
+                        <!--update-->
+                        @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+                        {
+
+                            <img class="m33-thumbnail-gallery__main-carousel-slide-image" alt="@image.Alt" src="@HashingUtils.ProtectAssetUrl(string.Format("{0}?w=1000&h=666&as=1&bc=ffffff", image.Src))" />
+                        }
+                        else
+                        {
+                            @Html.Glass().RenderImage(image, x => x,
+                                new
+                                {
+                                    @class = "m33-thumbnail-gallery__main-carousel-slide-image"
+                                },
+                                false)
+                        }
+
+                    </div>
+                </div>
+                mainCounter++;
+            }
+        </div>
+        @if (Model.Images!=null && Model.Images.ToList().Count() > 1)
+        {
+            <div role="button" aria-required="false" data-role="none" class="m33-thumbnail-gallery__main-carousel-button--prev"></div>
+            <div role="button" aria-required="false" data-role="none" class="m33-thumbnail-gallery__main-carousel-button--next"></div>
+        }
+    </div>
+    <div class="m33-thumbnail-gallery__info-bar">
+        <div class="m33-thumbnail-gallery__pagination"></div>
+    </div>
+    <div class="m33-thumbnail-gallery__thumb-carousel-container">
+        <div class="m33-thumbnail-gallery__thumb-carousel" data-of-value="@Translate.Text(DictionaryKeys.PhotoGallery.of)">
+            @foreach (var image in Model.Images)
+            {
+                <div class="m33-thumbnail-gallery__thumb-carousel-slide" data-index="@thumbnailCounter">
+                    <div class="m33-thumbnail-gallery__thumb-carousel-slide-inner">
+                        <div class="m33-thumbnail-gallery__thumb-carousel-slide-image">
+                            @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+                            {
+                                <img alt="@image.Alt" src="@HashingUtils.ProtectAssetUrl(string.Format("{0}?w=140&h=140&as=1&bc=ffffff", image.Src))" />
+                            }
+                            else
+                            {
+                                @Html.Glass().RenderImage(image, x => x,
+                                 new
+                                 {
+                                     @style = "max-width: 130px",
+
+                                 },
+                                 false)
+                            }
+
+
+                        </div>
+                    </div>
+                </div>
+                thumbnailCounter++;
+            }
+        </div>
+        @if (Model.Images != null && Model.Images.ToList().Count() > 1)
+        {
+            <div role="button" aria-required="false" data-role="none" class="m33-thumbnail-gallery__thumb-carousel-button--prev"></div>
+            <div role="button" aria-required="false" data-role="none" class="m33-thumbnail-gallery__thumb-carousel-button--next"></div>
+        }
+    </div>
+</div>
+
+

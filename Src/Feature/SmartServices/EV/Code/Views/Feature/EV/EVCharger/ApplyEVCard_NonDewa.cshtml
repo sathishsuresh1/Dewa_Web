@@ -1,0 +1,632 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content 
+@using DEWAXP.Feature.EV.Models.EVCharger
+@model DEWAXP.Feature.EV.Models.EVCharger.ApplyEVCard_NonDewa
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ltr" : "rtl"; }
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        
+        @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+@if (Model.AccountType == ((int)AccountType.Business).ToString())
+{
+
+    var listMulkiyaIdNumber = Model.CardIdType == "M" ? Model.CardIdNumber : "";
+    var listCarPlateIdNumber = Model.CardIdType == "P" ? Model.CardIdNumber : "";
+
+    <div class="grid j109-ev-charger" data-journey="j109-ev-charger" data-add_reference="@Translate.Text("EV.Add")" data-reference_notification="@Translate.Text("EV.Mulkiya Number") @Translate.Text("EV.Mutiple Mulkiya info")" data-reference_notificationnew="@Translate.Text("EV.Car Plate Number") @Translate.Text("EV.Mutiple Car Plate info")" data-show_reference="@Translate.Text("EV.Mulkiya Number")" data-show_referencenew="@Translate.Text("EV.Car Plate Number")" data-total_entry="@Translate.Text("EV.Change total number of cars")" data-max_entry="@Translate.Text("EV.Maximum20")" data-platenumber_row="@listCarPlateIdNumber" data-mulkiyanumber_row="@listMulkiyaIdNumber" data-form_label="I am new Title" data-reference_name="@Translate.Text("EV.Mulkiya Number")" data-mulkiya_num="@Translate.Text("EV.Number")" data-reference_email="Email" data-reference_phone="Phone" data-reference_prim="Primary" data-reference_error="Please add at least one reference in order to continue." data-reference_limit="You can only add up to 6 references with including 1 primary." data-email_error="You already entered that email id" data-plate_error="@Translate.Text("EV.Duplicatesnotallowed")" data-equal_error="@Translate.Text("No of Cards and IDNumber Mismatch")" data-empty_error="@Translate.Text("EV.Enter valid number")">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "applyEVCardForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Name)
+                    @Html.HiddenFor(m => m.EmailAddress)
+                    @Html.HiddenFor(m => m.MobileNumber)
+                    @Html.HiddenFor(m => m.CardIdType)
+                    @Html.HiddenFor(m => m.AccountType)
+                    @Html.HiddenFor(m => m.CardIdNumber, new { id = "CardIdNumber", @value = "" })
+                    @Html.HiddenFor(x => x.CarPlateNumber)
+                    @Html.HiddenFor(x => x.CarRegisteredIn)
+                    @Html.HiddenFor(x => x.EmirateOrCountry)
+                    @Html.HiddenFor(x => x.TrafficCodeNumber)
+                    @*<div class="form-field form-field--text" id="divName">
+                <label for="form-field-name" class="form-field__label">
+                    @Translate.Text("EV.Name")
+                </label>
+                <span class="form-field__input-wrapper">
+                    <label for="form-field-name" id="lblName" class="form-field__label">
+                        @Model.Name
+                    </label>
+                </span>
+            </div>*@
+                    <div class="form-field form-field--text" id="divEmailAddress">
+                        <label for="form-field-emailaddress" class="form-field__label">
+                            @Translate.Text("EV.Email Address")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <label for="form-field-emailaddress" id="lblemailAddress" class="form-field__label">
+                                @Model.EmailAddress
+                            </label>
+                        </span>
+                    </div>
+
+                    <div class="form-field form-field--text" id="divMobileNumber">
+                        <label for="form-field-mobilenumber" class="form-field__label">
+                            @Translate.Text("EV.Mobile Number")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <label dir="@direction" for="form-field-mobilenumber" id="lblMobileNumber" class="form-field__label">
+                                @Model.MobileNumber
+                            </label>
+                        </span>
+                    </div>
+
+                    <div class="form-field form-field--select form-field--select-single" id="divNoofCards">
+                        <label for="form-field-emirate" class="form-field__label">
+                            @Translate.Text("EV.No of Cards")
+                            <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                        </label>
+
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.mulkiyanum, (IEnumerable<SelectListItem>)ViewBag.NoofCards,
+                               new
+                               {
+                                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                   @id = "form-field-noofcards",
+                                   @name = "mulkiyanum",
+                                   @aria_describedby = "description-for-EVNoofcards",
+                                   @required = "",
+                                   @data_parsley_error_message = @Translate.Text("EV.NoofcardsErrorMessage"),
+                                   @data_parsley_errors_container = "#description-for-EVNoofcards",
+                                   @data_parsley_id = "15"
+                               })
+                        </span>
+                        <div id="description-for-EVNoofcards" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.NoofCards, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field__checkbox  last  first">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox"
+                                           id="form-field-allmulkiya"
+                                           name="allmulkiya"
+                                           type="checkbox"
+                                           value="1"
+                                           aria-describedby="description-for-x4tz6djeb"
+                                           data-parsley-errors-container="#description-for-x4tz6djeb"
+                                           checked>
+
+                                    <span class="form-field__fakecheckbox focus-enabled" id="spanIdTypeText">
+                                        @Translate.Text("All Vehicles are registered in UAE.")
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="description-for-x4tz6djeb" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="form-field form-field--text" id="divIdNumber">
+                        @*<label for="form-field-vatnumber" id="lblIdNumber" class="form-field__label">
+                    <span id="spanIdNumber">@Translate.Text("EV.Mulkiya Number")</span>
+                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                </label>*@
+                        <label for="form-field-vatnumber" id="lblIdNumber" class="form-field__label">
+                            <span id="spanIdNumber">@Translate.Text("EV.Mulkiya Number") @Translate.Text("EV.Mutiple Mulkiya info")</span>
+                            <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.mulkiya,
+                              new
+                              {
+                                  @class = "form-field__input form-field__input--text",
+                                  @name = "mulkiya",
+                                  @id = "form-field-CardIdNumber",
+                                  @placeholder = Translate.Text("EV.Mulkiya Number Placeholder"),
+                                 // @aria_required = "true",
+                                //  @required = "",
+                                 // @data_parsley_error_message = Translate.Text("EV.errorMessage_MulkiyaNumber"),
+                                  @data_parsley_errors_container = "#description-for-CardIdNumber",
+                                  @aria_describedby = "description-for-CardIdNumber",
+
+                              })
+                        </span>
+                        <div id="description-for-CardIdNumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.mulkiya, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <fieldset class="fieldset form-field" id="divIdDocument">
+                        <legend class="legend-color">.</legend>
+                        <label for="form-field-vatnumber" id="lblIdNumber" class="form-field__label">
+                            <span class="legend" id="legendDocument">@Translate.Text("Mulkiya Attachment")</span>
+                            <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                        </label>
+                        <label for="form-field-vatnumber" class="form-field__label">
+                            <span>@Translate.Text("EV.Upload at least one file")</span>
+                        </label>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="AttachedDocument">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-vatdocument" class="form-field__label">
+                                        <strong class="form-field__label-description" id="uploadfiletext">@Translate.Text("EV.MulkiyaUploadFile")</strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.AttachedDocument,
+                                         new
+                                         {
+                                             type = "file",
+                                             @class = "form-field__input form-field__input--upload",
+                                             @id = "form-field-AttachedDocument",
+                                             @name = @Translate.Text("upload"),
+                                             @aria_describedby = "description-for-AttachedDocument",
+                                             @required = "",
+                                             @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                             @data_parsley_required_message = @Translate.Text("EV.AttachedDocumentrequiredmessage"),
+                                             @data_parsley_errors_container = "#errors-for-AttachedDocument",
+                                             @data_uploader_field = "AttachedDocument",
+                                             @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                             @data_size = @AttachmentValidation.maximumFileSize,
+                                             @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                             @data_parsley_id = "16"
+                                         })
+
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="AttachedDocument"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="AttachedDocument">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-AttachedDocument" class="form-field__messages">
+                                <div id="errors-for-AttachedDocument">
+                                    @Html.ValidationMessageFor(x => x.AttachedDocument, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-field form-field--toggles">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("Terms Agreement")</span>
+                            </label>
+                        </div>
+                        <fieldset class="fieldset terms">
+                            <legend class="legend-color">.</legend>
+                            @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                        </fieldset>
+                        <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                        <input type="hidden" name="AgreedToPayment" value="false" />
+                    </div>
+
+                    <div class="form-field__button">
+                        <button type="submit" class="button button--primary button--next j109-submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="m39-modal language-switch" data-component="m39-modal" id="modal_true">
+            <a role="button" data-trigger="true" class="j109-ev-charger--delete button button--text button--next"></a>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                <div class="m39-modal__dialog">
+
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title">@Translate.Text("EV.PopUpTitle")</div>
+                    </div>
+                    <div class="m39-modal__content">
+                        <div class="grid__row">
+                            @Translate.Text("EV.Popup Description for Remove Number")
+                        </div>
+                        <div class="grid__row">
+                            <div class="button m39-m12-no"> @Translate.Text("EV.No") </div>
+                            <a class="button button--primary j109-ev-charger--delete-yes"> @Translate.Text("EV.Yes") </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="m39-modal language-switch" data-component="m39-modal" id="modal_true">
+            <a role="button" data-trigger="true" class="j109-ev-charger--delete-all button button--text button--next"></a>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                <div class="m39-modal__dialog">
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title">@Translate.Text("EV.PopUpTitle")</div>
+                    </div>
+                    <div class="m39-modal__content">
+                        <div class="grid__row">
+                            @Translate.Text("EV.Popup Description for Change CardType")
+                        </div>
+                        <div class="grid__row">
+                            <div class="button m39-m12-no"> @Translate.Text("EV.No") </div>
+                            <a class="button button--primary j109-ev-charger--delete-all-yes"> @Translate.Text("EV.Yes") </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        docReady(function () {
+            jQuery('.j109-ev-charger--delete-all-yes').on('click', function () {
+                if ($('#form-field-allmulkiya').prop('checked'))
+                {
+                    jQuery('input[name="CardIdType"]').val("P");
+                  //  $("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                    $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                    $("#uploadfiletext").text("@Translate.Text("EV.CarPlateUploadFile")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number Placeholder")");
+                }
+                else
+                {
+                    jQuery('input[name="CardIdType"]').val("M");
+                   // $("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                    $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                    $("#uploadfiletext").text("@Translate.Text("EV.MulkiyaUploadFile")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number Placeholder")");
+                }
+            });
+
+            $('#form-field-allmulkiya').change(function () {
+                if ($(this).is(":checked")) {
+                    $('input[name="CardIdType"]').val("M");
+                   // $("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                    $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                    $("#uploadfiletext").text("@Translate.Text("EV.MulkiyaUploadFile")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number Placeholder")");
+                }
+                else {
+                    $('input[name="CardIdType"]').val("P");
+                    //$("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                    $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                    $("#uploadfiletext").text("@Translate.Text("EV.CarPlateUploadFile")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number Placeholder")");
+                }
+            });
+
+            if (jQuery('input[name="CardIdType"]').val() == "P") {
+                //$("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                $("#uploadfiletext").text("@Translate.Text("EV.CarPlateUploadFile")");
+                $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number Placeholder")");
+            }
+            else {
+                jQuery('input[name="CardIdType"]').val("M");
+                //$("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                $("#uploadfiletext").text("@Translate.Text("EV.MulkiyaUploadFile")");
+                $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number Placeholder")");
+            }
+
+            var $referencelist = jQuery('#CardIdNumber');
+            setTimeout(function () {
+                jQuery('.j109-ev-charger__add-contact').on('click', function () {
+                    var referencelist = [];
+                    jQuery('.m23-table__content-table tbody>tr').each(function () {
+                        //debugger;
+                        if (jQuery(this).find(".j109-ev-charger__reference-name").html() != null) {
+                            referencelist.push(jQuery(this).find(".j109-ev-charger__reference-name").html().trim());
+                        }
+                    });
+                    $referencelist.val(referencelist.join(","));
+                    
+                });
+                jQuery('.j109-ev-charger--delete-yes').on('click', function () {
+                    setTimeout(function () {
+                        var referencelist = [];
+                        jQuery('.m23-table__content-table tbody>tr').each(function () {
+                            if (jQuery(this).find(".j109-ev-charger__reference-name").html() != null) {
+                                referencelist.push(jQuery(this).find(".j109-ev-charger__reference-name").html().trim());
+                            }
+                        });
+                        $referencelist.val(referencelist.join(","));
+                    }, 2000);
+                    
+                });
+            }, 3000);
+        });
+    </script>
+}
+else
+{
+    <div class="grid j109-ev-charger">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form", @id = "applyEVCardForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.Name)
+                    @Html.HiddenFor(m => m.EmailAddress)
+                    @Html.HiddenFor(m => m.MobileNumber)
+                    @Html.HiddenFor(m => m.CardIdType)
+                    @Html.HiddenFor(m => m.AccountType)
+                    @Html.HiddenFor(m => m.CardIdNumber, new { id = "CardIdNumber", @value = "" })
+                    @*<div class="form-field form-field--text" id="divName">
+                        <label for="form-field-name" class="form-field__label">
+                            @Translate.Text("EV.Name")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <label for="form-field-name" id="lblName" class="form-field__label">
+                                @Model.Name
+                            </label>
+                        </span>
+                    </div>*@
+                    <div class="form-field form-field--text" id="divEmailAddress">
+                        <label for="form-field-emailaddress" class="form-field__label">
+                            @Translate.Text("EV.Email Address")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <label for="form-field-emailaddress" id="lblemailAddress" class="form-field__label">
+                                @Model.EmailAddress
+                            </label>
+                        </span>
+                    </div>
+
+                    <div class="form-field form-field--text" id="divMobileNumber">
+                        <label for="form-field-mobilenumber" class="form-field__label">
+                            @Translate.Text("EV.Mobile Number")
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <label dir="@direction" for="form-field-mobilenumber" id="lblMobileNumber" class="form-field__label">
+                                @Model.MobileNumber
+                            </label>
+                        </span>
+                    </div>
+                    <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field__checkbox  last  first">
+                                @if (Model.AccountType == ((int)AccountType.Personal).ToString())
+                                {
+                                    var checkboxval = Model.CardIdType == "P" ? "" : "checked";
+
+                                    <label>
+                                        <input class="form-field__input form-field__input--checkbox" id="form-field-CardIdType" name="chkIdType" type="checkbox" value="false" aria-describedby="description-for-IdTypes" @checkboxval>
+                                        <span class="form-field__fakecheckbox focus-enabled" id="spanIdTypeText">@Translate.Text("My Car is registered in UAE")</span>
+                                    </label>
+                                }
+                            </div>
+                            <div id="description-for-n60mvibp2" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="form-field form-field--text" id="divIdNumber">
+                        <label for="form-field-vatnumber" id="lblIdNumber" class="form-field__label">
+                            <span id="spanIdNumber">@Translate.Text("EV.Mulkiya Number")</span>
+                            <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.mulkiya,
+                          new
+                          {
+                              @class = "form-field__input form-field__input--text",
+                              @name = "mulkiya",
+                              @id = "form-field-CardIdNumber",
+                              @placeholder = Translate.Text("EV.Mulkiya Number Placeholder"),
+                              @required = "",
+                              @data_parsley_error_message = Translate.Text("EV.errorMessage_MulkiyaNumber"),
+                              @data_parsley_errors_container = "#description-for-CardIdNumber",
+                              @aria_describedby = "description-for-CardIdNumber",
+
+                          })
+                        </span>
+                        <div id="description-for-CardIdNumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.mulkiya, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <fieldset class="form-field fieldset" id="divIdDocument">
+                        <legend class="legend" id="legendDocument">@Translate.Text("Mulkiya Attachment")</legend>
+                        <label for="form-field-vatnumber" class="form-field__label">
+                            <span>@Translate.Text("EV.Upload at least one file")</span>
+                        </label>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="AttachedDocument">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-vatdocument" class="form-field__label">
+                                        <strong class="form-field__label-description" id="uploadfiletext">@Translate.Text("Upload File")</strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.AttachedDocument,
+                                             new
+                                             {
+                                                 type = "file",
+                                                 @class = "form-field__input form-field__input--upload",
+                                                 @id = "form-field-AttachedDocument",
+                                                 @name = @Translate.Text("upload"),
+                                                 @aria_describedby = "description-for-AttachedDocument",
+                                                 @required = "",
+                                                 @data_parsley_error_message = @Translate.Text("Please select a file"),
+                                                 @data_parsley_required_message = @Translate.Text("EV.AttachedDocumentrequiredmessage"),
+                                                 @data_parsley_errors_container = "#errors-for-AttachedDocument",
+                                                 @data_uploader_field = "AttachedDocument",
+                                                 @data_accepts = @AttachmentValidation.acceptedFileTypesClientSide,
+                                                 @data_size = @AttachmentValidation.maximumFileSize,
+                                                 @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                                 @data_parsley_id = "16"
+                                             })
+
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="AttachedDocument"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="AttachedDocument">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-AttachedDocument" class="form-field__messages">
+                                <div id="errors-for-AttachedDocument">
+                                    @Html.ValidationMessageFor(x => x.AttachedDocument, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-field form-field--toggles">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("Terms Agreement")</span>
+                            </label>
+                        </div>
+                        <fieldset class="fieldset terms">
+                            <legend class="legend-color">.</legend>
+                            @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                        </fieldset>
+                        <div id="description-for-accept-terms" class="form-field__messages" style="padding-top:15px;"></div>
+                        <input type="hidden" name="AgreedToPayment" value="false" />
+                    </div>
+
+                    <div class="form-field__button">
+                        <button type="submit" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Submit")</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        docReady(function () {
+            $('#form-field-CardIdType').change(function () {
+                $("#description-for-CardIdNumber").html('');
+                if ($(this).is(":checked")) {
+                    jQuery('input[name="CardIdType"]').val("M");
+                    $("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                    $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                    $("#uploadfiletext").text("@Translate.Text("EV.MulkiyaUploadFile")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number Placeholder")");
+                }
+                else {
+                    jQuery('input[name="CardIdType"]').val("P");
+                    $("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                    $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                    $("#uploadfiletext").text("@Translate.Text("EV.CarPlateUploadFile")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number Placeholder")");
+                }
+            });
+
+            if (jQuery('input[name="CardIdType"]').val() == "P") {
+                $("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                $("#uploadfiletext").text("@Translate.Text("EV.CarPlateUploadFile")");
+                $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number Placeholder")");
+            }
+            else {
+                jQuery('input[name="CardIdType"]').val("M");
+                $("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                $("#uploadfiletext").text("@Translate.Text("EV.MulkiyaUploadFile")");
+                $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number Placeholder")");
+            }
+            //$('input[name="CardIdType"]').val("M");
+        });
+    </script>
+}
+@*<script type="text/javascript">
+        docReady(function () {
+            $('#form-field-CardIdType').change(function () {
+                if ($(this).is(":checked")) {
+                    jQuery('input[name="CardIdType"]').val("M");
+                    $("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                    $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number")");
+                }
+                else {
+                    jQuery('input[name="CardIdType"]').val("P");
+                    $("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                    $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                    $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                    $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number")");
+                }
+            });
+
+            if (jQuery('input[name="CardIdType"]').val() == "P") {
+                $("#spanIdNumber").text("@Translate.Text("EV.Car Plate Number")");
+                $("#legendDocument").text("@Translate.Text("EV.Upload Car Plate Picture")");
+                $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_CarPlate")");
+                $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Car Plate Number")");
+            }
+            else {
+                jQuery('input[name="CardIdType"]').val("M");
+                $("#spanIdNumber").text("@Translate.Text("EV.Mulkiya Number")");
+                $("#legendDocument").text("@Translate.Text("Mulkiya Attachment")");
+                $("#form-field-CardIdNumber").attr("data-parsley-error-message", "@Translate.Text("EV.errorMessage_MulkiyaNumber")");
+                $("#form-field-CardIdNumber").attr("placeholder", "@Translate.Text("EV.Mulkiya Number")");
+            }
+            //$('input[name="CardIdType"]').val("M");
+
+            var $referencelist = jQuery('#CardIdNumber');
+            setTimeout(function () {
+                jQuery('.j109-ev-charger__add-contact').on('click', function () {
+                    alert('called');
+                    var referencelist = [];
+                    jQuery('.m23-table__content-table tbody>tr').each(function () {
+                        //debugger;
+                        if (jQuery(this).find(".j109-ev-charger__reference-name").html() != null) {
+                            referencelist.push(jQuery(this).find(".j109-ev-charger__reference-name").html());
+                        }
+                    });
+                    $referencelist.val(referencelist.join(", "));
+                    //$referencelist[0].value = JSON.stringify(referencelist);
+                });
+                jQuery('.j109-ev-charger--delete-yes').on('click', function () {
+                    alert('called');
+                    setTimeout(function () {
+                        var referencelist = [];
+                        jQuery('.m23-table__content-table tbody>tr').each(function () {
+                            //debugger;
+                            if (jQuery(this).find(".j109-ev-charger__reference-name").html() != null) {
+                                referencelist.push(jQuery(this).find(".j109-ev-charger__reference-name").html());
+                            }
+                        });
+                        $referencelist.val(referencelist.join(", "));
+                    }, 2000);
+                    //$referencelist[0].value = JSON.stringify(referencelist);
+                });
+            }, 3000);
+        });
+    </script>*@
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

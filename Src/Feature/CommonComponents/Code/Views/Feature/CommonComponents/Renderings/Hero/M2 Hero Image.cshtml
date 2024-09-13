@@ -1,0 +1,51 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Resources.Media
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content.Repositories
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.HeroImage
+@{
+    var hideinmobile = Html.Sitecore().CurrentRendering.Parameters["hideinmobile"] != null ? true : false;
+    var _cache = DependencyResolver.Current.GetService<ICacheProvider>();
+    bool isnavhide = false;
+    _cache.TryGet("HIDENAV", out isnavhide);
+}
+
+@if (!isnavhide || (isnavhide && !hideinmobile))
+{
+    if (Model != null)
+    {
+        string extraCssClass = Html.Sitecore().CurrentRendering.Parameters["ExtraCssClass"] ?? "";
+        string AltHtml = "";
+        <div class="m2-hero-image @Html.Raw(extraCssClass)" data-component="m2-hero-image">
+            @if (Model.Image != null)
+            {
+                AltHtml = !string.IsNullOrEmpty(Model.Image.Alt) ? string.Format("data-alt=\"{0}\"", Model.Image.Alt) : "";
+                <div class="m2-hero-image__image" style="background-image:url('@Model.Image.Src')"></div>
+            }
+            @Html.Sitecore().Rendering(SitecoreRenderingIds.HEROBREADCRUMB)
+
+            @if (!string.IsNullOrEmpty(Model.Header) || !string.IsNullOrEmpty(Model.SubHeader))
+            {
+                <div @Html.Raw(AltHtml) class="m2-hero-image__inner">
+                    <div class="grid">
+                        <div class="grid__row">
+                            <div class="m2-hero-image__grid-row relative">
+                                <div class="m2-hero-image__content">
+                                    @if (!string.IsNullOrEmpty(Model.Header))
+                                    {
+                                        <h2 class="text__innerhero-title">@Html.Glass().Editable(x => x.Header)</h2>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.SubHeader))
+                                    {
+                                        <p class="text__page-intro">@Html.Glass().Editable(x => x.SubHeader)</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}

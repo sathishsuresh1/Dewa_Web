@@ -1,0 +1,327 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using System 
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.AccountSelector
+
+
+@Html.HiddenFor(m => m.MultiSelect)
+@Html.HiddenFor(m => m.AccountSelectionEnabled)
+@Html.HiddenFor(m => m.ShowAccountDetails)
+@Html.HiddenFor(m => m.SubmitOnConfirm)
+
+@{
+    var defaultAccount = Model.FirstSelected ?? Model.Primary ?? Model.First;
+    var defaultStatusIndicatorClass = defaultAccount != null && defaultAccount.Active ? "active" : "inactive";
+    var defaultStatusIndicatorText = defaultAccount != null && defaultAccount.Active ? "Active" : "Inactive";
+    var multiSelectLabelClass = Model.MultiSelect ? "hidden" : string.Empty;
+    var disableSubmitOnConfirm = (!Model.SubmitOnConfirm).ToString().ToLower();
+    var displayModal = Model.AccountSelectionEnabled.ToString().ToLower();
+    var additionalContentCssClasses = Model.MultiSelect ? "m39-modal__content--tabs" : string.Empty;
+    var additionalHeaderCssClasses = Model.MultiSelect ? "m39-modal__header--tabs" : string.Empty;
+    var dir = ViewBag.IsRTL ? "rtl" : "ltr";
+    var displayName = !string.IsNullOrWhiteSpace(defaultAccount.Name) ? defaultAccount.Name : defaultAccount.NickName;
+    bool IsMuptiple = Convert.ToBoolean(Model.Accounts != null && Model.Accounts.Count > 1);
+    var isexpocustomer = ViewBag.isexpocustomer != null && (bool)ViewBag.isexpocustomer;
+    }
+    <!--test ac update-->
+    <!--Views\V1\Renderings\Account Selector\M43 Account Selector.cshtml-->
+    <div class="m43-accountsel" data-component="m43-account-selector" data-isexpocustomer="@isexpocustomer">
+        <div class="m66-preloader small">
+            <div class="loader-small"></div>
+        </div>
+        <div class="m43-accountsel-hidden" style="display:none;">
+            @if (IsMuptiple)
+            {
+                <p class="m43-accountsel__labelstyle">@Model.Label</p>
+            }
+
+            <!-- .account selection trigger -->
+            <button class="m43-accountsel__selected m43-accountsel__selected--dropdown @Html.Raw(!IsMuptiple?"mt24":"")"
+                    data-accountselector="acc-sel-ctrl"
+                    data-preventsubmit="@disableSubmitOnConfirm"
+                    data-minselection="@Model.MinSelection"
+                    data-maxselection="@Model.MaxSelection"
+                    aria-haspopup="@displayModal"
+                    aria-expanded="false" @((defaultStatusIndicatorClass == "inactive" && !Model.SecondaryDatasource) ? " disabled" : "")
+                    type="button"
+                    id="m43-accountsel__selected_trigger"
+                    aria-controls="m43-accountsel__selected_content">
+                <span class="m43-accountsel__account" data-acc-detail="wrapper">
+                    @if (defaultAccount.HasPhoto)
+                    {
+                        <img src="/images/ajax-loader_50x50.gif"
+                             data-src="/account_thumbs.ashx?id=@(defaultAccount.AccountNumber)&aty=@((int)defaultAccount.BillingClassification)"
+                             class="m43-accountsel__image tooltipstered"
+                             alt="@displayName" role="presentation" data-acc-detail="acc_image">
+                    }
+                    else
+                    {
+                        <img src="@ImageHelper.GetAccountImage(defaultAccount.BillingClassification)"
+                             data-src="@ImageHelper.GetAccountImage(defaultAccount.BillingClassification)"
+                             class="m43-accountsel__image"
+                             alt="@displayName"
+                             role="presentation"
+                             data-acc-detail="acc_image">
+                    }
+                    <span class="m43-accountsel__header">
+                        @if (!string.IsNullOrWhiteSpace(defaultAccount.NickName))
+                        {
+                            <span class="m43-accountsel__secondarydetails m43-accountsel__nickname">
+                                <span class="inline-block" dir="@dir">
+                                    <strong>@defaultAccount.NickName</strong>
+                                </span>
+                            </span>
+                        }
+
+                        <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                            <span class="inline-block" dir="@(dir)">@displayName</span>
+                            @if (!Model.SecondaryDatasource || defaultAccount.AccountClass != DEWAXP.Foundation.Integration.Enums.AccountClassification.Unknown)
+                            {
+                                <span dir="@dir" class="m43-accountsel__status m43-accountsel__status--@defaultStatusIndicatorClass" title="@Translate.Text(defaultStatusIndicatorText)">
+                                    @*@Translate.Text(defaultStatusIndicatorText)*@
+                                </span>
+                            }
+                        </span>
+
+                        <span class="m43-accountsel__details">
+                            @if ((!string.IsNullOrWhiteSpace(defaultAccount.BillingClass) && !defaultAccount.BillingClass.Equals("-")))
+                            {
+                                <span dir="@(dir)" data-acc-detail="type">@defaultAccount.BillingClass</span> @("|")
+                            }
+                            else
+                            {
+                                <span dir="@(dir)" data-acc-detail="type" style="display:none;">@defaultAccount.BillingClass</span>
+                            }
+                            @if ((!string.IsNullOrWhiteSpace(defaultAccount.AccountNumber) && !defaultAccount.AccountNumber.Equals("-")))
+                            {
+                                <span title="Account">@Translate.Text("global.accountnumber")</span>
+                                <span dir="@(dir)" data-acc-detail="acc_number">(@defaultAccount.AccountNumber)</span>
+                            }
+                        </span>
+
+                        @if (!string.IsNullOrWhiteSpace(defaultAccount.Street) && !string.IsNullOrWhiteSpace(defaultAccount.Location))
+                        {
+                            <span class="m43-accountsel__secondarydetails">
+
+                                <span dir="@dir" data-acc-detail="address">
+                                    @defaultAccount.Street, @defaultAccount.Location
+                                </span>
+                            </span>
+                        }
+
+                            @if (!String.IsNullOrEmpty(defaultAccount.CustomerPremiseNumber))
+                            {
+                                if (defaultAccount.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle))
+                                {
+                                        <span class="m43-accountsel__secondarydetails">
+                                            <span dir="@dir" data-acc-detail="acc_premise">
+                                                @(!string.IsNullOrWhiteSpace(defaultAccount.CustomerPremiseNumber) ? string.Format(Translate.Text("cards"), defaultAccount.CustomerPremiseNumber) : "-")
+                                            </span>
+                                        </span>
+                                }
+                                else
+                                {
+                                    if (!string.IsNullOrWhiteSpace(defaultAccount.CustomerPremiseNumber))
+                                    {
+                                        <span class="m43-accountsel__secondarydetails">
+                                            <span dir="@dir" data-acc-detail="acc_premise">
+                                                @Translate.Text("Premise") (@(defaultAccount.CustomerPremiseNumber ?? "-"))
+                                            </span>
+                                        </span>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var pnumber = defaultAccount.CustomerPremiseNumber ?? defaultAccount.PremiseNumber;
+                                if (!string.IsNullOrWhiteSpace(pnumber) && !pnumber.Equals("-"))
+                                {
+                                    <span class="m43-accountsel__secondarydetails">
+                                        <span dir="@dir" data-acc-detail="acc_premise">
+                                            @(defaultAccount.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle) ? string.Format(Translate.Text("cards"), pnumber) : Translate.Text("Premise")+" "+ (pnumber)) 
+                                        </span>
+                                    </span>
+                                }
+                            }
+                            @*@if (!string.IsNullOrWhiteSpace(defaultAccount.NickName))
+        {
+            <span class="m43-accountsel__secondarydetails">
+                <span class="inline-block mt12" dir="@dir">
+                    <strong>@defaultAccount.NickName</strong>
+                </span>
+            </span>
+        }*@
+
+                    </span>
+                    <span class="m43-accountsel__medpod">
+                        @if (defaultAccount.Medical)
+                        {
+                            <span class="green icon-medical" title="@Translate.Text("POD.Medical")"></span>
+                        }
+                        @if (defaultAccount.POD)
+                        {
+                            <span class="green icon-pod" title="@Translate.Text("POD.pod")"></span>
+                        }
+                        @if (defaultAccount.Senior)
+                        {
+                            <span class="green icon-senior" title="@Translate.Text("POD.senior")"></span>
+                        }
+                    </span>
+                </span>
+
+                @*<div class="m43-accountsel__secondarydetails--link">
+                        @if (defaultAccount.HasAccounts)
+                        {
+                            <span class="link">@Translate.Text("global.chooseanotheraccount")</span>
+                        }
+                    </div>*@
+                <span class="m43-accountsel__message m43-accountsel__message--multiselected @multiSelectLabelClass" data-acc-multiselected="@Translate.Text("accounts selected")" data-acc-multiselected-sing="@Translate.Text("account selected")" aria-hidden="true" id="multiselected"></span>
+                <span class="m43-accountsel__message m43-accountsel__message--multiselected @multiSelectLabelClass" data-acc-multiselected-copy="@Translate.Text("Select Account")" aria-hidden="true" id="multiselected-copy"></span>
+                <span class="m43-accountsel__message m43-accountsel__message--error @multiSelectLabelClass" data-acc-error="@Translate.Text("Please select at least one account")" aria-hidden="true"></span>
+            </button>
+            <!-- ./account selection trigger -->
+            <!-- .account selection modal -->
+            <div class="m39-modal" data-component="m39-modal" id="modal_acc-sel-1">
+                <div data-content="acc-sel-ctrl" class="m39-modal__container" role="dialog" aria-expanded="false" id="m43-accountsel__selected_content" aria-labelledby="m43-accountsel__selected_trigger">
+                    <div class="m39-modal__dialog m39-modal__dialog--account">
+                        <div class="m39-modal__header @additionalHeaderCssClasses">
+                            <div class="m39-modal__title">@(Model.MultiSelect ? Translate.Text("Select up to n accounts", Model.MaxSelection) : @Translate.Text("Choose account"))</div>
+                            <span class="hidden" id="accountselector-bp">@(Model.MultiSelect ? Translate.Text("Account should be selected under same BP") : string.Empty)</span>
+                            <a data-close="acc-sel-ctrl" class="m39-modal__button--close" id="m43-accountsel__selected_close" aria-controls="m43-accountsel__selected_content">@Translate.Text("Close")</a>
+                            <!-- m49-list-filter-start -->
+                            <!-- ideally data-filter-list will match a container id for all list items to filter -->
+                            @if (Model.MultiSelect)
+                            {
+                                @Html.Sitecore().Rendering(SitecoreItemIdentifiers.M41_TAB_RENDERING, new { DataSource = SitecoreItemIdentifiers.M43_MODAL_TABS })
+                            }
+                            <div class="m49-list-filter" data-component="m49-list-filter" data-filter-list="#m43-account-list">
+                                <input class="m49-list-filter--input" id="m49-list-filter--input" name="m49-list-filter--input" placeholder="@Translate.Text(DictionaryKeys.AccountSelector.SearchByNumber)" type="search">
+                                <button class="m49-list-filter-reset-button hidden" title="Clear Filter" type="button" aria-label="Clear Filter">
+                                    <span class="aria-only">
+                                        @Translate.Text(DictionaryKeys.AccountSelector.Filter)
+                                    </span>
+                                </button>
+                                <button class="m49-list-filter--button" id="search" title="Filter results" type="button" role="search" aria-label="Filter results">
+                                    <span class="aria-only">
+                                        @Translate.Text(DictionaryKeys.AccountSelector.Filter)
+                                    </span>
+                                </button>
+                            </div>
+                            <!-- m49-list-filter-end -->
+                            @*<div class="m39-modal__subtitle">Subtitle here</div>*@
+                        </div>
+                        <div class="m39-modal__content @additionalContentCssClasses" id="m43-account-list" style="top: 149px;">
+                            @(Model.MultiSelect ? Html.Partial("~/Views/Feature/Account/Selector/M43 Multi Selection Account List.cshtml", Model) : Html.Partial("~/Views/Feature/Account/Selector/M43 Single Selection Account List.cshtml", Model))
+                        </div>
+                        <div class="m39-modal__footer">
+                            <span class="pager_update" data-pager-update="true"></span>
+                            <span class="reset_update" data-reset-update="true"></span>
+                            <p class="m39-modal__accsel-error hidden"
+                               data-modal="errormessage"
+                               aria-hidden="true"
+                               tabindex="0"
+                               data-min-error="@Translate.Text("Select at least n accounts", Model.MinSelection)"
+                               data-max-error="@Translate.Text("Select up to n accounts", Model.MaxSelection)"></p>
+                            <p class="m39-modal__accsel-error m39-modal__accsel-error-BP hidden">
+                                @Translate.Text("Account should be selected under same BP")
+                            </p>
+                            <button class="button button--primary" data-accountupdate="true" data-modal-confirm="true">@Translate.Text("global.accountsok")</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ./account selection modal -->
+            @if (Model.ShowAccountDetailsLink)
+            {
+                <a class="m43accountdetailslink" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.myprofile)?a=@defaultAccount.AccountNumber" data-url="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.myprofile)?a=">@Translate.Text("Account Details Link Text")</a>
+            }
+            @if (Model.ShowAccountDetails)
+            {
+                <!-- .expander for the selected account -->
+                <div class="m37-expander" data-component="m37-expander">
+                    <button type="button" data-toggle="true" aria-haspopup="true" aria-expanded="false" class="m37-expander__trigger m37-expander__trigger--themed">@Translate.Text("Account Details")</button>
+
+                    <div data-content="true" class="m37-expander__content">
+                        <div class="m42-keyvalue">
+                            <dl data-accountsel-additional-details="acc-sel-ctrl">
+                                @if (!string.IsNullOrWhiteSpace(defaultAccount.BillingClass) && defaultAccount.BillingClass != "-")
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="@dir">@Translate.Text(DictionaryKeys.ChangePremiseType.PremiseType) :</dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="type">@defaultAccount.BillingClass</dd>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(defaultAccount.CustomerPremiseNumber))
+                                {
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" data-acc-detail="acc_premiseType" dir="@dir">
+                                        <span>
+                                            @(defaultAccount.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle) ? string.Empty : Translate.Text("Premise"))
+                                        </span>
+                                        :
+                                    </dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">@string.Format(Translate.Text("cards"), defaultAccount.CustomerPremiseNumber)</dd>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(defaultAccount.PremiseNumber))
+                                {
+
+                                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" data-acc-detail="acc_premiseType" dir="@dir">
+                                        <span>
+                                            @(defaultAccount.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle) ? string.Empty : Translate.Text("Premise"))
+                                        </span>
+                                        :
+                                    </dt>
+                                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_premise">
+                                        @(defaultAccount.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle) ? string.Format(Translate.Text("cards"), defaultAccount.PremiseNumber) : defaultAccount.PremiseNumber)
+                                    </dd>
+                                }
+                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--inline-dt" dir="@dir">@Translate.Text("Business Partner") :</dt>
+                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--inline-dd" data-acc-detail="acc_businesspartner">@defaultAccount.BusinessPartnerNumber.TrimStart(new[] { '0' })</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <!-- ./expander for the selected account -->
+            }
+        </div>
+    </div>
+    <!--Views\V1\Renderings\Account Selector\M43 Account Selector.cshtml-->
+    <script type="text/javascript">
+    docReady(function () {
+        if ('@(isexpocustomer)' == 'True') {
+            jQuery(".grid-expo").removeClass('hidden');
+            jQuery("#awaymodethumbnail").hide();
+            jQuery(".BES-grid").hide();
+        }
+        else {
+            jQuery(".grid-expo").addClass('hidden');
+        }
+        var toggleReset = function () {
+            jQuery('.m49-list-filter--input').on('keypress', function (e) {
+                if (e.charCode == 13) {
+                    jQuery('.m49-list-filter-reset-button').removeClass('hidden');
+                }
+            });
+
+            jQuery('.m49-list-filter--button').on('click', function (e) {
+                jQuery('.m49-list-filter-reset-button').removeClass('hidden');
+            });
+
+            jQuery('.m49-list-filter-reset-button').on('click', function (e) {
+                //debugger;
+                if (!(jQuery('.m49-list-filter-reset-button').hasClass('hidden'))) {
+
+                    jQuery('.m49-list-filter-reset-button').addClass('hidden');
+                }
+            });
+        }
+        toggleReset();
+        $('.pager_update').on('click', function () {
+            toggleReset();
+        });
+
+        $('.reset_update').on('click', function () {
+            toggleReset();
+        });
+    });
+    </script>

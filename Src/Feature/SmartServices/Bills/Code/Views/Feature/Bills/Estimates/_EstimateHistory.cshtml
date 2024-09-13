@@ -1,0 +1,89 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@model DEWAXP.Feature.Bills.Models.Estimates.MyEstimates
+
+
+<div class="box box--1">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j82/m26-page-title")
+    </div>
+</div>
+
+@Html.Sitecore().Placeholder("j82/m41-tab-box")
+
+<div class="grid">
+    @Html.Partial("~/Views/Feature/CommonComponents/Error/AlertError.cshtml")
+
+    @{
+        string disablePayButton = "";
+    }
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Sitecore().Placeholder("j82/m14-journey-intro-rich-text")
+            @*<div class="grid__column grid__column--12 grid__column--form">
+                    <form id="form-account-selector" action="#" data-form="true" method="POST" form-skipvalidation="true">
+                        @Html.Sitecore().Placeholder("j18/m43-account-selector")
+                    </form>
+                </div>*@
+
+            @{ Html.RenderAction("GetEstimateAccountSelector", "Estimate");}
+            <div class="EstimateFilterList"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    //data handler function
+    var GetDetails = function () {
+        var _accountNumber = jQuery('#form-account-selector').find('input[name="SelectedAccountNumber"]:checked').val();
+        var _url = "/api/sitecore/Estimate/EstimateFilterList";
+        var _htmlelement = $(".EstimateFilterList");
+        return { accountNumber: _accountNumber, url: _url, htmlelement: _htmlelement };
+    }
+
+    var GetAsyncPartialView = function (url, data, htmlObj) {
+        //debugger;
+
+        $.ajax({
+            url: url,
+            data: data,
+            type: "GET",
+            beforeSend: function () {
+                $(".m66-preloader-fullpage").hide();
+            },
+            complete: function () {
+              $(".m66-preloader-fullpage").hide();
+            },
+            success: function (response) {
+                setTimeout(function () {
+                    $(htmlObj).html(response);
+                }, 100)
+
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+    }
+
+
+    docReady(function () {
+
+      $(".m66-preloader-fullpage").hide();
+        //default account
+        var data = GetDetails();
+        var request = { Accountnumber: data.accountNumber };
+        GetAsyncPartialView(data.url, request, data.htmlelement);
+
+        ////events
+        //$('#form-account-selector').submit(function () {
+        //    var data = GetDetails();
+        //    var request = { Accountnumber: data.accountNumber };
+        //    GetAsyncPartialView(data.url, request, data.htmlelement);
+        //    return false;
+        //});
+
+    });
+</script>

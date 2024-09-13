@@ -1,0 +1,84 @@
+﻿@model DEWAXP.Feature.HR.Models.CareerPortal.Dashboard
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@{
+    var FirstRow = "";
+}
+<div class="shadow-box career-list">
+    <h2 class="career-title">@Translate.Text("my application title")</h2>
+    @if (Model.applicationDetails != null && Model.applicationDetails.Count > 0)
+    {
+        var cnt = 1;
+
+        <div>
+
+            <div class="table-class">
+                <div class="table-head-row">
+                    <div class="table-body-row-col grid__column--1"></div>
+                    <div class="table-body-row-col grid__column--4">@Translate.Text("job title label")</div>
+                    <div class="table-body-row-col grid__column--3">@Translate.Text("applied on label")</div>
+                    <div class="table-body-row-col grid__column--2">@Translate.Text("status label")</div>
+                    <div class="table-body-row-col grid__column--2"></div>
+                </div>
+                @foreach (var item in Model.applicationDetails)
+                {
+                    <div class="table-body-row">
+
+                        <div class="table-body-row-col grid__column--1">
+                            <label for="form-field-radio_@item.JobDetails.JobId">
+                                <input class="form-field__input form-field__input--radio"
+                                       id="form-field-radio_@item.JobDetails.JobId"
+                                       name="PostingGUID"
+                                       type="radio"
+                                       data-guid-option="@item.PostingGuid"
+                                       value="@item.JobDetails.JobId"
+                                       aria-describedby="description-for-@item.JobDetails.JobId"
+                                       data-parsley-errors-container="#description-for-@item.JobDetails.JobId"
+                                       @FirstRow
+                                       data-parsley-multiple="radios_group1">
+                                <span class="form-field__fakeradio focus-enabled"></span>
+                            </label>
+                        </div>
+                        <div class="table-body-row-col table-body-row-col-position grid__column--4">
+                            @item.JobDetails.JobTitle
+                        </div>
+                        <div class="table-body-row-col table-body-row-col-date grid__column--3">
+                            @item.ApplicationDate
+                        </div>
+                        <div class="table-body-row-col table-body-row-col-process grid__column--2 process">
+                            @item.ApplicationStausText
+                        </div>
+                        <div class="table-body-row-col table-body-row-col-action grid__column--2 PostingGuid">
+                            @if (item.ApplicationStausID != "2")
+                            {
+                                <a href="#" data-option-guid="@item.PostingGuid#@item.JobDetails.ObjectId#@item.JobDetails.ObjectType#@item.JobDetails.PlanVersion" class="tile_link red deleteApp">@Translate.Text("withdraw label")</a>
+                            }
+                        </div>
+                    </div>
+                    <br>
+                    cnt++;
+                }
+
+
+            </div>
+            <div class="tile_links">
+                @*<a href="#" class="tile_link">Withdraw</a>*@
+                @*<a href="#" class="tile_link delete">Delete</a>*@
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="m23-table m23-table--asymetric-40" data-component="m23-table">
+            <h3 class="m23-table__title "></h3>
+            <div class="career-list-blank">
+                @Html.Sitecore().Placeholder("dashboraddwrap")
+            </div>
+        </div>
+    }
+
+</div>

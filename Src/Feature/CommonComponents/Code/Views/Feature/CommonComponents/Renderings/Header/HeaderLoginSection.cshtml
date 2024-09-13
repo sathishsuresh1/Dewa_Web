@@ -1,0 +1,1037 @@
+﻿@using DEWAXP.Feature.CommonComponents.Models.Header
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Feature.CommonComponents.Utils
+@using DEWAXP.Foundation.ORM.Models
+@using Roles = DEWAXP.Foundation.Content.Roles
+@using _scRenderingId = DEWAXP.Foundation.Content.SitecoreRenderingIds
+@using _scTemplate = DEWAXP.Foundation.Content.ScTemplate
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using _scHelper = DEWAXP.Foundation.Helpers.ScHelper
+
+@model Masthead
+@{
+    #region Initialization
+    string partnerslink = "https://e-services.dewa.gov.ae/partners_v2/login.aspx";
+    string Careerslink = "https://careers.dewa.gov.ae/irj/portal/anonymous/jsear?lang=en";
+    var j86login = "https://crm.dewa.gov.ae/irj/portal/anonymous";
+    var j87login = "https://srm.dewa.gov.ae/irj/portal/anonymous";
+    var web_lang = Language.Current.Name.ToLowerInvariant();
+    string studentloginlink = LinkHelper.GetItemUrl(_scPageItemId.SCHOLARSHIP_SIGNIN_PAGE);
+    //var yozlink = "https://www.zayed.ae/en/";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        partnerslink = "https://e-services.dewa.gov.ae/arabic/partners_v2/login.aspx";
+        Careerslink = "https://careers.dewa.gov.ae/irj/portal/anonymous/jsear_ar?lang=ar";
+        // yozlink = "https://www.zayed.ae/";
+    }
+    string epasstemplateid = "{255C4545-C106-4D40-BE2A-10F8988AB89A}".ToLower();
+    var tabindexcounter = 0;
+    //var j86login = LinkHelper.GetItemUrl(_scPageItemId.J86_LOGIN_PAGE);
+    if (string.IsNullOrEmpty(j86login))
+    {
+        j86login = "https://crm.dewa.gov.ae/irj/portal/anonymous";
+    }
+    //var j87login = LinkHelper.GetItemUrl(_scPageItemId.J87_LOGIN_PAGE);
+    if (string.IsNullOrEmpty(j87login))
+    {
+        j87login = "https://srm.dewa.gov.ae/irj/portal/anonymous";
+    }
+    #endregion
+}
+@{
+    Sitecore.Data.Items.ItemAxes CareerItem = new Sitecore.Data.Items.ItemAxes(Model.CurrentItem);
+    var query = "ancestor-or-self::*[@@id='{D79C0670-9EE4-429C-B873-8ED5A7F69FA1}']";
+    var selectedItem = CareerItem.SelectItems(query);
+    bool careerspage = selectedItem != null ? true : false;
+    string DRRGtemplateid = SitecoreItemIdentifiers.DRRG_PAGE_TEMPLATE.ToLower();
+    string DRRGadmintemplateid = SitecoreItemIdentifiers.DRRG_ADMINPAGE_TEMPLATE.ToLower();
+
+    bool isScrapSaleRegion = _scHelper.IsPageExistedInCurrentPageOrDescendent(new Guid(_scPageItemId.SCRAPESALE_INTROPAGE), Model.CurrentItem.ID.Guid);
+    bool isIdealHomeRegion = _scHelper.IsPageExistedInCurrentPageOrDescendent(new Guid(_scPageItemId.IDEALHOMECONSUMER_LANDINGPAGE), Model.CurrentItem.ID.Guid);
+    bool isIdealHomeRegionLogin = _scHelper.IsPageExistedInCurrentPageOrDescendent(new Guid(_scPageItemId.IDEALHOMECONSUMER_LOGIN), Model.CurrentItem.ID.Guid);
+}
+@if (Model.Mastheadv1 != null)
+{
+
+    <!-- start my account -->
+
+
+    if (!User.Identity.IsAuthenticated || (User.Identity.IsAuthenticated && !ViewBag.IsLoggedIn))
+    {
+        <ul class="m12-myaccount">
+            <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                <!-- Customer and Home -->
+                @if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.ConsumerLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.DewaHomePage))
+                {
+                    if (Model.CurrentItem.TemplateID.ToGuid().Equals(Guid.Parse(_scTemplate.CareerPortalTemplate)) || careerspage)
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.CAREER_POTAL_LOGIN)" data-label="My Account" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Translate.Text("header.login")</a>
+                    }
+                    else if (isScrapSaleRegion)
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.SCRAPESALE_PORTAL_LOGINPAGE)" data-label="My Account" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Translate.Text("header.login")</a>
+                    }
+                    else if (isIdealHomeRegion || isIdealHomeRegionLogin)
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.IDEALHOMECONSUMER_LOGIN)" data-label="My Account" data-m12-myaccount-link="true" style="display:none" class="m12-myaccount__link icon-b-person-sdg button  user">@Translate.Text("header.login")</a>
+                    }
+                    else
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGIN_PAGE)" data-label="My Account" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Translate.Text("header.login")</a>
+                    }
+                    @*<a  href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGIN_PAGE)"  aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="My Account" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Translate.Text("header.login")</a>*@
+
+                    if (1 == 0)
+                    {
+                        <div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <div class="grid__column grid__column--4">
+                                        <div class="m12-UAEpass--wrapper">
+                                            @*<p class="help-text centered">
+                                                    @Html.Glass().Editable(Model, x => x.Header.LoginParagraph)
+                                                </p>*@
+                                            <div class="form-field__button m12-myaccount_register-button centered">
+                                                <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_UAE_ID_LOGIN)" class="button button--quaternary button-register-now button--uaepass">
+                                                    @*@Translate.Text("Login with")*@
+                                                    <span class="m12-UAEpass--button">
+                                                    </span><p class="inline-block">@Translate.Text("UAE PASS")</p>
+                                                </a>
+                                            </div>
+                                            <div class="form-field__button m12-myaccount_register-button centered">
+                                                <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_MY_ID_LOGIN)" class="button button--fithtiary button--next">@Translate.Text("header.loginwithdubaiid")</a>
+                                            </div>
+                                            <div class="dsg-service">
+                                                <span class="help-text">@Translate.Text("header.serviceprovidedby")</span><br>
+                                                <b>@Translate.Text("header.dubaismartgovertment")</b>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- start pre logged content -->
+                                    <div class="grid__column grid__column--5">
+                                        <div class="m12-subsection_login-wrapper">
+                                            <h2 class="m12-subsection__title">@Translate.Text("header.loginascustomer")</h2>
+                                        </div>
+                                    </div>
+                                    <!-- end pre logged content -->
+                                    <div class="grid__column grid__column--3">
+                                        <h2 class="m12-subsection__title">@Translate.Text("Login to other areas")</h2>
+                                        <ul class="links-list">
+                                            <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.J8_GOVT_LOGIN_PAGE)" class="links-list__link">@Translate.Text("Government")</a></li>
+                                            <li class="links-list__item"><a href="https://crm.dewa.gov.ae/irj/portal/anonymous" class="links-list__link @(web_lang == "ar-ae" ? "non_arabic_link" : "")">@Translate.Text("Contractors & Consultants")</a></li>
+                                            <li class="links-list__item"><a href="https://srm.dewa.gov.ae/irj/portal/anonymous" class="links-list__link @(web_lang == "ar-ae" ? "non_arabic_link" : "")">@Translate.Text("Suppliers")</a></li>
+                                            <li class="links-list__item"><a href="@partnerslink" class="links-list__link">@Translate.Text("Partners")</a></li>
+                                            <li class="links-list__item"><a href="@Careerslink" class="links-list__link">@Translate.Text("Careers")</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                }
+                else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.StudentLandingPage))
+                {
+                    <!--  Student-->
+                    @*<a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@(!string.IsNullOrWhiteSpace(studentloginlink)?studentloginlink:"#")">@Translate.Text("header.login")</a>*@
+                }
+                else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.BuilderLandingPage))
+                {
+                    if (Model.CurrentItem.Template.ID.ToString().ToLower().Equals(DRRGtemplateid) || Model.CurrentItem.Template.ID.ToString().ToLower().Equals(DRRGadmintemplateid))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true"
+                           class="m12-myaccount__link icon-b-person-sdg button  user
+                           @(web_lang == "ar-ae" ? "non_arabic_link" : "")"
+                           href="@(Model.CurrentItem.Template.ID.ToString().ToLower().Equals(DRRGtemplateid)?LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG_HOME):
+                    LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_LOGIN))">@Translate.Text("header.login")</a>
+                }
+                else
+                {
+                    <!--  Consultants and Contractors-->
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j86login">@Translate.Text("header.login")</a>
+                }
+            }
+            else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.SupplierLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.PartnerLandingPage))
+            {
+                <!--  Suppliers and Partners-->
+                if (Model.CurrentItem.Template.ID.ToString().ToLower().Equals(epasstemplateid))
+                {
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@(LinkHelper.GetItemUrl(_scPageItemId.EPASS_LOGIN))">@Translate.Text("header.login")</a>
+                }
+                else
+                {
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j87login">@Translate.Text("header.login")</a>
+                }
+            }
+            </li>
+        </ul>
+    }
+
+    if (User.Identity.IsAuthenticated && ViewBag.IsLoggedIn)
+    {
+        if (Model.CurrentUserRole == Roles.User)
+        {
+            if (false)
+            {
+                <!-- start my account -->
+                <ul class="m12-myaccount">
+                    <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                        @if (Model.ActiveLanding.Id == Guid.Parse("22D3DA06-E385-42B7-84BE-1E533D25BB57") || Model.ActiveLanding.Id == Guid.Parse("110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9"))
+                        {
+                            <!-- Customer and Home-->
+                            <a href="@LinkHelper.GetItemUrl(_scPageItemId.J69_CUSTOMER_DASHBOARD)" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@Model.UserName" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Model.UserName</a>
+                            <div class="m12-subsection m12-myaccount__content">
+                                <div class="m12-subsection__wrapper">
+                                    <div class="m12-subsection__content">
+                                        <!-- start post logged content -->
+                                        <div data-myaccount-postlogin-nav="true">
+                                            <div class="grid__column grid__column--3" data-subsection="true">
+                                                <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                    <div class="user-widget">
+                                                        @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                                                        {
+                                                            <img src="data:image;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto)" class="user-widget__image" width="54" height="54" alt="@Model.UserName" />
+                                                        }
+                                                        <p>
+                                                            <strong class="user-widget__name">@Model.UserName</strong>
+                                                        </p>
+                                                    </div>
+                                                    <ul class="m12-subsection-menu">
+                                                        @foreach (var item in Model.MyAccountItem.DashboardItems)
+                                                        {
+                                                            if (item.DisplayInMenu)
+                                                            {
+                                                                <li class="m12-subsection-menu__item">
+                                                                    <a href="@item.Url" data-section-link="true" class="m12-subsection-menu__link">@item.MenuLabel</a>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        <li class="m12-subsection-menu__item">
+                                                            <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGOUT)" data-section-link="true" data-myaccount-logout="true" ; class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="grid__column grid__column--3" data-subsection="true">
+                                                <div class="m12-subsection-menu-wrapper">
+                                                    <h2 class="m12-subsection__title" data-subsection-title="true">@Model.MyAccountItem.Column1Title</h2>
+                                                    <ul class="m12-subsection-menu">
+                                                        @foreach (var item in Model.MyAccountItem.Column1Items)
+                                                        {
+                                                            if (item.DisplayInMenu)
+                                                            {
+                                                                <li class="m12-subsection-menu__item">
+                                                                    <a href="@item.Url" data-section-link="true" class="m12-subsection-menu__link">@item.MenuLabel</a>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(Model.MyAccountItem.Column1ShowMoreText))
+                                                        {
+                                                            <li class="m12-subsection-menu__item">
+                                                                <a href="@Model.MyAccountItem.Column1ShowMoreLink.Url" data-section-link="true" class="button button--text button--next">@Model.MyAccountItem.Column1ShowMoreText</a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="grid__column grid__column--3" data-subsection="true">
+                                                <div class="m12-subsection-menu-wrapper">
+                                                    <h2 class="m12-subsection__title" data-subsection-title="true">@Model.MyAccountItem.Column2Title</h2>
+                                                    <ul class="m12-subsection-menu">
+                                                        @foreach (var item in Model.MyAccountItem.Column2Items)
+                                                        {
+                                                            if (item.DisplayInMenu)
+                                                            {
+                                                                <li class="m12-subsection-menu__item">
+                                                                    <a href="@item.Url" data-section-link="true" class="m12-subsection-menu__link">@item.MenuLabel</a>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(Model.MyAccountItem.Column2ShowMoreText))
+                                                        {
+                                                            <li class="m12-subsection-menu__item">
+                                                                <a href="@Model.MyAccountItem.Column2ShowMoreLink.Url" data-section-link="true" class="button button--text button--next">@Model.MyAccountItem.Column2ShowMoreText</a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="grid__column grid__column--3" data-subsection="true">
+                                                <div class="m12-subsection-menu-wrapper">
+                                                    <h2 class="m12-subsection__title" data-subsection-title="true">@Model.MyAccountItem.Column3Title</h2>
+                                                    <ul class="m12-subsection-menu">
+                                                        @foreach (var item in Model.MyAccountItem.Column3Items)
+                                                        {
+                                                            if (item.DisplayInMenu)
+                                                            {
+                                                                <li class="m12-subsection-menu__item">
+                                                                    <a href="@item.Url" data-section-link="true" class="m12-subsection-menu__link">@item.MenuLabel</a>
+                                                                </li>
+                                                            }
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(Model.MyAccountItem.Column3ShowMoreText))
+                                                        {
+                                                            <li class="m12-subsection-menu__item">
+                                                                <a href="@Model.MyAccountItem.Column3ShowMoreLink.Url" data-section-link="true" class="button button--text button--next">@Model.MyAccountItem.Column3ShowMoreText</a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- end post logged content -->
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.ActiveLanding.Id == Guid.Parse("8D78B937-8501-470A-927C-22E5B6262C36"))
+                        {<!--Consultants and Contractors-->
+                            <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" data-label="@Translate.Text("My Account")" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j86login">@Translate.Text("My Account")</a>
+                        }
+
+                        else if (Model.ActiveLanding.Id == Guid.Parse("A3788209-6DA8-4BF0-A785-BDCB97FE394C"))
+                        {
+                            <!--suppliers and partners -->
+                            <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" data-label="@Translate.Text("My Account")" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j87login">@Translate.Text("My Account")</a>
+                        }
+                    </li>
+                </ul>
+                <!-- end my account -->
+            }
+
+            <!--New my Loggedin Account-->
+            <ul class="m12-myaccount">
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    @if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.ConsumerLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.StudentLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.DewaHomePage))
+                    {<!-- Customer and Home -->
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J69_CUSTOMER_DASHBOARD)" data-label="@Model.UserName" data-m12-myaccount-link="true" class="m12-myaccount__loggedin m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button  user">
+                            @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                            {
+                                <div class="m12-myaccount__link--avatar" style="background-image: url(data:image/png;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto));"></div>
+                                <span class="aria-only">@Model.UserName</span>
+                            }
+                            else
+                            {
+                                <div class="m12-myaccount__link--avatar"></div>
+                                <span class="aria-only">@Model.UserName</span>
+                            }
+                        </a>
+                    }
+                    else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.BuilderLandingPage))
+                    {
+                        <!--  Consultants and Contractors-->
+                        <a data-label="@Translate.Text("My Account")t" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg  button @(web_lang == "ar-ae" ? "non_arabic_link" : "")  user" href="@j86login">@Translate.Text("My Account")</a>
+                    }
+                    else if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.SupplierLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.PartnerLandingPage))
+                    {
+                        <!--  Suppliers and Partners-->
+                        <a data-label="@Translate.Text("My Account")" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg  button @(web_lang == "ar-ae" ? "non_arabic_link" : "")  user" href="@j87login">@Translate.Text("My Account")</a>
+                    }
+                </li>
+                @if (Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.ConsumerLandingPage) || Model.ActiveLanding.Id == Guid.Parse(_scPageItemId.DewaHomePage))
+                {
+                    <li data-myaccount-section="true" class="m12-myaccount__item">
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGOUT)" data-label="@Model.MyAccountItem.LogoutText" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("global.logout")</a>
+                    </li>
+                }
+
+            </ul>
+            <!--New my Loggedin Account-->
+        }
+
+
+
+        if (Model.CurrentUserRole == Roles.Government)
+        {
+            <!-- start my account -->
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    @* Customer and Home *@
+                    @if (Model.ActiveLanding.Id == Guid.Parse("22D3DA06-E385-42B7-84BE-1E533D25BB57") || Model.ActiveLanding.Id == Guid.Parse("110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9"))
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J91_GOVT_OBS_REQUEST)" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@Translate.Text("Government Observation")" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Model.UserName</a>
+                        <div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <!-- start post logged content -->
+                                    <div data-myaccount-postlogin-nav="true">
+                                        <div class="grid__column grid__column--3" data-subsection="true">
+                                            <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                <div class="user-widget">
+                                                    @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                                                    {
+                                                        <img src="data:image;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto)" class="user-widget__image" width="54" height="54" alt="@Model.UserName" />
+                                                    }
+                                                    <p>
+                                                        <strong class="user-widget__name">@Model.UserName</strong>
+                                                    </p>
+                                                </div>
+                                                <ul class="m12-subsection-menu">
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J91_GOVT_OBS_REQUEST)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Government Observation")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGOUT)" data-section-link="true" data-myaccount-logout="true" class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end post logged content -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @* Consultants and Contractors *@
+                    else if (Model.ActiveLanding.Id == Guid.Parse("8D78B937-8501-470A-927C-22E5B6262C36"))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j86login">@Translate.Text("My Account")</a>
+                    }
+                    @* Suppliers and Partners *@
+                    else if (Model.ActiveLanding.Id == Guid.Parse("A3788209-6DA8-4BF0-A785-BDCB97FE394C"))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j87login">@Translate.Text("My Account")</a>
+                    }
+                </li>
+            </ul>
+            <!-- end my account -->
+            <!--New my Loggedin Account-->
+            <ul class="m12-myaccount">
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="@LinkHelper.GetItemUrl(_scPageItemId.J91_GOVT_OBS_REQUEST)" data-label="@Model.UserName" data-m12-myaccount-link="true" class="m12-myaccount__loggedin m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button  user">
+                        @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                        {
+                            <div class="m12-myaccount__link--avatar" style="background-image: url(data:image/png;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto));"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                        else
+                        {
+                            <div class="m12-myaccount__link--avatar"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                    </a>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGOUT)" data-label="@Model.MyAccountItem.LogoutText" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("global.logout")</a>
+                </li>
+            </ul>
+            <!--New my Loggedin Account-->
+        }
+
+
+        if (Model.CurrentUserRole == Roles.Consultant)
+        {
+            <!-- start my account -->
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    @* Customer and Home *@
+                    @if (Model.ActiveLanding.Id == Guid.Parse("22D3DA06-E385-42B7-84BE-1E533D25BB57") || Model.ActiveLanding.Id == Guid.Parse("110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9"))
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J69_CUSTOMER_DASHBOARD)" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@Translate.Text("My Account")" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Model.UserName</a>
+                        <div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <!-- start post logged content -->
+                                    <div data-myaccount-postlogin-nav="true">
+                                        <div class="grid__column grid__column--3" data-subsection="true">
+                                            <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                <div class="user-widget">
+                                                    @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                                                    {
+                                                        <img src="data:image;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto)" class="user-widget__image" width="54" height="54" alt="@Model.UserName" />
+                                                    }
+                                                    <p>
+                                                        <strong class="user-widget__name">@Model.UserName</strong>
+                                                    </p>
+                                                </div>
+                                                <ul class="m12-subsection-menu">
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGOUT)" data-section-link="true" data-myaccount-logout="true" class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end post logged content -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @* Consultants and Contractors *@
+                    else if (Model.ActiveLanding.Id == Guid.Parse("8D78B937-8501-470A-927C-22E5B6262C36"))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user" href="@LinkHelper.GetItemUrl(_scPageItemId.J86_DOCUMENTUPLOADPAGE)">@Model.UserName</a>
+                        <div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <!-- start post logged content -->
+                                    <div data-myaccount-postlogin-nav="true">
+                                        <div class="grid__column grid__column--3" data-subsection="true">
+                                            <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                <ul class="m12-subsection-menu">
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J86_DOCUMENTUPLOADPAGE)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Submit document")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J86_CHANGEPASSWORD_PAGE)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Change Password")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J86_LOGOUT_PAGE)" data-section-link="true" data-myaccount-logout="true" class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end post logged content -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @* Suppliers and Partners *@
+                    else if (Model.ActiveLanding.Id == Guid.Parse("A3788209-6DA8-4BF0-A785-BDCB97FE394C"))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user @(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j87login">@Translate.Text("My Account")</a>
+                    }
+                </li>
+            </ul>
+            <!-- end my account -->
+        }
+        if (Model.CurrentUserRole == Roles.Partner)
+        {
+            <!-- start my account -->
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    @* Customer and Home *@
+                    @if (Model.ActiveLanding.Id == Guid.Parse("22D3DA06-E385-42B7-84BE-1E533D25BB57") || Model.ActiveLanding.Id == Guid.Parse("110D559F-DEA5-42EA-9C1C-8A5DF7E70EF9"))
+                    {
+                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J69_CUSTOMER_DASHBOARD)" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@Translate.Text("My Account")" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Model.UserName</a>
+                        <div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <!-- start post logged content -->
+                                    <div data-myaccount-postlogin-nav="true">
+                                        <div class="grid__column grid__column--3" data-subsection="true">
+                                            <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                <div class="user-widget">
+                                                    @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                                                    {
+                                                        <img src="data:image;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto)" class="user-widget__image" width="54" height="54" alt="@Model.UserName" />
+                                                    }
+                                                    <p>
+                                                        <strong class="user-widget__name">@Model.UserName</strong>
+                                                    </p>
+                                                </div>
+                                                <ul class="m12-subsection-menu">
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J7_LOGOUT)" data-section-link="true" data-myaccount-logout="true" class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end post logged content -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @* Consultants and Contractors *@
+                    else if (Model.ActiveLanding.Id == Guid.Parse("8D78B937-8501-470A-927C-22E5B6262C36"))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user@(web_lang == "ar-ae" ? "non_arabic_link" : "")" href="@j86login">@Translate.Text("My Account")</a>
+                    }
+                    @* Suppliers and Partners *@
+                    else if (Model.ActiveLanding.Id == Guid.Parse("A3788209-6DA8-4BF0-A785-BDCB97FE394C"))
+                    {
+                        <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user" href="@LinkHelper.GetItemUrl(_scPageItemId.J87_INBOXPAGE)">@Model.UserName</a>
+                        <div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <!-- start post logged content -->
+                                    <div data-myaccount-postlogin-nav="true">
+                                        <div class="grid__column grid__column--3" data-subsection="true">
+                                            <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                <ul class="m12-subsection-menu">
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J87_DOCUMENTUPLOADPAGE)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Submit document")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J87_CHANGEPASSWORD_PAGE)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Change Password")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.J87_LOGOUT_PAGE)" data-section-link="true" data-myaccount-logout="true" class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end post logged content -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </li>
+            </ul>
+            <!-- end my account -->
+        }
+        if (Model.CurrentUserRole == Roles.IdealHome)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user" href="@LinkHelper.GetItemUrl(_scPageItemId.IDEALHOMECONSUMER_DASHBOARD)">@Model.UserName</a>
+                    @*<div class="m12-subsection m12-myaccount__content">
+                            <div class="m12-subsection__wrapper">
+                                <div class="m12-subsection__content">
+                                    <!-- start post logged content -->
+                                    <div data-myaccount-postlogin-nav="true">
+                                        <div class="grid__column grid__column--3" data-subsection="true">
+                                            <div class="m12-subsection-menu-wrapper m12-subsection-menu-wrapper--highlighted">
+                                                <ul class="m12-subsection-menu">
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.IDEALHOMECONSUMER_DASHBOARD)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Dashboard")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.IDEALHOMWCONSUMER_USER_PROFILE)" data-section-link="true" class="m12-subsection-menu__link">@Translate.Text("Edit Profile")</a>
+                                                    </li>
+                                                    <li class="m12-subsection-menu__item">
+                                                        <a href="@LinkHelper.GetItemUrl(_scPageItemId.IDEALHOMECONSUMER_LOGOFF)" data-section-link="true" data-myaccount-logout="true" class="button button--text button--next">@Model.MyAccountItem.LogoutText</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- end post logged content -->
+                                </div>
+                            </div>
+                        </div>*@
+                </li>
+            </ul>
+            @*<ul class="m12-myaccount">
+                    <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                        @* IDEAL Home Consumer
+
+                            <a href="@LinkHelper.GetItemUrl(_scPageItemId.IDEALHOMECONSUMER_DASHBOARD)" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@Translate.Text("My Account")" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user">@Model.CustomerProfile.Name</a>
+
+
+                    </li>
+                </ul>*@
+        }
+        if (Model.CurrentUserRole == Roles.DewaSupplier)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_DASHBOARD)" data-label="@Model.UserName" data-m12-myaccount-link="true" class="m12-myaccount__loggedin m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button  user">
+                        <div class="m12-myaccount__link--avatar"></div>
+                        <span class="aria-only">@Model.UserName</span>
+                    </a>
+                    <div class="m12-subsection m12-myaccount__content">
+                        <div class="m12-subsection__wrapper">
+                            <div class="m12-subsection__content">
+                                <div class="grid__column grid__column--12">
+                                    <ul class="links-list">
+                                        <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_SERVICES)" class="links-list__link">@Translate.Text("Epass.Applynewpass")</a></li>
+                                        <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_MYPASSESS)" class="links-list__link">@Translate.Text("Epass.Mypasses")</a></li>
+                                        @*<li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.WP_SUBCONTRACTORLIST)" class="links-list__link">@Translate.Text("List of Subcontractors")</a></li>*@
+                                        <li class="links-list__item">
+                                            <a href="/api/sitecore/ePass/ePassLogout" data-section-link="true" data-myaccount-logout="true" class="links-list__link">@Translate.Text("Epass.Logout")</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- end pre logged content -->
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="/api/sitecore/ePass/ePassLogout" data-label="@Model.MyAccountItem.LogoutText" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("global.logout")</a>
+                </li>
+            </ul>
+        }
+        if (Model.CurrentUserRole == Roles.DewaSupplierAdmin || Model.CurrentUserRole == Roles.DewaSupplierSecurity)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" data-label="@Model.UserName" class="m12-myaccount__link icon-b-person-sdg" href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_ADMINDASHBOARD)">@Model.UserName</a>
+                    <div class="m12-subsection m12-myaccount__content">
+                        <div class="m12-subsection__wrapper">
+                            <div class="m12-subsection__content">
+                                <div class="grid__column grid__column--12">
+                                    <ul class="links-list">
+                                        <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_ALLPASSES)" class="links-list__link">@Translate.Text("Epass.Allpasses")</a></li>
+                                        @if (Model.CurrentUserRole == Roles.DewaSupplierSecurity)
+                                        {
+                                            <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_ADMINALLPASSESS)" class="links-list__link">@Translate.Text("Epass.AdminAllPasses")</a></li>
+                                            <li class="links-list__item"><a href="@LinkHelper.GetItemUrl(_scPageItemId.EPASS_BLOCKEDUSERS)" class="links-list__link">@Translate.Text("Epass.BlockedUsers")</a></li>
+                                        }
+                                        <li class="links-list__item"><a href="/api/sitecore/ePass/ePassAdminLogout" class="links-list__link">@Translate.Text("Epass.Logout")</a></li>
+                                    </ul>
+                                </div>
+                                <!-- end pre logged content -->
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        }
+        if (Model.CurrentUserRole == Roles.Jobseeker)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__link icon-b-person-sdg button  user" href="@LinkHelper.GetItemUrl(_scPageItemId.CAREER_PORTAL_DASHBOARD)">@Model.UserName</a>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="/en/career-portal/logout" data-label="Logout" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("logout")</a>
+                </li>
+            </ul>
+        }
+
+        if (Model.CurrentUserRole == Roles.ScrapeSale)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button user" href="@LinkHelper.GetItemUrl(_scPageItemId.SCRAPESALE_PORTAL_DASHBOARD)">
+                        @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                        {
+                            <div class="m12-myaccount__link--avatar" style="background-image: url(data:image/png;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto));"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                        else
+                        {
+                            <div class="m12-myaccount__link--avatar"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                    </a>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="/api/sitecore/ScrapSale/Logout" data-label="Logout" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("logout")</a>
+                </li>
+            </ul>
+        }
+        if (Model.CurrentUserRole == Roles.Miscellaneous)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button user" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_PROFILEUPDATE)">
+                        @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                        {
+                            <div class="m12-myaccount__link--avatar" style="background-image: url(data:image/png;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto));"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                        else
+                        {
+                            <div class="m12-myaccount__link--avatar"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                    </a>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="/api/sitecore/ScrapSale/Logout" data-label="Logout" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("logout")</a>
+                </li>
+            </ul>
+        }
+
+        if (Model.CurrentUserRole == Roles.scholarship)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a aria-haspopup="false" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true" class="m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button  user" href="@LinkHelper.GetItemUrl(_scPageItemId.SCRAPESALE_PORTAL_DASHBOARD)">
+                        @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                        {
+                            <div class="m12-myaccount__link--avatar" style="background-image: url(data:image/png;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto));"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                        else
+                        {
+                            <div class="m12-myaccount__link--avatar"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                    </a>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="/api/sitecore/Scholarship/Logout" data-label="Logout" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("logout")</a>
+                </li>
+            </ul>
+        }
+        if (Model.CurrentUserRole == Roles.DRRG || Model.CurrentUserRole == Roles.DRRGEvaulator || Model.CurrentUserRole == Roles.DRRGSchemaManager)
+        {
+            <ul class="m12-myaccount">
+                <li data-section="true" data-myaccount-section="true" class="m12-myaccount__item">
+                    <a data-label="@Model.UserName" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-m12-myaccount-link="true"
+                       class="m12-myaccount__loggedin m12-myaccount__link icon-b-person-sdg button user"
+                       href="@(Model.CurrentUserRole == Roles.DRRG?LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG_DASHBOARD) :LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Dashboard))">
+                        @if (Model.CurrentUserProfilePhoto.HasProfilePhoto)
+                        {
+                            <div class="m12-myaccount__link--avatar" style="background-image: url(data:image/png;base64,@Convert.ToBase64String(Model.CurrentUserProfilePhoto.ProfilePhoto));"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                        else
+                        {
+                            <div class="m12-myaccount__link--avatar" style="background-image: url();"></div>
+                            <span class="aria-only">@Model.UserName</span>
+                        }
+                    </a>
+                </li>
+                <li data-myaccount-section="true" class="m12-myaccount__item">
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG_LOGOUT)" data-label="Logout" data-m12-myaccount-link="true" class="m12-myaccount__link--logout">@Translate.Text("logout")</a>
+                </li>
+            </ul>
+        }
+    }
+    <!-- end my account -->
+
+}
+
+@helper RenderSublandings(MainLanding mainLanding, IEnumerable<ContentBase> sublandings, ContentBase activeSubLanding, int tabindexounter)
+{
+    <nav aria-label="@mainLanding.DisplayName" data-section-nav="true" class="m12-section-nav@(mainLanding.Id == Model.ActiveLanding.Id ? "--active" : string.Empty)">
+        <ul>
+            @foreach (var sublanding in sublandings)
+            {
+                @RenderSublanding(sublanding, activeSubLanding, tabindexounter)
+            }
+        </ul>
+    </nav>
+}
+
+@helper RenderHome(MainLanding customer, ContentBase activeSubLanding, int tabindexounter)
+{
+    <nav aria-label="@Model.ActiveLanding.DisplayName" data-section-nav="true" class="m12-section-nav--active">
+        <ul>
+
+            @foreach (var sublanding in customer.Children.Where(c => c.Id != Guid.Parse("FB606B30-EC6F-4952-B680-1E2C050CDED0")))
+            {
+                @RenderSublanding(sublanding, activeSubLanding, tabindexounter)
+            }
+        </ul>
+    </nav>
+}
+
+@helper RenderSublanding(ContentBase sublanding, ContentBase activeSubLanding, int tabindexounter)
+{
+    if (sublanding == null || (sublanding != null && !(sublanding is SublandingBase)))
+    {
+        return;
+    }
+    var subLandingChildren = ((SublandingBase)sublanding).Children.ToList();
+    var subLandingBase = sublanding as SublandingBase;
+    var activeClass = activeSubLanding != null && (subLandingBase.Id == activeSubLanding.Id) ? "m12-section-nav__link--active" : "";
+    <li data-section="true" class="m12-section-nav__item">
+        @if (sublanding.DisplayInMenu)
+        {
+            <a href="@sublanding.Url" aria-haspopup="true" aria-expanded="false" data-section-link="true" data-label="@subLandingBase.MenuLabel" class="m12-section-nav__link @activeClass">@subLandingBase.MenuLabel</a>
+        }
+
+        @if (subLandingChildren.Any())
+        {
+            var aclass = subLandingChildren.Where(x => x.DisplayInMenu).Count() > 3 ? "m12-subsection__column--4" : "";
+
+            <div class="m12-subsection" data-subsection="true">
+                <div class="m12-subsection__wrapper">
+                    <div class="m12-subsection__content">
+
+                        @foreach (var child in subLandingChildren.Where(x => x.DisplayInMenu))
+                        {
+
+                            <div class="m12-subsection__column @aclass">
+                                <h2 class="m12-subsection__title">@child.MenuLabel</h2>
+
+                                @if (child is SublandingFolder)
+                                {
+                                    var folder = (SublandingFolder)child;
+                                    <ul class="m12-subsection-menu">
+                                        @foreach (var subchild in folder.Children)
+                                        {
+                                            //var pageurl = MvcExtensions.GetMenuURL(subchild);
+
+                                            if (subchild.DisplayInMenu)
+                                            {
+                                                <li class="m12-subsection-menu__item"><a href="@subchild.FullUrl" class="m12-subsection-menu__link">@subchild.MenuLabel</a></li>
+                                            }
+
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </li>
+
+}
+
+@functions  {
+
+
+}
+
+
+@if (ViewBag.IsLoggedIn && !Model.CustomerProfile.IsContactUpdated)
+{
+    <script type="text/javascript">
+
+        jQuery(function () {
+
+            document.onload = setTimeout(function () { jQuery('.modal_contact').trigger('click'); }, 1000);
+
+            jQuery("#close-btn").click(function () {
+                jQuery(function () {
+                    jQuery(document).on('click', '.m39-m12-no', function () {
+                        @{
+                                Model.CustomerProfile.IsContactUpdated = true;
+                            }
+                            //parent.jQuery.fancybox.close();
+                        })
+                })
+            });
+
+            @*jQuery("#ok-btn").click(function () {
+                    window.location = "@LinkHelper.GetItemUrl(_scPageItemId.UPDATE_PRIMARY_CONTACT)";
+                });*@
+        });
+
+
+    </script>
+}
+<script type="text/javascript">
+    jQuery(function () {
+        jQuery(document).on('change', '.desktop--searchcategory input:checkbox', setcategory);
+        jQuery(document).on('change', '.m31-search--filter-checkbox__all input:checkbox', setall);
+        setcat();
+        jQuery(document).on('change', '.mobile--searchcategory input:checkbox', setcategorym);
+        jQuery(document).on('change', '.m31-search--filter-checkbox__all input:checkbox', setallm);
+        setcatm();
+    });
+    function setcat() {
+        var filter = getParameterByName("filter");
+        var term = getParameterByName("term");
+
+        jQuery(".site_search_filter").val(filter);
+
+        if (term != null) {
+            jQuery(".desktop--searchcategory #site_search").val(term);
+        }
+        if (filter == null || filter == "" || filter == "All") {
+            jQuery(".site_search_filter").val("All");
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", true);
+            jQuery(document).find(".searchcategory input:checkbox").prop('checked', true);
+        } else {
+            fq = filter.split(',');
+            jQuery.each(fq, function (i, v) {
+                var f = "";
+                jQuery(document).find(".desktop--searchcategory input:checkbox").each(function (index) {
+                    f = jQuery(this).data('text');
+                    if (f == fq[i]) {
+                        jQuery(this).attr("checked", "checked");
+                    }
+                });
+            });
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", false);
+        }
+        //jQuery("#site_search").focus();
+    }
+
+    function setcategory(e) {
+        //debugger;
+        var f = "";
+        if (jQuery('.desktop--searchcategory input:checked').length == jQuery('.desktop--searchcategory input:checkbox').length) {
+            jQuery(".site_search_filter").val("All");
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", true);
+
+        } else {
+            jQuery(document).find(".desktop--searchcategory input:checked").each(function (index) {
+                if (index > 0) {
+                    f = f + "," + jQuery(this).data('text');
+                } else {
+                    f = jQuery(this).data('text');
+                }
+            });
+            jQuery(".site_search_filter").val(f);
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", false);
+        }
+        jQuery("#site_search").focus();
+    }
+
+    function setall(e) {
+        jQuery(".site_search_filter").val("All");
+        jQuery(document).find(".desktop--searchcategory input:checkbox").prop('checked', this.checked);
+
+        jQuery("#site_search").focus();
+    }
+
+    function setcatm() {
+        var filter = getParameterByName("filter");
+        var term = getParameterByName("term");
+
+        jQuery(".site_search_filter").val(filter);
+
+        if (term != null) {
+            jQuery("#site_search").val(term);
+
+        }
+        if (filter == null || filter == "" || filter == "All") {
+            jQuery(".site_search_filter").val("All");
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", true);
+            jQuery(document).find(".mobile--searchcategory input:checkbox").prop('checked', true);
+        } else {
+            fq = filter.split(',');
+            jQuery.each(fq, function (i, v) {
+                var f = "";
+                jQuery(document).find(".mobile--searchcategory input:checkbox").each(function (index) {
+                    f = jQuery(this).data('text');
+                    if (f == fq[i]) {
+                        jQuery(this).attr("checked", "checked");
+                    }
+                });
+            });
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", false);
+        }
+        //jQuery("#site_search").focus();
+
+    }
+
+    function setcategorym(e) {
+        //debugger;
+        var f = "";
+        if (jQuery('.mobile--searchcategory input:checked').length == jQuery('.searchcategory input:checkbox').length) {
+            jQuery(".site_search_filter").val("All");
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", true);
+
+        } else {
+            jQuery(document).find(".mobile--searchcategory input:checked").each(function (index) {
+                if (index > 0) {
+                    f = f + "," + jQuery(this).data('text');
+                } else {
+                    f = jQuery(this).data('text');
+                }
+                // console.log(f);
+            });
+            jQuery(".site_search_filter").val(f);
+            jQuery(".m31-search--filter-checkbox__all input").prop("checked", false);
+        }
+        jQuery("#site_search").focus();
+    }
+
+    function setallm(e) {
+        jQuery(".site_search_filter").val("All");
+        jQuery(document).find(".mobile--searchcategory input:checkbox").prop('checked', this.checked);
+
+        jQuery("#site_search").focus();
+    }
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+</script>

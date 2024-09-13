@@ -1,0 +1,200 @@
+﻿@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.GeneralServices.Models.SelfEnergyAssessmentSurvey.SurveyPageViewModel
+
+<div class="box--news" id="dvseas">
+    @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "seasform", @class = "form form-dynamic", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+    {
+        @Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+    <div class="grid" id="dvMainGrid">
+        @Html.Partial("~/Views/Feature/GeneralServices/SelfEnergyAssessmentSurvey/SurveyMaster.cshtml", Model.FirstSection)
+    </div>
+    }
+</div>
+<div class="m39-modal m39-modal--confirm" data-component="m39-modal" id="modal_1122">
+    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="mt1" aria-controls="_bv1n_content">Modal Trigger</button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_bv1n_content" aria-labelledby="_sex14bv1n_trigger">
+        <div class="m39-modal__dialog ">
+            <div class="m39-modal__header">
+                <div class="m39-modal__title" id="dvhead">@Translate.Text("j154_EPDF")</div>
+                <button data-close="true" class="m39-modal__button--close" id="_sex14bv1n_close" aria-controls="_bv1n_content"></button>
+            </div>
+            <div class="m39-modal__content">
+                <p id="pbody"></p>
+                <button class="button button--outline mt24" data-close="true">@Translate.Text("Close")</button>
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal__overlay"> </div>
+</div>
+
+<script type="text/javascript">
+
+    var btnStart = '#btStart', btnBack = '.goprevious', dvMain = "#dvMainGrid", loader2 = ".m66-preloader-fullpage", acc_el = ".m43-accountsel__selected";
+
+    jQuery(document).ready(function ($) {
+        jQuery(acc_el).ready(function () { jQuery(acc_el).prop("disabled", true); });
+        jQuery(document).on("submit", "#form-account-selector", function (e) { e.preventDefault(); return false; });
+
+        jQuery(document).on("click", btnBack, function (e) { e.preventDefault(); SaveOrSubmitSurvey(false, false, true); });
+        jQuery(document).on("click", "#btSN", function (e) { e.preventDefault(); SaveOrSubmitSurvey(); });
+        jQuery(document).on("click", "#btSE", function (e) { e.preventDefault(); SaveOrSubmitSurvey(false,true,false); });
+        jQuery(document).on("click", "#btSubmit", function (e) { e.preventDefault(); SaveOrSubmitSurvey(true, false,false); })
+        jQuery(document).on("submit", "#seasform", function (e) { e.preventDefault(); SaveOrSubmitSurvey(true, false,false); return false; });
+        jQuery(document).on("click", ".form-field--ratingstar_icon", function (e) { $(this).siblings(".rating").val($(this).attr("data-answer")); });
+        jQuery(document).on("click", "#btEmailReport", function (e) { e.preventDefault();  EmailReport(jQuery(this).attr("data-url")); /*jQuery(this).prop("disabled", true);*/ });
+    });
+
+    function SaveOrSubmitSurvey(submit=false, exit=false, back=false)
+    {
+        var url = '@Url.Action("SaveSurvey")';
+        var data = { form: $("#seasform").serialize(), "__RequestVerificationToken": GetAFToken(), exit: exit, back: back };
+        var isvalid = false;
+
+        if (exit) {
+            CallBackend(url, data, 'json', 3);
+            return;
+        }
+        if (!back) {
+            isvalid = ValidateForm();
+            if (!isvalid) return false;
+        }
+        try {
+
+            jQuery.ajax({
+                url: url, data: data,
+                beforeSend: function () {
+                    $(loader2).show();
+                },
+                complete: function () {
+                    $(loader2).hide();
+                },
+                dataType: "html",
+                type: 'POST',
+                success: function (res) {
+                    if ((typeof res) === 'string' && res.indexOf("m41-tabs-box__tab-link") !== -1) {
+                       setTimeout(function () {
+                           window.location.assign('@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J54_LANDING_PAGE, false)' + '?a=' + GetSelectedAccount());
+                        }, 500);
+                        return;
+                    }
+                    ShowNextSection(res);
+                    if (submit) {                        
+                        jQuery(".copysel").html(jQuery(".m43-accountsel").html());
+                        jQuery(".copysel").find(".m43-accountsel__labelstyle").html('');
+                        jQuery(".copysel").find("button").prop("disabled", true);                        
+                    }
+                },
+                fail: function (error) {
+                    console.log(error);
+                    $(loader2).hide();
+                }
+            });
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function CallBackend(url, data,datatype, fn) {
+            jQuery.ajax({
+                url: url, data: data,
+                beforeSend: function () {
+                    $(loader2).show();
+                },
+                complete: function () {
+                    $(loader2).hide();
+                },
+                dataType: datatype,
+                type: 'POST',
+                success: function (res) {
+                    if ((typeof res)==='string' && res.indexOf("m41-tabs-box__tab-link") !== -1) {
+                        setTimeout(function () {
+                            window.location.assign('@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J54_LANDING_PAGE, false)' + '?a=' + GetSelectedAccount());
+                        }, 500);
+
+                        return;
+                    }
+                    switch (fn) {
+                        case 2://email report
+                            var mid = "#modal_1122";
+                            jQuery(mid).find("#pbody").text(res.message);
+                            //jQuery("#mt1").trigger("click");
+                            jQuery("#modal_1122").find('[data-trigger="true"]').click()
+                            break;
+                        case 3:
+                            if (res.reload) {
+                                setTimeout(function () {
+                                    window.location.assign('@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J54_LANDING_PAGE, false)' + '?a=' + GetSelectedAccount());
+                                }, 500);
+                            }
+                            else { console.log(res); }
+                            break;
+
+                    }
+                },
+                fail: function (error) {
+                   console.log(error);
+                }
+            });
+    }
+
+    function GetAFToken() {
+        return jQuery('input[name="__RequestVerificationToken"]').val()
+    }
+    function GetSelectedAccount() {
+        return $('input[name="SelectedAccountNumber"]:checked').val();
+    }
+
+    function ShowNextSection(res) {
+        try {
+            $(dvMain).empty();
+            $(dvMain).append(res);
+            setTimeout(() => {
+                jQuery(window).trigger("form_reinit");
+                window.initComponents('dvMainGrid');
+            }, 500);
+
+            setTimeout(function () {
+                $('html').animate({ scrollTop: $('#dvMainGrid').offset().top - 60 }, 500);
+            }, 250);
+
+        } catch (err) { console.log(err);}
+    }
+
+    function ValidateForm() {
+        var retval = true, focus = false;
+        jQuery('.form-dynamic--inner').find('input, select').each(function () {
+            if (jQuery(this).is(":visible")) {
+                jQuery(this).parsley().validate();
+
+                if (!jQuery(this).parsley().isValid()) {
+                    //console.log("validation failed for: " + jQuery(this).attr("id"));
+                    if (!focus) {
+                        jQuery(this).focus(); focus = true;
+                    }
+                    retval = false;                    
+                };
+            }
+        });
+
+        return retval;
+    }
+
+    function EmailReport(k) {
+        var url = '@Url.Action("EmailReport")';
+        var data = { key: k, "__RequestVerificationToken": GetAFToken() };
+        CallBackend(url, data, 'json', 2);
+    }
+
+</script>
+

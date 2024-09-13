@@ -1,0 +1,52 @@
+﻿@model DEWAXP.Feature.ShamsDubai.Models.SolarCalculator.SolarCalculatorModel
+@{ 
+    string url = Request.Url.Scheme + "://" + Request.Url.Host;
+}
+<script>
+    var userInfo = {};
+    function getUserInfo() {
+        //console.debug("getUserInfo called");
+        var xmlhttp;
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        } else {
+            // code for older browsers
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                userInfo = JSON.parse(this.responseText);
+            } else {
+                userInfo = {
+                    locale: "@Model.Language.Name", //"en-us"
+                    account: 0
+                };
+            }
+
+			if(document.location.pathname.indexOf("ar-AE")!=-1) {
+                document.getElementById("esriframe").innerHTML = "<iframe src='@url/SolarCalculator/index_local.html?locale=ar&" + document.location.search.substr(1) + "' style='height:100%; width:100%;'></iframe>";
+            } else {
+                document.getElementById("esriframe").innerHTML = "<iframe src='@url/SolarCalculator/index_local.html" + document.location.search + "' style='height:100%; width:100%;'></iframe>";
+            }
+        };
+        xmlhttp.open("GET", "@url/api/solarcalculator/Account", true);
+        xmlhttp.send();
+    }
+</script>
+<style type="text/css">
+    .grid {
+        max-width: 10000px !important;
+    }
+    .header-bar {
+        background: #37AA33;
+        height: 60px;
+    }
+</style>
+<div id="esriframe" style="height:700px;"></div>
+<div id="demo"></div>
+<script type="text/javascript">
+    getUserInfo();
+    //console.log(@Model.SessionID);
+</script>
+
+

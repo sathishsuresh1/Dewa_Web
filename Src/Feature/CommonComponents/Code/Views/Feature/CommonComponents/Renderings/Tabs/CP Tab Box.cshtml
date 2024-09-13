@@ -1,0 +1,41 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Links
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@using System.Linq
+@model DEWAXP.Feature.CommonComponents.Models.Renderings.Tabs
+
+@{ var additionalBoxCssClasses = Model.InModal ? "m41-tabs-box__tabs--modal" : string.Empty; }
+
+<div class="m41-tabs-box" data-component="m41-tabs-box">
+    <div class="m41-tabs-box__tabs m41-tabs-box--desktop @additionalBoxCssClasses">
+        <div class="m41-tabs-box__tab-items--wrapper">
+            <ul class="m41-tabs-box__tab-items">
+                @foreach (var tab in Model.Children)
+                {
+                    var index = Model.Children.ToList().IndexOf(tab);
+                    var pageUrl = LinkManager.GetItemUrl(Sitecore.Context.Item);
+                    var tabTargetUrl = tab.Target != null ? LinkManager.GetItemUrl(tab.Target) : null;
+                    var active = pageUrl.Equals(tabTargetUrl) || (Model.InModal && index == 0);
+                    var additionalCssClasses = active ? "m41-tabs-box__tab-link--active" : string.Empty;
+
+                    <li class="m41-tabs-box__tab-item">
+                        @if (!string.IsNullOrWhiteSpace(tabTargetUrl))
+                        {
+                            <a href="@tabTargetUrl" class="m41-tabs-box__tab-link @additionalCssClasses">@tab.Title</a>
+                        }
+                        else
+                        {
+                            <button id="tabber-@index" data-tabber="@index" aria-controls="tabpanel-@index" role="tab" aria-selected="@active" class="m41-tabs-box__tab-link @additionalCssClasses">
+                                @tab.Title
+                            </button>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="m41-tabs-box__tab-panels">
+            @Html.Sitecore().Placeholder("main/dashboard")
+        </div>
+    </div>
+</div>

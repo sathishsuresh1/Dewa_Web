@@ -1,0 +1,452 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using System.Linq
+@model DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j153-villa-exemption" data-journey="j153-villa-exemption">
+    <div class="grid">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m26-page-title title_message">
+                    <div class="m26-page-title__links">
+                        <p class="m26-page-title__backlink">
+                            <a href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_EDITAPPLICATION_STEP1)?n=@Model.ApplicationReferenceNumber" class="button button--text button--back">@Translate.Text("VE_Back")</a>
+                        </p>
+                    </div>
+                    <h1 class="text__page-title">@Translate.Text("VE_New_Application_Heading")</h1>
+                    @*<p class="text-page__intro"></p>*@
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="3" data-current-step="2" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="true">
+                    <div class="m38-steptracker__info-wrapper"></div>
+                    <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext=""></div>
+                </div>
+            </div>
+        </div>
+        <div class="grid__row">
+
+            <div class="grid__column grid__column--12 grid__column--form">
+                @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @id = "veform", @class = "form", data_form = "true", encType = "multipart/form-data", @data_submit_validate = "enabled" }))
+                {
+                    @Html.Sitecore().FormHandler()
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                    @Html.HiddenFor(x => x.OwnersJson)
+                    @Html.HiddenFor(x => x.Stage)
+                    @Html.HiddenFor(x => x.ApplicationNumber)
+                    @Html.HiddenFor(x => x.ApplicationReferenceNumber)
+                    @Html.HiddenFor(x => x.EstimateNumber)
+                    @Html.HiddenFor(x => x.BusinessPartner)
+                    @Html.HiddenFor(x => x.OwnerType)
+                    @Html.HiddenFor(x => x.AapplicationSequenceNumber)
+                    @Html.HiddenFor(x => x.Status)
+                    if (Model.AttachmentLists != null && Model.AttachmentLists.Count > 0)
+                    {
+                        var cnt = 0;
+                        foreach (var item in Model.AttachmentLists)
+                        {
+                            int index = Model.AttachmentLists.ToList().IndexOf(item);
+                            var previewpdf = "/images/preview_pdf@2x.png";
+                            string strFileExtension = (!string.IsNullOrWhiteSpace(item.FileName)) ? System.IO.Path.GetExtension(item.FileName).Replace(".", "") : string.Empty;
+                            if (!string.IsNullOrEmpty(strFileExtension) && !strFileExtension.ToLower().Equals("pdf"))
+                            {
+                                previewpdf = "/images/preview@2x.png";
+                            }
+                            if (item.AttachmentType != null && item.AttachmentType.Equals("01"))
+                            {
+                                var src1 = previewpdf;
+                                if (!string.IsNullOrEmpty(strFileExtension) && !strFileExtension.ToLower().Equals("pdf"))
+                                {
+                                    src1 = item.ConstructionContractSigned_Binary != null ? "data:image;base64," + Convert.ToBase64String(item.ConstructionContractSigned_Binary) : previewpdf;
+                                }
+
+                                var srctxt1 = !string.IsNullOrWhiteSpace(item.FileName) ? item.FileName : "";
+                                if (item.ConstructionContractSigned_Binary != null)
+                                { cnt++; }
+
+                                <fieldset class="fieldset ">
+                                    <legend class="legend">@Translate.Text("VE_Documents")</legend>
+                                    <label for="form-field-6ckws2kd9" class="form-field__label">
+                                        @Translate.Text("VE_ConstructionContractSigned")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="@src1" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" alt="@srctxt1" data-uploader-image="ConstructionContractSigned">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                <label for="form-field-ConstructionContractSigned" class="form-field__label">
+                                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                                </label>
+                                                <div>
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--upload"
+                                                               id="form-field-ConstructionContractSigned"
+                                                               name="AttachmentLists[@index].ConstructionContractSigned"
+                                                               type="file"
+                                                               aria-describedby="description-for-ConstructionContractSigned"
+                                                               data-parsley-errors-container="#description-for-ConstructionContractSigned"
+                                                               @((src1 == null || src1 == "/images/preview@2x.png") ? "required=\"=\"" : "")
+                                                               @((item.ConstructionContractSigned_Binary != null) ? "value=" + item.FileName + "" : "")
+                                                               data-parsley-required-message="@Translate.Text("VE_Construction_Signed_File1RequiredField")"
+                                                               data-uploader-field="ConstructionContractSigned"
+                                                               accept=""
+                                                               data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                               data-size="15048000"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-id="16">
+
+                                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="ConstructionContractSigned" @(!string.IsNullOrWhiteSpace(srctxt1) ? "style=display:block !important" : "")>@srctxt1</p>
+                                                <p><button class="button button--text button--remove hidden" data-removedoc="@item.DocumentNumber" data-removeindex="@index" data-uploader-remove="ConstructionContractSigned" @(!string.IsNullOrWhiteSpace(srctxt1) ? "style=display:block !important" : "")>@Translate.Text("VE_Remove")</button></p>
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].ConstructionContractSigned_AttachmentRemove1, new { id = "flagremove" + index })
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].AttachmentType)
+                                            </div>
+                                        </div>
+                                        <div id="description-for-ConstructionContractSigned" class="form-field__messages">
+                                            <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                        </div>
+                                    </div>
+
+                                </fieldset>
+                            }
+                            else if (item.AttachmentType != null && item.AttachmentType.Equals("02"))
+                            {
+                                var src2 = previewpdf;
+                                if (!string.IsNullOrEmpty(strFileExtension) && !strFileExtension.ToLower().Equals("pdf"))
+                                {
+                                    src2 = item.ConstructionContract_02_Binary != null ? "data:image;base64," + Convert.ToBase64String(item.ConstructionContract_02_Binary) : previewpdf;
+                                }
+                                var srctxt2 = !string.IsNullOrWhiteSpace(item.FileName) ? item.FileName : "";
+                                if (item.ConstructionContract_02_Binary != null)
+                                { cnt++; }
+                                <fieldset class="fieldset ">
+                                    <label for="form-field-ConstructionContract_02" class="form-field__label">
+                                        @Translate.Text("VE_Construction2")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="@src2"
+                                                     data-src="/images/preview_pdf@2x.png"
+                                                     data-success="/images/upload_success@2x.png"
+                                                     class="form-field__preview tooltipstered"
+                                                     aria-hidden="true" role="presentation" alt="@srctxt2"
+                                                     data-uploader-image="ConstructionContract_02">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                <label for="form-field-ConstructionContract_02" class="form-field__label">
+                                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                                </label>
+                                                <div>
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--upload"
+                                                               id="form-field-ConstructionContract_02"
+                                                               name="AttachmentLists[@index].ConstructionContract_02"
+                                                               type="file"
+                                                               aria-describedby="description-for-ConstructionContract_02"
+                                                               data-parsley-errors-container="#description-for-ConstructionContract_02"
+                                                               data-parsley-required-message="@Translate.Text("VE_Construction_File1RequiredField")"
+                                                               data-uploader-field="ConstructionContract_02"
+                                                               @((item.ConstructionContract_02_Binary != null) ? "value=" + item.FileName + "" : "")
+                                                               accept=""
+                                                               data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                               data-size="15048000"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-id="16">
+
+                                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="ConstructionContract_02" @(!string.IsNullOrWhiteSpace(srctxt2) ? "style=display:block !important" : "")>@srctxt2</p>
+                                                <p><button class="button button--text button--remove hidden" data-removedoc="@item.DocumentNumber" data-removeindex="@index" data-uploader-remove="ConstructionContract_02" @(!string.IsNullOrWhiteSpace(srctxt2) ? "style=display:block !important" : "")>@Translate.Text("VE_Remove")</button></p>
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].ConstructionContract_02_AttachmentRemove2, new { id = "flagremove" + index })
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].AttachmentType)
+                                            </div>
+                                        </div>
+                                        <div id="description-for-ConstructionContract_02" class="form-field__messages">
+                                            <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            }
+                            else if (item.AttachmentType != null && item.AttachmentType.Equals("03"))
+                            {
+                                var src3 = previewpdf;
+                                if (!string.IsNullOrEmpty(strFileExtension) && !strFileExtension.ToLower().Equals("pdf"))
+                                {
+                                    src3 = item.ConstructionContract_03_Binary != null ? "data:image;base64," + Convert.ToBase64String(item.ConstructionContract_03_Binary) : previewpdf;
+                                }
+                                var srctxt3 = !string.IsNullOrWhiteSpace(item.FileName) ? item.FileName : "";
+                                if (item.ConstructionContract_03_Binary != null)
+                                { cnt++; }
+                                <fieldset class="fieldset ">
+                                    <label for="form-field-ConstructionContract_03" class="form-field__label">
+                                        @Translate.Text("VE_Construction2")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="@src3" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" alt="@srctxt3" data-uploader-image="ConstructionContract_03">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                <label for="form-field-ConstructionContract_03" class="form-field__label">
+                                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                                </label>
+                                                <div>
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--upload"
+                                                               id="form-field-ConstructionContract_03"
+                                                               name="AttachmentLists[@index].ConstructionContract_03"
+                                                               type="file"
+                                                               aria-describedby="description-for-ConstructionContract_03"
+                                                               data-parsley-errors-container="#description-for-ConstructionContract_03"
+                                                               data-parsley-required-message="@Translate.Text("VE_Construction_File1RequiredField")"
+                                                               data-uploader-field="ConstructionContract_03"
+                                                               @((item.ConstructionContract_03_Binary != null) ? "value=" + item.FileName + "" : "")
+                                                               accept=""
+                                                               data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                               data-size="15048000"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-id="16">
+
+                                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="ConstructionContract_03" @(!string.IsNullOrWhiteSpace(srctxt3) ? "style=display:block !important" : "")>@srctxt3</p>
+                                                <p><button class="button button--text button--remove hidden" data-removedoc="@item.DocumentNumber" data-removeindex="@index" data-uploader-remove="ConstructionContract_03" @(!string.IsNullOrWhiteSpace(srctxt3) ? "style=display:block !important" : "")>@Translate.Text("VE_Remove")</button></p>
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].ConstructionContract_03_AttachmentRemove3, new { id = "flagremove" + index })
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].AttachmentType)
+                                            </div>
+                                        </div>
+                                        <div id="description-for-ConstructionContract_03" class="form-field__messages">
+                                            <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            }
+                            else if (item.AttachmentType != null && item.AttachmentType.Equals("04"))
+                            {
+                                var src4 = previewpdf;
+                                if (!string.IsNullOrEmpty(strFileExtension) && !strFileExtension.ToLower().Equals("pdf"))
+                                {
+                                    src4 = item.ConstructionContract_04_Binary != null ? "data:image;base64," + Convert.ToBase64String(item.ConstructionContract_04_Binary) : previewpdf;
+                                }
+                                var srctxt4 = !string.IsNullOrWhiteSpace(item.FileName) ? item.FileName : "";
+                                if (item.ConstructionContract_04_Binary != null)
+                                { cnt++; }
+                                <fieldset class="fieldset ">
+                                    <label for="form-field-ConstructionContract_04" class="form-field__label">
+                                        @Translate.Text("VE_Construction2")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="@src4" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" alt="@srctxt4" data-uploader-image="ConstructionContract_04">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                <label for="form-field-ConstructionContract_04" class="form-field__label">
+                                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                                </label>
+                                                <div>
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--upload"
+                                                               id="form-field-ConstructionContract_04"
+                                                               name="AttachmentLists[@index].ConstructionContract_04"
+                                                               type="file"
+                                                               aria-describedby="description-for-ConstructionContract_04"
+                                                               data-parsley-errors-container="#description-for-ConstructionContract_04"
+                                                               data-parsley-required-message="@Translate.Text("VE_Construction_File1RequiredField")"
+                                                               data-uploader-field="ConstructionContract_04"
+                                                               @((item.ConstructionContract_04_Binary != null) ? "value=" + item.FileName + "" : "")
+                                                               accept=""
+                                                               data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                               data-size="15048000"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-id="16">
+
+                                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="ConstructionContract_04" @(!string.IsNullOrWhiteSpace(srctxt4) ? "style=display:block !important" : "")>@srctxt4</p>
+                                                <p><button class="button button--text button--remove hidden" data-removedoc="@item.DocumentNumber" data-removeindex="@index" data-uploader-remove="ConstructionContract_04" @(!string.IsNullOrWhiteSpace(srctxt4) ? "style=display:block !important" : "")>@Translate.Text("VE_Remove")</button></p>
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].ConstructionContract_04_AttachmentRemove4, new { id = "flagremove" + index })
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].AttachmentType)
+                                            </div>
+                                        </div>
+                                        <div id="description-for-ConstructionContract_04" class="form-field__messages">
+                                            <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            }
+                            else if (item.AttachmentType != null && item.AttachmentType.Equals("05"))
+                            {
+                                var src5 = previewpdf;
+                                if (!string.IsNullOrEmpty(strFileExtension) && !strFileExtension.ToLower().Equals("pdf"))
+                                {
+                                    src5 = item.CompletionLetter_Binary != null ? "data:image;base64," + Convert.ToBase64String(item.CompletionLetter_Binary) : previewpdf;
+                                }
+                                var srctxt5 = !string.IsNullOrWhiteSpace(item.FileName) ? item.FileName : "";
+                                <fieldset class="fieldset">
+                                    <label for="form-field-CompletionLetter" class="form-field__label">
+                                        @Translate.Text("VE_CompletionLetter")
+                                        <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                    </label>
+                                    <div class="form-field form-field--upload">
+                                        <div class="form-field__input-wrapper">
+                                            <div class="form-field__preview-wrapper">
+                                                <img src="@src5" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" alt="@srctxt5" data-uploader-image="CompletionLetter">
+                                            </div>
+                                            <div class="form-field__uploader-details">
+                                                <label for="form-field-CompletionLetter" class="form-field__label">
+                                                    <span class="form-field__label-required aria-only">@Translate.Text("VE_Required")</span>
+                                                </label>
+                                                <div>
+                                                    <label>
+                                                        <input class="form-field__input form-field__input--upload"
+                                                               id="form-field-CompletionLetter"
+                                                               name="AttachmentLists[@index].CompletionLetter"
+                                                               type="file"
+                                                               @((cnt > 1 && item.CompletionLetter_Binary == null) ? "required=\"=\"" : "")
+                                                               aria-describedby="description-for-CompletionLetter"
+                                                               data-parsley-errors-container="#description-for-CompletionLetter"
+                                                               data-parsley-required-message="@Translate.Text("VE_Completion_File1RequiredField")"
+                                                               data-uploader-field="CompletionLetter"
+                                                               @((item.CompletionLetter_Binary != null) ? "value=" + item.FileName + "" : "")
+                                                               accept=""
+                                                               data-accepts='"jpg","bmp","png","jpeg","pdf"'
+                                                               data-size="15048000"
+                                                               data-parsley-trigger="focusout"
+                                                               data-parsley-id="16">
+
+                                                        <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("VE_Choose")</span>
+                                                    </label>
+                                                </div>
+                                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("VE_UploadFormat_Error")</p>
+                                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("VE_FileSize_Error")</p>
+                                                <p class="form-field__input--upload-filename" data-uploader-filename="CompletionLetter" @(!string.IsNullOrWhiteSpace(srctxt5) ? "style=display:block !important" : "")>@srctxt5</p>
+                                                <p><button class="button button--text button--remove hidden" data-removedoc="@item.DocumentNumber" data-removeindex="@index" data-uploader-remove="CompletionLetter" @(!string.IsNullOrWhiteSpace(srctxt5) ? "style=display:block !important" : "")>@Translate.Text("VE_Remove")</button></p>
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].CompletionLetter_AttachmentRemove5, new { id = "flagremove" + index })
+                                                @Html.HiddenFor(m => m.AttachmentLists[index].AttachmentType)
+                                            </div>
+                                        </div>
+                                        <div id="description-for-CompletionLetter" class="form-field__messages">
+                                            <p class="form-field__description">@Translate.Text("VE_UploadFile_Desc")</p>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            }
+                        }
+                    }
+
+                    <div class="form-field__button">
+                        <a class="button button--quaternary mb12" href="@DEWAXP.Foundation.Helpers.LinkHelper.GetItemUrl(SitecoreItemIdentifiers.HH_VILLA_EDITAPPLICATION_STEP1)?n=@Model.ApplicationReferenceNumber" id="btBack">@Translate.Text("VE_Back")</a>
+                        <button type="submit" id="btnSaveNext" class="button button--primary button--next mb12" data-submission-text="@Translate.Text("VE_Saving")...">@Translate.Text("VE_SaveNext")</button>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery(document).ready(function () {
+        var appjson = JSON.parse('@Html.Raw(DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel.ToJson(Model.Applications))');
+        var estimatejson = JSON.parse('@Html.Raw(DEWAXP.Feature.GeneralServices.Models.VillaCostExemption.ApplicationViewModel.ToJson(Model.Estimates))');
+        var owner = { itemNumber: "", idType: "", eid: "", ownerName: "", email: "", mobile1: "", mobile2: "", relation: "", passportNumber: "", passportExpiry: "", passportExpiryDisplay: "", issuingAuthority: "", dob: "", dobDisplay: "", nationlaity: "", isOwner: false }
+        var owners = @Html.Raw(Model.OwnersJson); cssClass = "";
+
+         steptrackerwithinpage(3, 2, "@Translate.Text("VE_Step2_Title")", "true");
+        //updateQueryStringParameter(window.location.href, "n", "@Model.ApplicationReferenceNumber");
+        function updateQueryStringParameter(uri, key, value) {
+            var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (!uri.match(re)) {
+                window.location.href = uri + separator + key + "=" + value;
+            }
+        }
+        jQuery('#btnSaveNext').on('click', function () {
+            if (jQuery("#veform").parsley().validate()) {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            }
+        });
+        jQuery('.button--remove').each(function () {
+            jQuery(this).off('click.remove').on('click.remove', function () {
+                var $this = jQuery(this);
+                var $index = $this.attr('data-removeindex');
+                var $doc = $this.attr('data-removedoc');
+
+                jQuery("#flagremove" + $index).val($doc);
+                //$this.closest('.form-field__input-wrapper').find('.form-field__input--upload').change();
+
+                var count = 0;
+                jQuery('.form-field__input--upload').not('#form-field-CompletionLetter').each(function () {
+                    if ((jQuery(this).closest('.form-field__uploader-details').find('.form-field__input--upload-filename').text() != '' && jQuery(this).closest('.form-field__uploader-details').find('.form-field__input--upload-filename').text() != undefined)) {
+                        count++;
+                    };
+                });
+
+                if (count > 1 && count < 4) {
+                    jQuery('#form-field-CompletionLetter').prop('required', true);
+                } else {
+                    jQuery('#form-field-CompletionLetter').prop('required', false);
+                }
+                console.log(count);
+            });
+        });
+        jQuery('.form-field__input--upload').not('#form-field-CompletionLetter').each(function () {
+            jQuery(this).off('change.form').on('change.form', function () {
+                var count = 0;
+
+                jQuery('.form-field__input--upload').not('#form-field-CompletionLetter').each(function () {
+                    if ((jQuery(this).closest('.form-field__uploader-details').find('.form-field__input--upload-filename').text() != '' && jQuery(this).closest('.form-field__uploader-details').find('.form-field__input--upload-filename').text() != undefined)) {
+                        count++;
+                    };
+                });
+
+                if (count > 1 && count < 4) {
+                    jQuery('#form-field-CompletionLetter').prop('required', true);
+                } else {
+                    jQuery('#form-field-CompletionLetter').prop('required', false);
+                }
+                console.log(count);
+            });
+        });
+    });
+</script>

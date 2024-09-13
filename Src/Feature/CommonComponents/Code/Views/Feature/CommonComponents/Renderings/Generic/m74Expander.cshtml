@@ -1,0 +1,60 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Presentation
+@using Glass.Mapper.Sc
+@using DEWAXP.Feature.CommonComponents.Models.Footer
+@using Sitecore.Globalization
+@using Glass.Mapper.Sc.Web;
+@using DEWAXP.Foundation.Content.Repositories
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+
+@model Sitecore.Mvc.Presentation.RenderingModel
+
+@{
+    IMvcContext _requestContext = new MvcContext(new SitecoreService(Sitecore.Context.Database));
+    IRenderingRepository _renderingRepository = new RenderingRepository(_requestContext);
+    //var contextid = RenderingContext.Current.Rendering.DataSource;
+    if (_renderingRepository.HasDataSource)
+    {
+        var expanderset = _renderingRepository.GetDataSourceItem<M74ExpanderSet>();
+        if (expanderset != null)
+        {
+            int i = 1;
+            foreach (M74ExpanderItem item in expanderset.ExpanderList)
+            {
+                if (!string.IsNullOrWhiteSpace(item.Iconclass) && item.Iconclass.Equals("rammas"))
+                {
+                    <a href="@(item.Link != null ? item.Link.Url : "#")" title="@Translate.Text("Rammas-Row-ChatWith") @Translate.Text("Rammas-Row-Rammas")" class="m13-footer--floating_link @(i==1?string.Empty:"m13-footer--floating_link--2") @item.Iconclass">
+                        <img src="/~/media/Images/M74Expander/rammas_icon.ashx" alt='@Translate.Text("Rammas-Row-ChatWith") @Translate.Text("Rammas-Row-Rammas")' class="tooltipstered" />
+                        <div class="m13-footer--floating_rammastext mobile-hide">
+                            <div class="rammas-text-small">@Translate.Text("Rammas-Row-ChatWith")</div>
+                            <div class="rammas-text-large">@Translate.Text("Rammas-Row-Rammas")</div>
+                        </div>
+                    </a>
+                }
+                else if (!string.IsNullOrWhiteSpace(item.Iconclass) && item.Iconclass.Equals("rammasgpt"))
+                {
+
+                    <a href="@(item.Link != null ? item.Link.Url : "#")" title="@Translate.Text("Rammas-Row-ChatWith") @Translate.Text("Powered by ChatGPT")" class="m13-footer--floating_link m13-footer--floating_link--2 rammas gpt-link ">
+                        <div class="m13-footer--floating_rammastext">
+                            <div class="rammas-text-large">@Translate.Text("Try RAMMAS")</div>
+                            <div class="rammas-text-small">
+                                @Translate.Text("Powered by ChatGPT")
+                            </div>
+                        </div>
+                    </a>
+
+
+                }
+                else
+                {
+                    <a href="@(item.Link != null ? item.Link.Url : "#")" class="m13-footer--floating_link @(i==1?string.Empty:"m13-footer--floating_link--2") @item.Iconclass">
+                        <span class="mobile-hide">
+                            @item.Title
+                        </span>
+                    </a>
+                }
+                i++;
+            }
+        }
+    }
+}

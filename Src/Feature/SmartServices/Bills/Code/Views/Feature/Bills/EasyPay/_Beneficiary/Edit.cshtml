@@ -1,0 +1,181 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.EasyPay.BeneficiaryDetailList
+
+<div class="grid">
+    @Html.Sitecore().Placeholder("j82/m26-page-title")
+</div>
+
+
+@Html.Sitecore().Placeholder("j82/m41-tab-box")
+
+<div class="grid j121-beneficiary-easy-pay" data-journey="j121-beneficiary-easy-pay">
+    @if (Model != null)
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+
+                @if (Model.BeneficiaryDetails != null && Model.BeneficiaryDetails.Count() > 0)
+                {
+                    int i = 0;
+                    foreach (var item in Model.BeneficiaryDetails.ToList())
+                    {
+                        <form id="from@(i)" class="form" data-form="true" novalidate="">
+                            <div class="form-field-group beneficiary-wapper">
+                                <div class="form-field form-field--text form-field--6 editBtn" style="padding-right: 5px; width:45%">
+                                    <label for="name@(i)" class="form-field__label">@Translate.Text("MBNickName")</label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text ctrl_name"
+                                               id="name@(i)"
+                                               name="name@(i)"
+                                               type="text"
+                                               value="@item.Name"
+                                               placeholder="@Translate.Text("MBNickNamePalceholder")"
+                                               aria-describedby="description-for-9v662u98g"
+                                               data-parsley-errors-container="#description-for-9v662u98g"
+                                               required=""
+                                               data-parsley-required-message="@Translate.Text("MBNickNameErrorMsg")"
+                                               data-parsley-trigger="focusout"
+                                               data-parsley-id="8">
+                                    </span>
+                                    <div id="description-for-9v662u98g" class="form-field__messages"></div>
+                                </div>
+                                <div class="form-field form-field--text form-field--6" style="padding-right: 5px; width:45%">
+                                    <label class="form-field__label" for="accountNo@(i)">@Translate.Text("MBAccountNumber")</label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text ctrl_accountNo form-field__input-read-only" disabled readonly="" id="accountNo@(i)" name="accountNo@(i)" type="text" value="@item.ContractAccount" style="pointer-events: none;">
+                                    </span>
+                                </div>
+                                @*<div class="icon-edit editBtn" title="@Translate.Text("MBEdit")"></div>*@
+                                <div class="icon-cancel deleteBtn" title="@Translate.Text("MBDelete")"></div>
+                                <div class="form-field__button_link form-field__button">
+                                    <div type="button" class="button  button--text button--save updateBtn">@Translate.Text("MBSave")</div>
+                                    <div type="button" class="button  button--text button--cancel">@Translate.Text("MBCancel")</div>
+                                </div>
+                            </div>
+                        </form>
+
+                        i++;
+                    }
+
+
+                    <script>
+                        var _DeleteUrl = "/api/sitecore/EasyPay/DeleteBeneficiary";
+                        var _UpdateUrl = "/api/sitecore/EasyPay/UpdateBeneficiary";
+
+                        AddCustomForgeryToken = function (data, elementId) {
+                            data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                            return data;
+                        };
+
+                        docReady(function () {
+                            jQuery(".deleteBtn").click(function () {
+                                event.preventDefault();
+                                var isConfirmed = confirm("@Translate.Text("Please confirm to delete")");
+                                if (!isConfirmed) {
+                                    return false;
+                                }
+
+                                var wapper = jQuery(this).closest(".beneficiary-wapper")
+                                var postdata = {
+                                    Name: jQuery(wapper).find(".ctrl_name").val(),
+                                    ContractAccount: jQuery(wapper).find(".ctrl_accountNo").val()
+                                }
+                                postdata = AddCustomForgeryToken(postdata, ".j121-beneficiary-easy-pay");
+                                $.ajax({
+                                    url: _DeleteUrl,
+                                    data: postdata,
+                                    type: "DELETE",
+                                    beforeSend: function () {
+                                        console.log(postdata);
+                                    },
+                                    complete: function () {
+
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            location.reload();
+                                        }
+                                        else if (response != null) {
+                                            jQuery(wapper).find(".form-field__messages").html(response.description);
+                                        }
+                                        console.log(response)
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                    }
+                                });
+
+                            })
+
+                            jQuery(".updateBtn").click(function () {
+                                var wapper = jQuery(this).closest(".beneficiary-wapper")
+                                var postdata = {
+                                    Name: jQuery(wapper).find(".ctrl_name").val(),
+                                    ContractAccount: jQuery(wapper).find(".ctrl_accountNo").val()
+                                }
+
+                                if (postdata.Name == "" || postdata.Name == null) {
+                                    jQuery(wapper).find(".form-field__messages").html("@Translate.Text("MBNickNameErrorMsg")");
+                                    return false;
+                                }
+                                postdata = AddCustomForgeryToken(postdata, ".j121-beneficiary-easy-pay");
+                                $.ajax({
+                                    url: _UpdateUrl,
+                                    data: postdata,
+                                    type: "POST",
+                                    beforeSend: function () {
+
+                                    },
+                                    complete: function () {
+
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            location.reload();
+                                        } else if (response != null) {
+                                            jQuery(wapper).find(".form-field__messages").html(response.description);
+                                        }
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                    }
+                                });
+                            })
+                            function UpdateBenefecairy(el) {
+
+
+                            }
+
+                        });
+
+
+                    </script>
+                }
+                else
+                {
+                    <p class="text__content-copy" style="text-align:center;font-size: 20px;font-weight: 200;">@Translate.Text("MBNoBeneficiaryExist")</p>
+
+                }
+
+
+            </div>
+        </div>
+
+    }
+    @*<div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--content">
+                <div class="form-field__button">
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EasyPay_Enquire)" class="button button--primary">@Translate.Text("Done")</a>
+                </div>
+            </div>
+        </div>*@
+</div>
+
+

@@ -1,0 +1,262 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.CustomDB.DRRGDataModel;
+@using System.Linq;
+@using System.Data.Entity.Core.Objects;
+@using DEWAXP.Foundation.Content
+@model List<DEWAXP.Foundation.CustomDB.DRRGDataModel.DRRG_Manufacturer_Details>
+@{
+    var firstModule = "";
+    DRRG_ApplicationHistory lastUpdateDate = null;
+    string detailedurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Details);
+    using (DRRGEntities context = new DRRGEntities())
+    {
+        lastUpdateDate = context.DRRG_ApplicationHistory.Where(x => x.Status == "Approved").OrderByDescending(x => x.id).Take(1).ToList().FirstOrDefault();
+    }
+}
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="j02-drrg-dashboard" data-journey="j02-drrg-dashboard">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+
+        <div class="grid__row mb12">
+            <div class="grid__column grid__column--12">
+                @Html.Sitecore().Placeholder("drrgEligibilityNote")
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <hr />
+                @if (lastUpdateDate != null && lastUpdateDate.Date != null)
+                {
+                    <p>Last Updated @Convert.ToDateTime(lastUpdateDate.Date).ToString("dddd, MMMM dd, yyyy")</p>
+                }
+            </div>
+        </div>
+        <div class="grid__row mb24">
+            <div class="grid__column grid__column--12">
+                <form method="get" action="#" class="form mb24" data-form="true" novalidate="">
+                    <div class="form--single_line">
+                        <div class="form-field form-field--text mobile-hide">
+                            <label for="form-field-searchmanufacturer" class="form-field__label">
+                                <span class="aria-only">Text Field</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--search">
+                                <input class="form-field__input form-field__input--text" m25-input-search id="form-field-searchmanufacturer" 
+                                       name="text-optional" type="text" placeholder="Search by manufacturer name" 
+                                       aria-describedby="description-for-searchmanufacturer" 
+                                       data-parsley-errors-container="#description-for-searchmanufacturer" 
+                                       data-parsley-trigger="focusout" data-parsley-id="6" aria-invalid="false">
+                                <button class="icon-search"><span class="aria-only">Submit</span></button>
+                            </span>
+                            <div id="description-for-searchmanufacturer" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <fieldset class="fieldset">
+                                <legend class="form-field__label">
+                                    <span class="aria-only">Equipment Type</span>
+                                </legend>
+                                <p class="form-field__radio form-field__radio--inline">
+                                    <label>
+                                        <input isclear="true" class="form-field__input form-field__input--radio" id="form-field-radio_1_1" name="radios_group2" type="radio" value="1" aria-describedby="description-for-equiptype" data-parsley-errors-container="#description-for-equiptype" data-parsley-multiple="radios_group2" data-parsley-id="7" checked="">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("DRRG_PVModule")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio form-field__radio--inline">
+                                    <label>
+                                        <input isclear="true" class="form-field__input form-field__input--radio" id="form-field-radio_1_3" name="radios_group2" type="radio" value="3" aria-describedby="description-for-equiptype" data-parsley-errors-container="#description-for-equiptype" data-parsley-multiple="radios_group3" >
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("DRRG_PVInverter")
+                                        </span>
+                                    </label>
+                                </p>
+                                <p class="form-field__radio form-field__radio--inline">
+                                    <label>
+                                        <input isclear="true" class="form-field__input form-field__input--radio" id="form-field-radio_1_2" name="radios_group2" type="radio" value="2" aria-describedby="description-for-equiptype" data-parsley-errors-container="#description-for-equiptype" data-parsley-multiple="radios_group2">
+                                        <span class="form-field__fakeradio focus-enabled">
+                                            @Translate.Text("DRRG_InterfaceProtection")
+                                        </span>
+                                    </label>
+                                </p>
+
+                                <div id="description-for-equiptype" class="form-field__messages">
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+               
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="m25-tabs" data-component="m25-tabs" data-helper="toggle-menu" data-toggle-breakpoint='m' data-selected-tab-id="m25-tab-0" id="pvmodule">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--4">
+                    <div class="m25-tabs__menu" data-m25-tabs-menu="true">
+                        <ul aria-role="tablist">
+                            @if (Model != null && Model.Count > 0)
+                            {
+                                var count = 0;
+                                foreach (var item in Model)
+                                {
+                                    bool EnvISO14001 = false;
+                                    bool EOL = false;
+                                    bool QualityISO14001 = false;
+                                    using (DRRGEntities context = new DRRGEntities())
+                                    {
+                                        var facDetails = context.DRRG_Factory_Details.Where(x => x.Manufacturer_Code.Equals(item.Manufacturer_Code)).ToList().FirstOrDefault();
+                                        var EnvISO14001_File = context.DRRG_Files.Where(x => x.Reference_ID.Equals(facDetails.Factory_Code) && x.File_Type.Equals("ENVIRONMENTALMANAGEMENTSUPPORT")).ToList().FirstOrDefault();
+                                        if (EnvISO14001_File != null) { EnvISO14001 = true; }
+                                        var EOLFile = context.DRRG_Files.Where(x => x.Reference_ID.Equals(facDetails.Factory_Code) && x.File_Type.Equals("EOLPVMODULE")).ToList().FirstOrDefault();
+                                        if (EOLFile != null) { EOL = true; }
+                                        var QualityISO14001File = context.DRRG_Files.Where(x => x.Reference_ID.Equals(facDetails.Factory_Code) && x.File_Type.Equals("QUALITYMANAGEMENTSUPPORT")).ToList().FirstOrDefault();
+                                        if (QualityISO14001File != null) { QualityISO14001 = true; }
+                                    }
+                                    <li onclick="assignManufactererCode('@item.Manufacturer_Code')">
+                                        <a href="#" aria-role="tab" aria-controls="m25-panel" class="m25-tabs__tab link" data-m25-tabs-tab="true" id="m25-tab-@(Guid.NewGuid().ToString("D"))">
+                                            @item.Manufacturer_Name
+                                            <span class="m25-tabs__tabicons">
+                                                @if (EnvISO14001)
+                                                {
+                                                    <img src="/images/DRRG/EnvISO14001.png" title="@Translate.Text("ENVIRONMENTALMANAGEMENTSUPPORT")" class="m25-tabs__tabicon tooltipstered">
+                                                }
+                                                @if (EOL)
+                                                {
+                                                    <img src="/images/DRRG/EOL.png" title="@Translate.Text("EOLPVMODULE")" class="m25-tabs__tabicon tooltipstered">
+                                                }
+                                                @if (QualityISO14001)
+                                                {
+                                                    <img src="/images/DRRG/QualityISO14001.png" title="@Translate.Text("QUALITYMANAGEMENTSUPPORT")" class="m25-tabs__tabicon tooltipstered">
+                                                }
+                                            </span>
+                                        </a>
+                                    </li>
+                                    if (count == 0)
+                                    {
+                                        firstModule = item.Manufacturer_Code;
+                                    }
+                                    count++;
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="m25-tabs__body grid__column grid__column--8">
+                    <div class="m15-tabs--mobile">
+                        <div class="form-field form-field--select form-field--select-single">
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="m25-tabs--select-mobile form-field__input form-field__input--select"></select>
+                            </span>
+                        </div>
+                        <div class="m25-tabs--container-mobile">
+                        </div>
+                    </div>
+                    <div class="toggle-menu__item">
+                        <div class="toggle-menu__trigger" data-toggle-trigger="true">
+                            <h2 class="m25-tabs__title toggle-menu__title icon-share">Canadian Solar Inc.</h2>
+                        </div>
+                        <div aria-labelledby="m25-tab" aria-role="tabpanel" id="m25-panel" class="m25-tabs__content toggle-menu__content" data-m25-tabs-content="true" data-toggle-content="true">
+                            @if (ViewBag.CurrentRole != null && (ViewBag.CurrentRole == "drrgevaluator" || ViewBag.CurrentRole == "drrgschemamanager"))
+                            {
+                                <div class="align_right">
+                                    <a href="#" class="link" id="lnkManufacturerDetails">@Translate.Text("DRRG_ManufacturerDetails")</a>
+                                </div>
+                            }
+
+                            <div class="m23-table m23-table--variant2 j02-drrg--table" data-component="m23-table">
+                                <h3 class="m23-table__title "></h3>
+                                <div id="table_body">
+
+                                </div>
+                                <p id="lblCompliance" class="parsley-errors-list mt24">
+
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var _globalModuleName = null;
+    var _globalManuCode = null;
+
+    _globalModuleName = 'pv';
+
+    _globalManuCode = '@firstModule';
+
+    handleList();
+    if ('@ViewBag.CurrentRole' == 'drrgevaluator' || '@ViewBag.CurrentRole' == 'drrgschemamanager') {
+        jQuery("#lnkManufacturerDetails").attr("href", "@(detailedurl)?id=" + _globalManuCode + "&strstatus=Approved");
+    }
+
+    jQuery('input[type=radio][name=radios_group2]').change(function () {
+        if (this.value == '1') {
+            _globalModuleName = 'pv';
+        }
+        else if (this.value == '2') {
+            _globalModuleName = 'ip';
+        }
+        else if (this.value == '3') {
+            _globalModuleName = 'iv';
+        }
+        else {
+            _globalModuleName = 'pv';
+        }
+        handleList();
+    });
+
+    function assignManufactererCode(code) {
+        if (code || code != null || code != undefined) {
+            _globalManuCode = code;
+        }
+        handleList();
+        if ('@ViewBag.CurrentRole' == 'drrgevaluator' || '@ViewBag.CurrentRole' == 'drrgschemamanager') {
+            jQuery("#lnkManufacturerDetails").attr("href", "@(detailedurl)?id=" + _globalManuCode + "&strstatus=Approved");
+        }
+    }
+
+    function handleList() {
+        $.ajax({
+            url: "/api/Sitecore/DRRGRegistration/GetManufacturers",
+            Type: 'get',
+            data: { manuCode: _globalManuCode, type: _globalModuleName },
+            success: function (data) {
+                jQuery('#table_body').html("");
+                jQuery('#table_body').html(data);
+                window.initComponents('pvmodule');
+                if (data != '') {
+                    if (_globalModuleName == 'pv') {
+                        //jQuery("#lblCompliance").html('@Html.Raw(Translate.Text("DRRG_PVModuleCompliance"))');
+                    }
+                    else if (_globalModuleName == 'ip') {
+                        //jQuery("#lblCompliance").html('@Translate.Text("DRRG_InterfaceProtectionCompliance")');
+                    }
+                    else {
+                        //jQuery("#lblCompliance").html('');
+                    }
+                }
+            }
+        });
+    }
+</script>

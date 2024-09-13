@@ -1,0 +1,1503 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc
+@using Sitecore.Data.Items
+@{
+
+    var now = DEWAXP.Foundation.Helpers.DateHelper.DubaiNow();
+    var Nationalities = DEWAXP.Foundation.Helpers.Extensions.FormExtensions.GetNationalities(null, true);
+}
+
+
+@Html.Sitecore().Placeholder("j1/m26-page-title")
+@Html.Sitecore().Placeholder("j87/m41-tab-box")
+<style>
+    .linehieght {
+        line-height: 34px !important;
+    }
+
+    .orange {
+        color: #E98535 !important;
+    }
+</style>
+<div class="grid__row mb0">
+    <div class="grid__column grid__column--12 grid__column--form receipt-form">
+        <form id="form-account-selector" action="#" method="POST" form-skipvalidation="true">
+            @*data-form="false"*@
+            @Html.Sitecore().Placeholder("j1/m43-account-selector")
+        </form>
+    </div>
+</div>
+
+<div class="grid__row j01-transaction-history" data-journey="j01-transaction-history">
+    <div id="no-refund-wrapper" class="grid__column grid__column--12 grid__column--form grid__column--centered form-field__messages parsley-errors-list hidden">@Translate.Text("no refund text")</div>
+    <div id="refund-list-wrapper" class="iban-update--wrapper grid__column grid__column--12 grid__column--form receipt-form">
+        <form id="form-refund-filter" method="GET" class="form hidden" data-form="true" data-parsley-focus="none" novalidate>
+            <fieldset class="fieldset">
+                <legend class="legend-color">.</legend>
+                <div class="form-field form-field--select form-field--select-single form-field-refundfilter">
+                    <label for="refund-filter"></label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownList("refund-filter", (IEnumerable<SelectListItem>
+                            )ViewBag.RefundTypes,
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "refund-filter",
+                                @name = "refund-filter",
+                                @aria_describedby = "description-for-refund-filter",
+                                @data_parsley_id = "20"
+                            })
+
+                    </span>
+                    <div class="form-field__messages"></div>
+                </div>
+            </fieldset>
+        </form>
+        <div id="refund-history-placeholder" class="ajax-placeholder transaction-history">
+
+        </div>
+
+        <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+            <button data-trigger="true" class="m39-modal__trigger m39-modal__trigger_refundstatus" id="m39-modal__trigger_refundstatus"></button>
+            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                <div class="m39-modal__dialog">
+                    <div class="m39-modal__header">
+                        <div class="m39-modal__title"></div>
+                        <a data-close="true" class="m39-modal__button--close">@Translate.Text("Refund.Close")</a>
+                        <div class="m39-modal__subtitle"></div>
+                    </div>
+                    <div class="m39-modal__content">
+                        <div class="grid__row">
+                            <div class="grid__column grid__column--12">
+                                <div class="m70-status-tracker" data-component="m70-status-tracker" data-steps="" data-current-step="" data-has-error="">
+                                    <div class="m70-status-tracker__progressbar" data-m70-progressbar="true" role="progressbar" aria-valuetext="status">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="m39-modal__content-iban iban_new_request hidden" id="m39-modal__content-1">
+                            <h3 class="m39-modal__content-iban-title not-available ibanstatus linehieght"></h3>
+                            <p class="linehieght">
+                                @Html.Raw(@Translate.Text("Refund.Customercare"))
+
+                                <h4 class="custome_errormessage hidden linehieght" style="color:red;"></h4>
+                            </p>
+                            <div class="m39-modal__content-form">
+                                <form method="post" id="form-updateIbanRequest" class="form" data-form="true" novalidate="">
+                                    @Html.AntiForgeryToken()
+                                    <div class="form-field" id="iban_details" aria-expanded="true">
+                                        <div class="form-field form-field--text hidden" id="iban_datalist">
+                                            <label for="form-field-ibanlist" class="form-field__label">
+                                                @Translate.Text("IBAN Select Label")
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                <select id="form-field-selectibanlist"
+                                                        name="IBANList"
+                                                        data-parsley-id="20"
+                                                        data-parsley-error-message="@Translate.Text("IBAN Select Required")"
+                                                        class="form-field__input form-field__input--select form-field__input--select-full"
+                                                        aria-describedby="description-for-ibanlist"
+                                                        data-parsley-required-message="@Translate.Text("IBAN Select Required")"
+                                                        data-parsley-errors-container="#description-for-ibanlist"></select>
+                                            </span>
+                                            <div id="description-for-ibanlist" class="form-field__messages"></div>
+                                        </div>
+                                        <div class="form-field form-field--text" id="iban_text">
+                                            <label for="form-field-IBANNumber" class="form-field__label">
+                                                @Translate.Text("IBAN Label")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                                <input class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-IBANNumber" name="IBANNumber" type="number"
+                                                       placeholder="@Translate.Text("IBAN Placeholder")" aria-describedby="description-for-IBANNumber" data-parsley-errors-container="#description-for-IBANNumber" required="" data-parsley-required-message="@Translate.Text("IBAN Required Text")" data-parsley-iban="" data-parsley-iban-message="@Translate.Text("IBAN Invalid Error Message")" data-iban_confirm="" data-parsley-trigger="focusout" data-parsley-id="19">
+                                            </span>
+                                            <div id="description-for-IBANNumber" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text" id="iban_conftext">
+                                            <label for="form-field-IBANConfirmNumber" class="form-field__label">
+                                                @Translate.Text("Confirm IBAN Label")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--iban">
+                                                <input class="form-field__input form-field__input--text form-field__input--prefixed" id="form-field-IBANConfirmNumber" name="IBANConfirmNumber" type="number"
+                                                       placeholder="@Translate.Text("IBAN Placeholder")" aria-describedby="description-for-IBANConfirmNumber" data-parsley-errors-container="#description-for-IBANConfirmNumber" required="" data-parsley-required-message="@Translate.Text("IBAN Required Text")" data-parsley-iban="" data-parsley-iban-message="@Translate.Text("IBAN Invalid Error Message")" data-parsley-equalto="#form-field-IBANNumber" data-parsley-equalto-message="@Translate.Text("IBAN Mismatch Error Message")" data-iban_confirm="" data-parsley-trigger="focusout" data-parsley-id="19">
+                                            </span>
+                                            <div id="description-for-IBANConfirmNumber" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-field__checkbox  last  first">
+                                        <label>
+                                            <input class="form-field__input form-field__input--checkbox" id="form-field-iban_terms_checkbox" name="checkbox_1_1" type="checkbox" value="1" aria-describedby="description-for-iban_terms_and_conditions" data-parsley-errors-container="#description-for-iban_terms_and_conditions" required="" data-parsley-required-message="@Translate.Text("Error Terms Agreement")" data-parsley-multiple="checkbox_1_1" data-parsley-id="7">
+                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                @Html.Raw(Translate.Text("IBAN Term and Condition html"))
+                                                @*<div class="m37-expander " data-component="m37-expander">
+                                                        <button data-toggle="true" class="m37-expander__trigger m37-expander__trigger--themed"> @Html.Raw(Translate.Text("IBAN Term and Condition html"))</button>
+                                                        <div data-content="true" class="m37-expander__content" role="region" aria-expanded="false">
+                                                            @Html.Raw(Translate.Text("IBAN Term and Condition Paragh html"))
+                                                        </div>
+                                                    </div>*@
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="hidden" id="btnNewIbanRequest"> submit</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="m39-modal__content-iban iban_otp_sendrequest hidden" id="m39-modal__content-2">
+                            <h3 class="m39-modal__content-iban-title not-available hidden ibanerrormsg"></h3>
+                            <h3 class="m39-modal__content-iban-title vmobile hidden">@Translate.Text("IBAN OTP M Title")</h3>
+                            <p class="vmobile hidden linehieght">
+                                @Html.Raw(Translate.Text("IBAN OTP M DETAIL"))
+                            </p>
+                            <h3 class="m39-modal__content-iban-title vemail hidden">@Translate.Text("IBAN OTP E Title")</h3>
+                            <p class="vemail hidden linehieght">
+                                @Html.Raw(Translate.Text("IBAN OTP E Detail"))
+                            </p>
+                            <h4 class="custome_errormessage hidden" style="color:red;"></h4>
+                            <div class="m39-modal__content-form otpform hidden">
+                                <h4 class="m39-modal__content-form-instructions otpforminfo linehieght">@Translate.Text("IBAN OTP Info")</h4>
+                                <form method="post" id="form-updateIbanOTPRequest" data-form="true" action="#" novalidate="">
+                                    <div class="m66-preloader small form-field--otp-loader" style="display:none;height:34px">
+                                        <div class="loader-small"></div>
+                                    </div>
+                                    <div class="form-field form-field--otp centered">
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkh" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-azcterkh" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="6" aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp form-field__input--error parsley-error" id="form-field-azcterkh" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkh" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-azcterkh" required="" data-parsley-required-message="" data-parsley-trigger="focusout" data-parsley-id="8" aria-invalid="true">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkh" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-azcterkh" required="" data-parsley-required-message="" data-parsley-trigger="focusout" data-parsley-id="10" aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkh" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-azcterkh" required="" data-parsley-required-message="" data-parsley-trigger="focusout" data-parsley-id="12" aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkh" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-azcterkh" required="" data-parsley-required-message="" data-parsley-trigger="focusout" data-parsley-id="12" aria-invalid="false">
+                                        </span>
+                                        <span class="form-field__input-wrapper_otp">
+                                            <input class="form-field__input form-field__input--otp" id="form-field-azcterkh" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkh" data-parsley-maxnumber="1" data-parsley-errors-container="#description-for-azcterkh" required="" data-parsley-required-message="" data-parsley-trigger="focusout" data-parsley-id="12" aria-invalid="false">
+                                        </span>
+                                        <input class="form-field__input form-field__input--otp_main" id="form-field-azcterkhmain" autocomplete="off" name="text" type="number" aria-describedby="description-for-azcterkhmain" data-parsley-maxnumber="6" data-parsley-errors-container="#description-for-azcterkhmain" data-parsley-required-message="" data-parsley-trigger="focusout" data-parsley-id="33">
+                                        <div id="description-for-azcterkh" class="form-field__messages">
+                                        </div>
+                                    </div>
+                                    <button type="submit" id="btnNewIbanOtpRequest" class="hidden">submit</button>
+
+                                    <div class="form-field__button">
+                                        <div class="button button--timer timer-button--outline"
+                                             data-component="m78-timer"
+                                             id="timerbutton"
+                                             timer-labels="{&quot;before&quot;:&quot;@Translate.Text("cust.resend.button.text")&quot;, &quot;after&quot;:&quot;@Translate.Text("cust.resend.button.text") (&quot;}"
+                                             timer-time="{&quot;seconds&quot;:300}">
+                                            <span class="m78-timer--button_text">@Translate.Text("cust.send.button.text")</span>
+                                            <span class="m78-timer--button_time"></span>
+
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="m39-modal__content-form otpsendform hidden">
+                                <div class="form-field__button">
+                                    <button type="submit" id="btnSendOtpRequest" class="button button--outline button--next">@Translate.Text("IBAN.SendOTP")</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__content-iban iban_request_success hidden" id="m39-modal__content-2">
+                            <h3 class="m39-modal__content-iban-title linehieght">@Translate.Text("IBAN_SuccessTitle")</h3>
+                            @Html.Raw(Translate.Text("IBAN_Success_Note"))
+                            <h4 class="modeval">AE026*****00*****001</h4>
+                        </div>
+
+                        <div class="grid__column grid__column--12 grid__column--centered m14-richtext hidden" id="modalstatusdescription" style="margin-bottom:100px">
+                            <h3 class="m39-modal__content-iban-title" id="modalstatus"></h3>
+                            <p class="status__subtext linehieght">@Translate.Text("Refund.Customercare")</p>
+                            <h4 class="status__text modalstatus linehieght"></h4>
+                        </div>
+                        
+
+                        <div class="m39-modal__content-wu" id="modalmtcnnumber">
+                            <div class="m39-modal__content-form">
+                                <form method="post" id="FromRefundNameChange" class="form" data-form="true" novalidate="">
+                                    @Html.AntiForgeryToken()
+                                    <div class="form-field form-field--text">
+
+                                        <label for="form-field-gn5rtz9hw" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("Money Transfer Control Number")
+                                        </label>
+
+                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                            <p class="form-field__input form-field__input--readonly" id="mtcnnumbertext"></p>
+                                        </div>
+                                        <div id="description-for-gn5rtz9hw" class="form-field__messages">
+                                            <p id="mtcnnumbervalidity" class="form-field__description"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-field form-field--text">
+
+                                        <label for="form-field-gn5rtz9hw2" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("Refund.Receiving Country")
+                                        </label>
+
+                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                            <p class="form-field__input form-field__input--readonly" id="receivingcountrytext"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-field form-field--text">
+
+                                        <label for="form-field-payoutamounttext" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("Refund.Payout Amount")
+                                        </label>
+
+                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                            <p class="form-field__input form-field__input--readonly" id="payoutamounttext"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-field form-field--text" id="secretcodediv">
+
+                                        <label for="form-field-secretcodetext" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("Refund.Secret Code")
+                                        </label>
+
+                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                            <p class="form-field__input form-field__input--readonly" id="secretcodetext"></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field form-field--text" id="CustomerNameLabel">
+
+                                        <label for="form-field-secretcodetext" class="form-field__label form-field__label--readonly">
+                                            @Translate.Text("RefundCustomerNameLabel")
+                                        </label>
+
+                                        <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                            <p class="form-field__input form-field__input--readonly" id="CustomerNameLabelValue"></p>
+                                            <div class="form-field__messages">
+                                                <p id="CustomerNameUpdateStatusLabelValue" class="form-field__description text-lh-20"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <fieldset class="fieldset-verification hidden" id="divNameUpdateSection">
+                                        <legend class="form-field__label">
+                                            @Translate.Text("RefundNameVerification")
+                                        </legend>
+                                        <div class="form-field form-field--text">
+                                            <label for="form-field-newname" class="form-field__label namelabel">
+                                                @Translate.Text("Refund_NamelabelEID")<!--Dynamic As per Country-->
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text" id="form-field-newname" name="text" type="text" placeholder="@Translate.Text("Refund_NamePlaceHolder")" aria-describedby="description-for-newname" data-parsley-errors-container="#description-for-newname" required="" data-parsley-required-message="@Translate.Text("Refund_NameRequiredError")" data-parsley-trigger="focusout" data-parsley-id="4">
+                                            </span>
+                                            <div id="description-for-newname" class="form-field__messages text-lh-20">
+
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text hidden UAESection">
+                                            <label for="form-field-EID" class="form-field__label">
+                                                @Translate.Text("Refund_EIDLabel")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text"
+                                                       id="form-field-EID"
+                                                       name="emiratesid"
+                                                       type="number"
+                                                       placeholder="@Translate.Text("Refund_EIDPlaceholder")"
+                                                       aria-describedby="description-for-EID"
+                                                       data-parsley-errors-container="#description-for-EID"
+                                                       required=""
+                                                       data-parsley-required-message="@Translate.Text("Refund_EIDRequiredMessage")"
+                                                       data-parsley-trigger="focusout"
+                                                       data-parsley-id="4"
+                                                       data-parsley-emiratesid-message="@Translate.Text("Refund_EIDInvalid")"
+                                                       maxlength="15"
+                                                       data-parsley-emiratesid="">
+                                            </span>
+                                            <div id="description-for-EID" class="form-field__messages">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--text hidden NonUAESection">
+                                            <label for="form-field-passport" class="form-field__label">
+                                                @Translate.Text("Refund_PassportLabel")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <input class="form-field__input form-field__input--text"
+                                                       id="form-field-passport"
+                                                       name="passportnumber"
+                                                       type="text"
+                                                       placeholder="@Translate.Text("Refund_PassportPlaceholder")"
+                                                       aria-describedby="description-for-passport"
+                                                       data-parsley-errors-container="#description-for-passport"
+                                                       required=""
+                                                       data-parsley-required-message="@Translate.Text("Refund_PassportRequired")"
+                                                       data-parsley-trigger="focusout"
+                                                       data-parsley-id="4"
+                                                       data-parsley-type="alphanum"
+                                                       data-parsley-alphanum-message="@Translate.Text("Refund_PassportInvalid")"
+                                                       oninput="this.value = this.value.toUpperCase()"
+                                                       maxlength="15">
+                                            </span>
+                                            <div id="description-for-passport" class="form-field__messages">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--text hidden NonUAESection">
+                                            <label for="form-field-DOB" class="form-field__label">
+                                                @Translate.Text("Refund_DOBLabel")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                                <input id="form-field-DOB"
+                                                       name="dateofbirth"
+                                                       placeholder="@Translate.Text("Refund_DOBPlaceholder")"
+                                                       data-parsley-required-message="@Translate.Text("Refund_DOBrequired")"
+                                                       aria-describedby="description-for-DOB"
+                                                       data-parsley-errors-container="#description-for-DOB"
+                                                       class="enddate form-field__input form-field__input--text form-field__input--datepicker"
+                                                       type="text"
+                                                       data-el="datepicker"
+                                                       required=""
+                                                       @*data-picker-options='{}'*@
+                                                       data-picker-options='{&quot;selectYears&quot;: 100 , &quot;selectMonths&quot;: true, "min": ["@(now.Year-100)","@(now.Month-1)","@((now.Day))"],"max": ["@(now.Year-16)","@(now.Month-1)","@((now.Day))"]}' />
+                                            </span>
+                                            <div id="description-for-DOB" class="form-field__messages">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--text hidden NonUAESection">
+                                            <label for="form-field-Country" class="form-field__label">
+                                                @Translate.Text("Refund_NationalityLabel")
+                                                <span class="form-field__label-required aria-only">(required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                                <select class="form-field__input form-field__input--select form-field__input--select-full"
+                                                        id="form-field-Nationality"
+                                                        name="nationality"
+                                                        aria-describedby="description-for-Nationality"
+                                                        data-parsley-errors-container="#description-for-Nationality"
+                                                        required=""
+                                                        data-parsley-required-message="@Translate.Text("Refund_SelectNationality")"
+                                                        data-parsley-trigger="focusout"
+                                                        data-parsley-id="4">
+                                                    <option>@Translate.Text("Refund_SelectNationality")</option>
+                                                    @foreach (var item in Nationalities)
+                                                    {
+                                                        <option value="@item.Value">@item.Text</option>
+                                                    }
+                                                </select>
+                                            </span>
+                                            <div id="description-for-Nationality" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--upload hidden IDAttachement">
+                                            <div class="form-field__input-wrapper">
+                                                <div class="form-field__preview-wrapper">
+                                                    <img src="/images/preview_pdf@2x.png" data-src="/images/preview_pdf@2x.png" data-success="/images/upload_success@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="attachment">
+                                                </div>
+                                                <div class="form-field__uploader-details">
+                                                    <label for="form-field-attachment" class="form-field__label attachmentFile">@Translate.Text("RefundDocLabel")<span class="form-field__label-required aria-only">(required)</span></label>
+                                                    <div>
+                                                        <label>
+                                                            <input class="form-field__input form-field__input--upload"
+                                                                   id="form-field-attachment"
+                                                                   name="attachment"
+                                                                   type="file"
+                                                                   aria-describedby="description-for-attachment"
+                                                                   data-parsley-errors-container="#description-for-attachment"
+                                                                   required=""
+                                                                   data-parsley-required-message="@Translate.Text("Refund_EIDDocRequire")"
+                                                                   data-uploader-field="attachment"
+                                                                   accept="image/x-png,,image/jpg,,image/jpeg,,image/bmp,,application/pdf" data-accepts='"jpg", "bmp","png","jpeg","pdf"' data-size="2048000"
+                                                                   data-parsley-trigger="focusout" data-parsley-id="20">
+
+                                                            <span class="button button--primary button--next button--small focus-enabled" data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                                        </label>
+                                                    </div>
+                                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("Refund_Uploadformat")</p>
+                                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("Refund_FileSizeError")</p>
+
+                                                    <p class="form-field__input--upload-filename" data-uploader-filename="attachment"></p>
+                                                    <p><button class="button button--text button--remove hidden" data-uploader-remove="attachment">@Translate.Text("Remove")</button></p>
+                                                </div>
+                                            </div>
+                                            <div id="description-for-attachment" class="form-field__messages text-lh-20">
+                                                <p class="form-field__description">@Translate.Text("Refund_FileUploaderNote")</p>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--upload mt0">
+                                            <div id="description-for-attachment" class="form-field__messages text-lh-20">
+                                                <p id="backend_error_msg" class="form-field__description form-field__description-warning hidden">
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+
+                                    
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__footer">
+                        <button class="button button--primary modal_close" data-actiontype="" data-accountupdate="true" data-modal-confirm="true">@Translate.Text("Refund.Done")</button>
+                    </div>
+                </div>
+            </div>
+            <div class="m39-modal__overlay"> </div>
+        </div>
+
+    </div>
+
+    <div id="error-refund-wrapper" class="grid__column grid__column--12 grid__column--form grid__column--centered form-field__messages parsley-errors-list hidden">@Translate.Text("refund timeout error message")</div>
+
+</div>
+
+<script id="refund-item-template" type="text/x-handlebars-template">
+    {{#refunds}}
+    <div class="transaction-history__item mt12">
+        <div class="transaction-history__title">{{refundtypetext}}</div>
+        <span class="transaction-history__detail-amount--bill">
+            {{#if isibannotexist}}
+            <span class="transaction-history__detail-item--content iban-update-status not-available">@Translate.Text("IBAN_NotAvailable")</span>
+            {{else}}
+            <span class="transaction-history__detail-item--content {{refundrejectedclass}}">{{refundstatustext}} </span>
+            {{/if}}
+
+        </span>
+        <ul class="transaction-history__detail-refund">
+            <li class="transaction-history__detail-item-refund">
+                @Translate.Text("Request tracking number"){{trackingnumber}}
+            </li>
+            <li class="transaction-history__detail-item-refund">
+                {{shortDate}}
+            </li>
+        </ul>
+        <a class="button button--primary refund_history_status_button mt12" data-rnumber="{{trackingnumber}}" data-isibannotexist="{{isibannotexist}}" data-ibanmessage="{{ibanmessage}}" data-statusdescription="{{refundstatusdescription}}" data-mtcnnumber="{{mtcnnumber}}" data-mtcnnumbervalidity="{{mtcnnumbervalidity}}" data-secretcode="{{secretcode}}" data-receivingcountry="{{receivingcountry}}" data-payoutamount="{{payoutamount}}" data-payoutcurrency="{{payoutcurrency}}" data-steps="{{refundsteps}}" data-stepcount="{{refundstepcount}}" data-modaltitle="{{refundtypetext}}" data-has-error='{{refundrejected}}'
+           data-firstname="{{firstname}}"
+           data-lastname="{{lastname}}"
+           data-namechangeallow="{{namechangeallow}}"
+           data-namechangeallowdescription="{{namechangeallowdescription}}"
+           data-isuae="{{isuae}}"
+           data-trackingnumber="@Translate.Text("Request tracking number"){{trackingnumber}}">
+            {{#if isibannotexist}}
+            @Translate.Text("Refund_UpdateIBan")
+            {{else}}
+            @Translate.Text("Refund status")
+            {{/if}}
+        </a>
+    </div>
+    {{/refunds}}
+    <div id="pagination-list">
+    </div>
+</script>
+
+<script id="refund-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination">
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="ajaxSelection({{firstpagenumber}})" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+            </a>
+            {{/if}}
+            {{#if previouspage}}
+            <a onclick="ajaxSelection({{previouspagenumber}})" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+            {{/if}}
+            <ul class="m34-pagination__page-list">
+                {{#pagenumbers}}
+                {{#ifCond ../page this}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                    <a onclick="ajaxSelection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{else}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                    <a onclick="ajaxSelection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{/ifCond}}
+                {{/pagenumbers}}
+            </ul>
+            {{#if nextpage}}
+            <a onclick="ajaxSelection({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="ajaxSelection({{lastpagenumber}})" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</script>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    var _rferenceNo = null;
+
+
+
+
+
+    docReady(function () {
+
+        require(['parsley'], function () {
+
+            var _this = this;
+
+            Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+                if (v1 == v2) {
+                    return options.fn(this);
+                }
+                return options.inverse(this);
+            });
+            jQuery('#form-account-selector').submit(handleAccountSelection);
+            jQuery('#form-account-selector').submit();
+            jQuery('select[name="refund-filter"]').change(handleFilterSelection);
+            var bindEvents = function () {
+
+                jQuery('.modal_close').off('click.close').on('click.close', function () {
+
+                    var actionType = jQuery(this).attr("data-actiontype");
+
+                    if (actionType == "btnNewIbanRequest") {
+
+                        fnPartailUpdateIBANRequest();
+                        return false;
+                    }
+
+
+                    if (actionType == "btnUpdateRefundNameSubmit") {
+
+                        fnUpdateRefundNameSubmit();
+                        return false;
+                    }
+
+                    //if (actionType == "btnVerifyName") {
+                    //    fnVerifyName();
+                    //    return false;
+                    //}
+
+                    setTimeout(function () {
+                        jQuery('#form-account-selector').submit();
+                    }, 100);
+                    jQuery(this).closest('.m39-modal__dialog').find('.m39-modal__button--close').click();
+
+                });
+                $(".m39-modal__button--close").on("click", function () {
+                    jQuery('#form-account-selector').submit();
+                })
+                jQuery('.refund_history_status_button').each(function () {
+                    jQuery(this).off('click.bind').on('click.bind', function (event) {
+                        event.preventDefault();
+                        $('.m39-modal__title').html($(this).attr('data-modaltitle'));
+                        $('.m39-modal__subtitle').html($(this).attr('data-trackingnumber'));
+                        $('.m70-status-tracker').attr('data-steps', $(this).attr('data-steps'));
+                        var datastepcount = $(this).attr('data-stepcount');
+                        $('.m70-status-tracker').attr('data-current-step', datastepcount);
+                        $('.m70-status-tracker').attr('data-has-error', $(this).attr('data-has-error'));
+                        var mtcn = $(this).attr('data-mtcnnumber');
+                        $("#modalstatusdescription").hide();
+                        $(".m39-modal__content-iban").hide();
+
+                        $("#modalmtcnnumber").hide();
+
+                        /*initial IBAN update setup*/
+                        var _isUpdateIBAN = $(this).data("isibannotexist");
+                        _rferenceNo = null;
+                        jQuery('.modal_close').attr("data-actiontype", null)
+                        jQuery('.iban_new_request').hide();
+                        jQuery('.iban_otp_sendrequest').hide();
+                        jQuery('.iban_request_success').hide();
+                        jQuery(".custome_errormessage").hide();
+                        jQuery(".otpsendform").show();
+                        $(".otpform").hide();
+                        $("#form-updateIbanRequest")[0].reset();
+                        jQuery('#form-updateIbanRequest').parsley().reset();
+
+                        $("#form-updateIbanOTPRequest")[0].reset();
+                        jQuery('#form-updateIbanRequest').parsley().reset();
+                        jQuery(".modal_close").show();
+                        jQuery('.modal_close').html('@Translate.Text("Refund.Close")');
+                        $(".form-field__input--otp").val('');
+                        $("#form-field-selectibanlist").trigger("change");
+                        $(".form-field__input-wrapper").removeClass("form-field__input-wrapper--validated").removeClass("form-field__input-wrapper--error");
+                        _rferenceNo = $(this).attr('data-rnumber');
+                        /*initial IBAN update setup*/
+
+                        if (mtcn != "" && datastepcount < "5") {
+                            $('#modalstatusdescription').hide();
+                            $('#modalmtcnnumber').show();
+                            $('#mtcnnumbertext').html($(this).attr('data-mtcnnumber'));
+                            $('#mtcnnumbervalidity').html($(this).attr('data-mtcnnumbervalidity'));
+                            $('#receivingcountrytext').html($(this).attr('data-receivingcountry'));
+                            var currencytext = "currency amount";
+                            currencytext = currencytext.replace("currency", $(this).attr('data-payoutcurrency'));
+                            var amount = numeral($(this).attr('data-payoutamount')).format('0,0.00')
+                            currencytext = currencytext.replace("amount", amount);
+                            $('#payoutamounttext').html(currencytext);
+                            $('#secretcodediv').hide();
+                            var secretcodetext = $(this).attr('data-secretcode');
+                            if (secretcodetext != "" && secretcodetext != "000000") {
+                                $('#secretcodediv').show();
+                                $('#secretcodetext').html($(this).attr('data-secretcode'));
+                            }
+
+                            RenderNameChangeScreenLogic(this);
+                        }
+                        else {
+                            if (_isUpdateIBAN) {
+                                $(".iban_new_request").show();
+
+                                jQuery('.modal_close').attr("data-actiontype", "btnNewIbanRequest")
+                                $(".ibanstatus").html($(this).attr('data-statusdescription'));
+
+                                jQuery('.modal_close').html('@Translate.Text("Refund_UpdateIBan")');
+                            } else {
+                                //iban_new_request
+                                $('#modalstatusdescription').show();
+                                $('#modalmtcnnumber').hide();
+                                var haserror = $(this).attr('data-has-error');
+                                //if (haserror == "false") {
+                                //    $('#modalstatus').addClass('green');
+                                //}
+                                //else {
+                                //    $('#modalstatus').addClass('red');
+                                //}
+                                $('#modalstatus').html($(this).attr('data-statusdescription'));
+                                $('.modalstatus').html($(this).attr('data-ibanmessage'));
+                            }
+
+
+                        }
+                        jQuery(window).trigger('reinit_m70');
+                        jQuery('.m39-modal__trigger_refundstatus').click();
+                    });
+                });
+            };
+            jQuery(window).off('bindClickEvents').on('bindClickEvents', function () {
+                bindEvents();
+            });
+
+
+            /*
+             step1: to subit IBAN
+             */
+            function fnPartailUpdateIBANRequest() {
+
+                if (jQuery('#form-updateIbanRequest').parsley().validate()) {
+
+                    var _url = '@Url.Action("PartailIBANUpdateNewRequest")';
+                    var requestData = {
+                        SelectedAccount: getAccountNumber(),
+                        SelectedBusinessPartnerNumber: getBpNumber(),
+                        IBANNumber: $("#form-field-IBANNumber").val(),
+                        IBANconfirmnumber: $("#form-field-IBANConfirmNumber").val(),
+                        SelectedRefernceNo: _rferenceNo
+                    };
+                    jQuery.ajax({
+                        url: _url,
+                        data: AddForgeryToken(requestData, "form-updateIbanRequest"),
+                        beforeSend: function () {
+                            $(".vmobile").hide();
+                            $(".vemail").hide();
+                            $(".custome_errormessage").hide();
+                            jQuery(".modal_close").show();
+                        },
+                        complete: function () {
+
+                        },
+                        dataType: 'json',
+                        method: 'POST',
+                        success: function (response) {
+
+                            var isValidMobileExit = response.data.m != undefined && response.data.m != "";
+                            var isValidEmailExit = response.data.e != undefined && response.data.e != "";
+
+                            if (response.success || (!response.success && (isValidMobileExit || isValidEmailExit))) {
+
+                                //jQuery(".modal_close").hide();
+                                if (isValidMobileExit) {
+                                    jQuery(".modeval").html(response.data.m);
+                                    $(".vmobile").show();
+                                } else if (isValidEmailExit) {
+                                    jQuery(".modeval").html(response.data.e);
+                                    $(".vemail").show();
+                                }
+                                jQuery('.modal_close').attr("data-actiontype", "");
+                                jQuery('.iban_new_request').hide();
+                                jQuery('.iban_otp_sendrequest').show();
+
+                                if (!response.success) {
+                                    $(".custome_errormessage").html(response.message);
+                                    $(".custome_errormessage").show();
+                                    $(".otpsendform").hide();
+                                } else {
+                                    $(".otpsendform").show();
+                                    jQuery('.modal_close').html('@Translate.Text("Refund.Close")');
+
+                                }
+                            } else {
+                                $(".custome_errormessage").html(response.message);
+                                $(".custome_errormessage").show();
+                            }
+                            //console.log(response);
+                        }
+                    });
+
+                }
+            }
+
+
+            /*
+             step3: verify OTP and submit IBAN
+             */
+            function fnPartailUpdateIBANOTPRequest() {
+
+                if (jQuery('#form-updateIbanOTPRequest').parsley().validate() && !IsOtpSubmit) {
+                    var _url = '@Url.Action("PartailIBANUpdateOtpRequest")';
+
+                    var requestData = {
+                        OTP: jQuery(".form-field__input--otp_main").val(),
+                        SelectedAccount: getAccountNumber(),
+                        SelectedBusinessPartnerNumber: getBpNumber(),
+                        SelectedRefernceNo: _rferenceNo
+                    };
+
+                    jQuery.ajax({
+                        url: _url,
+                        data: AddForgeryToken(requestData, "form-updateIbanRequest"),
+                        beforeSend: function () {
+                            $(".ibanerrormsg").hide();
+                            $(".form-field--otp").hide();
+                            $(".custome_errormessage").hide();
+                            IsOtpSubmit = true;
+                            $($(".form-field__input--otp")[0]).focus();
+                            $(".form-field__input--otp").val('');
+                            jQuery('.modal_close').attr("data-actiontype", "");
+
+                            $(".form-field--otp-loader").show();
+                        },
+                        complete: function () {
+                            IsOtpSubmit = false;
+
+                        },
+                        dataType: 'json',
+                        method: 'POST',
+                        success: function (response) {
+
+                            if (response.success) {
+                                if (response.data.ib != undefined && response.data.ib != "") {
+                                    jQuery(".modeval").html(response.data.ib);
+                                    jQuery('.modal_close').html('@Translate.Text("Refund.Done")');
+                                }
+                                //jQuery('.modal_close').removeAttr("data-actiontype");
+                                jQuery('.iban_new_request').hide();
+                                jQuery('.iban_otp_sendrequest').hide();
+                                jQuery('.iban_request_success').show();
+                                //jQuery('.modal_close').attr("data-actiontype", "ibanupdate-success");
+                            } else {
+                                setTimeout(function () {
+
+                                    $(".custome_errormessage").css("color", "red");
+                                    $(".custome_errormessage").html(response.message);
+                                    $(".custome_errormessage").show();
+                                    $(".form-field--otp-loader").hide();
+                                    if (response.data.maxattempt == "X") {
+                                        $(".otpforminfo").hide();
+                                    } else {
+                                        $(".form-field--otp").show();
+                                    }
+                                }, 100);
+                            }
+                        }
+                    });
+
+                }
+            }
+
+            /*
+             step 2: Sent OTP
+             */
+            jQuery(".otpsendform").on("click", function () {
+                //otpsendform
+                var _url = '@Url.Action("PartailIBANUpdateResendOtpRequest")';
+
+                var requestData = {
+                    SelectedAccount: getAccountNumber(),
+                    SelectedBusinessPartnerNumber: getBpNumber(),
+                    SelectedRefernceNo: _rferenceNo
+                };
+
+                jQuery.ajax({
+                    url: _url,
+                    data: AddForgeryToken(requestData, "form-updateIbanRequest"),
+                    beforeSend: function () {
+                        $(".ibanerrormsg").hide();
+                        $(".custome_errormessage").hide();
+                    },
+                    complete: function () {
+
+                    },
+                    dataType: 'json',
+                    method: 'POST',
+                    success: function (response) {
+
+                        if (response.success) {
+                            $(".otpsendform").hide();
+                            $(".otpform").show();
+                            $(".otpforminfo").show();
+                            $(".form-field--otp").show();
+
+                            if (ValidSetTimer()) {
+                                jQuery('.button--timer').trigger('start');
+                                jQuery('.modal_close').html('@Translate.Text("Refund.Close")');
+
+                            }
+                        } else {
+                            $(".custome_errormessage").css("color", "red");
+                            $(".custome_errormessage").html(response.message);
+                            $(".custome_errormessage").show();
+                        }
+                    }
+                });
+            })
+
+            jQuery("#timerbutton").on("click", (resendOTP));
+            function ValidSetTimer() {
+                if ($(".m78-timer--button_time").html() != "") {
+                    return false;
+                }
+                return true;
+            }
+
+            /*
+             step 2.5 :  resend OTP
+             */
+            function resendOTP() {
+                if (!jQuery("#timerbutton").hasClass("timer-button--outline")) {
+                var _url = '@Url.Action("PartailIBANUpdateResendOtpRequest")';
+                var requestData = {
+                    SelectedAccount: getAccountNumber(),
+                    SelectedBusinessPartnerNumber: getBpNumber(),
+                    SelectedRefernceNo: _rferenceNo
+                };
+
+                jQuery.ajax({
+                    url: _url,
+                    data: AddForgeryToken(requestData, "form-updateIbanRequest"),
+                    beforeSend: function () {
+                        $(".ibanerrormsg").hide();
+                        $(".custome_errormessage").hide();
+                    },
+                    complete: function () {
+                        if (ValidSetTimer()) {
+                            jQuery('.button--timer').trigger('start');
+                        }
+                    },
+                    dataType: 'json',
+                    method: 'POST',
+                    success: function (response) {
+                        if (response.success) {
+                            $(".otpform").show();
+                            $(".otpforminfo").show();
+                            $(".form-field--otp").show();
+                            $(".custome_errormessage").css("color", "green");
+                        } else {
+                            $(".custome_errormessage").css("color", "red");
+                        }
+                        $(".custome_errormessage").html(response.message);
+                        $(".custome_errormessage").show();
+                        //console.log(response);
+                    }
+                });
+            }
+        }
+
+
+            $($(".form-field__input--otp")[5]).on('blur', function () {
+                var otp = jQuery(".form-field__input--otp_main").val();
+                if (otp.length >= 6) {
+                    fnPartailUpdateIBANOTPRequest();
+                }
+            });
+
+
+            $("#form-field-selectibanlist").change(function () {
+                var selectedvalue = $('#form-field-selectibanlist option:selected').val();
+
+
+                var _isIbanExit = jQuery(this).attr('data-ibanexist') == 'true';
+
+                if (_isIbanExit) {
+                if (selectedvalue == "") {
+                    jQuery('#iban_text').hide();
+                    jQuery('#iban_conftext').hide();
+                    jQuery('#form-field-IBANConfirmNumber').attr('data-parsley-equalto', '#form-field-selectibanlist');
+
+                } else
+                    if (selectedvalue == "others") {
+                        RenderDefaultIBANUpdateFrom();
+                        jQuery("#iban_datalist").show();
+                    }
+                    else {
+                        jQuery('#iban_text').hide();
+                        jQuery('#iban_conftext').show();
+                        jQuery('#form-field-IBANConfirmNumber').attr('data-parsley-equalto', '#form-field-selectibanlist');
+                        jQuery("#form-field-IBANNumber").val(jQuery(this).val())
+                    }
+
+                }
+            });
+
+
+            jQuery("#form-field-newname").on("blur", function () {
+
+                fnVerifyName();
+            });
+
+
+            function fnUpdateRefundNameSubmit() {
+
+                if (jQuery('#FromRefundNameChange').parsley().validate()) {
+
+                //validate name
+                var _url = '@Url.Action("UpdateRefundNameSubmit")';
+
+                var myformData = new FormData($('#FromRefundNameChange')[0]);
+                myformData.append('notificationnumber', _rferenceNo);
+                myformData.append('mode', "W");
+                myformData.append('fullnamenew', _selectedData.newname);
+                myformData.append('fullnameold', _selectedData.oldname);
+                myformData.append('isuae', _selectedData.isuae);
+                //myformData.append('emiratesid', $("#form-field-EID").val());
+                //myformData.append('passportnumber', $("#form-field-EID").val());
+                //myformData.append('dateofbirth', $("#form-field-DOB").val());
+                //myformData.append('nationality', $("#form-field-Nationality").val());
+                //myformData.append('__RequestVerificationToken', jQuery('#FromRefundNameChange input[name=__RequestVerificationToken]').val())
+
+
+
+                //var requestData = {
+                //    notificationnumber: _rferenceNo,
+                //    mode: "W",
+                //    fullnamenew: _selectedData.newname,
+                //    fullnameold: _selectedData.oldname,
+                //    isuae: _selectedData.isuae,
+                //    emiratesid: $("#form-field-EID").val(),
+                //    passportnumber: $("#form-field-EID").val(),
+                //    dateofbirth: $("#form-field-EID").val(),
+                //    nationality: $("#form-field-EID").val(),
+                //};
+
+
+
+
+                jQuery.ajax({
+                    url: _url,
+                    data: myformData,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    beforeSend: function () {
+                        jQuery("#backend_error_msg").hide();
+                        jQuery("#description-for-newname").hide();
+                    },
+                    complete: function () {
+
+                    },
+                    dataType: 'json',
+                    method: 'POST',
+                    success: function (d) {
+                        console.log(d)
+                        if (d.success) {
+                            jQuery('.modal_close').attr("data-actiontype", null);
+                            jQuery('.modal_close').html('@Translate.Text("Refund.Close")');
+                            jQuery(".UAESection").hide();
+                            jQuery(".NonUAESection").hide();
+                            jQuery("#divNameUpdateSection").hide();
+                            jQuery(".IDAttachement").hide();
+                            jQuery("#CustomerNameUpdateStatusLabelValue").addClass("orange").html('<strong>' + d.data.description+'</strong>').show();
+                        } else {
+                            jQuery("#backend_error_msg").html(d.message).show();
+                        }
+                    },
+                });
+
+                }
+            }
+
+        });
+
+    });
+    var IsOtpSubmit = false;
+    function getAccountNumber() {
+        return jQuery('#form-account-selector').find('input[name="SelectedAccountNumber"]:checked').val();
+    }
+    function getBpNumber() {
+        return jQuery('#form-account-selector').find('input[name="SelectedAccountNumber"]:checked').attr("data-legacy-bp-number");
+    }
+
+    function handleAccountSelection() {
+        ajaxSelection(1);
+        return false;
+    }
+
+    function ajaxSelection(page, sortby) {
+        if (typeof (sortby) === 'undefined')
+            sortby = jQuery('select[name="refund-filter"]').val();
+        var accountNumber = getAccountNumber();
+        var bpnumber = getBpNumber();
+        if (accountNumber) {
+            jQuery('a[href*="?a="]').each(function () {
+                var $a = jQuery(this);
+                var $href = $a.attr('href');
+                var $newHref = $href.replace(/(\?a=\d*)/g, '?a={accnum}'.replace('{accnum}', accountNumber));
+
+                $a.attr('href', $newHref);
+            });
+            var url = "/api/refund/GetRefundHistory";
+            jQuery.ajax({
+                type: 'GET',
+                url: url,
+                traditional: true,
+                data: {
+                    id: accountNumber,
+                    bp: bpnumber,
+                    page: page,
+                    sortby: sortby
+                },
+                beforeSend: function () {
+                    jQuery('select[name="refund-filter"]').val('');
+                    jQuery('#refund-history-placeholder').removeClass('hidden').empty();
+                    jQuery('#refund-list-wrapper').removeClass('hidden');
+                    jQuery('#no-refund-wrapper, #error-refund-wrapper, #form-refund-filter, #downloadstmt').addClass('hidden');
+
+                    window.attachSpinner('#refund-history-placeholder', { minHeight: 100 });
+                    $("#form-field-selectibanlist").children().remove();
+                    RenderDefaultIBANUpdateFrom();
+                },
+                complete: function () {
+                    window.detachSpinner('#refund-list-wrapper');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        var result = response.Result;
+                        if (result.Refunds.length === 0 && sortby == "") {
+                            jQuery('#no-refund-wrapper').removeClass('hidden');
+                            jQuery('#refund-list-wrapper, #error-refund-wrapper, #form-refund-filter').addClass('hidden');
+                        }
+                        else if (result.Refunds.length === 0 && sortby != "") {
+                            jQuery('#no-refund-wrapper, #form-refund-filter').removeClass('hidden');
+                            jQuery('select[name="refund-filter"]').val(result.sortby);
+                            jQuery('#refund-history-placeholder').addClass('hidden');
+                        } else {
+                            jQuery('#no-refund-wrapper, #error-refund-wrapper').addClass('hidden');
+                            jQuery('#refund-list-wrapper, #form-refund-filter').removeClass('hidden');
+                            jQuery('select[name="refund-filter"]').val(result.sortby);
+                            var context = {
+                                refunds: function () {
+                                    return _.map(result.Refunds, transform);
+                                }
+                            };
+                            renderHistory(context);
+
+                            if (result.pagination) {
+                                var pagedata = {
+                                    previouspage: function () {
+                                        if (result.page > 1)
+                                            return true;
+                                        else
+                                            return false;
+                                    },
+                                    nextpage: function () {
+                                        if (result.page < result.totalpage)
+                                            return true;
+                                        else
+                                            return false;
+                                    },
+                                    page: result.page,
+                                    firstpagenumber: 1,
+                                    lastpagenumber: result.totalpage,
+                                    previouspagenumber: result.page - 1,
+                                    nextpagenumber: result.page + 1,
+                                    pagenumbers: result.pagenumbers,
+                                    totalpage: result.totalpage
+                                }
+                                renderSearchPagination(pagedata);
+                            }
+                        }
+                        jQuery(window).trigger('bindClickEvents');
+                        //console.log(response)
+                        RenderIBanListLogic(response.Result.IbanValues);
+
+
+                    }
+                    else {
+                        jQuery('#no-refund-wrapper').removeClass('hidden');
+                        jQuery('#no-refund-wrapper').html(response.Message);
+                        jQuery('#refund-list-wrapper, #error-refund-wrapper, #form-refund-filter').addClass('hidden');
+                    }
+                },
+                error: function () {
+                    jQuery('#no-refund-wrapper, #refund-list-wrapper, #form-refund-filter').addClass('hidden');
+                    jQuery('#error-refund-wrapper').removeClass('hidden');
+                }
+            });
+        }
+        return false;
+    }
+
+    function handleExpanderOpened($trigger) {
+        var $expander = $trigger.parent();
+        if ($expander.attr('data-loaded')) return;
+
+        var accountNumber = getAccountNumber();
+        var transaction = $trigger.closest('[data-transaction-ref]').data('transaction-ref');
+        var url = "/api/receipts/" + transaction;
+        var $content = $trigger.next('.m37-expander__content').first();
+
+        jQuery.ajax(url, {
+            beforeSend: function () {
+                $expander.find('.no-receipt-data-wrapper').addClass('hidden');
+
+                window.attachSpinner($content, { minHeight: 100 });
+            },
+            complete: function () {
+                window.detachSpinner($content);
+            },
+            dataType: 'json',
+            method: 'GET',
+            success: function (response) {
+                if (!response || response.length === 0) {
+                    $expander.find('.no-receipt-data-wrapper').removeClass('hidden');
+                }
+                else {
+                    $expander.find('.no-receipt-data-wrapper').addClass('hidden');
+                    $expander.attr('data-loaded', 'true');
+
+                    var context = {
+                        transactions: function () {
+                            return _.chain(response)
+                                .filter(function (r) {
+                                    return sanitize(r.AccountNumber) === accountNumber;
+                                })
+                                .map(transform)
+                                .value();
+                        }
+                    };
+
+                    var markup = jQuery('#receipt-details-template').html();
+                    var template = Handlebars.compile(markup);
+
+                    var rendering = template(context);
+                    $trigger.siblings('.m37-expander__content').first().html(rendering);
+                }
+            }, error: function () {
+                $expander.find('.no-receipt-data-wrapper').removeClass('hidden');
+            }
+        });
+    }
+
+    function handleFilterSelection() {
+        var type = jQuery(this).val();
+        ajaxSelection(1, type);
+    }
+
+    function sanitize(accountNumber) {
+        if (accountNumber) {
+            if (accountNumber.substring(0, 2) === '00') {
+                return accountNumber.substring(2);
+            }
+        }
+        return accountNumber;
+    }
+
+    function transform(refunds) {
+        var r = {
+            shortDate: refunds.FormattedDate,
+            refundtypetext: refunds.refundtypetext,
+            trackingnumber: refunds.notificationnumber,
+            refundstatustext: refunds.refundstatustext,
+            mtcnnumber: refunds.mtcnnumber,
+            mtcnnumbervalidity: refunds.mtcnnumbervalidity,
+            refundstatusdescription: refunds.refundstatusdescription,
+            secretcode: refunds.secretcode,
+            refundsteps: refunds.refundsteps,
+            refundstepcount: refunds.refundstepcount,
+            refundrejected: refunds.refundrejected,
+            receivingcountry: refunds.receivingcountry,
+            payoutamount: refunds.payoutamount,
+            payoutcurrency: refunds.payoutcurrency,
+            refundrejectedclass: refunds.refundrejected == true ? "red" : "",
+            isibannotexist: refunds.IsIBANNotExit == true,
+            ibanmessage: refunds.IbanMessage,
+            firstname: refunds.FirstName,
+            lastname: refunds.LastName,
+            namechangeallow: refunds.NameChangeAllow,
+            namechangeallowdescription: refunds.NameChangeAllowDescription,
+            isuae : (refunds.receivingcountry== "UNITED ARAB EMIRATES")
+        }
+        return r;
+    }
+
+    function renderHistory(context) {
+        var markup = jQuery('#refund-item-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#refund-history-placeholder').html(rendering);
+
+        window.initComponents('refund-history-placeholder');
+    }
+
+    function renderSearchPagination(context) {
+        var markup = jQuery('#refund-pagination-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#pagination-list').html(rendering);
+
+        //window.initComponents('pagination-list');
+    }
+
+    function RenderDefaultIBANUpdateFrom() {
+        //reset iban list not available
+        jQuery("#form-field-IBANNumber").val('');
+        jQuery("#iban_datalist").hide();
+        jQuery("#iban_text").show();
+        jQuery("#iban_conftext").show();
+        jQuery('#form-field-IBANConfirmNumber').attr('data-parsley-equalto', '#form-field-IBANNumber');
+        jQuery("#form-field-IBANNumber").attr("required", "");
+    }
+
+
+    function RenderIBanListLogic(IbanValues) {
+          $("#form-field-selectibanlist").html('');
+        $("#form-field-selectibanlist").append($("<option></option>").val('').html("@Translate.Text("updateiban.PleaseSelectIBAN")"));
+        var _ibanExit = (IbanValues != null && IbanValues != undefined);
+        if (_ibanExit) {
+            jQuery('input[name="Ibanavailable"]').val(true);
+
+            $("#form-field-selectibanlist").attr("required", "");
+            $(IbanValues).each(function (i, obj) {
+                $("#form-field-selectibanlist").append($("<option></option>").val(IbanValues[i].iban.replace('AE', '')).html(IbanValues[i].maskIban));
+            });
+            jQuery('#form-field-select-confirm-iban-number').attr('data-parsley-equalto', '#form-field-ibannumber2');
+
+
+            //RESET AFTER HAVING IBAN LIST
+            jQuery('#iban_text').hide();
+            jQuery('#iban_conftext').hide();
+            jQuery('#form-field-IBANConfirmNumber').attr('data-parsley-equalto', '#form-field-selectibanlist');
+            jQuery("#form-field-IBANNumber").removeAttr("required");
+            jQuery("#iban_datalist").show();
+        }
+
+        $("#form-field-selectibanlist").attr('data-ibanexist', _ibanExit )
+          $("#form-field-selectibanlist").append($("<option></option>").val('others').html("@Translate.Text("updateiban.others")"));
+    }
+
+    var _selectedData = null;
+    function RenderNameChangeScreenLogic(data) {
+        _selectedData = null;
+        jQuery("#CustomerNameUpdateStatusLabelValue").hide();
+        jQuery("#divNameUpdateSection").hide();
+        jQuery(".UAESection").hide();
+        jQuery(".NonUAESection").hide();
+        jQuery(".IDAttachement").hide();
+        jQuery("#description-for-newname").hide();
+
+        $("#FromRefundNameChange")[0].reset();
+        jQuery('#FromRefundNameChange').parsley().reset();
+        $(".form-field__input-wrapper").removeClass("form-field__input-wrapper--validated").removeClass("form-field__input-wrapper--error");
+
+        jQuery('.modal_close').attr("data-actiontype", null);
+        jQuery('.modal_close').html('@Translate.Text("Refund.Close")');
+
+        _selectedData = jQuery(data).data();
+        console.log(_selectedData);
+        _selectedData.isnamechangeshow = (_selectedData.namechangeallow == "N" || _selectedData.namechangeallow == "Y");
+        jQuery("#CustomerNameLabelValue").html(_selectedData.firstname + " " + _selectedData.lastname);
+
+        //check Country & diplay Name Label
+        var labeltext = '@Translate.Text("Refund_NamelabelEID")';
+        var labelAttachementText = '@Translate.Text("RefundDocEIDLabel")';
+        var AttachementRequireText = '@Translate.Text("Refund_EIDDocRequire")';
+        if (!_selectedData.isuae) {
+            labeltext = '@Translate.Text("Refund_NamelabelPassport")';
+            labelAttachementText = '@Translate.Text("RefundDocPassportLabel")';
+            AttachementRequireText = '@Translate.Text("Refund_PassportDocRequire")';
+        }
+
+        jQuery(".namelabel").text(labeltext);
+        jQuery(".attachmentFile").text(labelAttachementText);
+        jQuery("#form-field-attachment").attr("data-parsley-required-message", AttachementRequireText)
+
+
+
+        _selectedData.oldname = null;
+        _selectedData.newname = null;
+
+        if (_selectedData.isnamechangeshow) {
+            jQuery("#divNameUpdateSection").show();
+            @*jQuery('.modal_close').attr("data-actiontype", "btnVerifyName");
+            jQuery('.modal_close').html('@Translate.Text("Refund_Verify")');*@
+        } else {
+            RenderCustomerNameUpdateStatus(_selectedData);
+        }
+    }
+
+
+
+
+
+    function similar(aa, bb) {
+        var similarity = parseFloat(100);
+        if (aa != null && bb != null) {
+
+            var a = aa.toLowerCase();
+            var b = bb.toLowerCase();
+
+            var equivalency = 0;
+            var minLength = (a.length > b.length) ? b.length : a.length;
+            var maxLength = (a.length < b.length) ? b.length : a.length;
+            for (var i = 0; i < minLength; i++) {
+                if (a[i] == b[i]) {
+                    equivalency++;
+                }
+            }
+            var weight = equivalency / maxLength;
+            similarity = parseFloat(weight * 100);
+        }
+        return similarity;
+    }
+
+    function RenderCustomerNameUpdateStatus(data) {
+
+        jQuery("#CustomerNameUpdateStatusLabelValue").removeClass("green").removeClass("orange").removeClass("red").html('<strong>'+data.namechangeallowdescription+'</strong>');
+
+
+        switch (data.namechangeallow) {
+            case 'I': jQuery("#CustomerNameUpdateStatusLabelValue").addClass("orange");break;
+            case 'A': jQuery("#CustomerNameUpdateStatusLabelValue").addClass("green");break;
+            case 'R': jQuery("#CustomerNameUpdateStatusLabelValue").addClass("red"); break;
+            default:
+        }
+
+        jQuery("#CustomerNameUpdateStatusLabelValue").show();
+    }
+
+    function ValidateEnterNewName(oldName, newName,onSuccess) {
+        //validate name
+        var _url = '@Url.Action("UpdateRefundNameSubmit")';
+
+        var requestData = {
+            notificationnumber: _rferenceNo,
+            mode: "R",
+            fullnamenew: newName,
+            fullnameold: oldName
+        };
+
+        jQuery.ajax({
+            url: _url,
+            data: AddForgeryToken(requestData, "FromRefundNameChange"),
+            beforeSend: function () {
+
+            },
+            complete: function () {
+
+            },
+            dataType: 'json',
+            method: 'POST',
+            success: onSuccess,
+        });
+    }
+
+
+    function fnVerifyName() {
+
+        jQuery("#description-for-newname").hide().removeClass("green").removeClass('red').html('');
+        var newname = jQuery("#form-field-newname").val();
+        var oldname = _selectedData.firstname + " " + _selectedData.lastname;
+
+
+        jQuery("#form-field-attachment").removeAttr("required");
+        jQuery(".NonUAESection input").removeAttr("required");
+        jQuery(".UAESection input").removeAttr("required");
+        jQuery(".NonUAESection").hide();
+        jQuery(".UAESection").hide();
+        jQuery(".IDAttachement").hide();
+        jQuery(".button--remove").click();
+        //var similarpercent = similar(newname, oldname);
+
+        if (newname) {
+                    @*//60% similar then proceed for name change.
+                    if (similarpercent >= 60 && similarpercent <100) {
+                        //if UNITED ARAB EMIRATES EID
+                        if (_selectedData.isuae) {
+                            alert("UAE")
+                        } else {
+                            alert("Other")
+                            //Else passport
+                        }
+                    }else if (similarpercent == 100) {
+                        //Your name matches with our database
+
+                        jQuery("#description-for-newname").addClass("green").html('@Translate.Text("Refund_SuccessNameMatchesToDB")').show();
+                    } else {
+                        jQuery("#description-for-newname").addClass("red").html('@Translate.Text("Refund_UnSuccessTotallyDifferent")').show();
+                    }*@
+            jQuery('.modal_close').attr("data-actiontype", null);
+            jQuery('.modal_close').html('@Translate.Text("Refund.Close")');
+            ValidateEnterNewName(oldname, newname, function (d) {
+
+                _selectedData.oldname = oldname;
+                _selectedData.newname = newname;
+
+
+                if (d.success) {
+                    jQuery('.modal_close').attr("data-actiontype", "btnUpdateRefundNameSubmit");
+                        jQuery('.modal_close').html('@Translate.Text("Refund.Done")');
+                        jQuery("#description-for-newname").addClass("red").html(d.data.description).show();
+                        if (_selectedData.isuae) {
+                            jQuery(".UAESection input").attr("required", "");
+                            jQuery(".UAESection").show();
+                            //EID
+                        } else {
+                            jQuery(".NonUAESection input").attr("required", "");
+                            jQuery(".NonUAESection").show();
+                            //Else passport
+                    }
+                    jQuery("#description-for-newname").addClass("orange").html(d.data.description).show();
+                    if (d.data.attachmentflag == "X") {
+                        jQuery("#form-field-attachment").attr("required", "");
+                        jQuery(".IDAttachement").show();
+                    }
+
+                } else {
+                    jQuery("#description-for-newname").addClass("red").html(d.message).show();
+                }
+
+            })
+        } else {
+            //Name Required
+            jQuery("#description-for-newname").addClass("red").html('@Translate.Text("Refund_NameRequiredError")').show();
+        }
+    }
+</script>
+

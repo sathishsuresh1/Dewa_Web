@@ -1,0 +1,234 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using Sitecorex = Sitecore
+<div class="grid">
+    @Html.Sitecore().Placeholder("placeholder-back")
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+    <!--Start projectandinitiatives.cshtml-->
+    <div class="grid" id="projectandinitiativediv">
+        <div class="grid__row">
+            <div class="m66-preloader j1-CP--loader hidden">
+                <div class="grid">
+                    <div class="grid__row">
+                        <div class="grid__column grid__column--12">
+                            <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid__column grid__column--12">
+
+                <div class="m23-table-joint-services" data-component="m23-table-joint-services">
+                    <div class="m23-table-joint-services--heading_wrapper">
+                        <span class="m23-table-joint-services--title">@Translate.Text("cpportal.Projects and Initiatives")</span>
+                        <span class="m23-table-joint-services--count" dir="ltr"><span class="m23-table-joint-services--count_catch"></span> @Translate.Text("cpportal.Total")</span>
+                    </div>
+                    <!-- m15-filter start -->
+                    <div class="m15-filter" data-component="m15-filter">
+                        <form id="form-projectandinitiative-filter" action="#" method="POST" form-skipvalidation="true">
+                            @Html.AntiForgeryToken()
+                            <div class="m15-filter--input_wrapper">
+                                <input placeholder="@Translate.Text("cpportal.searchkeyword")" class="m15-filter--input" id="projectandinitiativekeyword" type="text" name="">
+                                <button class="m15-filter--input_button icon-search" id="projectandinitiativebutton"></button>
+                            </div>
+                        </form>
+
+                        @*<div class="m15-filter--select_wrapper icon-open" data-title="@Translate.Text("cpportal.sortby")">
+
+                               <select class="m15-filter--select" id="projectandinitiativefilter" name="projectandinitiativefilter">
+                                    <option value="1" selected="">
+                                        @Translate.Text("cpportal.datesort")
+                                    </option>
+                                    <option value="2">
+                                        @Translate.Text("cpportal.Namesort")
+                                    </option>
+                                </select>
+                            </div>*@
+
+                    </div>
+                    <!-- m15-filter end -->
+                    <table class="m23-table-joint-services--table">
+                        <thead class="m23-table-joint-services--thead">
+                            <tr class="m23-table-joint-services--tr">
+                                <th class="m23-table-joint-services--tcell">
+                                    @Translate.Text("cpportal.Type")
+                                </th>
+                                <th class="m23-table-joint-services--tcell">
+                                    @Translate.Text("cpportal.Dates Plan")
+                                </th>
+                                <th class="m23-table-joint-services--tcell">
+                                    @Translate.Text("cpportal.Project/ Initiative Name")
+                                </th>
+                                <th class="m23-table-joint-services--tcell">
+                                    @Translate.Text("cpportal.Division")
+                                </th>
+                                @*<th class="m23-table-joint-services--tcell">
+                                    Budget*@
+
+                            </tr>
+                        </thead>
+                        <tbody class="m23-table-joint-services--tbody" id="projectandinitiative-placeholder"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="Noelementprojectandinitiative-item-template" type="text/x-handlebars-template">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12">
+            <p class="centered">
+                @Translate.Text("cpportal.There is no projectandinitiatives documents")
+            </p>
+        </div>
+    </div>
+</script>
+<script id="projectandinitiative-item-template" type="text/x-handlebars-template">
+    {{#projectandinitiative}}
+    <tr class="m23-table-joint-services--tr">
+        <td data-label="Division/ Department" class="m23-table-joint-services--tcell">
+            {{projorinitiativetype}}
+        </td>
+        <td data-label="Dates Plan" class="m23-table-joint-services--tcell">
+            <div class='nowrap'><span class='m23-table-joint-services--tcell_hlight'>@Translate.Text("Cp_Starts"): </span>{{startDate}}</div><div class='nowrap'><span class='m23-table-joint-services--tcell_hlight'>@Translate.Text("Cp_Delivery"): </span> {{endDate}}</div>
+        </td>
+        <td data-label="Project/ Initiative Name" class="m23-table-joint-services--tcell">
+            @*<span class='m23-table-joint-services--tcell_hlight'>{{projorinitiativetype}} </span>*@{{projectInitiativeName}}
+        </td>
+        <td data-label="Division/ Department" class="m23-table-joint-services--tcell">
+            {{projorinitiativetext}}
+        </td>
+        @*<td data-label="Budget" class="m23-table-joint-services--tcell">
+            {{budget}}
+            </td>*@
+
+    </tr>
+    {{/projectandinitiative}}
+</script>
+<script id="zeroresultprojectandinitiative-item-template" type="text/x-handlebars-template">
+    <tr class="centered">
+        <td colspan="4" style="padding-top:12px;">
+            @Translate.Text("No result(s)")
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+    docReady(function () {
+        var _this = this;
+        handleAccountSelection();
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        jQuery('select[name="projectandinitiativefilter"]').change(handleFilterSelection);
+        jQuery('#projectandinitiativebutton').on('click', function (event) {
+            event.preventDefault();
+            handleAccountSelection();
+        });
+    });
+
+    function handleAccountSelection() {
+        ajaxSelection();
+        return false;
+    }
+
+    function ajaxSelection(sortby) {
+        if (typeof (sortby) === 'undefined')
+            sortby = jQuery('select[name="projectandinitiativefilter"]').val();
+        var url = "/api/Sitecore/CorporatePartnership/ProjectsAndInitiativesAjax";
+        jQuery.ajax({
+            type: 'POST',
+            url: url,
+            traditional: true,
+            data: AddForgeryToken({
+                sortby: sortby,
+                keyword: jQuery('#projectandinitiativekeyword').val()
+            }, "form-projectandinitiative-filter"),
+            beforeSend: function () {
+                jQuery('.j1-CP--loader').show();
+                jQuery('.j1-CP--loader').css('top', $(window).scrollTop());
+                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j1-CP--loader').hide();
+                jQuery('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status) {
+                    if (response.Result.length > 0) {
+                        var result = response.Result;
+                        var context = {
+                            projectandinitiative: function () {
+                                return _.map(result, transform);
+                            }
+                        };
+                        renderHistory(context);
+                        jQuery('.m23-table-joint-services--count_catch').html(response.Result.length);
+                    }
+                    else {
+                        var markup = jQuery('#zeroresultprojectandinitiative-item-template').html();
+                        var template = Handlebars.compile(markup);
+                        var rendering = template(context);
+                        jQuery('#projectandinitiative-placeholder').html(rendering);
+                        window.initComponents('projectandinitiative-placeholder');
+                    }
+                }
+                else {
+                    jQuery('#projectandinitiativediv').html();
+                    var markup = jQuery('#Noelementprojectandinitiative-item-template').html();
+                    var template = Handlebars.compile(markup);
+                    var rendering = template(context);
+                    jQuery('#projectandinitiativediv').html(rendering);
+                    //window.initComponents('projectandinitiative-placeholder');
+
+                }
+            },
+            error: function () {
+                jQuery('#projectandinitiativediv').html();
+                var markup = jQuery('#Noelementprojectandinitiative-item-template').html();
+                var template = Handlebars.compile(markup);
+                var rendering = template(context);
+                jQuery('#projectandinitiativediv').html(rendering);
+            }
+        });
+    }
+
+
+    function handleFilterSelection() {
+        var type = jQuery(this).val();
+        ajaxSelection(type);
+    }
+
+
+    function transform(projectandinitiative) {
+        var r = {
+            projectInitiativeName: projectandinitiative.projectInitiativeName,
+            startDate: projectandinitiative.startDate,
+            endDate: projectandinitiative.endDate,
+            budget: projectandinitiative.budget,
+            projorinitiativetext: projectandinitiative.divisions,
+            projorinitiativetype: projectandinitiative.types
+        }
+        return r;
+    }
+
+    function renderHistory(context) {
+        var markup = jQuery('#projectandinitiative-item-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#projectandinitiative-placeholder').html(rendering);
+        window.initComponents('projectandinitiative-placeholder');
+    }
+
+</script>

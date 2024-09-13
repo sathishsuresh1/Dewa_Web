@@ -1,0 +1,149 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using X.PagedList.Mvc;
+@using X.PagedList;
+@using X.PagedList.Web.Common
+@using X.PagedList.Mvc.Common
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.Bills.Models.Estimates.EstimateReceiptHistoryData
+<div class="m39-modal__header">
+    <div class="m39-modal__title">@Translate.Text("THI_EstimateNO") @Model.EstimateNo</div>
+    <a data-close="true" class="m39-modal__button--close" id="_tpxydxhri_close" aria-controls="_xcetvlagg_content">@Translate.Text("Close")</a>
+    <div class="m39-modal__subtitle">@Translate.Text("THI_Modal_Subtitle")</div>
+</div>
+<div class="m39-modal__content" id="_xcetvlagg_content">
+    <!-- transaction-history - start -->
+
+
+    @if (Model.PagedPaymentHistoryDetails != null && Model.PagedPaymentHistoryDetails.Count > 0)
+    {
+        foreach (var item in Model.PagedPaymentHistoryDetails)
+        {
+            <div class="transaction-history" data-estimate="@(Model.EstimateNo)">
+                <div class="transaction-history__item">
+                    <div class="transaction-history__title">
+                        @Translate.Text("THI_ReceiptNo") @(item.DocumentNumber)
+                    </div>
+                    <span class="transaction-history__detail-amount--reciept">
+                        <span class="transaction-history__detail-item--content">@(item.FormattedAmount.ToString("N2"))  @Translate.Text("AED")</span>
+                    </span>
+                    <ul class="transaction-history__detail">
+                        <li class="transaction-history__detail-item">@(item.FormattedDate)</li>
+                    </ul>
+                    @{
+                        string _redirectUrl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EstimatePaymentDetail);
+                        if (!string.IsNullOrEmpty(item.TransactionId ?? ""))
+                        {
+                            _redirectUrl += "?id=" + item.TransactionId + "&d=" + item.Timestamp + "&t=" + item.PaymentMode;
+                        }
+                        else
+                        {
+                            _redirectUrl += "?dNo=" + item.DocumentNumber;
+                        }
+                    }
+                    <a class="button button--secondary button--next button--very_small" target="_blank" href="@(_redirectUrl)">@Translate.Text("THI_ViewReciept")</a>
+
+                    @if (item.TaxInvoiceApplicability == "X")
+                    {
+                        @*<a class="button button--text" href="@Url.Action("GetEstiamteTaxInvoicePDF", "Estimate", new { docNo = item.DocumentNumber, sdtype = Model.sdType })" target="_blank">@Translate.Text("THI_DownloadTaxInvoice")</a>*@
+                        <a href="javascript:void(0)" data-docno="@item.DocumentNumber" data-sdtype="@Model.sdType" data-apiurl="/api/sitecore/Estimate/GetEstiamteTaxInvoicePDF" class="button button--text DownloadPDF">@Translate.Text("THI_DownloadTaxInvoice")</a>
+                        <script type="text/javascript">
+                            docReady(function () {
+                                $(".DownloadPDF").on("click", function () {
+                                    //debugger;
+                                    $(".m66-preloader-fullpage").show();
+                                    $('#GetEstiamteTaxInvoicePDF_form').html("");
+                                    $('#GetEstiamteTaxInvoicePDF_form').append('<input type="hidden" name="docNo" value="' + $(this).data("docno") + '"/>');
+                                    $('#GetEstiamteTaxInvoicePDF_form').append('<input type="hidden" name="sdtype" value="' + $(this).data("sdtype") + '"/>');
+                                    $('#GetEstiamteTaxInvoicePDF_form').append('<input name="__RequestVerificationToken" type="hidden" value="' + $('.taxform input[name=__RequestVerificationToken]').val() + '">');
+                                    $('#GetEstiamteTaxInvoicePDF_form').submit();
+                                    $('#GetEstiamteTaxInvoicePDF_form').html('<input type="hidden" name="test" />');
+
+                                    setTimeout(function () {
+                                        $(".m66-preloader-fullpage").hide();
+                                    }, 3000)
+                                    return false;
+                                })
+
+                                AddCustomForgeryToken = function (data, elementId) {
+                                    data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                                    return data;
+                                };
+                            });
+                        </script>
+
+
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="taxform">
+            @Html.AntiForgeryToken()
+            <form action="/api/sitecore/Estimate/GetEstiamteTaxInvoicePDF" method="post" id="GetEstiamteTaxInvoicePDF_form"></form>
+        </div>
+    }
+    else
+    {
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                @Translate.Text("NoTransactions")
+            </div>
+        </div>
+    }
+    <!-- transaction-history - end -->
+
+    @if (Model.PagedPaymentHistoryDetails != null && Model.PagedPaymentHistoryDetails.PageCount > 1)
+    {
+
+        <div id="myPager" class="centerpage">
+            <div class="fix" id="pagerReciepts">
+                @Html.PagedListPager(
+        Model.PagedPaymentHistoryDetails,
+        page => Url.Action(
+            "GetTransactionList",
+            new
+            {
+                PageNo = page,
+                Accountnumber = Model.Accountnumber,
+                EstimateNo = "X-" + Model.EstimateNo
+            }
+        ),
+        new PagedListRenderOptions
+        {
+            LinkToFirstPageFormat = "|<",
+            LinkToPreviousPageFormat = "<",
+            LinkToNextPageFormat = ">",
+            LinkToLastPageFormat = ">|",
+            MaximumPageNumbersToDisplay = 3,
+            DisplayEllipsesWhenNotShowingAllPageNumbers = false
+        }
+    )
+            </div>
+
+        </div>
+
+        <script type="text/javascript">
+            docReady(function () {
+                $('#pagerReciepts a').on('click', function () {
+                    event.preventDefault();
+                    if (this.href != '' && this.href != null) {
+                        jQuery.ajax({
+                            url: this.href,
+                            type: 'GET',
+                            cache: false,
+                            success: function (result) {
+                                $(".recieptListModal").html(result);
+                                window.initComponents("transaction-wapper");
+                            }
+                        });
+                    }
+                    return false;
+                });
+            })
+        </script>
+    }
+
+
+</div>

@@ -1,0 +1,140 @@
+﻿@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Integration.Enums
+@using Sitecore.Mvc
+@using Sitecore.Globalization
+
+@model DEWAXP.Feature.Bills.Models.Estimates.EstimatePaymentHistoryModel
+
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+
+
+<div class="box box--1">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j82/m26-page-title")
+    </div>
+</div>
+
+@Html.Sitecore().Placeholder("j82/m41-tab-box")
+
+<div class="grid">
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Partial("~/Views/Feature/CommonComponents/Error/AlertError.cshtml")
+            @if (Model != null && Model.HistoricalEstimates != null && Model.HistoricalEstimates.Count > 0)
+            {
+                var triggerText = Model.ThirdPartyPayments ? @Translate.Text("Friend estimate payment history") : @Translate.Text("Estimate payment history");
+
+                <div class="estimate-history">
+                    <div data-component="m37-expander" class="m37-expander">
+                        <button class="m37-expander__trigger m37-expander__trigger--themed" data-toggle="true">@triggerText</button>
+                        <div aria-expanded="false" class="m37-expander__content" data-content="true">
+                            <p class="intro-text">
+                                @Translate.Text("Please note label").
+                            </p>
+
+                            @if (Model.HistoricalEstimates != null && Model.HistoricalEstimates.Count > 0)
+                            {
+                                int current = 0;
+                                int currentPage = 1;
+                                int pageSize = Model.ItemsPerPage;
+                                int totalPages = Model.TotalPages;
+
+                                foreach (var history in Model.HistoricalEstimates)
+                                {
+                                    current++;
+                                    var date = DateTime.ParseExact(history.dateandtime, "dd/MM/yyyy HH:mm:ss", null, System.Globalization.DateTimeStyles.None);
+
+                                    <div class="estimate-history__item current_page_@currentPage" @((currentPage > 1) ? "style=display:none" : "")>
+                                        <!-- details -->
+                                        <dl class="estimate-history__details">
+                                            <dt class="estimate-history__key estimate-history__id">@Translate.Text("J81.Est")</dt>
+                                            <dd class="estimate-history__value estimate-history__id">@history.estimationno</dd>
+                                            <dt class="estimate-history__key">@Translate.Text("Issued"):</dt>
+                                            <dd class="estimate-history__value">@Convert.ToDateTime(history.create_date).ToString("dd MMM yyyy", Sitecore.Context.Culture)</dd>
+                                            <dt class="estimate-history__key">@Translate.Text("Amount"):</dt>
+                                            <dd class="estimate-history__value" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@history.tran_amount</dd>
+                                        </dl>
+                                        <!-- receipt -->
+                                        <div data-component="m37-expander" class="m37-expander">
+                                            <button class="m37-expander__trigger" data-toggle="true">@Translate.Text("View receipt")</button>
+                                            <div aria-expanded="false" class="m37-expander__content" data-content="true">
+                                                <!-- m42-key-value--start -->
+                                                <div class="m42-keyvalue">
+                                                    <dl>
+                                                        @*<dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text("Receipt ID"):</dt>
+                                                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset">@history.ReceiptID</dd>*@
+
+                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text("dsg transaction id label"):</dt>
+                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset">@history.deg_transid</dd>
+
+                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text("dewa transaction id label"):</dt>
+                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset">@history.dewa_transid</dd>
+
+                                                        @*The date provided over the web service is a string! The web service should provide a valid date format for proper formatting in UI*@
+                                                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text("payment date and time label"):</dt>
+                                                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset">@date.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+
+                                                        @if (!string.IsNullOrWhiteSpace(history.bpdetails) && !"null".Equals(history.bpdetails))
+                                                        {
+                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text("Business Partner"):</dt>
+                                                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset">@history.bpdetails</dd>
+                                                        }
+
+                                                        @if (!string.IsNullOrWhiteSpace(history.contract_account) && !"null".Equals(history.contract_account))
+                                                        {
+                                                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--reset">@Translate.Text(DictionaryKeys.Global.Account.ContractAccountLabel):</dt>
+                                                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--reset">@history.contract_account</dd>
+                                                        }
+                                                    </dl>
+                                                </div>
+                                                <!-- m42-key-value--end -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    if (current == pageSize)
+                                    {
+                                        current = 0;
+                                        currentPage++;
+                                    }
+                                }
+
+                                @Html.Hidden("NoHistoryPages", totalPages)
+                                @Html.Hidden("CurrentHistoryPage", 1)
+
+                                if (totalPages > 1)
+                                {
+                                    <p>
+                                        <a id="btn_more_estimates" href="#" class="button button--fullwidth" onclick="ShowMoreHistoryEstimate(); return false;">@Translate.Text("More Estimates")</a>
+                                    </p>
+                                }
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function ShowMoreHistoryEstimate() {
+        var currentPage = jQuery("#CurrentHistoryPage").val();
+        currentPage++;
+        jQuery(".current_page_" + currentPage).show();
+        var noPages = jQuery("#NoHistoryPages").val();
+        jQuery("#CurrentHistoryPage").val(currentPage);
+        if (currentPage >= noPages) {
+            jQuery("#btn_more_estimates").hide();
+        }
+        return false;
+    }
+</script>

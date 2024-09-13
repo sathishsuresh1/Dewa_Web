@@ -1,0 +1,192 @@
+﻿@model DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint.TrackingResponse
+@using _commonHelper = DEWAXP.Feature.SupplyManagement.Helpers.ConsumptionComplaint.ConsumptionHelper;
+@using _commonUtility = DEWAXP.Foundation.Content.Utils.CommonUtility;
+@using Sitecore.Globalization;
+
+<div class="j120-smart-response--content j120-smart-response--content-track">
+    <h2 class="j120-smart-response--track_title">@_commonHelper.GetSMTranslation("Track previous notifications")</h2>
+
+    <span class="j120-smart-response--track_ac">@_commonHelper.GetSMTranslation("Account") @Model.AccountNo</span>
+
+    @if (Model.ConsumptionTrackingDetailList != null && Model.ConsumptionTrackingDetailList.Count > 0)
+    {
+
+        foreach (DEWAXP.Feature.SupplyManagement.Models.ConsumptionComplaint.ConsumptionTrackingDetail item in Model.ConsumptionTrackingDetailList)
+        {
+
+            <div class="j120-smart-response-status-vert">
+                <div class="j120-smart-response-statusbox j120-smart-response--track track-content-box">
+                    <div class="j120-smart-response--track-head">
+                        <div class="j120-smart-response--track-head-title">
+                            <div class="j120-smart-response--track_title">@_commonHelper.GetSMTranslation(item.RequestType)</div>
+                            <div class="j120-smart-response--track_subtitle">@string.Format("{0} {1}", _commonHelper.GetSMTranslation("Notification no."), item.Reference)</div>
+                        </div>
+                        <div class="j120-smart-response--track-head-status">
+                            <div class="resolved-details-wrapper">
+                                <div class="resolved-details">
+                                    <span class="resolved-details-status icon-tick">@_commonHelper.GetSMTranslation(item.StatusDescription)</span>
+                                    @if (!string.IsNullOrWhiteSpace(item.StatusDate) && item.StatusDate != "0000-00-00")
+                                    {
+                                        string mnth = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.StatusDate, "yyyy-MM-dd", "MMM"));
+                                        string dd = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.StatusDate, "yyyy-MM-dd", "dd"));
+                                        string yyyy = _commonHelper.GetSMTranslation(_commonHelper.CustomDateFormate(item.StatusDate, "yyyy-MM-dd", "yyyy"));
+
+                                        string fromattedDate = string.Format("{0} {1} {2}", dd, mnth, yyyy);
+
+                                        if (item.StatusCode == "S002")
+                                        {
+                                            <span class="resolved-details-datetime parentarrivaldesc">@string.Format("{0} {1}", fromattedDate, item.StatusTime)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="resolved-details-datetime">@string.Format("{0} {1}", fromattedDate, item.StatusTime)</span>
+                                        }
+                                    }
+
+                                    <a data-nid="@(item.Reference)" data-showstatus="true" data-ac="@(Model.AccountNo)" class="resolved-details-button expand" href="#">
+                                        <span class="hide"> @_commonHelper.GetSMTranslation("View all Stages") +</span>
+                                        <span class="view">@_commonHelper.GetSMTranslation("Hide all Stages") -</span>
+                                    </a>
+                                </div>
+
+                            </div>
+
+                            @*@if (item.StatusCode == "S012")
+                                {
+                                    <button class="button button--senary">Rate it</button>
+                                }*@
+                        </div>
+                    </div>
+                    <div class="track-status-content">
+
+                    </div>
+                </div>
+            </div>
+        }
+
+
+        <script type="text/javascript">
+                docReady(function () {
+
+
+                    jQuery(".resolved-details-button").on("click", function () {
+                        var currentActionBtn = $(this);
+                        //debugger;
+
+                        var isShow = $(this).data("showstatus");
+                        var trackContainer = $(currentActionBtn).closest(".track-content-box").find(".track-status-content");
+                        if (!isShow) {
+
+                            $(trackContainer).html("");
+                            $(currentActionBtn).attr("data-showstatus", true);
+                            $(currentActionBtn).data("showstatus", true);
+
+                            $(currentActionBtn).removeClass('collapse')
+                            $(currentActionBtn).addClass('expand')
+
+                            return;
+                        }
+
+                        var requestData = {
+                            N: $(this).data("nid"),
+                            AC: $(this).data("ac")
+                        }
+                        var _postUrl = '@Url.Content("~/api/sitecore/Consumption/ConsumptionTrackStatusList")';
+                             requestData = AddCustomForgeryToken(requestData, ".j120-smart-response");
+                        $.ajax({
+                            url: _postUrl,
+                            type: 'POST',
+                            data: requestData,
+                            beforeSend: function () {
+                                fnDisabledBackButton();
+                            },
+                            success: function (successdata) {
+                                //debugger;
+
+                                if (typeof successdata == "object") {
+                                    window.location.href = successdata.RedirectUrl;
+                                }
+                                else {
+                                    $(trackContainer).html(successdata);
+                                }
+                                jQuery(window).trigger("reinit_j120");
+                                window.initComponents("ramas-section");
+                                $(".common-screen").hide();
+                                $(currentActionBtn).attr("data-showstatus", false);
+                                $(currentActionBtn).data("showstatus", false);
+
+                                $(currentActionBtn).removeClass("expand");
+                                $(currentActionBtn).addClass('collapse');
+                            },
+                            complete: function (x) {
+                                //console.log(x);
+
+                                fnEnabledBackButton();
+                            }
+
+                        })
+
+            });
+
+
+            $(window).resize(function () {
+                setTimeout(function () {
+                    if (jQuery(".j120-smart-response--content-track").length > 0) {
+                        $(".common-screen").hide();
+                    };
+                }, 500)
+
+            })
+
+            })
+
+            function GetStatusMapDescription(element) {
+                //debugger;
+                var notif = jQuery(element).data("notif");
+                var stattustext = jQuery(element).data("statustext");
+                var buffertime = jQuery(element).data("buffertime");
+                var storedvalue = "_artym" + notif;
+                var arrivalSecTime = readCookie(storedvalue);
+
+                if (arrivalSecTime != undefined && arrivalSecTime != null && parseInt(arrivalSecTime) > 0) {
+                    var arrivalsec = parseInt(arrivalSecTime) + (buffertime * 60);
+                    var _statusHtmlText = stattustext.replace("{{t}}", fnGetTime(arrivalsec))
+                    jQuery(element).html(_statusHtmlText);
+
+                   //parentarrivaldesc
+                    jQuery(element).closest(".j120-smart-response-statusbox").find(".parentarrivaldesc").html(_statusHtmlText);
+                }
+
+            }
+
+
+
+            function fnGetTime(_sec) {
+                var timeString = "";
+                try {
+                    var date = new Date();
+                    var d = new Date(date.getTime() + _sec * 1000); // specify value for SECONDS here
+                    timeString = d.toLocaleTimeString();
+                } catch (e) {
+                    console.log(e);
+                }
+                return timeString;
+            }
+        </script>
+    }
+    else
+    {
+
+        <div class="grid__column grid__column--12 grid__column--content j120-smart-response--formcontent">
+            <div class="j120-smart-response--track">
+                <div class="j120-smart-response--track-head">
+                    <div class="j120-smart-response--track-head-title">
+                        <div class="j120-smart-response--track_title">@_commonHelper.GetSMTranslation("No record found")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+</div>

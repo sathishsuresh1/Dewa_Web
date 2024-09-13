@@ -1,0 +1,119 @@
+﻿@using Sitecore.Globalization
+@model DEWAXP.Feature.GatePass.Models.ePass.SecurityPassViewModel
+@{
+    string strchecked1 = string.Empty;
+    string strchecked2 = string.Empty;
+    if (ViewBag.checkedbutton == null)
+    {
+        strchecked1 = "checked";
+    }
+    else
+    {
+        if ((string)ViewBag.checkedbutton == "1")
+        {
+            strchecked1 = "checked";
+        }
+        else
+        {
+            strchecked2 = "checked";
+        }
+    }
+}
+<div class="heading">
+    @Translate.Text("Epass.IndGeneration")
+</div>
+<div class="scan-mode">
+    <form id="gatepass" method="post">
+        @Html.AntiForgeryToken()
+        <fieldset>
+            <legend class="legend-color">.</legend>
+            <div class="input-wrapper_inline">
+                <div class="fake-radio @(!string.IsNullOrWhiteSpace(strchecked1) ?"fake-radio--active" :string.Empty)">
+                    @Translate.Text("Epass.IndClockIn")
+                    <input class="realradio" name="radios_group1" type="radio" value="1" @(strchecked1)>
+                </div>
+                <div class="fake-radio  @(!string.IsNullOrWhiteSpace(strchecked2) ?"fake-radio--active" :string.Empty)">
+                    @Translate.Text("Epass.IndClockOut")
+                    <input class="realradio" name="radios_group1" type="radio" value="2" @(strchecked2)>
+                </div>
+            </div>
+            <div class="input-wrapper_inline">
+                <div class="input-wrapper">
+                    <input class="realradio" type="radio" name="searchbyNumber" id="rdPassNumber" value="3" checked="checked">
+                    @Translate.Text("Epass.IndPassNo")
+                </div>
+                <div class="input-wrapper">
+                    <input class="realradio" type="radio" name="searchbyNumber" id="rdPassport" value="4">
+                    @Translate.Text("Epass.Passportnumber")
+                </div>
+                <div class="input-wrapper">
+                    <input class="realradio" type="radio" name="searchbyNumber" id="rdEmirateId" value="5">
+                    @Translate.Text("Epass.EmiratesID")
+                </div>
+            </div>
+            <div class="input-wrapper">
+                @* @Translate.Text("Epass.IndPassNo")*@
+                <input class="input" type="text" name="passnumber" onchange="myFunction(this.value)">
+                <button type="submit">
+                    @Translate.Text("Epass.IndSubmit")
+                </button>
+            </div>
+        </fieldset>
+        <div id="error_msg" style="color:red;text-align:center"></div>
+        @*<div>
+                @((string)ViewBag.headeragent)
+            </div>*@
+    </form>
+</div>
+
+@if (Model != null)
+{
+    <div class="status @((string)ViewBag.color) ">
+        @((string)ViewBag.statustext)
+        @*Entry Pass is <b><u>ACTIVE</u></b> and <b><u>VALID</u></b>*@
+    </div>
+
+    <div class="passID">
+        @if (!string.IsNullOrWhiteSpace(Model.profilepic))
+        {
+            <img class="passimg" alt="" src="@("data:image;base64," + Model.profilepic)">
+        }
+        <div class="passDetails">
+            <div class="detail">
+                <b>
+                    @Translate.Text("Epass.IndPassNo"):
+                </b> @Model.passNumber
+            </div>
+            <div class="detail">
+                <b>
+                    @Translate.Text("Epass.IndName"):
+                </b> @Model.name
+            </div>
+            <div class="detail">
+                <b>
+                    @Translate.Text("Epass.IndProfession"):
+                </b> @Model.profession
+            </div>
+            <div class="detail">
+                <b>
+                    @Translate.Text("Epass.IndNationality"):
+                </b> @Model.nationality
+            </div>
+            <div class="detail">
+                <b>@Translate.Text("Epass.IndProjectName"):</b> @Translate.Text("Epass.IndGeneric")
+            </div>
+        </div>
+    </div>
+}
+<script>
+    function myFunction(val) {
+        if (val.length >= 14) {
+            document.getElementById("gatepass").submit()
+        }
+        //else {
+        //    if (val != null) {
+        //        document.getElementById("error_msg").innerHTML = "make sure the input is equal and greater than 8 characters"
+        //    }
+        //}
+    }
+</script>

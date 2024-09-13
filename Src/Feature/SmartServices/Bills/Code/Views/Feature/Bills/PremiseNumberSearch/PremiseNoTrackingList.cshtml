@@ -1,0 +1,366 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Feature.Bills.Models.PremiseNumberSearch
+@model PremiseNumSearchModel
+
+@{
+    string gmap = "https://www.google.com/maps/place/{0},{1}/@{0},{1},17z";
+}
+@if (Model.PremiseFilterSeachResultList != null && Model.PremiseFilterSeachResultList.Count > 0)
+{
+    if (Model.currentPage <= 1)
+    {
+        // Download result in excel files
+        @*<div class="form-field__button floatRight mt0" data-label="@Translate.Text("SS_Download")">
+            <a href="javascript:void(0)" data-pnsstid="@Model.selectedSearchType" data-pnstid="@(Model.SearchText)" class="button button--primary button--fullwidth-mobile pnssearch-downloadbtn">@Translate.Text("PNS_Download")</a>
+        </div>*@
+        
+        <script type="text/javascript">
+
+            setTimeout(function () {
+                // Download premise search result document
+                $(".pnssearch-downloadbtn").on("click", function () {
+                    $(".pnstno").val($(this).data("pnstid"))
+                    $(".pnsstno").val($(this).data("pnsstid"))
+                    $("#premisenum-search-form").submit();
+                    triggerDownload();
+                });
+            }, 500);
+            function triggerDownload() {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                setTimeout(function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    jQuery('body').removeClass('unscrollable');
+                }, 500);
+            }
+            function PremiseNoTrackingList() {
+
+                var $cachedKey = jQuery('#cachedKey').val();
+                var $currentPage = jQuery('#currentPage').val();
+                var FD = jQuery("#IdPremisetrackingform").serialize() + "&cachedKey=" + $cachedKey + "&currentPage=" + parseInt($currentPage);
+
+                var url = "/api/sitecore/PremiseNumberSearch/PremiseNoTracking";
+                if (($cachedKey != null && $cachedKey != "") || ($currentPage != "" && $currentPage != null)) {
+                    jQuery.ajax({
+                        url: url,
+                        type: 'POST',
+                        datatype: 'application/json',
+                        traditional: true,
+                        data: FD, // AddForgeryToken({ cachedKey: $cachedKey, currentPage: parseInt($currentPage + 1) }, "IdPremisetrackingform"),
+                        beforeSend: function () {
+                            jQuery('.j105-drrg--loader').show();
+                            jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                            $('body').removeClass('unscrollable').addClass('unscrollable');
+                        },
+                        complete: function () {
+                            jQuery('.j105-drrg--loader').hide();
+                            $('body').removeClass('unscrollable');
+                        },
+                        success: function (response) {
+                            jQuery('.valtr').remove();
+                            jQuery('.primisetablebody').append(response);
+                            setTimeout(function () {
+                                if (jQuery('#loadMore') == undefined || jQuery('#loadMore').val() == 'false') {
+                                    jQuery(".divloadMore").remove();
+                                }
+                            }, 100)
+                        }
+                    });
+                }
+            }
+        </script>
+
+        <div style="display:none">
+            <form id="premisenum-search-form" action="/api/sitecore/PremiseNumberSearch/DownloadSearchResultList" method="post">
+                @Html.AntiForgeryToken();
+                <input type="text" name="pnstno" id="pnstno" class="pnstno" />
+                <input type="text" name="pnsstno" id="pnsstno" class="pnsstno" />
+            </form>
+        </div>
+        <br />
+        <table class="m23-table__content-table">
+            <thead class="m23-table__content-table-header">
+                <tr class="m23-table__content-table-row">
+                    @if (Model.IsLoggedIn)
+                    {
+                        if (Model.columnsCount.NameCount > 0)
+                        {
+                            <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_OwnerName")</th>
+                        }
+                        if (Model.columnsCount.ContractAccountCount > 0)
+                        {
+                            <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_OwnerContractAccount")</th>
+                        }
+                        if (Model.columnsCount.BusinessPartnerCount > 0)
+                        {
+                            <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_BusinessPartner")</th>
+                        }
+                    }
+                    @if (Model.columnsCount.WaterApplicationCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_WaterAppNo")</th>
+                    }
+                    @if (Model.columnsCount.ElectricityApplicationCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_ElectricityAppNo")</th>
+                    }
+                    @if (Model.columnsCount.LegacyNumberCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_PremiseNo")</th>
+                    }
+                    @if (Model.columnsCount.PtypeTextCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_PremiseType")</th>
+                    }
+                    @if (Model.columnsCount.UnitNumberCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_Unit")</th>
+                    }
+                    @if (Model.columnsCount.CommunityNameCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_CommunityNo")</th>
+                    }
+                    @if (Model.columnsCount.MakaniNumberCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_MakkaniNo")</th>
+                    }
+                    @*<th class="m23-table__content-table-cell--header">@Translate.Text("PNS_RoomNo")</th>*@
+                    @if (Model.columnsCount.LoadCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_Load")</th>
+                    }
+                    @if (Model.columnsCount.GisXCount > 0 && Model.columnsCount.GisYCount > 0)
+                    {
+                        <th class="m23-table__content-table-cell--header">@Translate.Text("PNS_Location")</th>
+                    }
+                </tr>
+            </thead>
+            <tbody class="m23-table__content-table-body primisetablebody">
+                <tr class="m23-table__content-table-row valtr" style="display:none">
+                    <td>
+                        <input type="hidden" id="cachedKey" name="cachedKey" value="@Model.cachedKey" />
+                        <input type="hidden" id="currentPage" name="currentPage" value="@Model.currentPage" />
+                        <input type="hidden" id="loadMore" name="loadMore" value="@(Model.PaginationInfo.CanLoadMore ? "true" : "false")" />
+                    </td>
+                </tr>
+
+
+                @if (Model.PremiseFilterSeachResultList != null && Model.PremiseFilterSeachResultList.Count > 0)
+                {
+                    foreach (PremiseNumSearchResult tracking in Model.PremiseFilterSeachResultList)
+                    {
+                        <tr class="m23-table__content-table-row toggleoption-@tracking.ContractAccount">
+                            @if (Model.IsLoggedIn)
+                            {
+                                if (Model.columnsCount.NameCount > 0)
+                                {
+                                    <td data-label="@Translate.Text("PNS_OwnerName")" class="m23-table__content-table-cell">
+                                        @tracking.Name
+                                    </td>
+                                }
+                                if (Model.columnsCount.ContractAccountCount > 0)
+                                {
+                                    <td data-label="@Translate.Text("PNS_OwnerContractAccount")" class="m23-table__content-table-cell">
+                                        @tracking.ContractAccount
+                                    </td>
+                                }
+                                if (Model.columnsCount.BusinessPartnerCount > 0)
+                                {
+                                    <td data-label="@Translate.Text("PNS_BusinessPartner")" class="m23-table__content-table-cell">
+                                        @tracking.BusinessPartner
+                                    </td>
+                                }
+                            }
+                            @if (Model.columnsCount.WaterApplicationCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_WaterAppNo")" class="m23-table__content-table-cell">
+                                    @tracking.WaterApplication
+                                </td>
+                            }
+                            @if (Model.columnsCount.ElectricityApplicationCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_ElectricityAppNo")" class="m23-table__content-table-cell">
+                                    @tracking.ElectricityApplication
+                                </td>
+                            }
+                            @if (Model.columnsCount.LegacyNumberCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_PremiseNo")" class="m23-table__content-table-cell">
+                                    @tracking.LegacyNumber
+                                </td>
+                            }
+                            @if (Model.columnsCount.PtypeTextCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_PremiseType")" class="m23-table__content-table-cell">
+                                    @tracking.PtypeText
+                                </td>
+                            }
+                            @if (Model.columnsCount.UnitNumberCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_Unit")" class="m23-table__content-table-cell">
+                                    @tracking.UnitNumber
+                                </td>
+                            }
+                            @if (Model.columnsCount.CommunityNameCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_CommunityNo")" class="m23-table__content-table-cell">
+                                    @tracking.CommunityName
+                                </td>
+                            }
+                            @if (Model.columnsCount.MakaniNumberCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_MakkaniNo")" class="m23-table__content-table-cell">
+                                    @tracking.MakaniNumber
+                                </td>
+                            }
+                            @*<td data-label="@Translate.Text("PNS_RoomNo")" class="m23-table__content-table-cell">
+                                    @tracking.RoomNumber
+                                </td>*@
+                            @if (Model.columnsCount.LoadCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_Load")" class="m23-table__content-table-cell">
+                                    @tracking.Load
+                                </td>
+                            }
+                            @if (Model.columnsCount.GisXCount > 0 && Model.columnsCount.GisYCount > 0)
+                            {
+                                <td data-label="@Translate.Text("PNS_Location")" class="m23-table__content-table-cell">
+                                    <a class="link" href="@string.Format(gmap,tracking.GisX,tracking.GisY)" target="_blank">@Translate.Text("PNS_View")</a>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="m23-table__content-table-row">
+                        <td class="centered m23-table__content-table-cell" colspan="@(Model.IsLoggedIn ? Convert.ToInt32("12") : '9')">
+                            <span class="">
+                                @(!string.IsNullOrWhiteSpace(Model.resDescription) ? Model.resDescription : @Translate.Text("PNS_nofound"))
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        // Load more button
+        if (Model.PaginationInfo != null && Model.PaginationInfo.CanLoadMore)
+        {
+            <div class="centered mt24 divloadMore">
+                <button class="button button--primary" onclick="PremiseNoTrackingList()">
+                    @Translate.Text("PNS_loadmore")
+                </button>
+            </div>
+        }
+    }
+    else
+    {
+        if (Model.PremiseFilterSeachResultList != null && Model.PremiseFilterSeachResultList.Count > 0)
+        {
+            <tr class="m23-table__content-table-row valtr" style="display:none">
+                <td>
+                    <input type="hidden" id="cachedKey" name="cachedKey" value="@Model.cachedKey" />
+                    <input type="hidden" id="currentPage" name="currentPage" value="@Model.currentPage" />
+                    <input type="hidden" id="loadMore" name="loadMore" value="@(Model.PaginationInfo.CanLoadMore ? "true" : "false")" />
+                </td>
+            </tr>
+
+            foreach (PremiseNumSearchResult tracking in Model.PremiseFilterSeachResultList)
+            {
+                <tr class="m23-table__content-table-row toggleoption-@tracking.ContractAccount">
+                    @if (Model.IsLoggedIn)
+                    {
+                        if (Model.columnsCount.NameCount > 0)
+                        {
+                            <td data-label="@Translate.Text("PNS_OwnerName")" class="m23-table__content-table-cell">
+                                @tracking.Name
+                            </td>
+                        }
+                        if (Model.columnsCount.ContractAccountCount > 0)
+                        {
+                            <td data-label="@Translate.Text("PNS_OwnerContractAccount")" class="m23-table__content-table-cell">
+                                @tracking.ContractAccount
+                            </td>
+                        }
+                        if (Model.columnsCount.BusinessPartnerCount > 0)
+                        {
+                            <td data-label="@Translate.Text("PNS_BusinessPartner")" class="m23-table__content-table-cell">
+                                @tracking.BusinessPartner
+                            </td>
+                        }
+                    }
+                    @if (Model.columnsCount.WaterApplicationCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_WaterAppNo")" class="m23-table__content-table-cell">
+                            @tracking.WaterApplication
+                        </td>
+                    }
+                    @if (Model.columnsCount.ElectricityApplicationCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_ElectricityAppNo")" class="m23-table__content-table-cell">
+                            @tracking.ElectricityApplication
+                        </td>
+                    }
+                    @if (Model.columnsCount.LegacyNumberCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_PremiseNo")" class="m23-table__content-table-cell">
+                            @tracking.LegacyNumber
+                        </td>
+                    }
+                    @if (Model.columnsCount.PtypeTextCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_PremiseType")" class="m23-table__content-table-cell">
+                            @tracking.PtypeText
+                        </td>
+                    }
+                    @if (Model.columnsCount.UnitNumberCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_Unit")" class="m23-table__content-table-cell">
+                            @tracking.UnitNumber
+                        </td>
+                    }
+                    @if (Model.columnsCount.CommunityNameCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_CommunityNo")" class="m23-table__content-table-cell">
+                            @tracking.CommunityName
+                        </td>
+                    }
+                    @if (Model.columnsCount.MakaniNumberCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_MakkaniNo")" class="m23-table__content-table-cell">
+                            @tracking.MakaniNumber
+                        </td>
+                    }
+                    @*<td data-label="@Translate.Text("PNS_RoomNo")" class="m23-table__content-table-cell">
+                            @tracking.RoomNumber
+                        </td>*@
+                    @if (Model.columnsCount.LoadCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_Load")" class="m23-table__content-table-cell">
+                            @tracking.Load
+                        </td>
+                    }
+                    @if (Model.columnsCount.GisXCount > 0 && Model.columnsCount.GisYCount > 0)
+                    {
+                        <td data-label="@Translate.Text("PNS_Location")" class="m23-table__content-table-cell">
+                            <a class="link" href="@string.Format(gmap,tracking.GisX,tracking.GisY)" target="_blank">@Translate.Text("PNS_View")</a>
+                        </td>
+                    }
+                </tr>
+            }
+        }
+    }
+}
+
+@* // No record found *@
+@if (!string.IsNullOrWhiteSpace(Model.resDescription))
+{
+    <div class="centered mt24" style="line-height:1.5;">
+        <span class="">
+            @(!string.IsNullOrWhiteSpace(Model.resDescription) ? Model.resDescription : @Translate.Text("PNS_nofound"))
+        </span>
+    </div>
+}
+

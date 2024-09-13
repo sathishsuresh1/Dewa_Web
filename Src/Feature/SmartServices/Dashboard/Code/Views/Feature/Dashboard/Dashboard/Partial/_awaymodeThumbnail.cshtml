@@ -1,0 +1,57 @@
+﻿@using System.Linq
+@using Sitecore.Globalization
+@using X.PagedList.Mvc;
+@using X.PagedList;
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+
+<a class="m80-my-consumption--incidents" id="awaymodethumbnail" data-redirect_url="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DTMC_LOGGEDIN_AWAYMODE_CREATE)" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DTMC_LOGGEDIN_AWAYMODE_CREATE)" style="display:none">
+    <div class="m80-my-consumption--incidents_inner">
+        <img src="/images/away_mode.png" class="tooltipstered" alt="@Translate.Text("SL.Activate Away Mode")">
+        <div class="m80-my-consumption--incidentstext">
+            @Translate.Text("SL.Activate Away Mode")
+        </div>
+    </div>
+</a>
+<script>
+
+    function ToggelAwaymodethumNail() {
+        var acNo = $("input[name='SelectedAccountNumber']:checked").val();
+        try {
+            var redirectURl = $("#awaymodethumbnail").data("redirect_url") + "?a=" + acNo;
+            $("#awaymodethumbnail").prop("href", redirectURl);
+        } catch (e) {
+            console.log(e);
+        }
+       
+
+        var _apiUrl = '@Url.Content("~/api/sitecore/AwayMode/IsSmartMeter")?ac=' + acNo;
+        $.ajax({
+            url: _apiUrl,
+            type: 'GET',
+            beforeSend: function () {
+
+            },
+            success: function (rdata) {
+			 $("#awaymodethumbnail").fadeOut();
+                if (rdata.success) {
+                    if (rdata.data.waterSmartMeter || rdata.data.electricitySmartMeter) {
+                        $("#awaymodethumbnail").fadeIn();
+                    }
+                }
+            },
+            complete: function (x) {
+                
+            }
+
+        });
+    }
+    docReady(function () {
+        jQuery(".m43-accountsel-hidden .m39-modal__footer .button--primary").on("click", ToggelAwaymodethumNail);
+
+        setTimeout(function(){
+		ToggelAwaymodethumNail();
+		},100)
+
+    })
+</script>

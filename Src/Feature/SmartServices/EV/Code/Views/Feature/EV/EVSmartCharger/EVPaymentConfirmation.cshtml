@@ -1,0 +1,170 @@
+﻿@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content.Models.Bills
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@model DEWAXP.Feature.EV.Models.EVSmartCharger.EVPaymentModel
+
+@{
+    ModelState ms;
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+<div class="grid j152-ev-smart-charge" data-journey="j152-ev-smart-charge" style="height: auto;">
+    <div class="j152-ev-smart-charge-wrapper">
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form grid__column--centered">
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.TryGetValue(ViewData.TemplateInfo.HtmlFieldPrefix, out ms))
+                {
+                    <div class="grid__row error-html">
+                        <div class="grid__column grid__column--12">
+                            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                                <div class="m40-status-message__text" dir="@direction">@Html.ValidationSummary(true)</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="icon icon-new-success-message">
+                </div>
+                <h3 class="text__page-title">@Translate.Text("EVSmart_payment_completed")</h3>
+                @if (ViewBag.RequestExpired == null)
+                {
+                    <p class="text__content-copy--small align-center">@Translate.Text("EVSmart_payment_subTitle")</p>
+                    if (!string.IsNullOrWhiteSpace(Model.Timer))
+                    {
+                        <div class="timer large" data-timer-ev="@Model.Timer">@Model.Timer</div>
+                        <div id="timerclick" class="hidden"></div>
+                    }
+                }
+            </div>
+        </div>
+
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="charge-box charge-completed">
+                    <div class="m42-keyvalue">
+                        <dl>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Date")</dt>
+                            @if (Language.Current.Name.ToLowerInvariant() == "ar-ae")
+                            {
+                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "mm:" + timeFix + "HH", Sitecore.Context.Culture)</dd>
+                            }
+                            else
+                            {
+                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm", Sitecore.Context.Culture)</dd>
+                            }
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EVSmart_transactionID")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular">@Model.DegTransactionId</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("EVSmart_duration")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular">@Model.Duration</dd>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Cost")</dt>
+                            <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Convert.ToDecimal(Model.Amount) + Model.SuqiaAmount)</dd>
+                            @if (Model.SuqiaAmount > 0)
+                            {
+                                <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Total amount")</dt>
+                                <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd font-regular" data-numeric-format="0,0.00" data-currency="@Translate.Text("AED")">@(Convert.ToDecimal(Model.Amount) + Model.SuqiaAmount)</dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.SuqiaAmount > 0)
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.RequestExpired == null)
+        {
+            <div class="m39-modal language-switch" data-component="m39-modal" id="successmodal">
+                <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="successmodal_trigger" aria-controls="successmodal_content"></button>
+                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="successmodal_content" aria-labelledby="successmodal_trigger">
+                    <div class="m39-modal__dialog j152-ev-smart-charge-modal">
+                        @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form  j152-ev-smart-charge-form", @id = "startchargingform", data_form = "true", enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="m39-modal__content">
+                                <div class="mb12">
+                                    <div class="icon icon-b-car-charge p0"></div>
+                                    @Translate.Text("Ready to start Charging")
+                                </div>
+                                <div class="grid__row mb0">
+                                    <div data-close="true" class="button m39-m12-no">@Translate.Text("Cancel")</div>
+                                    <a id="m39-m12-yesApprove" class="button button--primary m39-m12-yesApprove">@Translate.Text("Start")</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="m39-modal__overlay"> </div>
+            </div>
+            if (!string.IsNullOrWhiteSpace(Model.Timer))
+            {
+                <div class="grid__row" id="startcharingdiv">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="form-field__button form-field__button-full">
+                            <a href="#" id="Chargingbutton" class="button button--primary">@Translate.Text("EVSmart_start_charging")</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="form-field__button m14-richtext">@Html.Raw(@Translate.Text("EV_HelpText"))</div>
+        }
+        else
+        {
+            <div class="grid__row">
+                <div class="grid__column grid__column--12 grid__column--form">
+                    <div class="form-field__button m14-richtext">@Html.Raw(@Translate.Text("EV_HelpText"))</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@if (!string.IsNullOrWhiteSpace(Model.Timer))
+{
+    <script type="text/javascript">
+        docReady(function () {
+            setTimeout(function () {
+                jQuery('.j152-ev-smart-charge').trigger('evtimer');
+            }, 300);
+        });
+    </script>
+}
+
+<script type="text/javascript">
+    docReady(function () {
+        //setTimeout(function () {
+        //    jQuery('.j152-ev-smart-charge').trigger('evtimer');
+        //}, 1000);
+        jQuery('#Chargingbutton').on('click', function () {
+            jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+        });
+        $("#m39-m12-yesApprove").click(function () {
+            event.preventDefault();
+            event.stopPropagation();
+            beforesendfnc();
+            jQuery('#startchargingform').submit();
+        });
+        $("#timerclick").click(function () {
+            paymenttimerstopped();
+        });
+    });
+    function paymenttimerstopped() {
+        jQuery("#startcharingdiv").html("");
+        window.location.reload();
+    }
+</script>

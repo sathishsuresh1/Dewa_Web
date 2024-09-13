@@ -1,0 +1,58 @@
+﻿@using Sitecore.Links
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Globalization
+
+
+@model DEWAXP.Feature.Search.Models.SearchResult
+@{
+    var linkName = !string.IsNullOrEmpty(Model.Header) ? Model.Header : Model.MenuLabel;
+    var url = LinkHelper.GetItemUrl(Model.ItemId.ToString());
+
+    if (string.IsNullOrEmpty(linkName))
+    {
+        if (!string.IsNullOrWhiteSpace(Model.BrowserTitle))
+        {
+            linkName = Model.BrowserTitle.Replace('-', ' ');
+        }
+        else
+        {
+            linkName = Model.DisplayName;
+        }
+    }
+    int x = 150;
+    int y = 250;
+    if (linkName != null && linkName.Length > x)
+    {
+        linkName = linkName.Substring(0, x) + "...";
+    }
+    var text = !string.IsNullOrWhiteSpace(Model.Summary) ? Model.Summary : Model.Description;
+    if (text != null && text.Length > y)
+    {
+        text = text.Substring(0, y) + "...";
+    }
+    var category = !string.IsNullOrWhiteSpace(Model.categories) ? Model.categories : "Content";
+    var articleDate = string.Empty;
+    if (Model.TemplateId.Guid.ToString("D") == "960e0516-38bc-495d-a49b-57a9eb0ce1ca")
+    {
+        Sitecore.Data.Fields.DateField dateTimeField = Model.GetField("Publish Date");
+        string dateTimeString = dateTimeField.Value;
+        DateTime dateTimeStruct = Sitecore.DateUtil.IsoDateToDateTime(dateTimeString);
+
+        articleDate = dateTimeStruct.ToString("dd MMM yyyy", global::Sitecore.Context.Language.CultureInfo).Replace("يوليه", "يوليو");
+    }
+}
+
+<div data-m63-search-results-result-item="true" data-m63-search-results-result-category="" class="m63-search-results__result-item">
+    <h5><a href="@url" class="link">@Html.Raw(linkName)</a></h5>
+    <p>@Html.Raw(text)</p>
+    @if (!string.IsNullOrWhiteSpace(articleDate))
+    {
+        <p><span class="mt12 inline-block teaser__date">@articleDate</span></p>
+    }
+    <span class="data-m63-search-results-result-category">@Translate.Text("search_" + category)</span>
+
+    @*@if (Model.Updated != DateTime.MinValue)
+        {
+            <p class="teaser__date">@Model.Updated.ToString("d MMMM yyyy", global::Sitecore.Context.Language.CultureInfo)</p>
+        }*@
+</div>

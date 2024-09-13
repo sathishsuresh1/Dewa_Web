@@ -1,0 +1,151 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@using Sitecore.Data.Items;
+@model DEWAXP.Feature.SupplyManagement.Models.MoveIn.CreateOnlineAccountModel
+
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            @Html.Sitecore().Placeholder("step-tracker")
+        </div>
+    </div>
+
+    @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form form--inline", @id = "findEstimateForm", @data_form = "true", @data_submit_validate = "enabled", @novalidate = string.Empty }))
+    {
+        @Html.Sitecore().FormHandler()
+        @Html.AntiForgeryToken()
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div>
+                    @Html.ValidationMessage("ResetPasswordError")
+                </div>
+                <fieldset class="fieldset ">
+                    <legend class="legend">@Translate.Text("j25.CreateOnlineAccount")</legend>
+
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-userid">
+                            @Sitecore.Globalization.Translate.Text("username label")
+                        </label>
+
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.UserId, new
+                            {
+                                @class = "form-field__input form-field__input--text",
+                                @id = "form-field-userid",
+                                @placeholder = Translate.Text("username label"),
+                                @required = "required",
+                                @data_parsley_error_message = Translate.Text("register username validation message"),
+                                @data_parsley_errors_container = "#description-for-userid",
+                                @aria_describedby = "description-for-userid",
+                                @data_parsley_dewausername = "",
+                                @maxlength = "20"
+                            })
+
+                        </span>
+                        <div id="description-for-userid" class="form-field__messages">
+                            <p class="form-field__description">@Html.ValidationMessageFor(x => x.UserId, "", new { @class = "parsley-errors-list" })</p>
+                        </div>
+                    </div>
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-password">
+                            @Sitecore.Globalization.Translate.Text("password label")
+                            <span class="form-field__label-required aria-only">(@(Translate.Text("required")))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.Password, new
+                            {
+                                //@class = "form-field__input form-field__input--text form-field__input--error parsley-error",
+                                @class = "form-field__input form-field__input--text form-field__input parsley",
+                                @id = "form-field-password",
+                                @placeholder = Translate.Text("Enter Password"),
+                                @required = "",
+                                @data_parsley_error_message = Translate.Text(DictionaryKeys.Global.Login.InvalidPassword),
+                                @data_parsley_errors_container = "#description-for-form-field-password",
+                                @aria_describedby = "description-for-form-field-password",
+                                @data_parsley_id = "8",
+                                @minlength = "8",
+                                @type = "password",
+                                @autocomplete = "off"
+                            })
+                        </span>
+                        <div id="description-for-form-field-password" class="form-field__messages">
+                            <p class="form-field__description">@Translate.Text("PassMin")</p>
+                            @*@Html.ValidationMessageFor(x => x.Password, Translate.Text("PassVal"), new { @class = "parsley-errors-list" })*@
+                            @Html.ValidationMessageFor(x => x.Password, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div class="form-field form-field--text ">
+                        <label class="form-field__label" for="form-field-confirm-password">
+                            @Sitecore.Globalization.Translate.Text("confirm password label")
+                            <span class="form-field__label-required aria-only">(@(Translate.Text("required")))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            @Html.TextBoxFor(x => x.ConfirmationPassword, new
+                               {
+                                   @class = "form-field__input form-field__input--text",
+                                   @id = "form-field-confirm-password",
+                                   @placeholder = Translate.Text("Enter Password"),
+                                   @data_parsley_error_message = Translate.Text("Password mismatch error"),
+                                   @data_parsley_errors_container = "#description-for-form-field-confirm-password",
+                                   @data_parsley_equalto = "#form-field-password",
+                                   @data_parsley_id = "8",
+                                   @minlength = "8",
+                                   @type = "password",
+                                   @autocomplete = "off"
+                               })
+                        </span>
+                        <div id="description-for-form-field-confirm-password" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.ConfirmationPassword, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+
+                    <div class="form-field form-field--text form-field--textblock">
+                        <p class="text__content-copy--small">
+                            @Translate.Text("If you require further assistance visit our") <a class="link" href="@DEWAXP.Foundation.Helpers.Extensions.UtilExtensions.GetLinkUrl(@Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.J10_SUPPLIMENTARY), "Help Link")">@Translate.Text("movein.faq")</a>
+                        </p>
+                    </div>
+
+                    <div id="ServiceErrorPane" class="form-field__messages hidden">
+                        <span class="parsley-errors-list" id="ServiceError"></span>
+                    </div>
+                </fieldset><br />
+                @*<div class="form-field form-field--toggles">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled">@Translate.Text("movein.TermsAgreement")</span>
+                            </label>
+                        </div>
+                        <fieldset class="fieldset ">
+                            @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                        </fieldset>
+                        <div id="description-for-accept-terms" class="form-field__messages"></div>
+                        <input type="hidden" name="AgreedToPayment" value="false" />
+                    </div>*@
+                <div class="form-field form-field--toggles inline-terms">
+                    <div class="form-field__checkbox  last">
+                        <label>
+                            <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1_terms" name="AgreedToPayment" type="checkbox" value="true" aria-describedby="description-for-accept-terms" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms" data-parsley-multiple="form-field-checkbox_1_1_terms" data-parsley-id="23">
+                            <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                        </label>
+                    </div>
+                    <fieldset class="fieldset m39-modal__tnc">
+                        <legend class="legend-color">.</legend>
+                        <span class="text">@Translate.Text("movein.Iagree")</span>
+                        @Html.Sitecore().Placeholder("j26/m39-modal-overlay")
+                    </fieldset>
+                    <div id="description-for-accept-terms" class="form-field__messages"></div>
+                    <input type="hidden" name="AgreedToPayment" value="false" />
+                </div>
+                <div class="form-field__button">
+                    <button id="submitBtn" class="button button--primary" type="submit" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("movein.contactpagesubmit")</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

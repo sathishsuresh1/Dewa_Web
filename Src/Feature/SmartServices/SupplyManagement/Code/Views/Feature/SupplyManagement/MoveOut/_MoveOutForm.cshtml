@@ -1,0 +1,115 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.MoveOut.MoveOutAccount
+
+@using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form form--inline", @data_form = "true", @id = "moveoutform"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.Sitecore().FormHandler("MoveOut", "MoveOut_v2form")
+@Html.HiddenFor(m => m.AccountNumber)
+       <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="form-field__label">
+                                Clearance certificate request
+                                <span class="form-field__label-optional">(optional)</span>
+                            </legend>
+                            <div class="form-field__checkbox  last  first">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" aria-label="form-field-checkbox_1_1" name="checkbox_1_1" type="checkbox" value="false" aria-describedby="description-for-fkek2trtr" data-parsley-errors-container="#description-for-fkek2trtr" aria-role="button" aria-pressed="false" aria-controls="clearance_details" data-checkbox-toggle="true" @(Model.Clearance ? "checked" : "")>
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        Clearance certificate required
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="description-for-fkek2trtr" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+       <div class="form-field  fieldset--hidden" id="clearance_details" aria-expanded="false">
+                        <div class="form-field form-field--text">
+                            <label for="form-field-ic3afw7ct" class="form-field__label form-field__label--readonly">
+                                50 AED will be charged for Clearance Certificate & will be issued only after Final Bill settelement
+                            </label>
+                            <div class="form-field__input-wrapper form-field__input-wrapper--readonly">
+                                <input class="form-field__input form-field__input--readonly" readonly id="form-field-ic3afw7ct" name="customer_name" type="text" aria-describedby="description-for-ic3afw7ct" data-parsley-errors-container="#description-for-ic3afw7ct" />
+                            </div>
+                            <div id="description-for-ic3afw7ct" class="form-field__messages">
+                            </div>
+                        </div>
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-purpose" class="form-field__label">
+                                @Translate.Text("Purpose")
+                                <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.SelectedPurpose, (IEnumerable<SelectListItem>)Model.Purposes,
+         Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.Forms.PurposeSelectionPlaceholder),
+         new
+         {
+             @class = "form-field__input form-field__input--select form-field__input--select-full",
+             @id = "form-field-purpose",
+             @aria_describedby = "description-for-purpose",
+             @data_parsley_error_message = Translate.Text("Please enter a value"),
+             @data_parsley_errors_container = "#description-for-purpose",
+             @data_parsley_id = "22"
+         })
+                            </span>
+                            <div id="description-for-purpose" class="form-field__messages"></div>
+                        </div>
+                    </div>
+       <div class="form-field form-field--account-details">
+                        <!-- m42-key-value-start -->
+                        <div class="m42-keyvalue">
+                            <dl>
+                                <dt class="m42-keyvalue__key">Previous bill payment balance:</dt>
+                                <dd class="m42-keyvalue__value">@Model.OutStandingAmount</dd>
+                            </dl>
+
+                            <dl id="moveoutclearancekey" class="hidden">
+                                <dt class="m42-keyvalue__key">Clearance Certificate Fee:</dt>
+                                <dd class="m42-keyvalue__value" data-clearance-amt="@Model.ClearanceAmount">50.00 AED</dd>
+                            </dl>
+                        </div>
+                        <!-- m42-key-value-end -->
+                    </div>
+                    <div class="form-field__button">
+                        @if (Model.IsCollectPayment)
+                        {
+                            <button type="submit" id="moveoutformpayment" class="button button--primary">Pay</button>
+                        }
+                        else
+                        {
+                            <button type="submit" id="moveoutfromnext" class="button button--primary">Update</button>
+                        }
+                    </div>
+
+}
+<script type="text/javascript">
+    //This script works when the user clicks on "Clearance Certificate Required" checkbox and shows/hides the clerance certificate details
+    $(function () {
+        $('#form-field-checkbox_1_1').change(function () {
+            if ($('#form-field-checkbox_1_1').is(":checked")) {
+                $("#clearance_details").show();
+                $("#moveoutformpayment").hide();
+                $("#moveoutfromnext").show();
+                $("#form-field-purpose").attr("requried", "required");
+                $("#form-field-purpose").attr("aria-required", "true");
+                $("#moveoutclearancekey").show();
+                $('#form-field-checkbox_1_1').val("true");
+
+            }
+            else {
+                $("#clearance_details").hide();
+                $("#moveoutclearancekey").hide();
+                $("#form-field-purpose").removeAttr("requried");
+                $("#form-field-purpose").removeAttr("aria-requried");
+                // $("#form-field-purpose").hide();
+                $('#form-field-purpose option:selected').val("");
+            }
+        });
+    });
+</script>
+
+ 

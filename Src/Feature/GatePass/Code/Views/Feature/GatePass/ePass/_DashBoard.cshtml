@@ -1,0 +1,130 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using Roles = DEWAXP.Foundation.Content.Roles
+@model DEWAXP.Feature.GatePass.Models.ePass.ePassLogin
+
+@{
+    var dir = Sitecore.Context.Culture.TextInfo.IsRightToLeft ? "،" : ",";
+}
+<div class="j113-epass">
+    <div class="grid">
+        <div class="grid__row mb0">
+            <div class="grid__column grid__column--12">
+                <div class="j113-epass--title_wrapper">
+                    <div class="j113-epass--title_company">
+                        @Translate.Text("Epass.Welcome")@dir @Model.UserName
+                    </div>
+
+                    @*<a class="button button--text button--next" href="/api/sitecore/ePass/ePassLogout">@Translate.Text("Epass.Logout")</a>*@
+                </div>
+                @if (Model.UserType == Roles.DewaSupplier)
+                {
+                    <div class="j113-epass--action_wrapper">
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SERVICES)">
+                            @Translate.Text("Epass.Applynewpass")
+                        </a>
+                        <a class="button button--text button--next" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS)">@Translate.Text("Epass.Mypasses")</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    @if (Model.lstpassess != null)
+    {
+        <div class="box box--3">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--3">
+                        <div class="j113-epass--card_wrapper">
+                            <div class="j113-epass--card_message">
+                                @Translate.Text("Epass.Pendingapproval")
+                            </div>
+                            <div class="j113-epass--card_message-expire">
+                                @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.UnderApprovalinWorkPermit || x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithSecurity || x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.PendingApprovalwithCoordinator).Count()
+                            </div>
+                            <div class="j113-epass--card_message-passes">
+                                @Translate.Text("Epass.Passes")
+                            </div>
+                            <a class="button button--primary" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS)#pending">@Translate.Text("Epass.Review")</a>
+                        </div>
+                    </div>
+                    <div class="grid__column grid__column--3">
+                        <div class="j113-epass--card_wrapper">
+                            <div class="j113-epass--card_message">
+                                @Translate.Text("Epass.Active")
+                            </div>
+                            <div class="j113-epass--card_message-expire green">
+                                @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Active || x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.SoontoExpire).Count()
+                            </div>
+                            <div class="j113-epass--card_message-passes">
+                                @Translate.Text("Epass.Passes")
+                            </div>
+                            <a class="button button--primary" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS)#active">@Translate.Text("Epass.Review")</a>
+                        </div>
+                    </div>
+                    <div class="grid__column grid__column--3">
+                        <div class="j113-epass--card_wrapper">
+                            <div class="j113-epass--card_message">
+                                @Translate.Text("Epass.Expired")
+                            </div>
+                            <div class="j113-epass--card_message-expired">
+                                @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.Expired).Count()
+                            </div>
+                            <div class="j113-epass--card_message-passes">
+                                @Translate.Text("Epass.Passes")
+                            </div>
+                            <a class="button button--primary" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS)#expired">@Translate.Text("Epass.Review")</a>
+                        </div>
+                    </div>
+                    <div class="grid__column grid__column--3">
+                        <div class="j113-epass--card_wrapper">
+                            <div class="j113-epass--card_message">
+                                @Translate.Text("Epass.Soontoexpire")
+                            </div>
+                            <div class="j113-epass--card_message-expired">
+                                @Model.lstpassess.Where(x => x.status == DEWAXP.Feature.GatePass.Models.ePass.SecurityPassStatus.SoontoExpire).Count()
+                            </div>
+                            <div class="j113-epass--card_message-passes">
+                                @Translate.Text("Epass.Passes")
+                            </div>
+                            <a class="button button--primary" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MYPASSESS)#soontoexpire">@Translate.Text("Epass.Review")</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+    <div class="box">
+        <div class="m41-tabs-box__tab-panel" data-index="0" style="display: block;">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <div class="m26-page-title title_message">
+                            <h2 class="text__page-title">@Translate.Text("Epass.Recentpasses")</h2>
+                        </div>
+                    </div>
+                    <div class="grid__column grid__column--12">
+                        @Html.Sitecore().Placeholder("recentpasses")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="grid">
+        @Html.Sitecore().Placeholder("contactus")
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

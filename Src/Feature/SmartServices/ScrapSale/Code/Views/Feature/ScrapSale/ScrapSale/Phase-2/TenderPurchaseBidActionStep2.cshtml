@@ -1,0 +1,263 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Integration.CustomerSmartSalesSvc
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.ScrapSale.Models.ScrapSale.TenderBidingStep2Model
+@{
+    bool _IsExpiredbiditemDisplay = Convert.ToBoolean(ViewBag.IsExpiredbiditemDisplay);
+}
+
+<div class="grid">
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12">
+            <!-- m26-page-title-start -->
+            <div class="m26-page-title ">
+                <div class="m26-page-title__links">
+                    <p class="m26-page-title__backlink">
+                        <a href="@(_IsExpiredbiditemDisplay?string.Format("{0}?t={1}&m={2}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP1),Model.TenderNumber,Model.bidMode):"#")" class="button button--text button--back">@Translate.Text("Back")</a>
+                    </p>
+                </div>
+                <h2 class="text__page-title">
+                    @Translate.Text("SS_BD_Header") @Model.TenderNumber
+                </h2>
+                <p class="text-page__intro">
+                    @if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft)
+                    {
+                        @Model.TenderARDescription
+                    }
+                    else
+                    {
+                        @Model.TenderEndDescription
+                    }
+                </p>
+            </div>
+            <!-- m26-page-title-end -->
+        </div>
+    </div>
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <div class="m38-step-tracker" data-component="m38-step-tracker" data-total-steps="7" data-current-step="2" data-labels='{"conjunction":"@Translate.Text("of")"}' data-hasInfo="false">
+                <div class="m38-steptracker__info-wrapper">@Translate.Text("SS_BD_Step2")</div>
+                <div class="m38-step-tracker__progressbar" data-m38-progressbar="true" role="progressbar" aria-valuetext="">
+                    @*@Translate.Text("SS_BD_Steptitle")*@
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (Model.Success)
+    {
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="message-box">@Model.successDesc</div>
+                @*<div class="message-box">
+                        @if (Model.BidStatus == "4")
+                        {
+                            <span>
+                                @string.Format(Translate.Text("SS_BD_BidCreated"), @Model.TenderBidRefNumber)
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                @string.Format(Translate.Text("SS_BD_BidSuccess"), @Model.TenderBidRefNumber)
+                            </span>
+                        }
+                    </div>*@
+                @*<span class="m43-accountsel__accounts-number">@string.Format(Translate.Text("SS_BD_SuccessDesc"), @Model.TenderNumber, @Model.TenderBidRefNumber)</span>*@
+            </div>
+        </div>
+    }
+    @*<div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="message-box">You will be able to submit the bid once all the necessary steps and document uploads are completed.</div>
+            </div>
+        </div>*@
+    <div class="grid__row mb12">
+        <div class="grid__column grid__column--12">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+         FormMethod.Post, new
+         {
+             @class = "form",
+             @id = "IdTenderbidActionStep2",
+             data_form = "true",
+             data_parsley_focus = "none",
+             @data_submit_validate = "enabled",
+             enctype = "multipart/form-data",
+             @autocomplete = "off"
+         }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                @Html.HiddenFor(m => m.TenderNumber)
+                @Html.HiddenFor(m => m.bidMode)
+                if (!string.IsNullOrWhiteSpace(Model.TenderBidRefNumber))
+                {
+                    <div class="m42-keyvalue">
+                        <dl>
+                            <dt class="m42-keyvalue__key--stacked"><strong>@Translate.Text("SS_BD_BidRefNumber")</strong></dt>
+                            <dd class="m42-keyvalue__value--stacked grey" style="color: #717173;">@Model.TenderBidRefNumber</dd>
+
+                        </dl>
+                    </div>
+                }
+                @*<div class="grid__row" style="display:none">
+                        <div class="grid__column grid__column--12">
+                            <div class="float_right">
+                                @Translate.Text("pagesize")
+                                @Html.DropDownList("pagesizefilter", ScrapSaleHelper.GetPageSize(),
+                                    new
+                                    {
+                                        @class = "m15-filter--select",
+                                        @id = "pagesizefilter",
+                                        @name = "pagesizefilter",
+                                        @aria_describedby = "description-for-pagesizefilter",
+                                        @data_parsley_id = "20"
+                                    })
+                            </div>
+
+                        </div>
+                    </div>*@
+                <div id="divbidItemList">
+                    @{ Html.RenderPartial("~/Views/Feature/ScrapSale/ScrapSale/Phase-2/_bidItemList.cshtml", Model); }
+                </div>
+
+                <div class="form-field__button">
+                    @if (Model.BidStatus != "1" && !_IsExpiredbiditemDisplay)
+                    {
+                        <button id="btnsavebid" type="submit" name="SubmitType" value="SaveBid" class="button button--primary button--fullwidth-mobile mb12" data-submission-text="@Translate.Text("SS_BD_Saving")...">@Translate.Text("SS_BD_SaveBid")</button>
+                    }
+                    <button id="btnnextbid" type="submit" name="SubmitType" value="NextBid" class="button button--primary button--fullwidth-mobile mb12" data-submission-text="@Translate.Text("Continue")...">
+                        @Translate.Text("Next")
+                    </button>
+                    @if (Model.BidStatus == "1" || _IsExpiredbiditemDisplay)
+                    {
+                        <a href="javascript:void(0)" data-tid="@(Model.TenderBidRefNumber)" class="button button--primary button--fullwidth-mobile doc-downloadbtn mb12">@Translate.Text("SS_Download")</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div style="display:none">
+    <form id="scrap-doc-form" action="/api/sitecore/ScrapSale/DownloadBIDItemDocument" method="post">
+        @Html.AntiForgeryToken();
+        <input type="hidden" name="bidrefno" id="bidrefno" class="bidrefno" value="" />
+    </form>
+</div>
+
+@*Model pop up on back button*@
+<div class="m39-modal m39-modal--confirm" data-component="m39-modal" id="modal_true">
+    <button data-trigger="true" class="m39-modal__trigger hidden btnmodaltrigger" type="button"></button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_m2f48n2so_content" aria-labelledby="_m2f48n2so_trigger">
+        <div class="m39-modal__dialog ">
+            <div class="m39-modal__header">
+                <div class="m39-modal__title">
+                    @Translate.Text("SS_BD_TenderPurchase") @Model.TenderNumber
+                </div>
+                <button data-close="true" class="m39-modal__button--close" id="_m2f48n2so_close" aria-controls="_m2f48n2so_content"></button>
+            </div>
+            <div class="m39-modal__content">
+                @Translate.Text("SS_BD_Popupmessage")
+                <div class="mt24">
+                    <a class="button button--very_small button--primary" href="@string.Format("{0}?t={1}&m={2}",@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_TENDER_PUCHASE_BIDITEM_STEP1),Model.TenderNumber,Model.bidMode)">
+                        @Translate.Text("Yes")
+                    </a>
+                    <button class="button button--very_small button--senary" data-close="true" id="_m2f48n2so_close" aria-controls="_m2f48n2so_content">@Translate.Text("No")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="m39-modal__overlay"> </div>
+</div>
+@*end*@
+
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+
+
+@if (!_IsExpiredbiditemDisplay)
+{
+    // model popup on back button
+    <script language="javascript" type="text/javascript">
+        jQuery('.button--back').on('click', function () {
+            if (!jQuery('.button--back').parent().hasClass('disabled')) {
+                jQuery('.btnmodaltrigger').trigger('click');
+            }
+            return false;
+        });
+
+    </script>
+}
+
+<script language="javascript" type="text/javascript">
+    setTimeout(function () {
+        $(".doc-downloadbtn").on("click", function () {
+            $(".bidrefno").val($(this).data("tid"))
+            $("#scrap-doc-form").submit();
+        });
+    }, 500);
+
+
+
+
+    docReady(function () {
+        $("#pagesizefilter").change(function () {
+            PaginationClick(1);
+        });
+
+        // Unit price disabled enter key
+        setTimeout(function () {
+            jQuery('.bidPrice').each(function () {
+                jQuery(this).off('keydown.submit').on('keydown.submit', function (event) {
+                    if (event.keyCode == 13 || event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                })
+            });
+        }, 250)
+    });
+    function PaginationClick(index) {
+        var pageSize = $('#pagesizefilter').val();
+
+        var url = "/api/sitecore/ScrapSale/AjaxSearchBidItems";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            datatype: 'application/json',
+            data: { currentPage: parseInt(index), pageSize: parseInt(pageSize) },
+            beforeSend: function () {
+                jQuery('.j105-drrg--loader').show();
+                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.j105-drrg--loader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            success: function (response) {
+                jQuery('#divbidItemList').html('');
+                jQuery('#divbidItemList').html(response);
+                window.initComponents('rs_area');
+
+                // Unit price disabled enter key
+                setTimeout(function () {
+                    jQuery('.bidPrice').each(function () {
+                        jQuery(this).off('keydown.submit').on('keydown.submit', function (event) {
+                            if (event.keyCode == 13) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                        })
+                    });
+                }, 250)
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+</script>
+
+
+

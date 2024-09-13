@@ -1,0 +1,136 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Presentation
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.ShamsDubai.Models.ShamsDubaiTraining
+@model CertificateVerifyingModel
+
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12" id="divIdverifycertificate">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+        FormMethod.Post, new
+        {
+            @class = "form",
+            @id = "Idverifycertificate",
+            data_form = "true",
+            data_parsley_focus = "none",
+            @data_submit_validate = "enabled",
+            enctype = "multipart/form-data",
+            @autocomplete = "off"
+        }))
+            {
+
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="form-field form-field--text">
+                    <label for="form-field-pvcccertificatenumber" class="form-field__label">
+                        @Translate.Text("PVCC_Certificate_Number")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input maxlength="13"
+                               data-parsley-maxlength="13"
+                               value="@Model.CertificateNumber"
+                               class="form-field__input form-field__input--text form-field__binding"
+                               id="form-field-pvcccertificatenumber"
+                               name="CertificateNumber"
+                               type="text"
+                               placeholder="@Translate.Text("PVCC_Entercertificatenumber")"
+                               aria-describedby="description-for-pvcccertificatenumber"
+                               data-parsley-errors-container="#description-for-visa"
+                               data-parsley-trigger="focusout"
+                               data-parsley-id="40"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("PVCC_Entercertificatenumber")"
+                               data-bindingID="visabinding"
+                               oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+                    </span>
+                    <div id="description-for-pvcccertificatenumber" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field form-field--text  ">
+                    <label for="form-field-emiratesidver" class="form-field__label">
+                        @Translate.Text("PVCC_EmiratesId")
+                        <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text form-field__binding"
+                               id="form-field-emiratesidver"
+                               name="EmiratesID"
+                               type="number"
+                               required=""
+                               value="@Model.EmiratesID"
+                               data-parsley-required-message="@Translate.Text("PVCC_EnterEmiratesId")"
+                               placeholder="@Translate.Text("PVCC_EnterEmiratesId")"
+                               aria-describedby="description-for-emiratesidver"
+                               data-parsley-errors-container="#description-for-emiratesidver"
+                               data-parsley-emiratesid=""
+                               data-parsley-trigger="focusout"
+                               data-parsley-emiratesid-message="@Translate.Text("PVCC_EnterValidEmiratesId")">
+                    </span>
+                    <div id="description-for-emiratesidver" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.EmiratesID, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field__button">
+                    <a id="btnVerifyingSearch" href="#" onclick="VerifyingList()" class="button button--primary button--fullwidth-mobile" data-submission-text="@Translate.Text("PVCC_Finding")...">@Translate.Text("PVCC_Find_Status")</a>
+                </div>
+            }
+            <div class="m23-table m23-table--green mt12" id="CertificateVerificationList" data-component="m23-table" style="display:none">
+                @{ Html.RenderPartial("~/Views/Feature/ShamsDubai/ShamsDubaiTraining/CertificateVerificationList.cshtml", Model); }
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Scripts/External/nml/form-submit-validate.js"></script>
+<script type="text/javascript">
+    function VerifyingList() {
+        jQuery("#Idverifycertificate").parsley().validate();
+        var isValid = jQuery("#Idverifycertificate").parsley().isValid();
+        var certificateNumber = jQuery('#form-field-pvcccertificatenumber').val();
+        var emiratesId = jQuery('#form-field-emiratesidver').val();
+        var url = "/api/sitecore/ShamsDubaiTraining/CertificateVerification";
+        if (isValid) {
+            if ((certificateNumber != null && certificateNumber != "") || (emiratesId != null && emiratesId != "")) {
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    datatype: 'application/json',
+                    traditional: true,
+                    data: AddForgeryToken({ CertificateNumber: certificateNumber, EmiratesID: emiratesId }, "Idverifycertificate"),
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    success: function (response) {
+                        jQuery('#CertificateVerificationList').show();
+                        jQuery('#CertificateVerificationList').html('');
+                        jQuery('#CertificateVerificationList').html(response);
+                    }
+                });
+            }
+        }
+        return false;
+    }
+</script>

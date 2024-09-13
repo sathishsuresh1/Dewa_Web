@@ -1,0 +1,301 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+<script id="listofcards-item-template" type="text/x-handlebars-template">
+    <div data-component="m100-ev-card" class="m100-ev-card--selector">
+        <div class="m100-ev-card--selector_wrapper">
+            <div class="m100-ev-card--selector_desc">
+                @Translate.Text("EV_Dashboard_Change_My_Cards")
+            </div>
+            {{#each_upto this 1}}
+            <div class="m100-ev-card" style="background-image: url('/images/ev_card_bg.png');">
+                <div class="m100-ev-card--ratiodiv"></div>
+                <div class="m100-ev-card--header">
+                    <div class="m100-ev-card--name" data-holder="">
+                        {{contractaccountname}}
+                    </div>
+                </div>
+                <div class="m100-ev-card--title">
+                    <div class="m100-ev-card--title_title">
+                        @Translate.Text("EV_Dashboard_Card_Title")
+                    </div>
+                    <div class="m100-ev-card--title_name" data-title="">
+                        {{nickname}}
+                    </div>
+                </div>
+                <div class="m100-ev-card--footer">
+                    <div class="m100-ev-card--detail">
+                        <div class="m100-ev-card--detail_key">
+                            @Translate.Text("EV_Dashboard_Card_Number")
+                        </div>
+                        <div class="m100-ev-card--detail_value  evcardnumber_value" data-cardnumber="{{cardnumber}}">
+                            {{serialnumber}}
+                        </div>
+                    </div>
+                    <div class="m100-ev-card--detail">
+                        <div class="m100-ev-card--detail_key">
+                            @Translate.Text("EV_Dashboard_EV_Number")
+                        </div>
+                        <div class="m100-ev-card--detail_value" data-evnumber="{{platenumber}}">
+                            {{platenumber}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{/each_upto}}
+        </div>
+        
+        <div class="m100-ev-card--buttons">
+            <div class="m39-modal" data-component="m39-modal" id="modal_true">
+                <button data-trigger="true" class="hidden" type="button" id="_li6ftjl87_trigger" aria-controls="_li6ftjl87_content">@Translate.Text("View All")</button>
+                <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_li6ftjl87_content" aria-labelledby="_li6ftjl87_trigger">
+                    <div class="m39-modal__dialog ">
+                        <div class="m39-modal__header">
+                            <div class="j69-dashboard--card_filter">
+                                <div >
+                                    <label for="form-field-listofcardmodal" class="form-field__label aria-only">
+                                        Select
+                                    </label>
+                                    <span class="form-field__input-wrapper">
+                                        <input class="form-field__input form-field__input--text"
+                                               id="form-field-listofcardmodal" name="text"
+                                               type="text" placeholder="@Translate.Text("EV_Dashboard_Search_card_number")"
+                                               aria-describedby="description-for-listofcardmodal"
+                                               data-parsley-errors-container="#description-for-listofcardmodal"
+                                               required="" data-parsley-required-message="This field is required"
+                                               data-parsley-trigger="focusout" data-parsley-id="12"
+                                               aria-invalid="true">
+                                        @*<ul class="parsley-errors-list filled" id="parsley-id-12"></ul>*@
+                                        <button type="submit" id="listofcardsearchbutton" class="icon-search"><span class="aria-only">@Translate.Text("Submit")</span></button>
+                                    </span>
+                                </div>
+                            </div>
+                            <button data-close="true" class="m39-modal__button--close" id="_li6ftjl87_close" aria-controls="_li6ftjl87_content">@Translate.Text("Close")</button>
+                        </div>
+                        <div class="m39-modal__content" style="top: 100px;">
+                            <div class="m100-table">
+                                <table class="m100-table__content-table">
+                                    <thead class="m100-table__content-table-header">
+                                        <tr class="m100-table__content-table-row">
+                                            <th class="m100-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Card_Holder")</th>
+                                            <th class="m100-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Card_Number")</th>
+                                            <th class="m100-table__content-table-cell--header">@Translate.Text("EV_Dashboard_EV_Number")</th>
+                                            <th class="m100-table__content-table-cell--header">@Translate.Text("EV_Dashboard_Card_Title")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modallistofcards" class="m100-table__content-table-body"></tbody>
+                                </table>
+                            </div>
+                            <div id="pagination-list">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="m39-modal__overlay" style="display: none;"> </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script id="listofcards-modal-template" type="text/x-handlebars-template">
+    {{#each this}}
+    <tr class="m100-table__content-table-row">
+        <td class="m100-table__content-table-cell" data-holder="">
+            {{contractaccountname}}
+        </td>
+        <td class="m100-table__content-table-cell" data-cardnumber="{{cardnumber}}">
+            <strong class="green">{{serialnumber}}</strong>
+        </td>
+        <td class="m100-table__content-table-cell" data-evnumber="{{platenumber}}">
+            <span class="border-1 radius-3 padding p-l-5 p-r-5">{{platenumber}}</span>
+        </td>
+        <td class="m100-table__content-table-cell" data-title="">
+            {{nickname}}
+        </td>
+    </tr>
+    {{/each}}
+</script>
+<script id="listofcards-pagination-template" type="text/x-handlebars-template">
+    <div class="m34-pagination">
+        <div class="m34-pagination__content">
+            {{#if previouspage}}
+            <a onclick="evlistofcardsselection({{firstpagenumber}})" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+            </a>
+            {{/if}}
+            {{#if previouspage}}
+            <a onclick="evlistofcardsselection({{previouspagenumber}})" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+            {{/if}}
+            <ul class="m34-pagination__page-list">
+                {{#pagenumbers}}
+                {{#ifCond ../page this}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                    <a onclick="evlistofcardsselection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{else}}
+                <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                    <a onclick="evlistofcardsselection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                </li>
+                {{/ifCond}}
+                {{/pagenumbers}}
+            </ul>
+            {{#if nextpage}}
+            <a onclick="evlistofcardsselection({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+            {{/if}}
+            {{#if nextpage}}
+            <a onclick="evlistofcardsselection({{lastpagenumber}})" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</script>
+<script>
+    var firstTime =true;
+    docReady(function () {
+        Handlebars.registerHelper('each_upto', function (ary, max, options) {
+            if (!ary || ary.length == 0)
+                return options.inverse(this);
+
+            var result = [];
+            for (var i = 0; i < max && i < ary.length; ++i)
+                result.push(options.fn(ary[i]));
+            return result.join('');
+        });
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+    });
+    function evlistofcardsselection(page) {
+        firstTime = false;
+        _listofevcardsHandler(page);
+        return false;
+    }
+    var _listofevcardsHandler = function (page) {
+        var accountNumber = jQuery("input[name='SelectedAccountNumber']:checked").val();
+        if (typeof (page) === 'undefined') {
+            page = 1;
+        }
+        var url = "/api/ListofEVCards/Card/";
+        jQuery.ajax({
+            type: 'GET',
+            url: url,
+            beforeSend: function (jqXHR) {
+                beforesendfnc();
+            },
+            data: {
+                id: accountNumber,
+                page: page,
+                keyword: jQuery('#form-field-listofcardmodal').val()
+            },
+            dataType: 'json',
+            method: 'GET',
+            async: true,
+            success: function (response) {
+                if (response != null) {
+                    if (response.Error != null && response.Error != undefined) {
+                        //renderErrorList(response.Error)
+                    }
+                    else if (response != null && response.eVCardDetails != null) {
+                        if (firstTime) {
+                            renderList(response.eVCardDetails);
+                        }
+                        renderModalList(response.eVCardDetails);
+                        if (response.pagination) {
+                            var pagedata = {
+                                previouspage: function () {
+                                    if (response.page > 1)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                nextpage: function () {
+                                    if (response.page < response.totalpage)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                page: response.page,
+                                firstpagenumber: 1,
+                                lastpagenumber: response.totalpage,
+                                previouspagenumber: response.page - 1,
+                                nextpagenumber: response.page + 1,
+                                pagenumbers: response.pagenumbers,
+                                totalpage: response.totalpage
+                            }
+                            renderSearchPagination(pagedata);
+                        }
+                        else {
+                            jQuery('#pagination-list').html("");
+                        }
+                        if (firstTime) {
+                            fnAfterEVCardSelected();
+                        }
+                        loadcustfunc() 
+                    }
+                }
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+
+            },
+            complete: function (response) {
+                jQuery(window).trigger('reinitm100');
+                completefunc();
+            }
+        });
+    }
+    function loadcustfunc() {
+        jQuery('.m100-table__content-table-row').on('click', function () {
+            setTimeout(function () {
+                fnAfterEVCardSelected();
+            }, 100);
+        });
+    }
+    function renderList(context) {
+        var markup = jQuery('#listofcards-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#listofcard-placeholder').html(rendering);
+        window.initComponents('listofcard-placeholder');
+    }
+    function renderModalList(context) {
+        var markup = jQuery('#listofcards-modal-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#modallistofcards').html(rendering);
+    }
+    function renderErrorList(context) {
+        var markup = jQuery('#listofcards-error-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#listofcard-placeholder').html(rendering);
+    }
+
+    function renderSearchPagination(context) {
+        var markup = jQuery('#listofcards-pagination-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('#pagination-list').html(rendering);
+    }
+</script>

@@ -1,0 +1,769 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers
+@model DEWAXP.Foundation.Content.Models.MoveOut.MoveOutAccount
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    var dir = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<style>
+    #multiselected-copy {
+        display: none;
+    }
+</style>
+@Html.Sitecore().Placeholder("j18/m26-page-title")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("j18/m38-step-tracker")
+        @Html.Sitecore().Placeholder("j18/m14-formatted-text")
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+    </div>
+</div>
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form j104_1-move-out" id="moveouttotaljourney" data-journey="j104-move-out">
+            <div class="form-field form-field--account-details">
+                <!-- m43-account-selector-start -->
+                <div class="form-field form-field--account-details">
+                    <div class="hidden moveout_hidden_container">
+
+                    </div>
+                    <form id="form-account-selector" data-form="true" action="#" method="POST" form-skipvalidation="true">
+                        @Html.Sitecore().Placeholder("j18/m43-account-selector")
+                    </form>
+
+                </div>
+                <!-- m42-account-selector-end -->
+            </div>
+            <br />
+            @*<div id="moveoutregister-error" class="form-field__messages hidden" style="color:#ff0000;cursor:pointer;">
+                </div>*@
+            <div id="selectedAccountlistdata"></div>
+            <div class="m42-keyvalue mt12 hidden" id="totalPaymentDetails">
+                <dl>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt totalAmountLabel"></dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd totalAmount" data-acc-detail=""></dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt outstandingBalanceLabel"></dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd outstandingBalance" data-acc-detail=""></dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt viewdetails"><span class="link" style="cursor:pointer;" id="lnkViewdetails">@Translate.Text("RR_ViewDetails")</span></dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd" data-acc-detail=""></dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--totalmovein m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("moveout.totalPayableAmount")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--totalmovein m42-keyvalue__value--secondary m42-keyvalue--justified-dd totalPayableAmount" data-acc-detail=""></dd>
+                </dl>
+
+                <div class="m39-modal m39-modal--new" data-component="m39-modal" id="modal_true">
+                    <button data-trigger="true" class="m39-modal__trigger hidden btnviewdetails" type="button" id="_kz7biy3li_trigger" aria-controls="_kz7biy3li_content"></button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_kz7biy3li_content" aria-labelledby="_kz7biy3li_trigger">
+                        <div class="m39-modal__dialog ">
+                            <div class="m39-modal__header">
+                                <div class="m39-modal__title green">@Translate.Text("moveout.OutstandingDueTitle")</div>
+                                <button data-close="true" class="m39-modal__button--close" id="_kz7biy3li_close" aria-controls="_kz7biy3li_content">@Translate.Text("Close")</button>
+                                @*<div class="m39-modal__subtitle">@Translate.Text("moveout.OutstandingDueSubTitle")</div>*@
+                            </div>
+                            <div class="m39-modal__content" id="outstandinglist-content" style="top: 123px;">
+
+                            </div>
+                            <div class="m39-modal__footer">
+                                <div class="button button--primary" data-close="true" id="_kz7biy3li_close" aria-controls="_kz7biy3li_content">@Translate.Text("Refund.Done")</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay" style="display: none;"> </div>
+                </div>
+            </div>
+            <div class="errormsg-label" style="color:red;"></div>
+            <br />
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form update-details-form clear_both", @id = "moveoutform", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.dewaglobalmultiselect, new { id = "dewaglobalmultiselect", @value = "" })
+
+
+                <div class="form-field__button">
+                    <button type="submit" id="moveoutfromnext" class="button button--primary hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveout.update")</button>
+                    <a id="moveoutpay-popup" class="button button--primary hidden" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("moveout.pay")</a>
+                </div>
+                <input type="hidden" id="totalAmountMoveOut" />
+
+                @* Payment Type Popup module *@
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_PaymentPopup.cshtml", string.Empty)
+            }
+
+        </div>
+    </div>
+    <div id="selectedAccountFormate" style="display:none;">
+        <div class="m43-accountsel">
+            <div class="m43-accountsel-hidden" style="">
+                <div class="m43-accountsel__selected relative" data-accountselector="acc-sel-1">
+                    <div class="m43-accountsel__account" data-acc-detail="wrapper">
+                        <img src="" data-src="" class="m43-accountsel__image withimage tooltipstered" alt="ImageAlt" role="presentation" data-acc-detail="acc_image">
+
+                        <div class="m43-accountsel__header">
+
+                            <div class="m43-accountsel__secondarydetails m43-accountsel__nickname">
+                                AccountNickname
+                            </div>
+                            <span class="m43-accountsel__name" data-acc-detail="acc_name">
+                                <span class="inline-block" dir="ltr">AccountName</span>
+                                <span dir="@dir" class="m43-accountsel__status m43-accountsel__status--active"></span>
+                            </span>
+
+                            <div class="m43-accountsel__details">
+                                <span dir="@dir" data-acc-detail="type">AccountType</span> | <span title="@Translate.Text("Acc")">@Translate.Text("Acc")</span>
+                                <span dir="@dir" data-acc-detail="acc_number">AccountNumber</span>
+
+                            </div>
+                            <div class="m43-accountsel__secondarydetails">
+                                <span dir="@dir" data-acc-detail="address">
+                                    AccountAddress
+                                </span>
+                            </div>
+                            <span class="m43-accountsel__secondarydetails">
+                                <span dir="@dir" data-acc-detail="acc_premise">
+                                    @Translate.Text("Premise") (PremiseNumber)
+                                </span>
+                            </span>
+
+                            <div class="m43-accountsel__secondarydetails">
+                                outbalance
+                            </div>
+                        </div>
+                    </div>
+                    <span class="m43-accountsel__message m43-accountsel__message--multiselected hidden" data-acc-multiselected=" accounts selected" aria-hidden="true"></span>
+                    <div class="m43-accountsel__medpod">
+                        ismeddiv
+                        ispoddiv
+                        isscdiv
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="outstandingrefund-item-template" type="text/x-handlebars-template">
+    {{#divisionlist}}
+    <div class="refund_detail-card" style="max-width:100%">
+        <div class="refund_detail-name">
+            {{contractaccountname}}
+            {{#ifCond finalbillflag '==' 'X'}}
+            <span class="refund_detail-status">
+                @Translate.Text("moveout.FinalBiling")
+            </span>
+            {{/ifCond}}
+        </div>
+        <div class="refund_detail-details">
+            @Translate.Text("MoveOut.Account number") ({{contractaccountnumber}})
+        </div>
+        <div class="refund_detail-details">
+            {{premiseaddress1}} {{premiseaddress2}}
+        </div>
+        <div class="refund_detail-details">
+            @Translate.Text("Premise Number") ( {{premisenumber}} )
+        </div>
+        <div class="refund_detail-amount">
+            @if (dir == "rtl")
+            {
+                <span> {{formattedtotalamount}} @Translate.Text("AED")</span>
+            }
+            else
+            {
+                <span>@Translate.Text("AED") {{formattedtotalamount}}</span>
+            }
+        </div>
+    </div>
+    {{/divisionlist}}
+</script>
+
+<script type="text/javascript">
+
+    docReady(function () {
+        $('.m38-step-tracker').attr('data-total-steps', "3");
+        $('.m38-step-tracker').attr('data-current-step', "1");
+        $('.m38-step-tracker__progressbar').attr('aria-valuetext', '@Translate.Text("moveout.step1.info")');
+        $('.m38-step-tracker').attr('data-hasInfo', "true");
+        Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+            switch (operator) {
+                case '==':
+                    return (v1 == v2) ? options.fn(this) : options.inverse(this);
+                case '===':
+                    return (v1 === v2) ? options.fn(this) : options.inverse(this);
+                case '!=':
+                    return (v1 != v2) ? options.fn(this) : options.inverse(this);
+                case '!==':
+                    return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+                case '<':
+                    return (v1 < v2) ? options.fn(this) : options.inverse(this);
+                case '<=':
+                    return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+                case '>':
+                    return (v1 > v2) ? options.fn(this) : options.inverse(this);
+                case '>=':
+                    return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+                case '&&':
+                    return (v1 && v2) ? options.fn(this) : options.inverse(this);
+                case '||':
+                    return (v1 || v2) ? options.fn(this) : options.inverse(this);
+                default:
+                    return options.inverse(this);
+            }
+        });
+
+        jQuery('.moveout_hidden_container').html($('.m43-accountsel__selected--dropdown').find('.m43-accountsel__account').html());
+        var bpnumber = "";
+        var disabled_count = 0;
+        var selectedaccountlist = "";
+        var $selectedlist = jQuery('#dewaglobalmultiselect');
+        jQuery("#accountselector-bp").show();
+        jQuery(".m39-modal__title").addClass("mb12");
+        jQuery(".accountselector-ownertype").removeClass("hidden");
+        jQuery(".accountselector-moveoutreference").removeClass("hidden");
+        jQuery(".accountselector-ownertype").css("float", "");
+        var disable_check = function () {
+            //console.log('disable_check')
+            jQuery('#m43-account-list').find('.form-field__fakecheckbox').each(function () {
+                var _this = this;
+                var hasNotif = jQuery(this).find('.accountselector-moveoutreference').length;
+
+                if (hasNotif == 1) {
+                    jQuery(_this).off('click');
+                    jQuery(_this).closest('label').find('.form-field__input--checkbox').attr('disabled', true).addClass('disabled');
+                }
+            });
+        };
+        var showerror = function () {
+            //console.log('showerror');
+            jQuery('.form-field__fakecheckbox').each(function () {
+                jQuery(this).on('click', function () {
+                    var input = jQuery(this).closest('label').find('.multi-account-selector');
+
+
+                    if (jQuery(input).hasClass('disabled') && (jQuery(this).closest('label').find('.accountselector-moveoutreference').length == 0)) {
+                        var message = jQuery('.m39-modal__footer').find('.m39-modal__accsel-error-BP');
+
+                        jQuery(message).removeClass('hidden');
+                        jQuery('.button--primary[data-accountupdate="true"]').addClass('hidden');
+                        setTimeout(function () {
+                            jQuery(message).addClass('hidden');
+                            jQuery('.button--primary[data-accountupdate="true"]').removeClass('hidden');
+                        }, 3000);
+
+                    };
+                });
+            });
+        }
+        var check_click = function (pagination, reset) {
+            //console.log('check_click');
+            //jQuery('#clear-link').addClass('hidden');
+            //Deprecate UI
+            jQuery('input').off('click.check').on('click.check', function () {
+                var parent = jQuery(this).closest('.m43-accountsel__group'),
+                    checker = 0;
+                if (jQuery(this).prop('checked')) {
+                    jQuery('.m43-accountsel__group').each(function () {
+                        jQuery(this).addClass('checked_disabled');
+                    });
+                    jQuery(parent).removeClass('checked_disabled');
+                } else if (!(jQuery(this).prop('checked'))) {
+                    jQuery(parent).find('input').each(function () {
+                        if (jQuery(this).prop('checked')) {
+                            checker += 1;
+                        };
+                    });
+                    if (checker == 0) {
+                        jQuery('.m43-accountsel__group').each(function () {
+                            jQuery(this).removeClass('checked_disabled');
+                        });
+                    }
+                };
+                var disabled_counter = 0;
+                jQuery('.m43-accountsel__group').find('input').each(function () {
+                    if (jQuery(this).prop('checked')) {
+                        disabled_counter += 1;
+                    };
+                });
+
+                jQuery('.m43-accountsel__group').find('input').each(function () {
+                    jQuery(this).attr('disabled', false).removeClass('disabled');
+                });
+                jQuery(window).trigger('bind-selector-checkbox');
+                disable_check();
+                jQuery('.checked_disabled').find('input').each(function () {
+                    jQuery(this).attr('disabled', true).addClass('disabled');
+                });
+                jQuery('.checked_disabled').find('.form-field__fakecheckbox').each(function () {
+                    jQuery(this).off('click');
+                });
+
+                //jQuery('.form-field__fakecheckbox').each(function () {
+                //    jQuery(this).on('click', function () {
+                //        var input = jQuery(this).closest('label').find('.multi-account-selector');
+
+
+                //        if (jQuery(input).hasClass('disabled') && (jQuery(this).closest('label').find('.accountselector-moveoutreference').length == 0) ) {
+                //            var message = jQuery('.m39-modal__footer').find('.m39-modal__accsel-error-BP');
+
+                //            jQuery(message).removeClass('hidden');
+                //            jQuery('.button--primary[data-accountupdate="true"]').addClass('hidden');
+                //            setTimeout(function () {
+                //                jQuery(message).addClass('hidden');
+                //                jQuery('.button--primary[data-accountupdate="true"]').removeClass('hidden');
+                //            }, 3000);
+
+                //        };
+                //    });
+                //});
+                showerror();
+                disabled_count = disabled_counter
+            });
+
+            if (pagination && (disabled_count != 0)) {
+                jQuery('.m43-accountsel__group').each(function () {
+                    var checked_counter = 0;
+                    jQuery(this).find('input').each(function () {
+                        if (jQuery(this).prop('checked')) {
+                            checked_counter += 1;
+                        };
+                    });
+                    if (checked_counter == 0) {
+                        jQuery(this).addClass('checked_disabled');
+                    }
+                });
+            };
+            if (!reset) {
+                jQuery('.m43-accountsel__group').find('input').each(function () {
+                    jQuery(this).attr('disabled', false).removeClass('disabled');
+                });
+                jQuery(window).trigger('bind-selector-checkbox');
+
+                disable_check();
+
+            } else {
+                disabled_count = 0;
+
+            };
+            jQuery('.checked_disabled').find('input').each(function () {
+                jQuery(this).attr('disabled', true).addClass('disabled');
+            });
+            jQuery('.checked_disabled').find('.form-field__fakecheckbox').each(function () {
+                jQuery(this).off('click');
+            });
+
+            disable_check();
+            showerror();
+
+            //jQuery('.form-field__fakecheckbox').each(function () {
+            //    jQuery(this).on('click', function () {
+            //        var input = jQuery(this).closest('label').find('.multi-account-selector');
+
+            //        if (jQuery(input).hasClass('disabled')) {
+            //            var message = jQuery('.m39-modal__footer').find('.m39-modal__accsel-error-BP');
+
+            //            jQuery(message).removeClass('hidden');
+            //            jQuery('.button--primary[data-accountupdate="true"]').addClass('hidden');
+            //            setTimeout(function () {
+            //                jQuery(message).addClass('hidden');
+            //                jQuery('.button--primary[data-accountupdate="true"]').removeClass('hidden');
+            //            }, 3000);
+
+            //        };
+            //    });
+            //});
+        };
+
+        check_click(false, false);
+
+        setTimeout(function () {
+            disable_check();
+        }, 300)
+
+        jQuery('.button[data-accountupdate="true"]').on('click', function () {
+            $('.m40-status-message').closest('.grid__row').addClass('hidden');
+        });
+
+
+
+
+        $('.reset_update').on('click', function () {
+            //console.log("reset_update");
+            setTimeout(function () {
+                check_click(false, true);
+            }, 100);
+
+            jQuery(".accountselector-ownertype").removeClass("hidden");
+            jQuery(".accountselector-moveoutreference").removeClass("hidden");
+            jQuery("#moveoutfromnext").hide()
+            jQuery("#moveoutpay").hide()
+            jQuery("#moveoutpay-popup").hide()
+            jQuery("#moveoutregister-error").hide()
+        });
+
+        $('.pager_update').on('click', function () {
+            //console.log("pager_update");
+            setTimeout(function () {
+                check_click(true, false);
+                //disable_check();
+            }, 100)
+
+            jQuery(".accountselector-ownertype").removeClass("hidden");
+            jQuery(".accountselector-moveoutreference").removeClass("hidden");
+        });
+
+
+
+
+        var handleAccountSelection = function (e) {
+            // console.log('handleAccountSelection');
+
+            e.preventDefault();
+            var accountslist;
+            if (selectedaccountlist == "") {
+                if (dewaGlobal.multiSelectionInputData != null && dewaGlobal.multiSelectionInputData.length > 0) {
+                    var activeTab = jQuery('input[data-tabstorer]').val();
+                    var selection = $.map(dewaGlobal.multiSelectionInputData, function (Obj, key) {
+                        if (Obj.tabindex == activeTab) return Obj;
+                    });
+                    accountslist = _.pluck(selection, 'account').toString();
+
+                    $selectedlist[0].value = JSON.stringify(selection);
+                }
+                else {
+                    jQuery(e.target).find('.m43-accountsel').find('.m43-accountsel__selected').find('.m43-accountsel__details').find('span').each(function () {
+                        if ($(this).attr('data-acc-detail') == "acc_number") {
+                            accountslist = $(this).html();
+                        }
+                    });
+                }
+            }
+            else {
+                accountslist = selectedaccountlist;
+                selectedaccountlist = "";
+            }
+            jQuery(".m43-accountsel__details").find("abbr").css("text-decoration", "none");
+            //console.log(accountslist);
+            formSubmit(accountslist);
+            return false;
+        };
+        var cntAccount = "";
+        var formSubmit = function (accountslist) {
+            cntAccount = accountslist.length;
+            // $selectedlist[0].value = JSON.stringify(dewaGlobal.multiSelectionInputData);
+            var url = "/api/MoveOut/Get/";
+            jQuery.ajax({
+                url: url,
+                traditional: true,
+                type: "GET",
+                data: {
+                    accounts: accountslist
+                },
+                beforeSend: function () {
+                    jQuery("#moveoutform").hide();
+                    window.attachSpinner('#moveouttotaljourney', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                    jQuery("#moveoutfromnext").hide();
+                    jQuery("#moveoutpay").hide();
+                    jQuery("#moveoutpay-popup").hide();
+                    jQuery("#moveoutregister-error").hide();
+                },
+                complete: function () {
+                    window.detachSpinner('#moveouttotaljourney', { zIndex: 1, bgColor: "#fff", bgPosition: "top center" });
+                    dewaGlobal.multiSelectionInputData = JSON.parse($selectedlist[0].value);
+
+                    try {
+                        inputcheck();
+                        inputcheck_page();
+                        binding();
+                    }
+                    catch (error) {
+
+                    }
+                    if (dewaGlobal.multiSelectionInputData != null && dewaGlobal.multiSelectionInputData.length > 0) {
+                        $(dewaGlobal.multiSelectionInputData).each(function (Obj, key) {
+                            $('#tabber-' + key.tabindex).click();
+                            //setTimeout(function () {  }, 300);
+                            return false;
+                        });
+                    }
+                    jQuery(window).trigger('hellopopulate');
+
+                    //jQuery('#form-account-selector').find('.button--primary').trigger('click');
+                },
+                success: function (response) {
+                    if (response.issuccess) {
+                        jQuery("#lnkViewdetails").on("click", function () {
+                            jQuery(".btnviewdetails").trigger("click");
+                        });
+                        //console.log(response);
+                        jQuery("#moveoutform").show();
+
+                        if (response.proceed) {
+                            jQuery("#moveoutfromnext").show();
+                            jQuery("#totalPaymentDetails").hide();
+                        }
+                        else {
+                            jQuery("#totalPaymentDetails").show();
+                            jQuery("#moveoutpay").show();
+                            jQuery("#moveoutpay-popup").show();
+                            //jQuery("#moveoutpay").text('@Translate.Text("moveout.pay")' + numeral(response.totalamounttopay).format('0,0.00') + " " + '@Translate.Text("AED")');
+                            //jQuery("#moveoutpay-popup").text('@Translate.Text("moveout.pay")' + numeral(response.totalamounttopay).format('0,0.00') + " " + '@Translate.Text("AED")');
+                            //jQuery("#form-field-totalAmount-ot").val('@Translate.Text("moveout.pay")' + numeral(response.totalamounttopay).format('0,0.00') + " " + '@Translate.Text("AED")');
+
+                            //totalbalancediv_pending
+                            var totalpayableamount = 0;
+                            if (parseFloat(response.totalamounttopay) > 0) {
+                                totalpayableamount = parseFloat(response.totalamounttopay);
+                                if (dewaGlobal.multiSelectionInputData != null && dewaGlobal.multiSelectionInputData.length > 0) {
+                                    var txtActiveAccounts = '@Translate.Text("moveout.activeAccounts")';
+                                    jQuery(".totalAmountLabel").html('<strong>' + '@Translate.Text("moveout.TotalAmount") ' + '</strong>' + '' + txtActiveAccounts.replace("{0}", dewaGlobal.multiSelectionInputData.length));
+                                    jQuery(".totalbalancediv_pending").show();
+                                    var paymenttext = numeral(Math.abs(response.totalamounttopay)).format('0,0.00') + " " + '@Translate.Text("AED")';
+                                    if ('@dir' == "rtl") {
+                                        paymenttext = numeral(Math.abs(response.totalamounttopay)).format('0,0.00') + " " + '@Translate.Text("AED")';
+                                    }
+                                    jQuery(".totalAmount").html(paymenttext);
+
+                                    jQuery(".totalPayableAmount").html(numeral(Math.abs(totalpayableamount)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                                }
+                                jQuery("#moveoutpay").text('@Translate.Text("moveout.pay")' + numeral(Math.abs(totalpayableamount)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                                jQuery("#moveoutpay-popup").text('@Translate.Text("moveout.pay")' + numeral(Math.abs(totalpayableamount)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                                jQuery('#totalAmountMoveOut').val(totalpayableamount);
+                            }
+                            else {
+                                jQuery(".totalbalancediv_pending").hide();
+                            }
+                            if (parseFloat(response.TotalPendingBalance) > 0) {
+                                var txtOutstandingAccounts = '@Translate.Text("moveout.outstandingAccounts")';
+                                jQuery(".outstandingBalanceLabel").html('<strong>' + '@Translate.Text("moveout.OutstandingDueBalance") ' + '</strong>' + '' + txtOutstandingAccounts.replace("{0}", response.divisionlist.length));
+                                jQuery(".Outstanding_balance").show();
+                                //jQuery(".btnviewdetails").show();
+                                jQuery("#lnkViewdetails").show();
+                                var paymenttext = numeral(Math.abs(response.TotalPendingBalance)).format('0,0.00') + " " + '@Translate.Text("AED")';
+                                if ('@dir' == "rtl") {
+                                    paymenttext = numeral(Math.abs(response.TotalPendingBalance)).format('0,0.00') + " " + '@Translate.Text("AED")';
+                                }
+                                totalpayableamount += parseFloat(response.TotalPendingBalance);
+                                jQuery(".outstandingBalance").html(paymenttext);
+                                jQuery(".totalPayableAmount").html(numeral(Math.abs(totalpayableamount)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                                jQuery("#moveoutpay").text('@Translate.Text("moveout.pay")' + numeral(Math.abs(totalpayableamount)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                                jQuery("#moveoutpay-popup").text('@Translate.Text("moveout.pay")' + numeral(Math.abs(totalpayableamount)).format('0,0.00') + " " + '@Translate.Text("AED")');
+                                jQuery('#totalAmountMoveOut').val(totalpayableamount);
+                                //jQuery("#form-field-Outstandingbalance-ot").val('@Translate.Text("moveout.pay")' + numeral(response.TotalPendingBalance).format('0,0.00') + " " + '@Translate.Text("AED")');
+                            }
+                            else {
+                                jQuery(".Outstanding_balance").hide();
+                                jQuery("#lnkViewdetails").hide();
+                                jQuery(".outstandingBalanceLabel").html('');
+                                jQuery(".outstandingBalance").html('');
+                                jQuery("#totalPaymentDetails").hide();
+                            }
+                            //{cntActiveCount}
+                            var template = Handlebars.compile(jQuery('#outstandingrefund-item-template').html());
+                            $("#outstandinglist-content").empty().html(template(response));
+                        }
+                    }
+
+                    var activeTab = jQuery('input[data-tabstorer]').val();
+                    var selection = $.map(JSON.parse($selectedlist[0].value), function (Obj, key) {
+                        if (Obj.tabindex == activeTab) return Obj;
+                    });
+                    var htmlformat = $("#selectedAccountFormate").html().trim();
+                    var datatest = "<p class='mb12'><strong>@Translate.Text("moveout.activeaccounts_label")</strong></p>";
+                    if (response.details != null) {
+                        $.each(response.details, function (key, value) {
+                            var out = '';
+                            if (parseInt(value.amounttocollect) > 0 && value.okpaymenttocollect == "Y") {
+                                out = '@Translate.Text("Outstanding Balance"): <span data-acc-detail="o_balance">' + numeral(value.amounttocollect).format('0,0.00') + '</span>';
+                            }
+                            var htmldata = htmlformat.replace('AccountNumber', value.contractaccountnumber).replace("AccountName", value.contractaccountname).replace('outbalance', out);
+                            var adt = getAccountObjDetails(value.contractaccountnumber.replace("00", ""));
+                            if (adt) {
+                                //var ro = { isrc: "", idsrc: "", ialt: "", ann: "", an: "", acno: "", actp: "", acadd: "", acpn: "" };
+                                htmldata = htmldata.replace("ImageSrc", adt.isrc).replace('<img src=""', '<img src="' + adt.idsrc + '"').replace("ImageAlt", adt.ImageAlt).replace("AccountNickname", adt.ann).replace("AccountAddress", adt.acadd).replace("PremiseNumber", adt.acpn).replace("AccountType", adt.actp);
+                                if(adt.ismed)
+                                {
+                                   htmldata = htmldata.replace('ismeddiv', '<div class="green icon-medical"></div>')
+                                } else {
+                                   htmldata = htmldata.replace('ismeddiv', '')
+                                }
+                                if(adt.issc)
+                                {
+                                   htmldata = htmldata.replace('isscdiv', '<div class="green icon-senior"></div>')
+                                } else {
+                                   htmldata = htmldata.replace('isscdiv', ' ')
+                                }
+                                if(adt.ispod)
+                                {
+                                   htmldata = htmldata.replace('ispoddiv', '<div class="green icon-pod"></div>')
+                                } else {
+                                   htmldata = htmldata.replace('ispoddiv', ' ')
+                                }
+                                htmldata = htmldata.replace("undefined", "");
+                            }
+                            //console.log(htmldata);
+                            if (!response.issuccess && response.duplicaterequests != null) {
+                                jQuery.each(response.duplicaterequests, function (index, errorvalue) {
+                                    if (errorvalue.indexOf(value.account) >= 0) {
+                                        htmldata = htmldata.replace("ErrorMessage", errorvalue);
+                                    }
+                                });
+                                htmldata = htmldata.replace("ErrorMessage", "");
+                            }
+                            else {
+                                htmldata = htmldata.replace("ErrorMessage", "");
+                            }
+                            htmldata = htmldata.replace("undefined", "");
+                            datatest = datatest + "" + htmldata;
+                        });
+                    }
+                    datatest = datatest.replace("undefined", "");
+                    $("#selectedAccountlistdata").html(datatest);
+
+                    if (!response.issuccess) {
+
+                        var _Errorhtml = '';
+                        if (response.duplicaterequests != null && response.duplicaterequests.length > 0) {
+                            _Errorhtml += '<br/><ul>';
+                            for (var i = 0; i < response.duplicaterequests.length; i++) {
+                                _Errorhtml += '<li>' + response.duplicaterequests[i] + '</li>';
+                            }
+                            _Errorhtml += '</ul>';
+                        } else {
+                            _Errorhtml = '<p>' + response.errormessage + '</p>';
+                        }
+
+                        $(".errormsg-label").html(_Errorhtml);
+
+                    }
+                    else {
+                        $(".errormsg-label").html('');
+                    }
+                }
+            });
+        }
+        jQuery('#form-account-selector').submit(handleAccountSelection);
+        if ("@Model.dewaglobalmultiselect" != "") //Non Residential
+        {
+            var accounts = '@Model.dewaglobalmultiselect';
+            dewaGlobal.multiSelectionInputData = JSON.parse(accounts.replace(/&quot;/g, '\"'));
+
+            if (dewaGlobal.multiSelectionInputData != null && dewaGlobal.multiSelectionInputData.length > 0) {
+                var selection = $.map(dewaGlobal.multiSelectionInputData, function (Obj, key) {
+                    return Obj;
+                });
+                selectedaccountlist = _.pluck(selection, 'account').toString();
+                $selectedlist[0].value = JSON.stringify(selection);
+            }
+            var inputcheck = function () {
+                $(dewaGlobal.multiSelectionInputData).each(function () {
+                    var _this = this;
+                    $('.multi-account-selector').each(function () {
+                        if (parseInt($(this).attr("data-account-number")) == parseInt(_this.account)) {
+                            $(this).prop('checked', true)
+                            //console.log($(this).attr("data-account-name"));
+                        }
+                    });
+                });
+            };
+
+            var inputcheck_page = function () {
+                $('.pagination').find('a').each(function () {
+                    $(this).on('click', function () {
+                        inputcheck();
+                        inputcheck_page();
+                        binding();
+                    });
+                });
+            };
+
+            jQuery('#form-account-selector').submit();
+            var binding = function () {
+                if (dewaGlobal.multiSelectionInputData.length != 0) {
+                    $('.m43-accountsel__group').each(function () {
+                        var check = 0;
+                        $(this).find('input').each(function () {
+                            if ($(this).prop('checked')) {
+                                check += 1;
+                                disabled_count += 1;
+                            };
+                        });
+                        if (check == 0) {
+                            $(this).addClass('checked_disabled');
+                        };
+
+                    });
+                };
+
+
+                check_click(false, false);
+            };
+        }
+        try {
+            if ($(grp_el).length == 1) {
+                var any_sub = $(grp_el).first().find(mo_submitted_el).length;
+                if (any_sub == 0) {
+                    $el = jQuery(grp_el).first().find(".form-field__input--checkbox");
+                    var js = [];
+                    js.push({ "tabindex": "0", "id": $el.attr("id"), "account": $el.attr("data-account-number"), "name": $el.attr("data-account-name"), "type": $el.attr("data-account-class") });
+                    jQuery("#dewaglobalmultiselect").val(JSON.stringify(js));
+                    formSubmit($el.attr("data-account-number"));
+                }
+            }
+
+        } catch (e) { console.log(e.message); }
+
+    });
+    // Open Payment method popup.
+    jQuery('#moveoutpay-popup').on('click', function () {
+        var total = jQuery("#totalAmountMoveOut").val();
+        var currency = '@Translate.Text("AED")';
+
+        jQuery('#divPaymentAmountVal').attr('data-value', total);
+        jQuery('#divPaymentAmountVal').data('value', total);
+
+        if (numeral(total) > 0)
+        {
+            //Set payment method based on paid amount
+            setPaymentMethod(total);
+
+            jQuery("#continue-button").html(numeral(parseFloat(total)).format('0,0.00') + " " + currency);
+            jQuery("#continue-button").attr("data-amount", numeral(parseFloat(total)).format('0,0.00'));
+            jQuery('.btnmodaltrigger').trigger('click');
+        }
+        //jQuery("#continue-button").html(jQuery(".totalPayableAmount").text());
+        //jQuery('.btnmodaltrigger').trigger('click');
+    });
+
+    var grp_el = ".m43-accountsel__group", fake_cb = ".form-field__fakecheckbox", mo_submitted_el = ".accountselector-moveoutreference", form_el = "#form-account-selector";
+
+    function singleAccountCase() {
+
+    }
+    function getAccountObjDetails(acc) {
+        var ro = { isrc: "", idsrc: "", ialt: "", ann: "", an: "", acno: "", actp: "", acadd: "", acpn: "",ispod:false,issc:false,ismed:false };
+        try {
+            var s = $.map(JSON.parse($("#dewaglobalmultiselect").val()), function (obj, key) {
+                if (obj.account == acc) return obj;
+            });
+
+            if (s) {
+                $l = jQuery('input[id="' + s[0].id + '"]').closest(".form-field__checkbox").find(".m43-accountsel__account");
+                ro.ann = $l.find(".m43-accountsel__nickname").html();
+                ro.actp = $l.find('[data-acc-detail="type"]').html();
+                ro.acadd = $l.find('[data-acc-detail="address"]').html();
+                ro.acpn = $l.find('[data-acc-detail="acc_premise"]').text();
+
+                $i = $l.find(".m43-accountsel__image").first();
+
+                ro.isrc = $i.attr("src");
+                ro.idsrc = $i.attr("data-src");
+                ro.ialt = $i.attr("alt");
+                ro.ispod = $l.find('.icon-pod').length == 0 ? false : true;
+                ro.issc = $l.find('.icon-senior').length == 0 ? false : true;
+                ro.ismed = $l.find('.icon-medical').length == 0 ? false : true;
+            }
+        } catch (e) {
+            console.log(e.message);
+        }
+        return ro;
+    }
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

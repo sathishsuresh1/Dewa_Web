@@ -1,0 +1,78 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.EV.Models.EVSmartCharger.EV_Green_Charger_Details_ViewModel
+@{
+     var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+}
+<div class="grid j152-ev-smart-charge" data-journey="j152-ev-smart-charge">
+    <div class="j152-ev-smart-charge-wrapper">
+        @if (!Model.Status)
+        {
+            <div style="margin-top:60px;">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                            <div class="m40-status-message__title">@Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)</div>
+                            <div class="m40-status-message__text" dir="@direction">@Translate.Text("Invalid URL")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form j152-ev-smart-charge-form", @id = "EVGreenGeneralDetails", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="charge-box charge-details margin mt-40">
+                            <div class="cd-item item-icon location fw">
+                                <div class="cd-item-title icon-location">@Translate.Text("EVSmart.Charger location")</div>
+                                <div class="cd-item-value">@Model.ChargerLocation</div>
+                            </div>
+                            <div class="cd-item item-icon location fw">
+                                <div class="cd-item-title icon-EV-Charge">@Translate.Text("EVSmart.Charger ID")</div>
+                                <div class="cd-item-value">@Model.ChargerID</div>
+                                @Html.HiddenFor(m => m.ChargerID)
+                            </div>
+                            <div class="cd-item item-icon location fw">
+                                <div class="cd-item-title icon-b-charge">@Translate.Text("EVSmart.Charger Type")</div>
+                                <div class="cd-item-value"><strong class="cd-item-value-large color blue">@Model.ChargerType</strong></div>
+                            </div>
+                            <div class="cd-item item-icon location fw p0">
+                                @if (!string.IsNullOrWhiteSpace(Model.ConnectorIcon) && !Model.ConnectorIcon.Equals("na"))
+                                {
+                                <img class="cd-item-img" src="/images/EVSmart/@(Model.ConnectorIcon).png" />
+                                }
+                                <div class="cd-subitem">
+                                    <div class="cd-item-title">@Translate.Text("EVSmart.Connector")</div>
+                                    <div class="cd-item-value"><strong class="cd-item-value-large padding p-r-10">@Model.Connector</strong><strong class="status @Model.ConnectorStatus.ToLower()">@Model.ConnectorStatus</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12 grid__column--form">
+                        <div class="form-field__button form-field__button-full">
+                            @if (Model.ConnectorAvailable)
+                            {
+                                <button type="submit" class="button button--primary" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("Next")</button>
+                            }
+                        </div>
+                        <div class="form-field__button form-field__button-full">
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EVGREEN_VIEWLOCATIONS)" class="button button--quaternary">
+                                <span class="relative icon-EV-Charge">@Translate.Text("Evgreen.ViewGreenChargerLocations")</span></a>
+                        </div>
+                        <div class="form-field__button m14-richtext">@Html.Raw(@Translate.Text("EV_HelpText"))</div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

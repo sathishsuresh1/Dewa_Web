@@ -1,0 +1,338 @@
+﻿@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr"; }
+
+<div class="box box--1">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("j31/page-title")
+    </div>
+</div>
+
+@Html.Sitecore().Placeholder("j31/tabs")
+
+<!-- .account selector -->
+<div class="grid">
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+            <form id="form-account-selector" action="#" method="POST" form-skipvalidation="true">
+                @*data-form="true"*@
+                @Html.Sitecore().Placeholder("j31/account-selector")
+            </form>
+        </div>
+    </div>
+</div>
+<!-- ./account selector -->
+<!-- .electricity consumption graph -->
+<div class="box box--5">
+    <div class="grid">
+        <div class="grid__row">
+            <div id="electricity-consumption-graph-placeholder" class="grid__column grid__column--12 graph-placeholder ajax-placeholder">
+                <div class="m29-chart">
+                    <div class="chart-header">
+                        <h3 class="chart-header__title chart-header__title--electricity">@Translate.Text("Electricity"): @Translate.Text("no usage statistics notification")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ./electricity consumption graph -->
+<!-- .water consumption graph -->
+<div class="box box--5">
+    <div class="grid">
+        <div class="grid__row">
+            <div id="water-consumption-graph-placeholder" class="grid__column grid__column--12 graph-placeholder ajax-placeholder">
+                <div class="m29-chart">
+                    <div class="chart-header">
+                        <h3 class="chart-header__title chart-header__title--water">@Translate.Text("Water"): @Translate.Text("no usage statistics notification")</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- .teaser set -->
+<div class="grid">
+    @Html.Sitecore().Placeholder("j31/teaser")
+</div>
+<!-- ./teaser set -->
+<!-- .templates -->
+<script id="consumption-graph-template" type="text/x-handlebars-template">
+    <div class="m29-chart" data-component="m29-chart" data-chart-type="consumption" dir="{{dir}}" data-chart-y-axis="{{xAxisTitle}}" data-chart-value-suffix="{{unit}}" data-x-axis-categories="{{xAxis}}" data-step-s="2" data-series='[{{series}}]' data-usagefor="{{xAxisTitle}}">
+        <div class="chart-header">
+            {{#if hasData}}
+            <h3 class="chart-header__title {{headingClass}}">{{utilityLabel}}</h3>
+            {{else}}
+            <h3 class="chart-header__title {{headingClass}}">{{utilityLabel}}: @Translate.Text("no usage statistics notification")</h3>
+            {{/if}}
+        </div>
+
+        {{#if hasData}}
+        <div class="m29-chart__key">
+            <div class="m29-chart__label">{{xAxisTitle}}</div>
+            <div class="m29-chart__legend">
+                {{#each legend}}
+                <div class="m29-chart__legend--item" data-color="{{color}}">
+                    <span class="m29-chart__legend--item-icon"></span>
+                    <span class="m29-chart__legend--item-text">{{name}}</span>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="m29-chart__container" data-chart-container="true"></div>
+        <p><a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.TARIFFS)" class="button button--text button--next">@Translate.Text("bands based on tariff link")</a></p>
+        {{/if}}
+    </div>
+</script>
+<!-- ./templates -->
+
+<script type="text/javascript">
+	docReady(function () {
+	    var handleAccountSelection = function (e) {
+	        e.preventDefault();
+			jQuery('.ajax-placeholder').empty();
+
+			var activeTab = jQuery('input[data-tabstorer]').val();
+
+			//var selection = jQuery(e.target).find('[data-tabpanel]').eq(activeTab).find('input[ data-account-number ]:checked').map(function () {
+			//	return {
+			//		account: jQuery(this).data('account-number'),
+			//		name: jQuery(this).data('account-name'),
+			//		type: jQuery(this).data('account-class')
+			//	};
+	        //}).get();
+
+			var selection = $.map(dewaGlobal.multiSelectionInputData, function (Obj, key) {
+			    if (Obj.tabindex == activeTab) return Obj;
+			});
+
+            jQuery.ajax("/api/comparativeconsumptionstatistics/Accounts/", {
+				beforeSend: function() {
+					window.attachSpinner('#electricity-consumption-graph-placeholder');
+					window.attachSpinner('#water-consumption-graph-placeholder');
+				},
+				complete: function() {
+					window.detachSpinner('#electricity-consumption-graph-placeholder');
+					window.detachSpinner('#water-consumption-graph-placeholder');
+				},
+				error: function() {
+					jQuery('.ajax-placeholder').show();
+				},
+				dataType: 'json',
+				method: 'GET',
+				data: {
+					accounts: _.pluck(selection, 'account')
+                },
+                success:function(response) {
+                    renderConsumptionGraphs(response.series, selection);
+                },
+                error:function() {
+                    renderConsumptionGraphs([
+                        { Utility: 0, DataPoints: [] },
+                        { Utility: 1, DataPoints: [] }
+                    ], selection);
+                }
+			});
+
+			return false;
+		};
+
+		var renderConsumptionGraphs = function(series, meta) {
+			jQuery('.ajax-placeholder').show();
+			jQuery('.ajax-placeholder').empty();
+			var markup = jQuery('#consumption-graph-template').html();
+			var template = Handlebars.compile(markup);
+
+			var groupedSeries = _.chain(series)
+				.groupBy(function (s) {
+					return s.Utility;
+				})
+				.map(function (group, key) {
+					return {
+						Utility: parseInt(key),
+						Series: group
+					};
+				}).value();
+
+			for (var i = 0; i < groupedSeries.length; i++) {
+				var seriesGroup = groupedSeries[i];
+				var placeholder = seriesGroup.Utility === 0 ? "#electricity-consumption-graph-placeholder" : "#water-consumption-graph-placeholder";
+				var context = buildGraphContext(seriesGroup, meta);
+
+				var rendering = template(context);
+
+				jQuery(placeholder).html(rendering);
+				window.initComponents(placeholder.substring(1));
+			}
+		};
+
+		var buildGraphContext = function(seriesGroup, meta) {
+			var orderedSeries = seriesGroup.Series;
+
+			return {
+				legend: function () {
+					var i = 0;
+					var colours = getColoursForUtility(seriesGroup.Utility);
+
+					return _.map(orderedSeries, function (s) {
+						var selectedColour = colours[i];
+						if (i++ >= colours.length) {
+							i = 0;
+						}
+
+						var metadata = _.find(meta, function (m) {
+							return m.account === parseInt(s.Legend);
+						});
+
+						if (!metadata) {
+							return {
+								name: '-',
+								color: selectedColour
+							};
+						}
+
+						return {
+							name: metadata.name + ' (' + metadata.account + ')',
+							color: selectedColour
+						};
+					});
+				},
+				series: function () {
+					var legend = this.legend();
+
+					var i = 0;
+					var _this = this;
+					var points = _.map(orderedSeries, function(s) {
+						var data = {
+							data: _this.getAlignedDataPoints(_.map(s.DataPoints, _.clone)),
+							name: legend[i].name,
+							color: legend[i].color
+						};
+						i++;
+						return JSON.stringify(data);
+					});
+					return points.join(", ");
+				},
+				getAlignedDataPoints: function (dataPoints) {
+					var range = this.getCategories();
+
+					for (var i = 0; i < range.length; i++) {
+						if (dataPoints.length < (i + 1) || dataPoints[i].Month !== range[i]) {
+							dataPoints.splice(i, 0, {
+								Month: range[i],
+								Value: null
+							});
+						}
+					}
+					return _.pluck(dataPoints, 'Value');
+				},
+                hasData: function () {
+                    var dataPoints = orderedSeries[0].DataPoints;
+                    if (_.size(dataPoints) > 0) {
+                        return _.some(dataPoints, function (s) {
+                            return _.size(s) > 0;
+                        });
+                    }
+                    return false;
+                },
+				headingClass: function () {
+					return seriesGroup.Utility === 0 ? "chart-header__title--electricity" : "chart-header__title--water";
+				},
+				utility: function () {
+					return seriesGroup.Utility === 0 ? '@Translate.Text("Electricity")' : '@Translate.Text("Water")';
+				},
+				utilityLabel: function () {
+					return seriesGroup.Utility === 0 ? '@Translate.Text("Electricity") @Translate.Text("Usage")' : '@Translate.Text("Water") @Translate.Text("Usage")';
+				},
+				unit: function () {
+					return seriesGroup.Utility === 0 ? '@Translate.Text("Kilowatt Hour unit")' : '@Translate.Text("Imperial Gallon unit")';
+				},
+			    UsageFor: function () {
+			        return '@Translate.Text(DictionaryKeys.Global.Account.ConsumptionGraph.UsageFor)';
+			    },
+				latestConsumptionFigure: function () {
+					var last = _.chain(orderedSeries)
+						.pluck('DataPoints')
+						.flatten()
+						.last()
+						.value();
+
+					return numeral(last.Value).format('0,0');
+				},
+				latestConsumptionPeriod: function () {
+					var last = _.chain(orderedSeries)
+						.pluck('DataPoints')
+						.flatten()
+						.last()
+						.value();
+
+					var s = last.Month + "/" + last.Year;
+
+					return moment(s, 'MM/YYYY').format('MMMM YYYY');
+				},
+				xAxis: function () {
+					var range = this.getCategories();
+
+					return _.map(range, function (m) {
+						return moment(m, 'M').format('MMM').toUpperCase();
+					}).join(",");
+				},
+				xAxisTitle: function () {
+					var fstring = '@Translate.Text("consumption.graph.xaxis.label", "{utility}", "{unit}")';
+					var unit = this.unit();
+					var utility = this.utility();
+					fstring = fstring.replace("{utility}", utility);
+
+					return fstring.replace("{unit}", unit);
+				},
+				getCategories: function () {
+					var series = _.chain(orderedSeries)
+						.pluck('DataPoints')
+						.sortBy(function(dp) {
+							return dp.Year + '/' + dp.Month;
+						}).value();
+
+					var monthSets = _.chain(series)
+						.map(function(s) {
+							 return _.pluck(s, 'Month');
+						})
+						.sortBy(function (s) { return _.first(s); })
+						.value();
+
+					var start = 100;
+					for (var i = 0; i < monthSets.length; i++) {
+						var f = _.first(monthSets[i]);
+						if (f < start) {
+							start = f;
+						}
+					}
+
+					var merged = _.extend.apply(_, monthSets);
+
+					var j = 0;
+					while (merged[0] > start) {
+						merged.splice(j, 0, start);
+						start++;
+					}
+
+					return merged;
+				},
+				dir: '@direction'
+			};
+		};
+
+		var getColoursForUtility = function(util) {
+			if (util === 0) {
+				return ["#B00020", "#34B233", "#008542"];
+			}
+			return ["#34B233", "#B00020", "#008542"];
+		};
+
+		jQuery("#form-account-selector").submit(handleAccountSelection);
+    });
+</script>

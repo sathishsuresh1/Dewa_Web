@@ -1,0 +1,1514 @@
+﻿@using Sitecore.Globalization;
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Integration.APIHandler.Models.Response.Masar.MasarBankResponse
+
+@{
+    var _showApp = Request.QueryString["k"] != null ? Request.QueryString["k"].ToString() : string.Empty;
+}
+
+
+<style type="text/css">
+    .maxwidth {
+        max-width: none !important;
+        width: 100% !important;
+    }
+</style>
+
+<div class="grid hidden" id="_successShow">
+    <div class="grid__row mt48">
+        <div class="grid__column grid__column--12 grid__column--content">
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message" data-component="m40-status-message">
+                <div class="m40-status-message__title _cnfrTitle"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="grid" id="_successHide">
+
+    @Html.Sitecore().Placeholder("j7/m26-page-title")
+    <div class="grid__row error-html hidden" id="_erDiv">
+        <div class="grid__column grid__column--12">
+            <div class="m40-status-message m40-status-message--error icon icon-caution" data-component="m40-status-message">
+                <div class="m40-status-message__title icon--error">
+                    @Sitecore.Globalization.Translate.Text(DictionaryKeys.Global.SubmissionError)
+                </div>
+                <div class="m40-status-message__text" id="_erDivMsg">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="m41-tabs-box m41-tabs-box--variant6 m41-tabs-box--scripted" data-component="m41-tabs-box">
+        <div class="m41-tabs-box__tabs">
+            <div class="add-link btnAddbank">
+                <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="
+http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5.93509 -0.00317383V6.12181H0.705078V7.87181H5.93509V13.9968H7.42938V7.87181H12.6594V6.12181H7.42938V-0.00317383H5.93509Z" fill="#007560"></path>
+                </svg> @Translate.Text("Masar.AddNewBankAccount")
+            </div>
+            <ul class="m41-tabs-box__tab-items">
+                <li class="m41-tabs-box__tab-item" data-index="0">
+                    <a href="" id="_activeAcc" class="m41-tabs-box__tab-link m41-tabs-box__tab-link--active">
+                        @Translate.Text("Masar.ActiveAccounts")
+                    </a>
+                </li>
+                <li class="m41-tabs-box__tab-item" data-index="1">
+                    <a href="" id="_activeApp" class="m41-tabs-box__tab-link">@Translate.Text("Masar.NewPendingRequests")</a>
+                </li>
+            </ul>
+
+            <div class="m41-tabs-box__tab-panels">
+                <div class="m41-tabs-box__tab-panel" data-index="0" style="display: block;">
+
+                    <div class="m23-table m23-table--variant2 m23-table--masar" data-component="m23-table">
+                        <div class="m23-table" data-component="m23-table">
+                            <table class="m23-table__content-table">
+                                <thead class="m23-table__content-table-header">
+                                    <tr class="m23-table__content-table-row" tabindex="0">
+
+                                        <th class="m23-table__content-table-cell--header no-wrap">
+                                            @Translate.Text("Masar.BankName")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header">
+                                            @Translate.Text("Masar.AccountNumber")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header">
+                                            @Translate.Text("Masar.Iban")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header">
+                                            @Translate.Text("Masar.Status")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header">
+                                            @Translate.Text("Masar.Action")
+                                        </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody class="m23-table__content-table-body">
+                                    @{ int _counter = 0;}
+                                    @foreach (var item in Model.bankmasterdetails)
+                                    {
+                                        <tr class="m23-table__content-table-row" tabindex="0">
+                                            <td data-label="Bank Name" class="m23-table__content-table-cell m23-table__content-table-cell--center initialized reqnum-cell" style="min-height: 0px;">
+                                                @item.bankname
+                                                <div class="m23-table__content-table-th-mobile" style="">
+                                                    @Translate.Text("Masar.BankName")&nbsp;:&nbsp;
+                                                </div>
+                                            </td>
+
+                                            <td data-label="Account Number" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                @item.bankaccount
+                                                <div class="m23-table__content-table-th-mobile" style="">
+                                                    @Translate.Text("Masar.AccountNumber")&nbsp;:&nbsp;
+                                                </div>
+                                            </td>
+
+                                            <td data-label="IBAN" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("Masar.Iban")&nbsp;:&nbsp;</div>@item.iban
+                                            </td>
+
+                                            <td data-label="Status" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                <span class="status-label active-s">@Translate.Text("Masar.Active")</span>
+                                                <div class="m23-table__content-table-th-mobile" style="">
+                                                    @Translate.Text("Masar.Status")&nbsp;:&nbsp;
+                                                </div>
+                                            </td>
+
+                                            <td data-label="Action" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                <div class="button--dots" button-more="">
+                                                    <span class="aria-only"></span>
+                                                    <div class="button-more--container masar-more">
+                                                        <a href="#" class="button-more--link" onclick="viewDetails('@_counter')">@Translate.Text("Masar.ViewDetails")</a>
+                                                    </div>
+                                                </div>
+                                                <div class="m23-table__content-table-th-mobile" style="">
+                                                    @Translate.Text("Masar.Action")
+                                                </div>
+                                            </td>
+
+                                        </tr>
+
+                                        _counter++;
+
+                                    }
+                                </tbody>
+                            </table>
+                            <!-- Generate Popup-->
+                            @{ int _count = 0;}
+                            @foreach (var item in Model.bankmasterdetails)
+                            {
+                                <div class="m39-modal m39-modal--new m39-modal-add-bankac-details" data-component="m39-modal" id="modal_true">
+                                    <button id="_yaghe8fl2_trigger_@_count" type="button"
+                                            aria-controls="_yaghe8fl2_content_@_count" data-trigger="true"
+                                            class="button button--primary button--fullwidth-mobile btnAddbank_@_count hidden">
+                                        @Translate.Text("Masar.AddBank")
+                                    </button>
+                                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_yaghe8fl2_content_@_count" aria-labelledby="_yaghe8fl2_trigger_@_count">
+                                        <div data-content="true" class="m39-modal__container" role="dialog"
+                                             aria-expanded="true" id="_yaghe8fl2_content_@_count"
+                                             aria-labelledby="_yaghe8fl2_trigger_@_count">
+
+                                            <div class="m39-modal__dialog" style="max-height: 600px;">
+                                                <div class="m39-modal__header">
+                                                    <div class="m39-modal__title">@Translate.Text("Masar.AccountDetail")</div>
+                                                    <a data-close="true" class="m39-modal__button--close closeBank"
+                                                       id="_yaghe8fl2_close_@_count"
+                                                       aria-controls="_yaghe8fl2_content">@*@Translate.Text("Masar.Close")*@</a>
+                                                </div>
+                                                <div class="m39-modal__content mb0" style="bottom:0px;">
+                                                    <form name="viewonly_@_count" id="viewonlyfrm_@_count">
+                                                        <div class="form-field ">
+                                                            <fieldset class="fieldset">
+                                                                <div class="form-field form-field--text">
+                                                                    <label for="form-field-uj0dpkni52_@_count" class="form-field__label">
+                                                                        @Translate.Text("Masar.BankName")
+                                                                    </label>
+                                                                    <span class="form-field__input-wrapper">
+                                                                        <input disabled="disabled" class="form-field__input form-field__input--text" value="@item.bankname" id="form-field-uj0dpkni52_@_count" name="text" type="text" placeholder="ABC Inc" aria-describedby="description-for-uj0dpkni52_@_count" data-parsley-errors-container="#description-for-uj0dpkni52_@_count" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                    </span>
+                                                                    <div id="description-for-uj0dpkni52_@_count" class="form-field__messages">
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--select form-field--select-single  form-field--6">
+                                                                    <label for="form-field-z198vv0ad_@_count" class="form-field__label">
+                                                                        @Translate.Text("Masar.Country")
+                                                                    </label>
+                                                                    <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+
+                                                                        @Html.DropDownList("Country", (List<SelectListItem>)ViewBag.Country, new
+                                                                   {
+                                                                       @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                                       @id = "form-field-Countryv" + _count,
+                                                                       @name = "Country",
+                                                                       @aria_invalid = "false",
+                                                                       @data_parsley_id = "40",
+                                                                       @data_parsley_trigger = "change",
+                                                                       @disabled = "true",
+                                                                       @data_parsley_errors_container = "#description-for-Countryv" + _count,
+                                                                       @aria_describedby = "description-for-Countryv" + _count,
+                                                                   })
+                                                                        <script type="text/javascript">
+
+                                                                            $('#form-field-Countryv' + @_count + ' option').each(function () {
+                                                                                if ($(this).text() == '@item.country') {
+                                                                                    $(this).attr('selected', 'selected');
+                                                                                }
+                                                                            });
+                                                                        </script>
+                                                                    </span>
+                                                                    <div id="description-for-z198vv0ad_@_count" class="form-field__messages">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--text form-field--6">
+                                                                    <label for="form-field-uj0dpkni58_@_count" class="form-field__label">
+                                                                        @Translate.Text("Masar.AccountNumber")
+                                                                    </label>
+                                                                    <span class="form-field__input-wrapper">
+                                                                        <input disabled="disabled" class="form-field__input form-field__input--text" value="@item.bankaccount" id="form-field-uj0dpkni58_@_count" name="text" type="text" aria-describedby="description-for-uj0dpkni58_@_count" data-parsley-errors-container="#description-for-uj0dpkni58_@_count" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                    </span>
+                                                                    <div id="description-for-uj0dpkni58_@_count" class="form-field__messages">
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-field form-field--text">
+                                                                    <label for="form-field-uj0dpkni52_@_count" class="form-field__label">
+                                                                        @Translate.Text("Masar.AccountHolderName")
+                                                                    </label>
+                                                                    <span class="form-field__input-wrapper">
+                                                                        <input disabled="disabled" class="form-field__input form-field__input--text" value="@item.holdername" id="form-field-uj0dpkni52_@_count" name="text" type="text" aria-describedby="description-for-uj0dpkni52_@_count" data-parsley-errors-container="#description-for-uj0dpkni52_@_count" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                    </span>
+                                                                    <div id="description-for-uj0dpkni52_@_count" class="form-field__messages">
+
+                                                                    </div>
+                                                                </div>
+                                                                <div class="form-field form-field--text">
+                                                                    <label for="form-field-uj0dpkni58_@_count" class="form-field__label">
+                                                                        @Translate.Text("Masar.SwiftCode")
+                                                                    </label>
+                                                                    <span class="form-field__input-wrapper">
+                                                                        <input disabled="disabled" class="form-field__input form-field__input--text" value="@item.swift" id="form-field-uj0dpkni58_@_count" name="text" type="text" aria-describedby="description-for-uj0dpkni58_@_count" data-parsley-errors-container="#description-for-uj0dpkni58_@_count" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                    </span>
+                                                                    <div id="description-for-uj0dpkni58_@_count" class="form-field__messages">
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="form-field form-field--text">
+                                                                    <label for="form-field-uj0dpkni58_@_count" class="form-field__label">@Translate.Text("Masar.Iban")</label>
+                                                                    <span class="form-field__input-wrapper">
+                                                                        <input disabled="disabled" class="form-field__input form-field__input--text" value="@item.iban" id="form-field-uj0dpkni58_@_count" name="text" type="text" aria-describedby="description-for-uj0dpkni58_@_count" data-parsley-errors-container="#description-for-uj0dpkni58_@_count" required="" data-parsley-required-message="This field is required" data-parsley-trigger="focusout" data-parsley-id="4">
+                                                                    </span>
+                                                                    <div id="description-for-uj0dpkni58_@_count" class="form-field__messages">
+                                                                    </div>
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                @*<div class="m39-modal__footer">
+                                                        <span class="button button--primary" id="_btnSubmit">@Translate.Text("submit")</span>
+
+                                                    </div>*@
+                                            </div>
+                                            <div class="m39-modal__overlay"> </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                _count++;
+
+                            }
+                            <!-- End Generate Popup-->
+                        </div>
+                    </div>
+
+                </div>
+                <div class="m41-tabs-box__tab-panel" data-index="1" style="display: none;">
+
+                    <div class="m23-table m23-table--variant2 m23-table--masar" data-component="m23-table">
+                        <div class="m23-table" data-component="m23-table">
+                            <table class="m23-table__content-table">
+                                <thead class="m23-table__content-table-header">
+                                    <tr class="m23-table__content-table-row" tabindex="0">
+                                        <th class="m23-table__content-table-cell--header no-wrap  ">
+                                            @Translate.Text("Masar.ReqNum")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header   ">
+                                            @Translate.Text("Masar.BankName")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header   ">
+                                            @Translate.Text("Masar.Iban")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header   ">
+                                            @Translate.Text("Masar.Status")
+                                        </th>
+
+                                        <th class="m23-table__content-table-cell--header   ">
+                                            @Translate.Text("Masar.Action")
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="m23-table__content-table-body">
+                                    @if (Model.bankheaderdetails != null)
+                                    {
+                                        foreach (var item in Model.bankheaderdetails)
+                                        {
+                                            <tr class="m23-table__content-table-row" tabindex="0">
+
+                                                <td data-label="Request Number " class="m23-table__content-table-cell m23-table__content-table-cell--center initialized reqnum-cell" style="min-height: 0px;">
+                                                    @item.referencenumber
+                                                    <div class="m23-table__content-table-th-mobile" style="">
+                                                        @Translate.Text("Masar.RequestNumber")&nbsp;:&nbsp;
+                                                    </div>
+                                                </td>
+                                                <td data-label="Bank Names" class="m23-table__content-table-cell initialized" style="min-height: 0px; max-width: 200px; word-break: break-word;">
+                                                    @item.bankname
+                                                    <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("Masar.BankName")&nbsp;:&nbsp;</div>
+                                                </td>
+
+                                                <td data-label="IBAN" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                    <div class="m23-table__content-table-th-mobile" style="">@Translate.Text("Masar.Iban")&nbsp;:&nbsp;</div>@item.iban
+                                                </td>
+
+                                                <td data-label="Status" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                    <span id="modstatus_@item.referencenumber">
+                                                        @{
+                                                            if (item.status == "01")
+                                                            {
+                                                                <span class="status-label active-s">@Translate.Text("Masar.Approved")</span>
+                                                            }
+                                                            else if (item.status == "03")
+                                                            {
+                                                                <span class="status-label pending-s">@Translate.Text("Masar.Pending")</span>
+                                                            }
+                                                            else if (item.status == "04")
+                                                            {
+                                                                <span class="status-label cancelled-s">@Translate.Text("Masar.Cancelled")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="status-label rejected-s">@Translate.Text("Masar.Rejected")</span>
+
+                                                            }
+                                                        }
+                                                    </span>
+                                                    <div class="m23-table__content-table-th-mobile" style="">
+                                                        @Translate.Text("Masar.Status")&nbsp;:&nbsp;
+                                                    </div>
+                                                </td>
+                                                <td data-label="Action" class="m23-table__content-table-cell initialized" style="min-height: 0px;">
+                                                    <div class="button--dots" button-more="">
+                                                        <span class="aria-only"></span>
+                                                        <div class="button-more--container masar-more">
+                                                            <a href="#" class="button-more--link" onclick="viewAppDetails('@item.referencenumber')">@Translate.Text("Masar.ViewDetails")</a>
+                                                            @if (item.status == "03")
+                                                            {
+                                                                <a href="#" class="button-more--link cancel-link" onclick="cancelApp('@item.referencenumber')">@Translate.Text("Masar.CancelRequest")</a>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="m23-table__content-table-th-mobile" style="">
+                                                        @Translate.Text("Masar.Action")
+                                                    </div>
+                                                </td>
+
+                                            </tr>
+                                        }
+
+                                    }
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class=" grid__row">
+        <div class="grid__column grid__column--12">
+            <div class="m23-table " data-component="m23-table">
+                <div class="m39-modal m39-modal--longform m39-modal-add-bankac" data-component="m39-modal"
+                     id="modal_true1">
+                    <button id="_yaghe8fl2_trigger" type="button"
+                            aria-controls="_yaghe8fl2_content" data-trigger="true"
+                            class="button button--primary button--fullwidth-mobile btnAddbank1 hidden">
+                        @Translate.Text("Masar.AddBank")
+                    </button>
+                    <div data-content="true" class="m39-modal__container" role="dialog"
+                         aria-expanded="true" id="_yaghe8fl2_content"
+                         aria-labelledby="_yaghe8fl2_trigger">
+                        <div class="m39-modal__dialog">
+                            <div class="m39-modal__header">
+                                <div id="_AddBank" class="m39-modal__title">@Translate.Text("Masar.AddBankAccountHeading")</div>
+                                <div id="_ViewBank" class="m39-modal__title hidden">@Translate.Text("Masar.ViewBank")</div>
+                                <a data-close="true" class="m39-modal__button--close closeBank"
+                                   id="_yaghe8fl2_close"
+                                   aria-controls="_yaghe8fl2_content">@*@Translate.Text("Masar.Close")*@</a>
+                                @*<div>@Translate.Text("Masar.AddNewBank")</div>*@
+                            </div>
+                            <div class="m39-modal__content mb48">
+                                @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form maxwidth", @id = "ScrapSaleAddBankForm", data_form = "true", data_parsley_focus = "none", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                                    <div class="form-field ">
+                                        <fieldset class="fieldset">
+                                            <div class="form-field form-field--select form-field--select-single">
+                                                <label for="form-field-BankName"
+                                                       class="form-field__label lblfocus">
+                                                    @Translate.Text("Masar.BankName")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-BankName"
+                                                           name="BankName" type="text"
+                                                           maxlength="60"
+                                                           placeholder="@Translate.Text("Masar.BankName")"
+                                                           aria-describedby="description-for-BankName"
+                                                           data-parsley-errors-container="#description-for-BankName"
+                                                           required=""
+                                                           data-parsley-required-message="@Translate.Text("Masar.BankNameRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="28">
+                                                </span>
+
+                                                <div id="description-for-BankName"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--select form-field--select-single">
+                                                <label for="form-field-AddressBank"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.Address")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-AddressBank"
+                                                           name="AddressBank" type="text"
+                                                           maxlength="70"
+                                                           placeholder="@Translate.Text("Masar.Address")"
+                                                           aria-describedby="description-for-AddressBank"
+                                                           data-parsley-errors-container="#description-for-AddressBank"
+                                                           required=""
+                                                           data-parsley-required-message="@Translate.Text("Masar.AddressRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="11">
+                                                </span>
+                                                <div id="description-for-AddressBank"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+
+
+                                            <div class="form-field form-field--select form-field--select-single  form-field--6">
+                                                <label for="form-field-Country"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.Country")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                    @Html.DropDownList("Country", (List<SelectListItem>)ViewBag.Country, new
+                                               {
+                                                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                   @id = "form-field-Country",
+                                                   @name = "Country",
+                                                   @aria_invalid = "false",
+                                                   @data_parsley_id = "28",
+                                                   @data_parsley_trigger = "change",
+                                                   @required = "required",
+                                                   @data_parsley_required_message = Translate.Text("Masar.CountryRequired"),
+                                                   @data_parsley_errors_container = "#description-for-Country",
+                                                   @aria_describedby = "description-for-Country",
+                                               })
+                                                </span>
+                                                <div id="description-for-Country"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text form-field--6">
+                                                <label for="form-field-AccountNumber"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.AccountNumber")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-AccountNumber"
+                                                           maxlength="24"
+                                                           name="AccountNumber" type="tel"
+                                                           data-input-numbers
+                                                           placeholder="@Translate.Text("Masar.AccountNumber")"
+                                                           aria-describedby="description-for-AccountNumber"
+                                                           data-parsley-errors-container="#description-for-AccountNumber"
+                                                           required=""
+                                                           data-parsley-required-message="@Translate.Text("Masar.AccountNumberRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-AccountNumber"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text">
+                                                <label for="form-field-AccountHolderName"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.AccountHolderName")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-AccountHolderName"
+                                                           name="AccountHolderName" type="text"
+                                                           maxlength="70"
+                                                           placeholder="@Translate.Text("Masar.AccountHolderName")"
+                                                           aria-describedby="description-for-AccountHolderName"
+                                                           data-parsley-errors-container="#description-for-AccountHolderName"
+                                                           required=""
+                                                           data-parsley-required-message="@Translate.Text("Masar.AccountHolderNameRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-AccountHolderName"
+                                                     class="form-field__messages">
+
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--select form-field--select-single  form-field--6">
+                                                <label for="form-field-Currency"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.Currency")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                    @Html.DropDownList("Currency", (List<SelectListItem>)ViewBag.Currency, new
+                                               {
+                                                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                   @id = "form-field-Currency",
+                                                   @name = "Currency",
+                                                   @aria_invalid = "false",
+                                                   @data_parsley_id = "28",
+                                                   @data_parsley_trigger = "change",
+                                                   @required = "required",
+                                                   @data_parsley_required_message = Translate.Text("Masar.CurrencyRequired"),
+                                                   @data_parsley_errors_container = "#description-for-Currency",
+                                                   @aria_describedby = "description-for-Currency",
+                                               })
+                                                </span>
+                                                <div id="description-for-Currency"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text form-field--6">
+                                                <label for="form-field-SwiftCode"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.SwiftCode")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-SwiftCode"
+                                                           maxlength="11"
+                                                           name="SwiftCode" type="text"
+                                                           placeholder="@Translate.Text("Masar.SwiftCode")"
+                                                           aria-describedby="description-for-SwiftCode"
+                                                           data-parsley-errors-container="#description-for-SwiftCode"
+                                                           data-parsley-required-message="@Translate.Text("Masar.SwiftCodeRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-SwiftCode"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text iiban flex-field">
+                                                <label for="form-field-IBAN"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.IBAN")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-IBAN"
+                                                           name="IBAN" type="text"
+                                                           required=""
+                                                           placeholder="@Translate.Text("Masar.IBAN")"
+                                                           aria-describedby="description-for-IBAN"
+                                                           data-parsley-errors-container="#description-for-IBAN"
+                                                           maxlength="23"
+                                                           data-parsley-required-message="@Translate.Text("IBAN Invalid Error Message")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-IBAN"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text hidden ifsc flex-field">
+                                                <label for="form-field-IFSCCode"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.IFSC")
+                                                    @*<span class="form-field__label-required aria-only">(@Translate.Text("required"))</span>*@
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-IFSCCode"
+                                                           name="IFSCCode" type="text"
+                                                           maxlength="15"
+                                                           placeholder="@Translate.Text("Masar.IFSC")"
+                                                           aria-describedby="description-for-IFSCCode"
+                                                           data-parsley-errors-container="#description-for-IFSCCode"
+                                                           data-parsley-required-message="@Translate.Text("Masar.IFSCCodeRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-IFSCCode"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field__radio-fieldset form-field__radio-fieldset-toggle">
+                                                <label class="form-field__label">@Translate.Text("Masar.CorrespondentRequired")</label>
+                                                <div class="form-field__radio-row">
+                                                    <p class="form-field__radio form-field__radio--inline form-field__radio--toggle">
+                                                        <label>
+                                                            <input isclear="true" toggle-target="#fieldset-bankdetails" class="form-field__input form-field__input--radio" id="form-field-radio_1_1"
+                                                                   name="IsCorrespondent" type="radio" onclick="checkCorrespondentOption('1')" value="1" aria-describedby="description-for-kahsjdba73" data-parsley-errors-container="#description-for-kahsjdba73" data-parsley-multiple="radios_group2" data-parsley-id="7" required="">
+                                                            <span class="form-field__fakeradio focus-enabled">
+                                                                @Translate.Text("Yes")
+                                                            </span>
+                                                        </label>
+                                                    </p>
+                                                    <p class="form-field__radio form-field__radio--inline form-field__radio--toggle">
+                                                        <label>
+                                                            <input isclear="true" toggle-target="" class="form-field__input form-field__input--radio" id="form-field-radio_1_3" name="IsCorrespondent" type="radio"
+                                                                   onclick="checkCorrespondentOption('2')" value="2" aria-describedby="description-for-kahsjdba73" data-parsley-errors-container="#description-for-kahsjdba73" data-parsley-multiple="radios_group2" required="" checked="">
+                                                            <span class="form-field__fakeradio focus-enabled">
+                                                                @Translate.Text("No")
+                                                            </span>
+                                                        </label>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="fieldset hidden fieldset-bankdetails" id="fieldset-bankdetails">
+                                            <div class="form-field form-field--text">
+                                                <label for="form-field-BankNameCorrespondent"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.BankName")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-BankNameCorrespondent"
+                                                           maxlength="60"
+                                                           name="BankNameCorrespondent" type="text"
+                                                           placeholder="@Translate.Text("Masar.BankName")"
+                                                           aria-describedby="description-for-BankNameCorrespondent"
+                                                           data-parsley-errors-container="#description-for-BankNameCorrespondent"
+                                                           data-parsley-required-message="@Translate.Text("Masar.BankNameRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-BankNameCorrespondent"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--select form-field--select-single  form-field--6 country">
+                                                <label for="form-field-CountryCorrespondent"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.Country")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                    @Html.DropDownList("CountryCorrespondent", (List<SelectListItem>)ViewBag.Country, new
+                                               {
+                                                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                   @id = "form-field-CountryCorrespondent",
+                                                   @name = "CountryCorrespondent",
+                                                   @aria_invalid = "false",
+                                                   @data_parsley_id = "28",
+                                                   @data_parsley_trigger = "change",
+                                                   @data_parsley_required_message = Translate.Text("Masar.CountryRequired"),
+                                                   @data_parsley_errors_container = "#description-for-CountryCorrespondent",
+                                                   @aria_describedby = "description-for-CountryCorrespondent",
+                                               })
+                                                </span>
+                                                <div id="description-for-CountryCorrespondent"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text form-field--6">
+                                                <label for="form-field-SwiftCodeCorespondent"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.SwiftCode")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-SwiftCodeCorespondent"
+                                                           maxlength="11"
+                                                           name="SwiftCodeCorespondent" type="text"
+                                                           placeholder="@Translate.Text("Masar.SwiftCode")"
+                                                           aria-describedby="description-for-SwiftCodeCorespondent"
+                                                           data-parsley-errors-container="#description-for-SwiftCodeCorespondent"
+                                                           data-parsley-required-message="@Translate.Text("Masar.SwiftCodeRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-SwiftCodeCorespondent"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--text flex-field">
+                                                <label for="form-field-Address"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.Address")
+                                                </label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text"
+                                                           id="form-field-Address"
+                                                           name="Address" type="text"
+                                                           maxlength="40"
+                                                           placeholder="@Translate.Text("Masar.Address")"
+                                                           aria-describedby="description-for-Address"
+                                                           data-parsley-errors-container="#description-for-Address"
+                                                           data-parsley-required-message="@Translate.Text("Masar.AddressRequired")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="4">
+                                                </span>
+                                                <div id="description-for-Address"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                            <div class="form-field form-field--select form-field--select-single hidden form-field--6">
+                                                <label for="form-field-CityCorrespondent"
+                                                       class="form-field__label">
+                                                    @Translate.Text("Masar.City")
+                                                </label>
+                                                <span class="form-field__input-wrapper form-field__input-wrapper--select form-field__input-wrapper--validated">
+                                                    @Html.DropDownList("CityCorrespondent", (List<SelectListItem>)ViewBag.City, new
+                                               {
+                                                   @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                                   @id = "form-field-CityCorrespondent",
+                                                   @name = "CityCorrespondent",
+                                                   @aria_invalid = "false",
+                                                   @data_parsley_id = "28",
+                                                   @data_parsley_trigger = "change",
+                                                   @required = "required",
+                                                   @data_parsley_required_message = Translate.Text("Masar.CityRequired"),
+                                                   @data_parsley_errors_container = "#description-for-CityCorrespondent",
+                                                   @aria_describedby = "description-for-CityCorrespondent",
+                                               })
+                                                </span>
+                                                <div id="description-for-CityCorrespondent"
+                                                     class="form-field__messages">
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="fieldset" id="fieldset-upload">
+                                            <div id="showOnFile" class="hidden _downloadDiv">
+                                                <a id="setURL" href="#" target="_blank">
+                                                    <div class="form-field--download_new">
+                                                        <div class="form-field__download-filetype">File</div>
+                                                        <div>
+                                                            <p class="form-field__download-filename">@Translate.Text("Masar.Download")</p>
+                                                        </div>
+                                                        <svg width="24" class="form-field__download-icon" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M4.125 21C3.42881 21 2.76113 20.7234 2.26884 20.2312C1.77656 19.7389 1.5 19.0712 1.5 18.375V14.625C1.5 14.3266 1.61853 14.0405 1.8295 13.8295C2.04048 13.6185 2.32663 13.5 2.625 13.5C2.92337 13.5 3.20952 13.6185 3.4205 13.8295C3.63147 14.0405 3.75 14.3266 3.75 14.625V18.375C3.75 18.582 3.918 18.75 4.125 18.75H19.875C19.9745 18.75 20.0698 18.7105 20.1402 18.6402C20.2105 18.5698 20.25 18.4745 20.25 18.375V14.625C20.25 14.3266 20.3685 14.0405 20.5795 13.8295C20.7905 13.6185 21.0766 13.5 21.375 13.5C21.6734 13.5 21.9595 13.6185 22.1705 13.8295C22.3815 14.0405 22.5 14.3266 22.5 14.625V18.375C22.5 19.0712 22.2234 19.7389 21.7312 20.2312C21.2389 20.7234 20.5712 21 19.875 21H4.125Z"></path>
+                                                            <path d="M10.8743 11.5335V3C10.8743 2.70163 10.9928 2.41548 11.2038 2.2045C11.4148 1.99353 11.7009 1.875 11.9993 1.875C12.2977 1.875 12.5838 1.99353 12.7948 2.2045C13.0058 2.41548 13.1243 2.70163 13.1243 3V11.5335L16.0793 8.58C16.1837 8.4756 16.3076 8.39278 16.444 8.33628C16.5805 8.27978 16.7267 8.2507 16.8743 8.2507C17.0219 8.2507 17.1681 8.27978 17.3046 8.33628C17.441 8.39278 17.5649 8.4756 17.6693 8.58C17.7737 8.6844 17.8565 8.80834 17.913 8.94475C17.9695 9.08116 17.9986 9.22736 17.9986 9.375C17.9986 9.52264 17.9695 9.66884 17.913 9.80525C17.8565 9.94166 17.7737 10.0656 17.6693 10.17L12.7943 15.045C12.69 15.1495 12.566 15.2324 12.4296 15.289C12.2932 15.3455 12.147 15.3746 11.9993 15.3746C11.8516 15.3746 11.7054 15.3455 11.569 15.289C11.4326 15.2324 11.3086 15.1495 11.2043 15.045L6.3293 10.17C6.2249 10.0656 6.14208 9.94166 6.08558 9.80525C6.02908 9.66884 6 9.52264 6 9.375C6 9.22736 6.02908 9.08116 6.08558 8.94475C6.14208 8.80834 6.2249 8.6844 6.3293 8.58C6.4337 8.4756 6.55764 8.39278 6.69405 8.33628C6.83046 8.27978 6.97665 8.2507 7.1243 8.2507C7.27194 8.2507 7.41814 8.27978 7.55455 8.33628C7.69096 8.39278 7.8149 8.4756 7.9193 8.58L10.8743 11.5335Z"></path>
+                                                        </svg>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="form-field form-field--upload form-field--upload_new form-field--upload_new--variant _uploadDiv">
+                                                <div class="form-field__input-wrapper">
+                                                    <div class="form-field__uploader-details">
+                                                        <label for="form-field-Attachment" class="form-field__label" id="lblLink">
+                                                            @Translate.Text("Masar.ChequeCopy")
+                                                        </label>
+                                                        <div class="_uploadDiv">
+                                                            <label>
+                                                                <input class="form-field__input form-field__input--upload" id="form-field-Attachment" name="Attachment"
+                                                                       type="file" aria-describedby="description-for-Attachment"
+                                                                       required=""
+                                                                       data-parsley-errors-container="#description-for-Attachment"
+                                                                       data-parsley-required-message="@Translate.Text("Masar.AttachmentRequired")" data-uploader-field="Attachment"
+                                                                       accept="application/msword, application/vnd.ms-excel, application/pdf, image/*, application/rar, application/zip"
+                                                                       data-accepts="&quot;jpg&quot;, &quot;bmp&quot;,&quot;gif&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;,&quot;doc&quot;,&quot;docx&quot;,&quot;xls&quot;,&quot;csv&quot;, &quot;xlsx&quot;"
+                                                                       data-size="2048000" data-parsley-trigger="focusout" data-parsley-id="26">
+                                                                <span class="button button--upload--variant focus-enabled"
+                                                                      data-uploader-button="upload-choose"> @Translate.Text("SS_UR_Upload your File")</span>
+                                                                </label>
+                                                            </div>
+                                                            <p class="form-field__input--upload-format-error-message _uploaddiv" data-uploader-format-error="error-message">
+                                                                @Translate.Text("JO.UploadFormat")
+                                                            </p>
+                                                            <p class="form-field__input--upload-size-error-message _uploaddiv" data-uploader-size-error="error-message">
+                                                                @Translate.Text("JO.UploadSize")
+                                                            </p>
+                                                            <div class="form-field--upload_new-details _uploaddiv">
+                                                                <div class="form-field__input--upload-filetype" data-uploader-filetype="Attachment">
+
+                                                                </div>
+                                                                <div>
+                                                                    <p class="form-field__input--upload-filename" data-uploader-filename="Attachment"></p>
+                                                                    <div class="form-field__input--upload-filesize hidden" data-uploader-filesize="Attachment">
+                                                                        <span data-totalsize="Attachment"></span>@Translate.Text("SS_KB")
+                                                                    </div>
+                                                                </div>
+                                                                <button class="button--upload_remove hidden" data-uploader-remove="Attachment">
+                                                                    <span class="aria-only">@Translate.Text("Remove")</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="description-for-Attachment" class="form-field__messages _uploadDiv">
+                                                        <p class="form-field__description">@Translate.Text("SS_FileUploaderNote")</p>
+                                                    </div>
+                                                </div>
+
+                                            </fieldset>
+
+                                        </div>
+                                        <div class="form-field__button hidden">
+                                            <button type="button"
+                                                    class="button button--primary button--fullwidth-mobile btnsub" onclick="saveBankDetails()">
+                                                @Translate.Text("Submit")
+                                            </button>
+                                        </div>
+                                        <div class="form-field__messages red" id="errDiv">
+
+                                        </div>
+                                    }
+                            </div>
+                            <div class="m39-modal__footer">
+                                <div class="button button--primary hidden" id="_btnDone">@Translate.Text("Done")</div>
+                                <div class="button button--primary _uploadDiv" id="_btnSubmit">@Translate.Text("Submit")</div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+                </div>
+
+                <div class="m39-modal m39-modal--profile" data-component="m39-modal"
+                     id="modal_true2">
+                    <div class="form-field__button">
+                        <button id="_successModal_trigger" type="button"
+                                aria-controls="_successModal_content" data-trigger="true"
+                                class="button button--primary button--fullwidth-mobile successButton hidden">
+                        </button>
+                    </div>
+                    <div data-content="true" class="m39-modal__container" role="dialog"
+                         aria-expanded="true" id="_successModal_content"
+                         aria-labelledby="_successModal_trigger">
+                        <div class="m39-modal__dialog">
+                            <div class="m39-modal__header">
+                                <button data-close="true" class="m39-modal__button--close" id="_i568yupg3_close" aria-controls="_i568yupg3_content"><span class="aria-only">Close</span></button>
+                            </div>
+                            <div></div>
+                            <div class="m39-modal__content">
+                                <div class="otp--modalcontent">
+                                    <img src="../../images/check_cs.png">
+                                    <div class="otp--modalcontent-title">
+                                        @Translate.Text("Masar.Success")
+                                    </div>
+                                    <div class="otp--modalcontent-text _successMsg">
+
+                                    </div>
+                                    <div class="button button--primary _okbtn" data-close="true">
+                                        @Translate.Text("Masar.OK")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+    docReady(function () {
+
+        //var _showApp = getUrlVars()["k"];
+        //m25-tab-1
+
+
+
+
+        var _shApp = '@_showApp';
+        if (_shApp != "") {
+
+            setTimeout(function () {
+
+                var clickLink = true;
+                while (clickLink) {
+                    if ($('#_activeApp').length > 0) {
+
+                        jQuery('.m41-tabs-box--variant6 .m41-tabs-box__tab-item[data-index="1"] .m41-tabs-box__tab-link').click();
+
+                        clickLink = false;
+                    }
+                }
+
+            }, 100);
+
+
+
+        }
+
+
+
+
+
+
+       $('.closeBank').on('click', function () {
+            clearFields();
+        });
+
+        $('#_btnSubmit').on('click', function () {
+            $('.btnsub').click();
+        });
+
+        //form-field-Country
+        $('#form-field-Country').change(function () {
+            var _selCountry = $('#form-field-Country').val();
+            DisplayIbanOrIfsc(_selCountry);
+            //if (DisplayIbanOrIfsc(_selCountry)) {
+
+                //$('.ifsc').addClass('hidden');
+                //$('.iiban').removeClass('hidden');
+                //$("#form-field-IBAN").attr("required", "");
+                //$("#form-field-IFSCCode").removeAttr("required", "");
+            //}
+            //else {
+
+                //$('.iiban').addClass('hidden');
+                //$('.ifsc').removeClass('hidden');
+                //$("#form-field-IFSCCode").attr("required", "");
+                //$("#form-field-IBAN").removeAttr("required", "");
+            //}
+
+        });
+
+
+        if (!jQuery(".scrapsalemargin").hasClass("mt56")) {
+            jQuery(".scrapsalemargin").addClass("mt56");
+        }
+        jQuery(".m26-page-title").addClass("align_left");
+
+        setRequiredvalidation(true);
+
+        jQuery(".btnAddbank").click(function () {
+            $('#_erDiv').hide();
+
+            $('#form-field-radio_1_3').click();
+            $('#fieldset-bankdetails').hide();
+
+
+          //  jQuery('#ScrapSaleAddBankForm')[0].reset();
+           // jQuery('#ScrapSaleAddBankForm').parsley().reset();
+            $('#form-field-Country').val('AE');
+            $('.ifsc').addClass('hidden');
+            $('.iiban').removeClass('hidden');
+            $("#form-field-IBAN").attr("required", "");
+            $("#form-field-IFSCCode").removeAttr("required", "");
+            $('.btnAddbank1').click();
+
+
+
+        jQuery("#ScrapSaleAddBankForm").find('.form-field__input').each(function () {
+            jQuery(this).parsley().reset();
+            $(this).removeClass('form-field__input--error');
+            $(this).closest('.form-field__input-wrapper').removeClass('form-field__input-wrapper--error');
+           // window.ParsleyUI.removeError($(this).parsley(), 'required');
+        });
+
+
+            setTimeout(function () {
+                $('#form-field-BankName').focus();
+            }, 200);
+
+
+
+            //var targetNode = document.getElementById('.m39-modal__dialog');
+            //var observer = new MutationObserver(function () {
+            //    if (targetNode.style.display != 'none') {
+                   // your action here
+            //    }
+            //});
+            //observer.observe(targetNode, { attributes: true, childList: true });
+
+
+
+        });
+
+        $("#form-field-CountryCorrespondent").on("change", function () {
+                var cntryKey = $(this).val();
+
+                OnChangeCountry(cntryKey);
+
+                var ev = AddForgeryToken({
+                    ckey: cntryKey
+                }, "ScrapSaleAddBankForm");
+
+                $.ajax({
+                    url: '@Url.Action("GetRegionByCKey")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: ev,
+                    cache: false,
+                    success: function (r) {
+                        if (r != null) {
+                            var el = $("#form-field-CityCorrespondent");
+                            $(el).html("");
+                            $.each(r.data, function (index, d) {
+                                $(el).append('<option value="' + d.Value + '">' + d.Text + '</option>');
+                            });
+                        }
+                    }
+                });
+        });
+
+
+        setTimeout(function () {
+            window.scrollTo(0, 0);
+        }, 200);
+
+
+    });
+
+    AddCustomForgeryToken = function (data, elementId) {
+        data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+
+    function checkCorrespondentOption(value) {
+        if (value == '1') {
+            setRequiredvalidation(true);
+        }
+        else {
+            setRequiredvalidation(false);
+        }
+    }
+
+
+    function setRequiredvalidation(istrue) {
+        if (istrue) {
+            jQuery('#form-field-BankNameCorrespondent').attr('required', 'required');
+            jQuery('#form-field-Address').attr('required', 'required');
+            jQuery('#form-field-CountryCorrespondent').attr('required', 'required');
+            jQuery('#form-field-CityCorrespondent').attr('required', 'required');
+            jQuery('#form-field-Attachment').attr('required', 'required');
+        } else {
+            jQuery('#form-field-BankNameCorrespondent').removeAttr('required');
+            jQuery('#form-field-Address').removeAttr('required');
+            jQuery('#form-field-CountryCorrespondent').removeAttr('required');
+            jQuery('#form-field-CityCorrespondent').removeAttr('required');
+            // jQuery('#form-field-Attachment').removeAttr('required');
+            jQuery('#form-field-Attachment').attr('required', 'required');
+        }
+    }
+
+    function getFormData() {
+        var formData = new FormData();
+        var form = jQuery('#ScrapSaleAddBankForm');
+        var token = jQuery('input[name="__RequestVerificationToken"]', form).val();
+        var file = jQuery("#form-field-Attachment").get(0).files;
+
+        formData.append("Attachment", file[0]);
+        formData.append("__RequestVerificationToken", token);
+        formData.append("BankName", jQuery('#form-field-BankName').val());
+        formData.append("Country", jQuery('#form-field-Country option:selected').val());
+        formData.append("AccountNumber", jQuery('#form-field-AccountNumber').val());
+        formData.append("AccountHolderName", jQuery('#form-field-AccountHolderName').val());
+        formData.append("Currency", jQuery('#form-field-Currency option:selected').val());
+        formData.append("SwiftCode", $("#form-field-SwiftCode").val());
+        formData.append("IFSCCode", $("#form-field-IFSCCode").val());
+        formData.append("BankNameCorrespondent", $("#form-field-BankNameCorrespondent").val());
+        formData.append("Address", $("#form-field-Address").val());
+        formData.append("CountryCorrespondent", jQuery('#form-field-CountryCorrespondent option:selected').val());
+        formData.append("CityCorrespondent", jQuery('#form-field-CityCorrespondent option:selected').val());
+        formData.append("IsCorrespondent", $("#ScrapSaleAddBankForm input[type='radio']:checked").val());
+        formData.append("AddressBank", $("#form-field-AddressBank").val());
+        formData.append("IBAN", $("#form-field-IBAN").val());
+        formData.append("SwiftCodeCorespondent", $("#form-field-SwiftCodeCorespondent").val());
+
+        return formData;
+    }
+
+                    function show_Load() {
+                        if (jQuery('.m66-preloader-fullpage').length > 1) {
+                            jQuery('.m66-preloader-fullpage').eq(1).show();
+                        }
+                        else {
+                            jQuery('.m66-preloader-fullpage').show();
+                        }
+                    }
+
+
+            function GetReadRequestData(reqNumber) {
+
+                var requestData = {
+                    requestnumber: reqNumber,
+                    sessionid: '',
+                    userid: ''
+                }
+                return requestData;
+            }
+
+            function GetIbanRequestData(_countryCd) {
+
+                var requestData = {
+                    countrycode: _countryCd,
+                    lang: ''
+                }
+                return requestData;
+            }
+
+          function CancelBankRequest(requestData, onSuccess) {
+
+            var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/CancelBankRequest")';
+              requestData = AddCustomForgeryToken(requestData, "#ScrapSaleAddBankForm");
+            $.ajax({
+                url: _postUrl,
+                type: 'POST',
+                data: requestData,
+                beforeSend: function () {
+                    show_Load();
+                },
+                success: onSuccess,
+                error: function (er) {
+                    //console.log(er);
+                },
+                complete: function (x) {
+                    //$(".m66-preloader-fullpage").fadeOut();
+                    // console.log(x);
+                }
+            });
+        }
+                    //ShouldDisplayIban
+
+        function ShouldDisplayIban(requestData, onSuccess) {
+
+            var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/ShouldDisplayIban")';
+            requestData = AddCustomForgeryToken(requestData, "#ScrapSaleAddBankForm");
+            $.ajax({
+                url: _postUrl,
+                type: 'POST',
+                data: requestData,
+                beforeSend: function () {
+                   // show_Load();
+                },
+                success: onSuccess,
+                error: function (er) {
+                    //console.log(er);
+                },
+                complete: function (x) {
+                    //$(".m66-preloader-fullpage").fadeOut();
+                    // console.log(x);
+                }
+            });
+        }
+
+
+       function ViewBankRequest(requestData, onSuccess) {
+
+        var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/ViewBankRequest")';
+            requestData = AddCustomForgeryToken(requestData, "#ScrapSaleAddBankForm");
+        $.ajax({
+            url: _postUrl,
+            type: 'POST',
+            data: requestData,
+            beforeSend: function () {
+                show_Load();
+            },
+            success: onSuccess,
+            error: function (er) {
+                //console.log(er);
+            },
+            complete: function (x) {
+                //$(".m66-preloader-fullpage").fadeOut();
+                // console.log(x);
+            }
+        });
+    }
+
+    function RefreshNRedirectPage() {
+        var _cn = Math.floor(Math.random() * 100);
+        var _urlRedirect = '@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.SCRAPESALE_BANKLIST)' + '?{rep}#m25-tab-1';
+        @* _urlRedirect = '@(Language.Current.Name.ToLowerInvariant().Contains("ar") ? "/ar-AE/miscellaneous/bank-list?{rep}#m25-tab-1" : "/en/miscellaneous/bank-list?{rep}#m25-tab-1")'; *@
+
+        _urlRedirect = _urlRedirect.replace('{rep}', 'k=' + _cn);
+
+        //console.log(_urlRedirect);
+        window.location.href = _urlRedirect;
+
+    }
+
+
+    $('._okbtn').on('click', function () {
+        RefreshNRedirectPage();
+    });
+
+    $('#_btnDone').on('click', function () {
+
+        $(".closeBank").each(function (index) {
+            jQuery('.closeBank')[index].click();
+        });
+        //$(this).closest('.m39-modal').find('.closeThisPopup').click();
+        //jQuery('.closeThisPopup').click();
+    });
+
+    var isSubmiited = false;
+
+    function saveBankDetails() {
+        $('#errDiv').html('');
+        if (jQuery('#ScrapSaleAddBankForm').parsley().validate() && !isSubmiited) {
+            var formData = getFormData();//jQuery("#ScrapSaleAddBankForm").serialize()
+            var _postUrl = '@Url.Content("~/api/sitecore/ScrapSale/AddBank")';
+            $.ajax({
+                url: _postUrl,
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: formData,
+                beforeSend: function () {
+                    $("#_btnSubmit").html('@Translate.Text("Submitting")...');
+                    $("#_btnSubmit").attr('disabled', 'disabled');
+                    isSubmiited = true;
+                    show_Load();
+                },
+                success: function (er) {
+                    $(".m66-preloader-fullpage").fadeOut();
+                    if (er.status) {
+
+                        $(".closeBank").each(function (index) {
+                            jQuery('.closeBank')[index].click();
+                        });
+
+
+                        var _msg = '@Translate.Text("SS_Bank_SuccessMessage")';
+                        _msg = _msg.replace('{0}', er.appnum);
+                        $('._successMsg').html(_msg);
+
+
+                        setTimeout(function () {
+                            jQuery(".successButton").trigger("click");
+                        }, 100);
+
+                    }
+                    else
+                    {
+                        //console.log('error');
+                        //console.log(er.desc);
+
+                        $("#_btnSubmit").html('@Translate.Text("submit")');
+                        $("#_btnSubmit").removeAttr('disabled');
+                        isSubmiited = false;
+
+                        $('#errDiv').html(er.desc);
+                        jQuery('.m39-modal__content').scrollTop(jQuery('#ScrapSaleAddBankForm').height());
+
+                    }
+
+                     jQuery('.m66-preloader-fullpage').hide();
+                },
+                error: function (er) {
+                    console.log(er);
+                    console.log('error');
+
+                },
+                complete: function (x) {
+                     jQuery('.m66-preloader-fullpage').hide();
+                }
+            });
+        }
+    }
+
+                function OnChangeCountry(cntryKey) {
+                   // $(".uae").show();
+                 //   $('.country').addClass('form-field--6');
+
+                   // if (cntryKey != "AE") {
+                      //  $(".uae").hide();
+                      //  $('.country').removeClass('form-field--6');
+                   // }
+                }
+
+
+
+                    function viewDetails(_counterNum) {
+                        $('#_erDiv').hide();
+                        $('.btnAddbank_' + _counterNum).click();
+                    }
+
+
+                    var _rNumber = '';
+
+                    function viewAppDetails(_reqNumber) {
+                        jQuery("#ScrapSaleAddBankForm").find('.form-field__input').each(function () {
+                            jQuery(this).parsley().reset();
+                            $(this).removeClass('form-field__input--error');
+                            $(this).closest('.form-field__input-wrapper').removeClass('form-field__input-wrapper--error');
+                            // window.ParsleyUI.removeError($(this).parsley(), 'required');
+                        });
+                        clearFields();
+                        $('#_ViewBank').show();
+                        $('#_AddBank').hide();
+                        ViewBankRequest(GetReadRequestData(_reqNumber), function (rd) {
+
+                            if (rd.status) {
+
+                                jQuery('#form-field-BankName').val(rd.data[0].bankname);
+                                $('#form-field-Country').val(rd.data[0].bankkey);
+                                jQuery('#form-field-AccountNumber').val(rd.data[0].bankaccount);
+                                jQuery('#form-field-AccountHolderName').val(rd.data[0].holdername);
+                                jQuery('#form-field-Currency').val(rd.data[0].currencykey);
+                                $("#form-field-SwiftCode").val(rd.data[0].swift);
+                                DisplayIbanOrIfsc(rd.data[0].bankkey);
+                                //if (DisplayIbanOrIfsc(rd.data[0].bankkey)) {
+                                   // $('.ifsc').addClass('hidden');
+                                   // $('.iiban').removeClass('hidden');
+
+                               // }
+                               // else {
+                                   // $('.iiban').addClass('hidden');
+                                   // $('.ifsc').removeClass('hidden');
+
+                               // }
+
+                                $("#form-field-IFSCCode").val(rd.data[0].route);
+                                $("#form-field-BankNameCorrespondent").val(rd.data[0].financialinstitution);
+                                $("#form-field-AddressBank").val(rd.data[0].bankaddress);
+                                $("#form-field-Address").val(rd.data[0].financialinstitutionaddress);
+                                jQuery('#form-field-CountryCorrespondent').val(rd.data[0].regionbank);
+                                jQuery('#form-field-CityCorrespondent').val(rd.data[0].city);
+                                $("#form-field-IBAN").val(rd.data[0].iban);
+                                $("#form-field-SwiftCodeCorespondent").val(rd.data[0].financialswift)
+
+
+                                if (rd.data[0].generalflag == 'X' || rd.data[0].generalflag == 'x') {
+                                    $('#form-field-radio_1_1').attr('checked', 'checked');
+                                    $('#fieldset-bankdetails').show();
+                                }
+                                else {
+                                    $('#form-field-radio_1_3').attr('checked', 'checked');
+                                    $('#fieldset-bankdetails').hide();
+                                }
+
+
+                                $('._uploadDiv').addClass('hidden');
+                                $('#_btnDone').removeClass('hidden');
+
+
+                                _rNumber = _reqNumber;
+
+
+                                $('#setURL').attr('href','@Url.Action("DownloadAttachment", "ScrapSale")?requestnumber=' + _rNumber);
+
+
+
+                                $('#showOnFile').show();
+
+                                disableFields();
+
+                                $('.btnAddbank1').click();
+
+                                jQuery('#modal_true1 .m39-modal__content').scrollTop(0);
+                            }
+                            else {
+                                //$(".otp_inputdisplay_screen_error").html(rdata.desc);
+
+                                _rNumber = '';
+                                $('#_erDivMsg').html(rdata.desc);
+                                jQuery('.m66-preloader-fullpage').hide();
+                                $('#_erDiv').show();
+                                window.scrollTo(0, 0);
+                            }
+
+                            jQuery('.m66-preloader-fullpage').hide();
+                        });
+
+                    }
+
+
+                    function DisplayIbanOrIfsc(_countryCd) {
+
+                        ShouldDisplayIban(GetIbanRequestData(_countryCd), function (rdata) {
+
+                            if (rdata.status) {
+
+                                $('.ifsc').addClass('hidden');
+                                $('.iiban').removeClass('hidden');
+                                $("#form-field-IBAN").attr("required", "");
+                                $("#form-field-IFSCCode").removeAttr("required", "");
+                            }
+                            else {
+
+                                $('.iiban').addClass('hidden');
+                                $('.ifsc').removeClass('hidden');
+                                $("#form-field-IFSCCode").attr("required", "");
+                                $("#form-field-IBAN").removeAttr("required", "");
+
+                            }
+
+                        });
+
+                    }
+
+
+                    function cancelApp(_reqNumber) {
+                        $('#_erDiv').hide();
+                        CancelBankRequest(GetReadRequestData(_reqNumber), function (rdata) {
+
+                            if (rdata.status) {
+
+
+
+                                var _msg = '@Translate.Text("SS_Bank_CancelSuccessMessage")';
+
+                                $('._successMsg').html(_msg);
+
+                                setTimeout(function () {
+                                    jQuery(".successButton").trigger("click");
+                                }, 100);
+
+
+                            }
+                            else {
+                                //$(".otp_inputdisplay_screen_error").html(rdata.desc);
+                                $('#_erDivMsg').html(rdata.desc);
+                                jQuery('.m66-preloader-fullpage').hide();
+                                $('#_erDiv').show();
+                                window.scrollTo(0, 0);
+                            }
+
+
+                        });
+                    }
+
+
+                    function clearFields() {
+                        $('#_erDiv').hide();
+                        $('#errDiv').html('');
+                        $('._downloadDiv').hide();
+
+                        $('._uploadDiv').removeClass('hidden');
+                        $('#_btnDone').addClass('hidden');
+
+                        $('.button--upload_remove').click();
+                        $('#_ViewBank').hide();
+                        $('#_AddBank').show();
+                        enableFields();
+                       jQuery("#form-field-Attachment").get(0).files;
+                        jQuery('#form-field-BankName').val('');
+                      //jQuery('#form-field-Country option:selected').val('');
+                        jQuery('#form-field-AccountNumber').val('');
+                        jQuery('#form-field-AccountHolderName').val('');
+                        jQuery('#form-field-Currency').val('');
+                        $("#form-field-SwiftCode").val('');
+                        $("#form-field-IFSCCode").val('');
+                        $("#form-field-BankNameCorrespondent").val('');
+                        $("#form-field-Address").val('');
+                        jQuery('#form-field-CountryCorrespondent').val('');
+                        jQuery('#form-field-CityCorrespondent').val('');
+                       // $("#ScrapSaleAddBankForm input[type='radio']:checked").val('');
+                        $("#form-field-AddressBank").val('');
+                        $("#form-field-IBAN").val('');
+                        $("#form-field-SwiftCodeCorespondent").val('');
+
+                    }
+
+
+                    function disableFields() {
+
+                        jQuery('#form-field-BankName').attr('disabled', 'disabled');
+                        jQuery('#form-field-Country').attr('disabled', 'disabled');
+                        jQuery('#form-field-AccountNumber').attr('disabled', 'disabled');
+                        jQuery('#form-field-AccountHolderName').attr('disabled', 'disabled');
+                        jQuery('#form-field-Currency').attr('disabled', 'disabled');
+                        $("#form-field-SwiftCode").attr('disabled', 'disabled');
+                        $("#form-field-IFSCCode").attr('disabled', 'disabled');
+                        $("#form-field-BankNameCorrespondent").attr('disabled', 'disabled');
+                        $("#form-field-Address").attr('disabled', 'disabled');
+                        jQuery('#form-field-CountryCorrespondent').attr('disabled', 'disabled');
+                        jQuery('#form-field-CityCorrespondent').attr('disabled', 'disabled');
+                        $("#ScrapSaleAddBankForm input[type='radio']").attr('disabled', 'disabled');
+                        $("#form-field-AddressBank").attr('disabled', 'disabled');
+                        $("#form-field-IBAN").attr('disabled', 'disabled');
+                        $("#form-field-SwiftCodeCorespondent").attr('disabled', 'disabled');
+
+                    }
+
+                    function enableFields() {
+
+
+                        jQuery('#form-field-BankName').removeAttr('disabled');
+                        jQuery('#form-field-Country').removeAttr('disabled');
+                        jQuery('#form-field-AccountNumber').removeAttr('disabled');
+                        jQuery('#form-field-AccountHolderName').removeAttr('disabled');
+                        jQuery('#form-field-Currency').removeAttr('disabled');
+                        $("#form-field-SwiftCode").removeAttr('disabled');
+                        $("#form-field-IFSCCode").removeAttr('disabled');
+                        $("#form-field-BankNameCorrespondent").removeAttr('disabled');
+                        $("#form-field-Address").removeAttr('disabled');
+                        jQuery('#form-field-CountryCorrespondent').removeAttr('disabled');
+                        jQuery('#form-field-CityCorrespondent').removeAttr('disabled');
+                        $("#ScrapSaleAddBankForm input[type='radio']").removeAttr('disabled');
+                        $("#form-field-AddressBank").removeAttr('disabled');
+                        $("#form-field-IBAN").removeAttr('disabled');
+                        $("#form-field-SwiftCodeCorespondent").removeAttr('disabled');
+
+
+
+                    }
+
+
+
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

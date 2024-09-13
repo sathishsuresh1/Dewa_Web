@@ -1,0 +1,143 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+@using DEWAXP.Foundation.Content.Models
+@model DEWAXP.Foundation.Content.Models.AccountSelector
+@{
+    var defaultAccount = Model.FirstSelected ?? Model.Primary ?? Model.First;
+var defaultStatusIndicatorClass = defaultAccount != null && defaultAccount.Active ? "active" : "inactive";
+var defaultStatusIndicatorText = defaultAccount != null && defaultAccount.Active ? "Active" : "Inactive";
+var multiSelectLabelClass = Model.MultiSelect ? "hidden" : string.Empty;
+var disableSubmitOnConfirm = (!Model.SubmitOnConfirm).ToString().ToLower();
+var displayModal = Model.AccountSelectionEnabled.ToString().ToLower();
+var additionalContentCssClasses = Model.MultiSelect ? "m39-modal__content--tabs" : string.Empty;
+var additionalHeaderCssClasses = Model.MultiSelect ? "m39-modal__header--tabs" : string.Empty;
+var dir = ViewBag.IsRTL ? "rtl" : "ltr";
+var displayName = !string.IsNullOrWhiteSpace(defaultAccount.Name) ? defaultAccount.Name : defaultAccount.NickName;
+bool IsMuptiple = Convert.ToBoolean(Model.Accounts != null && Model.Accounts.Count > 1);
+var isexpocustomer = ViewBag.isexpocustomer != null && (bool)ViewBag.isexpocustomer;
+var defaultev = (defaultAccount.BillingClassification.Equals(DEWAXP.Foundation.Integration.Enums.BillingClassification.ElectricVehicle));
+}
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+<div class="j69-dashboard2" id="maindashboarddiv" data-evaccountjourney="@defaultev">
+    @Html.Sitecore().Placeholder("greetings")
+
+    <div class="grid">
+        <div class="grid__row mb24 grid__row-tight_gutter">
+            <div class="grid__column grid__column--6">
+                <!-- m43-account-selector-start -->
+                <form id="form-account-selector" method="GET" form-skipvalidation="true">
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("~/Views/Feature/Account/Selector/M43 Account Selector.cshtml", Model)
+                </form>
+                <input type="hidden" name="bes-accountid" class="bes-accountid">
+                <!-- m42-account-selector-end -->
+            </div>
+            <div class="grid__column grid__column--6">
+                <div class="m80-my-consumption nonevcomponentsdiv" data-component="m80-my-consumption" data-rate="70" style="@(defaultev ?"display: none;":"display: block;")">
+                    @Html.Sitecore().Placeholder("dashboard-thumbnail-placeholder")
+                    <a class="m80-my-consumption--incidents" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.CommonComplaint)">
+                        <div class="m80-my-consumption--incidents_inner">
+                            <img src="/images/smartresponse.png" class="tooltipstered" alt="@Translate.Text("SL.Report_Track_Technical_Incidents")">
+                            <div class="m80-my-consumption--incidentstext">
+                                @Translate.Text("SL.Report_Track_Technical_Incidents")
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="m80-my-consumption evcomponentsdiv" style="@(defaultev ?"display: block;":"display: none;")">
+                    <a class="m80-my-consumption--incidents" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_CardStatusPage)">
+                        <div class="m80-my-consumption--incidents_inner">
+                            <img src="/images/trackrequest.png" class="tooltipstered" alt="">
+                            <div class="m80-my-consumption--incidentstext">
+                                @Translate.Text("Track Requests")
+                            </div>
+                        </div>
+                    </a>
+                    <a class="m80-my-consumption--incidents" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EV_EnquiryPage)">
+                        <div class="m80-my-consumption--incidents_inner">
+                            <img src="/images/smartresponse.png" class="tooltipstered" alt="">
+                            <div class="m80-my-consumption--incidentstext">
+                                @Translate.Text("EV Support")
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Sitecore().Placeholder("tabs")
+</div>
+<div class="box--news j69-dashboard2">
+    <div class="nonevcomponentsdiv" style="@(defaultev ?"display: none;":"display: block;")">
+        @Html.Sitecore().Placeholder("component")
+    </div>
+    <div class="evcomponentsdiv" style="@(defaultev ?"display: block;":"display: none;")">
+        <div class="grid">
+            @Html.Sitecore().Placeholder("evcomponent")
+        </div>
+        @Html.Sitecore().Placeholder("evmapcomponent")
+    </div>
+    @Scripts.Render("~/bundles/bes")
+        @Scripts.Render("~/bundles/dashboard")
+    <div class="grid component-tigger">
+        <div class="grid__column grid__column--12">
+            <div class="cpage_variant_name"></div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div class="m66-preloader small ">
+                    <div class="loader-small "></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.Sitecore().Placeholder("bescomponent")
+    @Html.Sitecore().Placeholder("offers")
+    <div class="grid">
+        @Html.Sitecore().Placeholder("bottomcomponent")
+    </div>
+</div>
+
+<script type="text/javascript">
+    var xhrPool = []; // no need to use **var**
+    var gaguageLoadSettting =
+        [
+            { name: "_totalamountdue",evapplicable:"1", enabled: false, isComplete: null, functionname: "_totalamountdueHandler" },
+            { name: "_consumptiondetails", evapplicable: "1", enabled: false, isComplete: null, functionname: "_consumptiondetailsHandler" },
+            { name: "_consumptionGraph", evapplicable: "1", enabled: false, isComplete: null, functionname: "_consumptionGraphHandler" },
+            { name: "_besHandler", evapplicable: "1", enabled: false, isComplete: null, functionname: "_besHandler" },
+            { name: "_dewaoffers", evapplicable: "3", enabled: false, isComplete: null, functionname: "_fndewaoffers" },
+            { name: "_evtotalamountdue", evapplicable: "2", enabled: false, isComplete: null, functionname: "_evtotalamountdueHandler" },
+            { name: "_evbillcompare", evapplicable: "2", enabled: false, isComplete: null, functionname: "_fnevbillcompare" },
+            { name: "_evtransactions", evapplicable: "2", enabled: false, isComplete: null, functionname: "_evtransactionsHandler" },
+            { name: "_evconsumptionGraph", evapplicable: "2", enabled: false, isComplete: null, functionname: "_evconsumptionGraphHandler" },
+            { name: "_listofevcards", evapplicable: "2", enabled: false, isComplete: null, functionname: "_listofevcardsHandler" },
+
+        ];
+    var accountNumber = '';
+    var evaccount = '';
+    var evaccountjourney = jQuery("#maindashboarddiv").attr("data-evaccountjourney");
+    var bpNumber = '';
+    var cat = '';
+    var flag = '';
+    var isvisited = '';
+    var _graphInitiate = false
+    docReady(function () {
+        jQuery(window).scroll(function () {
+            if (!fnLazyload(gaguageLoadSettting)) {
+                return false;
+            }
+        });
+        jQuery('#form-account-selector').off("submit").submit(function (e) {
+            handleAccountSelection(e, gaguageLoadSettting);
+            e.preventDefault();
+            return false;
+        });
+        jQuery('.ajax-placeholder').empty();
+        AbortAllAjaxCall();
+        fnInitializeDashBoardComponent(gaguageLoadSettting,'@defaultev');
+    });
+</script>

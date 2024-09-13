@@ -1,0 +1,67 @@
+﻿@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using Sitecore.Resources.Media;
+@using Sitecore.Globalization;
+@using Sitecore.Links.UrlBuilders;
+@using Sitecore.Mvc.Analytics.Extensions;
+@using DEWAXP.Foundation.Helpers.Extensions;
+@using System.Web.Optimization
+@using DEWAXP.Foundation.Helpers.MetaTags
+@using DEWAXP.Foundation.Content
+@model RenderingModel
+@{
+    var textDirection = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var lang = Model.Item.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    string version = Translate.Text("assest.version");
+}
+
+<!doctype html>
+<html lang="@Model.Item.Language.Name" dir="@textDirection">
+<head>
+    @*@Html.GetMetaTags()*@
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/MetaTags.cshtml", Sitecore.Context.Item)
+    @Html.GetSeoTagsForPage(Sitecore.Context.Item)
+    @Html.Partial("~/Views/Website/SubLayouts/SEO/_FaviconRendering.cshtml")
+    <script src='https://www.google.com/recaptcha/api.js?hl=@(lang)'></script>
+
+    @if (!Sitecore.Context.PageMode.IsExperienceEditor)
+    {
+        @Html.Sitecore().Rendering(SitecoreRenderingIds.GOOGLE_ANALYTICS_CONFIG_HEAD)
+    }
+    <!--Visitor-->
+    @Html.Sitecore().VisitorIdentification()
+    <!--Visitor-->
+
+
+    <link href="@Url.Content("~/styles/DEWA/custom.css?v="+version)" media="all" rel="stylesheet" type="text/css">
+    <link href="@Url.Content("~/styles/Epass/custom.css?v="+version)" media="all" rel="stylesheet" type="text/css">
+
+    <!--Epass layout-->
+</head>
+<body id="page">
+    @Html.Sitecore().Placeholder("main")
+    <script type="text/javascript">
+        var event = new Event('click');
+        var fakeradio = document.getElementsByClassName("fake-radio"),
+            realradio = document.getElementsByClassName("realradio");
+
+        for (var i = 0; i < fakeradio.length; i++) {
+            fakeradio[i].addEventListener('click', function () {
+                var radio = this.getElementsByClassName('realradio');
+
+                for (var j = 0; j < realradio.length; j++) {
+                    realradio[j].removeAttribute("checked");
+                };
+                for (var k = 0; k < fakeradio.length; k++) {
+                    //console.log(fakeradio[k])
+                    fakeradio[k].setAttribute("class", "fake-radio");
+                };
+
+                this.setAttribute("class", "fake-radio fake-radio--active")
+                radio[0].setAttribute("checked", "checked");
+            });
+        };
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,486 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Integration.Enums
+@using DEWAXP.Foundation.Helpers.Extensions
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model  DEWAXP.Feature.Bills.Models.EasyPay.ManageBeneficiaryDetails
+
+
+
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__column grid__column--12 grid__column--form" data-journey="j69-dashboard">
+    <div class="grid__row">
+        <div class="m17-sectiontitle" data-component="m17-sectiontitle">
+            <h3 class="m17-sectiontitle__title m17-sectiontitle__title--green text__section-title">
+                @Translate.Text("MBTitle")
+            </h3>
+            <p class="m17-sectiontitle__text">
+                @Translate.Text("MBSectionTitle")
+            </p>
+        </div>
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName,
+            FormMethod.Post,
+            new
+            {
+                @id = "addBeneficiary",
+                @class = "fromNormalRegistration form",
+                @data_form = "true",
+                @novalidate = "",
+                @autocomplete = "off",
+                data_journey = "j69-dashboard"
+            }))
+        {
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            <div class="hidden j69-dashboard--customer_labels" data-labels='{"famemname":"Name of Family Member", "famemres":"Select the account that you reside in", "reside_label":"Select the account that you reside in", "mem_namelabel":"Name of the family member","mem_namepholder":"Enter family member name", "req_label":"This field is required.", "rela_label":"Select your relationship with this family member", "cat_label":"What category do they fall in?", "hasPOD_label":"From People of Determination", "hasPMI_label":"Has Permanent Medical Issue",  "medeq_label": "Is there any special medical equipment such as oxygen concentrator, pulse oximeter, ventilator, etc?", "yes":"Yes", "no":"No", "podcard_label":"Enter the People of Determination ID card number", "podcard_pholder":"Enter POD ID card number", "preview_path":"../../images/preview@2x.png", "eidfile_label":"Emirates ID for DEWA Account Holders", "choose_label":"Choose", "uploadformat_msg":"Upload format is not correct.", "uploadfile_msg":"Upload file size is too high", "remove_label":"Remove", "upload_note":"Note that the maximum size allowed for each attachment is 2MB. Formats allowed: jpg, bmp, gif, png, jpeg."}'>
+            </div>
+            <fieldset class="fieldset fieldset-add-beneficiary">
+                <legend class="legend">@Translate.Text("MBAddNewBeneficiary")</legend>
+                <div class="form-field form-field--text fieldset-edit-beneficiary-item-name">
+                    <label for="Name" class="form-field__label">
+                        @Translate.Text("MBNickName")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.Name, new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                       @placeholder = Translate.Text("MBNickNamePalceholder"),
+                       @aria_describedby = "description-for-Name",
+                       @data_parsley_errors_container = "#description-for-Name",
+                       @name = "inst_name",
+                       @required = "",
+                       @data_parsley_required_message = Translate.Text("MBNickNameErrorMsg"),
+                       @data_parsley_trigger = "focusout",
+                       @data_parsley_id = "46",
+                       @autocomplete = "off"
+                   })
+                    </span>
+                    <div id="description-for-Name" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Name, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field form-field--text fieldset-edit-beneficiary-item-account">
+                    <label for="ContractAccount" class="form-field__label">
+                        @Translate.Text("MBAccountNumber")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(m => m.ContractAccount, new
+                        {
+                            @class = "form-field__input form-field__input--text",
+                       @placeholder = Translate.Text("MBAccountNumberPalceHolder"),
+                       @aria_describedby = "description-for-ContractAccount",
+                       @data_parsley_errors_container = "#description-for-ContractAccount",
+                       @name = "inst_name",
+                       @required = "",
+                       @data_parsley_required_message = Translate.Text("MBAccountNumberErrorMsg"),
+                       @data_parsley_pattern_message = Translate.Text("MBAccountNumberErrorMsg"),
+                       @data_parsley_trigger = "focusout",
+                       @data_parsley_id = "47",
+                       @data_parsley_account_premise_number = "",
+                       @data_parsley_account_number = "",
+                       @maxlength = 10,
+                       @data_parsley_maxnumber = 10,
+                       @data_parsley_pattern = "^((2|3)[0-9]{9})$",
+                       @lang = "en",
+                       @autocomplete = "off"
+                   })
+                    </span>
+                    <div id="description-for-ContractAccount" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.ContractAccount, "", new { @class = "parsley-errors-list" })
+                    </div>
+
+                </div>
+                <div class="form-field__button">
+                    <button type="button" class="button button--primary button--next button--centered add-button">@Translate.Text("AddBeneficiary")</button>
+                    <button type="submit" id="btnSave" class="hidden">@Translate.Text("MBSaveBeneficiary")</button>
+
+                </div>
+                <div class="m39-modal m39-modal--new m39-modal--beneficiary" data-component="m39-modal" id="modal_true">
+                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="_llbbsjwye_trigger" aria-controls="_llbbsjwye_content">Modal Trigger</button>
+                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_llbbsjwye_content" aria-labelledby="_llbbsjwye_trigger">
+                        <div class="m39-modal__dialog">
+                            <div class="m39-modal__header">
+                                <div class="m39-modal__title">@Translate.Text("MBAddBeneficiaryConfirm")</div>
+
+                                <button data-close="true" class="m39-modal__button--close" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content"></button>
+                            </div>
+                            <div class="m39-modal__content">
+                                <div class="grid__row mb24">
+                                    <div class="grid__column grid__column--12">
+                                        <!-- m42-key-value-start -->
+                                        <div class="m42-keyvalue fieldset-edit-beneficiary-item-value" data-item-id="3t2ktlckr">
+                                            <dl></dl>
+                                        </div>
+                                        <!-- m42-key-value-end -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__footer">
+                                <button class="button button--outline" data-close="true" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content">@Translate.Text("MBCancel")</button>
+                                <button class="button button--primary saveButton" data-close="true" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content">@Translate.Text("AddBeneficiary")</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m39-modal__overlay"> </div>
+                </div>
+            </fieldset>
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="form-field__button form-field__button_legend">
+                    @*<button type="submit" class="button  button--text button--save_legend">@Translate.Text("MBSave")</button>
+                        <button type="button" class="button  button--text button--cancel_legand" onclick="ClearFlied()">@Translate.Text("MBCancel")</button>*@
+
+                    @if (!string.IsNullOrWhiteSpace(ViewBag.BeneficiaryName))
+                    {
+                        <div class="m39-modal m39-modal--new m39-modal--beneficiary" style="display:inline" data-component="m39-modal" id="modal_true">
+                            <div type="button" class="button  button--text button--save_legend m39-modal__trigger successModel" data-trigger="true" style="display:none;">Save</div>
+                            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_ucrticrem_content" aria-labelledby="_ucrticrem_trigger">
+                                <div class="m39-modal__dialog">
+                                    <div class="m39-modal__header ">
+                                        <div class="grid__row">
+                                            <div class="grid__column grid__column--12">
+                                                <!-- m42-key-value-start -->
+                                                <div class="icon icon-new-success-message centered">
+                                                </div>
+                                                <!-- m42-key-value-end -->
+                                                <div class="m39-modal__title" style="padding-top:0px;"> @string.Format(Translate.Text("AddBeneficiarySuccessMsg"), Convert.ToString(ViewBag.BeneficiaryName))</div>
+                                                <button data-close="true" class="m39-modal__button--close" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="m39-modal__footer">
+                                        <button class="button button--primary button--next" data-accountupdate="true" data-close="true">@Translate.Text("MBDone") </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay" style="display: none;"> </div>
+                        </div>
+
+                        <script>
+                            docReady(function () {
+                                setTimeout(function () {
+                                    jQuery(".successModel").click();
+                                    ClearFlied();
+                                }, 100)
+                            });
+
+
+
+                        </script>
+                    }
+
+                    <script>
+                        function ClearFlied() {
+                            $("#ContractAccount,#Name").val('');
+                        }
+                    </script>
+
+                </div>
+
+            </div>
+        }
+        <script language="javascript" type="text/javascript">
+            $(".saveButton").click(function () {
+                var $btnSave = $('#btnSave');
+                $btnSave.trigger('click');
+            });
+        </script>
+
+
+    </div>
+
+    <div class="edit-beneficiary">
+        @if (Model != null)
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="grid__row1">
+                <div class="grid__column1 grid__column--121 grid__column--form1">
+                    <div class="fieldset-edit-beneficiary-wrapper">
+                        <legend class="legend">@Translate.Text("MBEditBeneficiary")</legend>
+                        <fieldset class="fieldset fieldset-edit-beneficiary beneficiary-wapper">
+                            @if (Model.BeneficiaryDetailLists != null && Model.BeneficiaryDetailLists.Count() > 0)
+                            {
+                                int i = 0;
+                                foreach (var item in Model.BeneficiaryDetailLists.ToList())
+                                {
+                                    <form id="from@(i)" data-form="true" novalidate="">
+                                        <div class="fieldset-edit-beneficiary-item">
+                                            <div class="form-field fieldset-edit-beneficiary-item-form fieldset-edit-beneficiary-item-name form-field--6 form-field--text">
+                                                <label for="name@(i)" class="form-field__label">@Translate.Text("MBNickName")</label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text ctrl_name"
+                                                           id="name@(i)"
+                                                           name="name@(i)"
+                                                           type="text"
+                                                           value="@item.Name"
+                                                           placeholder="@Translate.Text("MBNickNamePalceholder")"
+                                                           aria-describedby="description-for-9v662u98g"
+                                                           data-parsley-errors-container="#description-for-9v662u98g"
+                                                           required=""
+                                                           data-default-value="@item.Name"
+                                                           data-parsley-required-message="@Translate.Text("MBNickNameErrorMsg")"
+                                                           data-parsley-trigger="focusout"
+                                                           data-parsley-id="8">
+                                                </span>
+                                                <div id="description-for-@(i)" class="form-field__messages parsley-errors-list filled">
+
+                                                </div>
+                                            </div>
+
+                                            <div class="form-field fieldset-edit-beneficiary-item-form fieldset-edit-beneficiary-item-account form-field--6 form-field--text">
+                                                <label class="form-field__label" for="accountNo@(i)">@Translate.Text("MBAccountNumber")</label>
+                                                <span class="form-field__input-wrapper">
+                                                    <input class="form-field__input form-field__input--text ctrl_accountNo form-field__input-read-only disabled"
+                                                           disabled readonly=""
+                                                           id="accountNo@(i)"
+                                                           name="accountNo@(i)"
+                                                           type="text"
+                                                           value="@item.ContractAccount"
+                                                           data-default-value="@item.ContractAccount"
+                                                           style="pointer-events: none;">
+                                                </span>
+                                                <div id="description-for-3t2ktlckr" class="form-field__messages">
+
+                                                </div>
+                                            </div>
+                                            <div class="fieldset-edit-beneficiary-item-button-delete deleteBtn" data-index="@(i)" id="del@(i)" title="@Translate.Text("MBDelete")"></div>
+                                            <div class="form-field__button hidden">
+                                                <button type="submit" data-index="@(i)" class="button button--primary button--text button--centered save-button updateBtn">@Translate.Text("MBSave")</button>
+                                                <button type="reset" class="button button--primary button--text button--centered btn-reset">@Translate.Text("MBCancel")</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    i++;
+                                }
+                                <div class="m39-modal m39-modal--new m39-modal--beneficiary" data-component="m39-modal" id="modal_true">
+                                    <button data-trigger="true" class="m39-modal__trigger hidden" type="button" id="_llbbsjwye_trigger" aria-controls="_llbbsjwye_content">Modal Trigger</button>
+                                    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="_llbbsjwye_content" aria-labelledby="_llbbsjwye_trigger">
+                                        <div class="m39-modal__dialog">
+                                            <div class="m39-modal__header">
+                                                <div class="m39-modal__title save-title hidden">@Translate.Text("MBUpdateBeneficiaryConfirm")</div>
+                                                <div class="m39-modal__title delete-title g">@Translate.Text("MBDeleteBeneficiaryConfirm")</div>
+                                                <button data-close="true" class="m39-modal__button--close" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content"></button>
+                                            </div>
+                                            <div class="m39-modal__content">
+                                                <div class="grid__row mb24">
+                                                    <div class="grid__column grid__column--12">
+                                                        <!-- m42-key-value-start -->
+                                                        <div class="m42-keyvalue fieldset-edit-beneficiary-item-value" data-item-id="3t2ktlckr">
+                                                            <dl></dl>
+                                                        </div>
+                                                        <!-- m42-key-value-end -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="m39-modal__footer">
+                                                <button class="button button--outline" data-close="true" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content">@Translate.Text("MBCancel")</button>
+                                                <button class="button button--primary btn add-btn" data-close="true" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content">@Translate.Text("MBUpdateBeneficiary")</button>
+                                                <button class="button button--primary btn remove-btn" data-close="true" id="_llbbsjwye_close" aria-controls="_llbbsjwye_content">@Translate.Text("MBRemoveBeneficiary")</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="m39-modal__overlay"> </div>
+                                </div>
+                                <script>
+                                    var _DeleteUrl = "/api/sitecore/EasyPay/DeleteBeneficiary";
+                                    var _UpdateUrl = "/api/sitecore/EasyPay/UpdateBeneficiary";
+                                    AddCustomForgeryToken = function (data, elementId) {
+                                        data.__RequestVerificationToken = $(elementId + ' input[name=__RequestVerificationToken]').val();
+                                        return data;
+                                    };
+                                    var index = "";
+                                    jQuery(".deleteBtn").click(function () {
+                                        index = $(this).attr("data-index");
+                                        //alert(index);
+                                    });
+                                    jQuery(".updateBtn").click(function () {
+                                        index = $(this).attr("data-index");
+                                        //alert(index);
+                                    });
+                                    jQuery(".remove-btn").click(function () {
+                                        event.preventDefault();
+                                        var postdata = {
+                                            Name: jQuery("#name" + index).val(),
+                                            ContractAccount: jQuery("#accountNo" + index).val()
+                                        }
+                                        postdata = AddCustomForgeryToken(postdata, ".edit-beneficiary");
+                                        $.ajax({
+                                            url: _DeleteUrl,
+                                            data: postdata,
+                                            type: "DELETE",
+                                            beforeSend: function () {
+                                                jQuery('.j105-drrg--loader').show();
+                                                jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                                                jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                                            },
+                                            complete: function () {
+
+                                            },
+                                            success: function (response) {
+                                                jQuery('.j105-drrg--loader').hide();
+                                                jQuery('body').removeClass('unscrollable');
+                                                if (response.success) {
+                                                    location.reload();
+                                                }
+                                                else if (response != null) {
+                                                    jQuery("#description-for-" + index).html(response.description);
+                                                }
+                                                console.log(response)
+                                            },
+                                            error: function (error) {
+                                                console.log(error);
+                                            }
+                                        });
+                                    });
+                                    jQuery(".add-btn").click(function () {
+
+                                        var postdata = {
+                                            Name: jQuery("#name" + index).val(),
+                                            ContractAccount: jQuery("#accountNo" + index).val()
+                                        }
+
+                                            if (postdata.Name == "" || postdata.Name == null) {
+                                                jQuery(wapper).html("@Translate.Text("MBNickNameErrorMsg")");
+                                                return false;
+                                            }
+                                        postdata = AddCustomForgeryToken(postdata, ".edit-beneficiary");
+                                            $.ajax({
+                                                url: _UpdateUrl,
+                                                data: postdata,
+                                                type: "POST",
+                                                beforeSend: function () {
+                                                    jQuery('.j105-drrg--loader').show();
+                                                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                                                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                                                },
+                                                complete: function () {
+
+                                                },
+                                                success: function (response) {
+                                                    jQuery('.j105-drrg--loader').hide();
+                                                    jQuery('body').removeClass('unscrollable');
+                                                    if (response.success) {
+                                                        location.reload();
+                                                    } else if (response != null) {
+                                                        jQuery("#description-for-" + index).html(response.description);
+                                                    }
+                                                },
+                                                error: function (error) {
+                                                    console.log(error);
+                                                }
+                                            });
+                                        });
+                                    //fieldset-edit-beneficiary-item
+                                    docReady(function () {
+
+                                        jQuery(".deleteBtn").click(function () {
+                                            event.preventDefault();
+                                        @*var isConfirmed = confirm("@Translate.Text("Please confirm to delete")");
+                                        if (!isConfirmed) {
+                                            return false;
+                                        }*@
+
+                                            var wapper = jQuery(this).closest(".beneficiary-wapper")
+                                            var postdata = {
+                                                Name: jQuery(wapper).find(".ctrl_name").val(),
+                                                ContractAccount: jQuery(wapper).find(".ctrl_accountNo").val()
+                                            }
+                                            postdata = AddCustomForgeryToken(postdata, ".j121-beneficiary-easy-pay");
+                                            $.ajax({
+                                                url: _DeleteUrl,
+                                                data: postdata,
+                                                type: "DELETE",
+                                                beforeSend: function () {
+                                                    jQuery('.j105-drrg--loader').show();
+                                                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                                                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                                                },
+                                                complete: function () {
+
+                                                },
+                                                success: function (response) {
+                                                    jQuery('.j105-drrg--loader').hide();
+                                                    jQuery('body').removeClass('unscrollable');
+                                                    if (response.success) {
+                                                        location.reload();
+                                                    }
+                                                    else if (response != null) {
+                                                        jQuery(wapper).find(".form-field__messages").html(response.description);
+                                                    }
+                                                    console.log(response)
+                                                },
+                                                error: function (error) {
+                                                    console.log(error);
+                                                }
+                                            });
+
+                                        });
+
+                                        jQuery(".updateBtn").click(function () {
+                                            var wapper = jQuery(this).closest(".beneficiary-wapper")
+                                            var postdata = {
+                                                Name: jQuery(wapper).find(".ctrl_name").val(),
+                                                ContractAccount: jQuery(wapper).find(".ctrl_accountNo").val()
+                                            }
+
+                                            if (postdata.Name == "" || postdata.Name == null) {
+                                                jQuery(wapper).find(".form-field__messages").html("@Translate.Text("MBNickNameErrorMsg")");
+                                                return false;
+                                            }
+                                            postdata = AddCustomForgeryToken(postdata, ".j121-beneficiary-easy-pay");
+                                            $.ajax({
+                                                url: _UpdateUrl,
+                                                data: postdata,
+                                                type: "POST",
+                                                beforeSend: function () {
+                                                    jQuery('.j105-drrg--loader').show();
+                                                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                                                    jQuery('body').removeClass('unscrollable').addClass('unscrollable');
+                                                },
+                                                complete: function () {
+
+                                                },
+                                                success: function (response) {
+                                                    if (response.success) {
+                                                        location.reload();
+                                                    } else if (response != null) {
+                                                        jQuery(wapper).find(".form-field__messages").html(response.description);
+                                                    }
+                                                },
+                                                error: function (error) {
+                                                    console.log(error);
+                                                }
+                                            });
+                                        });
+                                    });
+
+                                </script>
+                            }
+                            else
+                            {
+                                <p class="text__content-copy" style="text-align:center;font-size: 20px;font-weight: 200;">@Translate.Text("MBNoBeneficiaryExist")</p>
+
+                            }
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

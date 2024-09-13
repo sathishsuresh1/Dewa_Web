@@ -1,0 +1,611 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Feature.DRRG.Models.PVModule
+@{
+    string listurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_RegistrationList);
+
+}
+<div class="j105-drrg">
+    <div class="m66-preloader m66-preloader-fullpage j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="j05-drrg-manager" data-journey="j05-drrg-manager">
+    <div class="grid">
+        @Html.Sitecore().Placeholder("pagetitle")
+        <div class="grid__row mb24" style="display:none">
+            <div class="grid__column grid__column--12">
+                <form id="form-evaluator-filter" action="#" method="POST" form-skipvalidation="true">
+                    @Html.AntiForgeryToken()
+                    <div class="form-field form-field--text">
+                        <label for="form-field-SearchText" class="form-field__label">
+                            <span class="aria-only">Text Field</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--search">
+                            <input class="form-field__input form-field__input--text"
+                                   id="form-field-SearchText"
+                                   name="SearchText"
+                                   type="text"
+                                   placeholder="Search by reference number or name"
+                                   aria-describedby="description-for-SearchText"
+                                   data-parsley-errors-container="#description-for-SearchText"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="6"
+                                   aria-invalid="false">
+                            <button type="submit" class="icon-search"><span class="aria-only">Submit</span></button>
+                        </span>
+                        <div id="description-for-SearchText" class="form-field__messages">
+                        </div>
+                    </div>
+
+                    <div class="form--single_line">
+                        <div class="form-field form-field--select form-field--select_new">
+                            <label for="form-field-evaluatorstatus" class="form-field__label">
+                                Status
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-evaluatorstatus" name="select" aria-describedby="description-for-lcjasldad" data-parsley-errors-container="#description-for-lcjasldad" data-parsley-trigger="change" data-parsley-id="16">
+                                    <option value="" selected="">All</option>
+                                    <option value="1">Approved</option>
+                                    <option value="2">Submitted</option>
+                                    <option value="3">Rejected</option>
+                                </select>
+                            </span>
+                            <div id="description-for-lcjasldad" class="form-field__messages">
+                            </div>
+                        </div>
+
+                        <div class="form-field form-field--select form-field--select_new">
+                            <label for="form-field-lcnoqjho4" class="form-field__label">
+                                Sort By
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                <select class="form-field__input form-field__input--select form-field__input--select-full" id="form-field-lcnoqjho4" name="select" aria-describedby="description-for-lcnoqjho4" data-parsley-errors-container="#description-for-lcnoqjho4" data-parsley-trigger="change" data-parsley-id="18">
+                                    <option value="" selected="">Created Date</option>
+                                    @*<option value="1">Option 1</option>
+                                        <option value="2">Option 2</option>*@
+                                </select>
+                            </span>
+                            <div id="description-for-lcnoqjho4" class="form-field__messages">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="grid__row">
+            <div class="grid__column grid__column--12">
+                <div id="evaluator-list">
+                </div>
+            </div>
+        </div>
+        <div class="grid__row" id="approve-reject">
+            <div class="grid__column grid__column--12">
+                <div class="centered mt12">
+                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.DRRG__EVALUATOR_Dashboard)" class="button button--outline">BACK</a>
+                    <div class="m39-modal m39-modal--confirm m39-modal--reject m39-modal--button" data-component="m39-modal" id="reject">
+                        <button data-trigger="true" class="button button--outline  disabled j05-action--button" type="button" disabled="" id="_manufacturer_trigger" aria-controls="_manufacturer_content">REJECT</button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_manufacturer_content" aria-labelledby="_manufacturer_trigger">
+                            <div class="m39-modal__dialog ">
+                                <div class="m39-modal__header">
+                                    <div class="m39-modal__title">Rejection - New Evaluator Registration Application(s)</div>
+                                    <button data-close="true" class="m39-modal__button--close" id="_manufacturer_close" aria-controls="_manufacturer_content">
+                                        <span class="aria-only">Close</span>
+                                    </button>
+                                </div>
+                                <div class="m39-modal__content" style="top: 31.1875px;">
+                                    <p class="mb24">
+                                        Are you sure you want to reject this application?
+                                    </p>
+
+                                    <form method="get" class="form" data-form="true" novalidate="">
+                                        <div class="form-field form-field--text form-field--textarea">
+                                            <label for="form-field-rejectedreason" class="form-field__label">
+                                                <span class="aria-only">Textarea Field (required)</span>
+                                            </label>
+                                            <span class="form-field__input-wrapper">
+                                                <textarea class="form-field__input form-field__input--text form-field__input--textarea"
+                                                          maxlength="500" data-textarea="rejectedreason"
+                                                          id="form-field-rejectedreason" name="textarea" type="textarea" placeholder="Please type your comments here"
+                                                          aria-describedby="description-for-rejectedreason"
+                                                          data-parsley-errors-container="#description-for-rejectedreason"
+                                                          required="" data-parsley-required-message="This field is required" data-parsley-id="6"></textarea>
+                                            </span>
+                                            <div id="description-for-rejectedreason" class="form-field__messages">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field form-field--upload">
+                                            <div class="form-field__input-wrapper">
+                                                <div class="form-field__preview-wrapper">
+                                                    <img src="/images/preview@2x.png"
+                                                         data-src="/images/preview_pdf@2x.png"
+                                                         data-success="/images/upload_success@2x.png" class="form-field__preview tooltipstered" aria-hidden="true" role="presentation" alt="alt text" data-uploader-image="rejectedfile">
+                                                </div>
+                                                <div class="form-field__uploader-details">
+                                                    <label for="form-field-rejectedfile" class="form-field__label">
+                                                        <span class="aria-only">Supporting Documents (required)</span>
+                                                    </label>
+                                                    <div>
+                                                        <label>
+                                                            <input class="form-field__input form-field__input--upload" id="form-field-rejectedfile"
+                                                                   name="upload" type="file" aria-describedby="description-for-rejectedfile"
+                                                                   data-parsley-errors-container="#description-for-rejectedfile"
+                                                                   data-parsley-required-message="This field is required" data-uploader-field="rejectedfile"
+                                                                   accept="image/png,image/x-png,image/jpeg,image/jpg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                                                   data-accepts="&quot;jpg&quot;,&quot;png&quot;,&quot;jpeg&quot;,&quot;pdf&quot;,&quot;doc&quot;,&quot;docx&quot;" data-size="2048000"
+                                                                   data-parsley-trigger="focusout" data-parsley-id="8" required="">
+                                                            <span class="button button--primary button--next button--small focus-enabled"
+                                                                  data-uploader-button="upload-choose">@Translate.Text("Choose")</span>
+                                                            </label>
+                                                        </div>
+                                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("DRRG.fileformat")</p>
+                                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("DRRG.filesizehigh")</p>
+                                                        <p class="form-field__input--upload-filename" data-uploader-filename="rejectedfile"></p>
+                                                        <p>
+                                                            <button class="button button--text button--remove hidden" data-uploader-remove="rejectedfile">@Translate.Text("Remove")</button>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div id="description-for-rejectedfile" class="form-field__messages">
+                                                    <p class="form-field__description">@Translate.Text("DRRG.MaxFileSize")</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-field form-field--buttons centered">
+                                                <div class="button button--outline m39-m12-noReject" data-close="true" id="_manufacturer_close" aria-controls="_manufacturer_content">No</div>
+                                                <a class="button button--primary m39-m12-yesReject" href="#" id="_manufacturerrej_close" aria-controls="_manufacturerrej_content">Yes</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay" style="display: none;"> </div>
+                        </div>
+                        <div class="m39-modal m39-modal--confirm m39-modal--button" data-component="m39-modal" id="approve">
+                            <button data-trigger="true" class="button button--primary disabled j05-action--button" disabled="">APPROVE</button>
+                            <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                                <div class="m39-modal__dialog ">
+                                    <div class="m39-modal__header">
+                                        <div class="m39-modal__title">Approval - New Evaluator Registration Application(s)</div>
+                                        @*<button data-close="true" class="m39-modal__button--close">
+                                                <span class="aria-only">Close</span>
+                                            </button>*@
+                                    </div>
+                                    <div class="m39-modal__content">
+                                        <p class="mb24">
+                                            Are you sure you want to <strong>approve</strong> this (these) new evaluator registration application(s)?
+                                        </p>
+                                        <button class="button button--outline m39-m12-noApprove" data-close="true">No</button>
+                                        <a class="button button--primary  m39-m12-yesApprove" href="#" data-close="true">Yes</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m39-modal__overlay"></div>
+                        </div>
+                    </div>
+                    <div class="m39-modal m39-modal--success m39-modal--nofocus" data-component="m39-modal" id="successmodal">
+                        <button data-trigger="true" class="m39-modal__trigger hidden">Modal Trigger</button>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false">
+                            <div class="m39-modal__dialog ">
+                                <div class="m39-modal__header">
+                                    <button data-close="true" class="m39-modal__button--close">
+                                        <span class="aria-only">Close</span>
+                                    </button>
+                                </div>
+                                <div class="m39-modal__content">
+                                    <div class="icon icon-new-success-message green"></div>
+                                    <p id="successMessage">
+                                        <strong>
+                                            New Evaluator Registration Approved
+                                        </strong>
+                                    </p>
+                                    <p id="responseMessage">The New Evaluator Registration Application(s) has (have) been approved Successfully.</p>
+                                    <a class="button button--primary" href="@listurl"> @Translate.Text("BACK TO THE LIST")</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script id="evaluator-item-template" type="text/x-handlebars-template">
+        <div class="pagination-list">
+        </div>
+        <div class="m23-table m23-table--variant2 j05-drrg-table" data-component="m23-table">
+            <h3 class="m23-table__title "></h3>
+            <table class="m23-table__content-table">
+                <thead class="m23-table__content-table-header">
+                    <tr class="m23-table__content-table-row">
+                        <th class="m23-table__content-table-cell--header">
+                            <div class="form-field__checkbox">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_3" name="checkbox_1_3" type="checkbox" value="3" aria-describedby="description-for-ch8zokreh" data-parsley-errors-container="#description-for-ch8zokreh">
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        <span class="aria-only">Checkbox option 3</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </th>
+                        <th class="m23-table__content-table-cell--header">Serial No.</th>
+                        <th class="m23-table__content-table-cell--header">Reference No.</th>
+                        <th class="m23-table__content-table-cell--header">Name of Evaluator</th>
+                        <th class="m23-table__content-table-cell--header">Date Submitted</th>
+                        <th class="m23-table__content-table-cell--header">Approval Status</th>
+                    </tr>
+                </thead>
+                <tbody class="m23-table__content-table-body">
+                    {{#results}}
+                    <tr class="j05-drrg--row m23-table__content-table-row middle">
+                        <td data-label="" class="m23-table__content-table-cell">
+                            {{#ifSubmitted Status}}
+                            <div class="form-field__checkbox">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_{{ReferenceID}}" name="checkbox_1_{{ReferenceID}}" type="checkbox" value="{{ReferenceID}}" aria-describedby="description-for-ch8zokreh" data-parsley-errors-container="#description-for-ch8zokreh">
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        <span class="aria-only">Checkbox option 3</span>
+                                    </span>
+                                </label>
+                            </div>
+                            {{/ifSubmitted}}
+                        </td>
+                        <td data-label="" class="m23-table__content-table-cell">
+                            {{serialNumber}}
+                        </td>
+                        <td data-label="" class="m23-table__content-table-cell" data-module-model-origin="001">
+                            {{ReferenceID}}
+                        </td>
+                        <td data-label="" class="m23-table__content-table-cell">
+                            {{Name}}
+                        </td>
+                        <td data-label="" class="m23-table__content-table-cell">
+                            {{CreatedDate}}
+                        </td>
+                        <td data-label="" class="m23-table__content-table-cell">
+                            {{#ifSubmitted Status}}
+                            <span class="m23-table__content-table-cell_status pending">{{Status}}</span>
+                            {{/ifSubmitted}}
+                            {{#ifRejected Status}}
+                            <span class="m23-table__content-table-cell_status rejected">{{Status}}</span>
+                            {{/ifRejected}}
+                            {{#ifApproved Status}}
+                            <span class="m23-table__content-table-cell_status approved">{{Status}}</span>
+                            {{/ifApproved}}
+                        </td>
+                    </tr>
+                    {{/results}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-list">
+        </div>
+    </script>
+
+    <script id="evaluator-pagination-template" type="text/x-handlebars-template">
+        <div class="m34-pagination m34-pagination--variant m34-pagination--variant_end mt24">
+            <span>
+                {{firstitem}} - {{lastitem}} of {{totalitem}}
+            </span>
+            <div class="m34-pagination__content">
+                {{#if previouspage}}
+                <a onclick="ajaxpage({{previouspagenumber}})" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev"><span class="aria-only">@Translate.Text("Previous")</span></a>
+                {{else}}
+                <a disabled="" role="button" aria-label="@Translate.Text("Previous")" class="button button--text button--back m34-pagination__button--prev disabled"><span class="aria-only">@Translate.Text("Previous")</span></a>
+                {{/if}}
+                {{#if nextpage}}
+                <a onclick="ajaxpage({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next"><span class="aria-only">@Translate.Text("Next")</span></a>
+                {{else}}
+                <a disabled="" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next disabled"><span class="aria-only">@Translate.Text("Next")</span></a>
+                {{/if}}
+
+            </div>
+        </div>
+    </script>
+    <script id="evaluator-norecord-template" type="text/x-handlebars-template">
+        <div class="grid__row">
+            <div class="grid__column grid__column--12 grid__column--form">
+                <div class="m40v2-status-message m40v2-status-message--success  icon icon-new-success-message " data-component="m40v2-status-message">
+                    <div class="m40v2-status-message__text">@Translate.Text("No record")</div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/javascript">
+    docReady(function () {
+        jQuery("#form-evaluator-filter").on('submit', function (event) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            handleSearchFilter(event);
+        });
+        Handlebars.registerHelper('ifSubmitted', function (v1, options) {
+            if (v1 == 'Submitted') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifRejected', function (v1, options) {
+            if (v1 == 'Rejected') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper('ifApproved', function (v1, options) {
+            if (v1 == 'Approved') {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        setTimeout(function () {
+            jQuery('select[id="form-field-evaluatorstatus"]').change(handleFilterSelection);
+        }, 200);
+        jQuery('#form-evaluator-filter').submit();
+        function handleSearchFilter(e) {
+            e.preventDefault();
+            ajaxpage(1);
+        }
+        $(".m39-m12-yesApprove").click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var refNumber = '';
+            jQuery(".m23-table__content-table-row").find(".form-field__input--checkbox:checked").each(function () {
+                refNumber += $(this).val() + ",";
+            });
+            refNumber = refNumber.replace(/,\s*$/, "");
+            var requestData = {
+                refIds: refNumber,
+            }
+            var url = "/api/Sitecore/DRRGEvaluator/ApproveEvaluatorRegistration";
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                traditional: true,
+                data: requestData,
+                beforeSend: function () {
+                    jQuery('.m66-preloader').show();
+                    jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.m66-preloader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                dataType: 'json',
+                success: function (response) {
+                    jQuery("#responseMessage").html(response.Message);
+                    jQuery(".m39-m12-noApprove").click();
+                    jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+
+                }
+            });
+
+        });
+        $(".m39-m12-yesReject").click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var files = jQuery("#form-field-rejectedfile").get(0).files;
+            var data1 = new FormData();
+            var refNumber = '';
+            jQuery(".m23-table__content-table-row").find(".form-field__input--checkbox:checked").each(function () {
+                refNumber += $(this).val() + ",";
+            });
+            refNumber = refNumber.replace(/,\s*$/, "");
+            data1.append("regnumber", refNumber);
+            data1.append("rejectionreason", $("#form-field-rejectedreason").val());
+            if (files.length > 0) {
+                data1.append("file", files[0]);
+            }
+            //else {
+            //    jQuery("#form-field-rejectedfile").parsley().validate();
+            //}
+             var url = "/api/Sitecore/DRRGEvaluator/RejectvaluatorRegistration";
+                jQuery.ajax({
+                    url: url,
+                    type: 'POST',
+                    traditional: true,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    data: data1,
+                    beforeSend: function () {
+                        jQuery('.m66-preloader').show();
+                        jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                    },
+                    complete: function () {
+                        jQuery('.m66-preloader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    dataType: 'json',
+                    success: function (response) {
+                        jQuery("#responseMessage").html('');
+                        jQuery("#responseMessage").html(response.Message);
+                        jQuery("#successMessage").html("<strong>@Translate.Text("New Evaluator Registration Rejected")</strong>");
+                        jQuery("#successMessage").addClass("red");
+                        if (response.status != null && response.status) {
+                            jQuery(".m39-m12-noReject").click();
+                            jQuery('#successmodal').find(".icon").removeClass("icon-new-success-message green");
+                            jQuery('#successmodal').find(".icon").addClass("icon-new-announcement red");
+                            jQuery('#successmodal').find('.m39-modal__trigger').trigger('click');
+                            jQuery(".m39-m12-noReject").click();
+                        }
+                        else {
+                            jQuery(".form-field__input--upload-format-error-message").css("display", "block");
+                        }
+                    },
+                    error: function (jqXHR, exception) {
+                        var msg = '';
+                        if (jqXHR.status === 0) {
+                            msg = 'Not connect.\n Verify Network.';
+                        }
+                        else if (jqXHR.status == 404) {
+                            msg = 'Requested page not found. [404]';
+                        }
+                        else if (jqXHR.status == 500) {
+                            msg = 'Internal Server Error [500].';
+                        }
+                        else if (exception === 'parsererror') {
+                            msg = 'Requested JSON parse failed.';
+                        }
+                        else if (exception === 'timeout') {
+                            msg = 'Time out error.';
+                        }
+                        else if (exception === 'abort') {
+                            msg = 'Ajax request aborted.';
+                        }
+                        else {
+                            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                        }
+
+                    }
+                });
+        });
+    });
+    function handleFilterSelection() {
+        ajaxpage(1);
+    }
+    function ajaxpage(page, pagesize, namesort) {
+        var keyword = jQuery("#form-field-SearchText").val();
+        var evaluatorstatus = jQuery("#form-field-evaluatorstatus option:selected").val();
+        var url = "/api/Sitecore/DRRGEvaluator/EvaluatorsListAjax";
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            traditional: true,
+            data: AddForgeryToken({
+                pagesize: pagesize,
+                keyword: keyword,
+                statustxt: evaluatorstatus,
+                page: page,
+                namesort: namesort,
+            }, "form-evaluator-filter"),
+            beforeSend: function () {
+                jQuery('.m66-preloader').show();
+                jQuery('.m66-preloader').css('top', $(window).scrollTop());
+                $('body').removeClass('unscrollable').addClass('unscrollable');
+            },
+            complete: function () {
+                jQuery('.m66-preloader').hide();
+                $('body').removeClass('unscrollable');
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status && response.Message != null && response.Message.Lstevaluator != null && response.Message.Lstevaluator.length > 0) {
+                    var context = {
+                        results: response.Message.Lstevaluator,
+                    };
+
+                    renderApplicationsReceived(context);
+                    if (response.Message.pagination) {
+                        var pagedata = {
+                            previouspage: function () {
+                                if (response.Message.page > 1)
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            nextpage: function () {
+                                if (response.Message.page < response.Message.totalpage)
+                                    return true;
+                                else
+                                    return false;
+                            },
+                            firstitem: response.Message.firstitem,
+                            lastitem: response.Message.lastitem,
+                            totalitem: response.Message.totalitem,
+                            page: response.Message.page,
+                            previouspagenumber: response.Message.page - 1,
+                            nextpagenumber: response.Message.page + 1,
+                            //pagenumbers: response.Message.pagenumbers,
+                            totalpage: response.Message.totalpage,
+                        }
+                        renderSearchPagination(pagedata);
+
+                    }
+                    window.initComponents('rs_area');
+                    jQuery(window).trigger('j05table');
+
+                }
+                else {
+                    renderApplicationsNorecordReceived(null);
+                }
+
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+
+            }
+        });
+    }
+    function renderApplicationsReceived(context) {
+        var markup = jQuery('#evaluator-item-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery("#approve-reject").show();
+        jQuery('#evaluator-list').html(rendering);
+    }
+    function renderApplicationsNorecordReceived(context) {
+        var markup = jQuery('#evaluator-norecord-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery("#approve-reject").hide();
+        jQuery('#evaluator-list').html(rendering);
+    }
+    function renderSearchPagination(context) {
+        var markup = jQuery('#evaluator-pagination-template').html();
+        var template = Handlebars.compile(markup);
+        var rendering = template(context);
+        jQuery('.pagination-list').html(rendering);
+    }
+    AddForgeryToken = function (data, formid) {
+        data.__RequestVerificationToken = $('#' + formid + ' input[name=__RequestVerificationToken]').val();
+        return data;
+    };
+    //jQuery(".m23-table__content-table-row").find(".form-field__input--checkbox:checked")
+    </script>

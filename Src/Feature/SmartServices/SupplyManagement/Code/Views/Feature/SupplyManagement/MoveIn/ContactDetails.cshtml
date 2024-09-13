@@ -1,0 +1,1868 @@
+﻿@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using DEWAXP.Foundation.Helpers.Extensions
+@using DEWAXP.Foundation.Content
+@model DEWAXP.Foundation.Content.Models.SupplyManagement.Movein.MoveInViewModelv3
+@{
+    var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    var rFirstName = string.IsNullOrEmpty(Model.FirstName) ? "" : "readonly";
+    var rLastName = string.IsNullOrEmpty(Model.LastName) ? "" : "readonly";
+
+    var rMobilePhone = string.IsNullOrEmpty(Model.MobilePhone) ? "" : "readonly";
+    var rEmailAddress = string.IsNullOrEmpty(Model.EmailAddress) ? "" : "readonly";
+    var rvatnumber = Model.IsVATNumber ? "readonly" : "";
+    var rPoBox = string.Empty;
+    var idnumber = string.IsNullOrEmpty(Model.IdType) ? "hidden" : "";
+    var IssuingAuthority = (Model.IdType == "IA" || Model.IdType == "TN") ? "" : "hidden";
+    var IssuingAuthorityName = string.IsNullOrEmpty(IssuingAuthority) && Model.IssuingAuthority == "OTH" ? "" : "hidden";
+    var departmentother = Model.departmentnameid == "1111111111" ? "" : "hidden";
+    string prefilleddepartmentid = string.Empty;
+
+
+    var _expDate = !string.IsNullOrEmpty(Model.ExpiryDate) ? DateTime.ParseExact(Model.ExpiryDate, "dd MMMM yyyy",
+                                          System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMMM yyyy") : string.Empty;
+
+    if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft && _expDate != string.Empty)
+    {
+        _expDate = _expDate.Replace("January", "يناير").Replace("February", "فبراير").Replace("March", "مارس").Replace("April", "أبريل").Replace("May", "مايو").Replace("June", "يونيو").Replace("July", "يوليو").Replace("August", "أغسطس").Replace("September", "سبتمبر").Replace("October", "أكتوبر").Replace("November", "نوفمبر").Replace("December", "ديسمبر");
+    }
+
+    var _birthDate = !string.IsNullOrEmpty(Model.DateOfBirth) ? DateTime.ParseExact(Model.DateOfBirth, "dd MMMM yyyy",
+                                       System.Globalization.CultureInfo.InvariantCulture).ToString("dd MMMM yyyy") : string.Empty;
+
+    if (Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft && _birthDate != string.Empty)
+    {
+        _birthDate = _birthDate.Replace("January", "يناير").Replace("February", "فبراير").Replace("March", "مارس").Replace("April", "أبريل").Replace("May", "مايو").Replace("June", "يونيو").Replace("July", "يوليو").Replace("August", "أغسطس").Replace("September", "سبتمبر").Replace("October", "أكتوبر").Replace("November", "نوفمبر").Replace("December", "ديسمبر");
+    }
+
+
+
+
+    if (Model.IsDeptid)
+    {
+        prefilleddepartmentid = Model.GovernmentDDList != null ? (Model.GovernmentDDList.Select(x => x.Value.Equals(Model.departmentnameid)) != null ? Model.GovernmentDDList.Where(x => x.Value.Equals(Model.departmentnameid)).FirstOrDefault().Text : string.Empty) : string.Empty;
+    }
+
+}
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+@Html.Sitecore().Placeholder("mandatoryfields")
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form", data_form = "true", id = "contactdetails", @data_submit_validate = "enabled", enctype = "multipart/form-data" }))
+        {
+            @Html.Sitecore().FormHandler()
+            @Html.AntiForgeryToken()
+            @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+            <fieldset class="fieldset ">
+                <legend class="legend">@Translate.Text("movein.contactdetails")</legend>
+                @if (Model.CustomerCategory != "G")
+                {
+                    <div class="form-field form-field--select form-field--select-single">
+                        <label for="form-field-IdType" class="form-field__label">
+                            @Translate.Text("movein.accountregister.residtype")
+                            <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                            @Html.DropDownListFor(x => x.IdType, (IEnumerable<SelectListItem>
+                        )Model.IDTypeList,
+                        Translate.Text("Select from dropdown"),
+                        new
+                        {
+                            @class = "form-field__input form-field__input--select form-field__input--select-full",
+                            @id = "form-field-IdType",
+                            @name = "IdType",
+                            @aria_describedby = "description-for-IdType",
+                            @required = "",
+                            @data_parsley_error_message = @Translate.Text("movein.accountregister.residtypeerrormessage"),
+                            @data_parsley_errors_container = "#description-for-IdType"
+                        })
+                        </span>
+                        <div id="description-for-IdType" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.IdType, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div id="idNexpiry" class="clearfix">
+                        <div class="form-field form-field--text @idnumber form-field--6 form-field--6-mobile_full mt24 mb0" id="idnumber">
+                            <label for="form-field-idnumber" class="form-field__label" id="idnumber_label">@Translate.Text("movein.idlabel") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                            <span class="form-field__input-wrapper">
+                                @Html.TextBoxFor(x => x.IdNumber,
+                                    new
+                                    {
+                                        @class = "form-field__input form-field__input--text",
+                                        @name = "IdNumber",
+                                        @id = "form-field-IdNumber",
+                                        @placeholder = Translate.Text("movein.idplaceholder"),
+                                        @required = "",
+                                        @data_parsley_error_message = @Translate.Text("movein.idnumbererrormessage"),
+                                        @data_parsley_errors_container = "#description-for-IdNumber",
+                                        @data_parsley_emiratesid_message = @Translate.Text(DictionaryKeys.MoveIn.InvalidEmiratesId),
+                                        @aria_describedby = "description-for-IdNumber",
+                                    })
+
+                            </span>
+                            <div id="description-for-IdNumber" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.IdNumber, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+
+                        <div id="datepicker-container-ExpiryDate" tabindex="-1" class="form-field form-field--text @idnumber picker--6 form-field--6 form-field--6-mobile_full mb0">
+                            <label for="form-field-ExpiryDate" class="form-field__label">@Translate.Text("MI_ExpiryDate") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                            <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                <input id="ExpiryDate"
+                                       name="ExpiryDate"
+                                       value="@_expDate"
+                                       placeholder="@Translate.Text("MI_ExpiryDate")"
+                                       data-parsley-required-message="@Translate.Text("required")"
+                                       aria-describedby="description-for-ExpiryDate"
+                                       data-parsley-errors-container="#description-for-ExpiryDate"
+                                       class="form-field__input form-field__input--text form-field__input--datepicker"
+                                       data-el="datepicker-future"
+                                       required=""
+                                       tabindex="-1"
+                                       data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 }' />
+                            </span>
+                            <div id="description-for-ExpiryDate" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.ExpiryDate, "", new { @class = "parsley-errors-list" })
+                                <div id="_dateerror" class="red hidden">@Translate.Text("MI_FutureDate")</div>
+                            </div>
+                        </div>
+                    </div>
+                    if (Model.IssuingAuthorityList != null)
+                    {
+                        <div class="form-field @IssuingAuthority" id="IssuingAuthority">
+                            <div class="form-field form-field--select form-field--select-single">
+                                <label for="form-field-IssuingAuthority" class="form-field__label">
+                                    @Translate.Text("movein.IssuingAuthority")
+                                    <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                                </label>
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.IssuingAuthority, (IEnumerable<SelectListItem>
+            )Model.IssuingAuthorityList,
+            Translate.Text("Select from dropdown"),
+            new
+            {
+             @class = "form-field__input form-field__input--select form-field__input--select-full",
+             @id = "form-field-IssuingAuthority",
+             @name = "IdType",
+             @aria_describedby = "description-for-IssuingAuthority",
+             @aria_required = "true",
+             @required = "",
+             @data_parsley_error_message = @Translate.Text("movein.accountregister.IssuingAuthorityerrormessage"),
+             @data_parsley_errors_container = "#description-for-IssuingAuthority"
+            })
+                                </span>
+                                <div id="description-for-IssuingAuthority" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.IssuingAuthority, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+                            <div class="form-field form-field--text @IssuingAuthorityName" id="IssuingAuthorityName">
+                                <label for="form-field-IssuingAuthorityName" class="form-field__label">@Translate.Text("movein.Issuingauthorityname") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                                <label class="form-field__input-wrapper">
+
+                                    @Html.TextBoxFor(x => x.IssuingAuthorityName,
+            new
+            {
+            @class = "form-field__input form-field__input--text" + " " + rFirstName,
+            @name = "IssuingAuthorityName",
+            @id = "form-field-IssuingAuthorityName",
+            @placeholder = Translate.Text("Enter IssuingAuthorityName"),
+            @required = "",
+            @data_parsley_pattern = "/^[a-zA-Z0-9 .]*$/",
+            @data_parsley_error_message = Translate.Text("Enter IssuingAuthorityNameerrormessage"),
+            @data_parsley_errors_container = "#description-for-IssuingAuthorityName",
+            @aria_describedby = "description-for-IssuingAuthorityName",
+            @data_parsley_id = "8",
+            @step = "any"
+
+            })
+
+                                </label>
+                                <div id="description-for-IssuingAuthorityName" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.IssuingAuthorityName, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+
+                    if (Model.CustomerCategory == "P")
+                    {
+                        <div class="mb24 clearfix" id="nationalityNDOB">
+
+                            <div class="form-field form-field--text mt24 natBig">
+                                <label for="form-field-nationality" class="form-field__label">@Translate.Text("Nationality") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                    @Html.DropDownListFor(x => x.Nationality, (IEnumerable<SelectListItem>)Model.NationalityList,
+                       Sitecore.Globalization.Translate.Text("Select from dropdown"),
+                       new
+                       {
+                           @class = "form-field__input form-field__input--select form-field__input--select-full",
+                           @id = "form-field-nationality",
+                           @name = "select_optgropus",
+                           @aria_describedby = "description-for-nationality",
+                           @required = "",
+                           @data_parsley_error_message = @Translate.Text("Select Nationality"),
+                           @data_parsley_errors_container = "#description-for-nationality",
+                           @data_parsley_id = "20"
+                       })
+                                </span>
+
+                                <div id="description-for-nationality" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.Nationality, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+
+                            <div id="datepicker-container-DateOfBirth" class="form-field hidden form-field--text picker--6 form-field--6 form-field--6-mobile_full">
+                                <label for="form-field-DateOfBirth" class="form-field__label">@Translate.Text("dob label") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+
+                                <span class="form-field__input-wrapper form-field__input-wrapper--datepicker">
+                                    <input id="DateOfBirth"
+                                           name="DateOfBirth"
+                                           value="@_birthDate"
+                                           placeholder="@Translate.Text("dob label")"
+                                           data-parsley-required-message="@Translate.Text("required")"
+                                           aria-describedby="description-for-DateOfBirth"
+                                           data-parsley-errors-container="#description-for-DateOfBirth"
+                                           class="form-field__input form-field__input--text form-field__input--datepicker"
+                                           data-el="datepicker-past"
+                                           required=""
+                                           data-picker-options='{&quot;selectMonths&quot;: true , &quot;selectYears&quot;: 36 }' />
+                                </span>
+
+                                <div id="description-for-DateOfBirth" class="form-field__messages">
+                                    @Html.ValidationMessageFor(x => x.DateOfBirth, "", new { @class = "parsley-errors-list" })
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    if (Model.CustomerCategory == "P")
+                    {
+                        <div class="form-field form-field--text hidden" id="uiddiv">
+                            <label for="form-field-uidnumber" class="form-field__label">@Translate.Text("movein.uidnumber")@(" (" + Translate.Text("optional") + ")") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                            <label class="form-field__input-wrapper">
+
+                                @Html.TextBoxFor(x => x.uidnumber,
+                   new
+                   {
+                       @class = "form-field__input form-field__input--text",
+                       @name = "uidnumber",
+                       @id = "form-field-uidnumber",
+                       @placeholder = Translate.Text("movein.uidnumber_placeholder"),
+                       @data_parsley_error_message = Translate.Text("movein.uidnumber_error"),
+                       @data_parsley_type = "alphanum",
+                       @data_parsley_errors_container = "#description-for-uidnumber",
+                       @aria_describedby = "description-for-uidnumber",
+                       @data_parsley_id = "8",
+                       @step = "any"
+
+                   })
+
+                            </label>
+                            <div id="description-for-uidnumber" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.uidnumber, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-field form-field--text " id="divfname">
+                        @if (Model.CustomerCategory == "P")
+                        {
+                            <label for="form-field-fname" class="form-field__label">@Translate.Text("movein.firstname") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                            <span class="form-field__input-wrapper">
+
+                                @Html.TextBoxFor(x => x.FirstName,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text" + " " + rFirstName,
+                            @name = "first-name",
+                            @id = "form-field-fname",
+                            @placeholder = Translate.Text("movein.firstnameplaceholder"),
+                            @required = "",
+                            @data_parsley_error_message = Translate.Text("movein.firstnameerrormessage"),
+                            @data_parsley_errors_container = "#description-for-fname",
+                            @aria_describedby = "description-for-fname",
+                            @data_parsley_name = "",
+                            @data_parsley_id = "8",
+                            @step = "any"
+
+                        })
+                            </span>
+                        }
+                        else
+                        {
+                            <label for="form-field-fname" class="form-field__label">@Translate.Text("movein.companyname") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                            <span class="form-field__input-wrapper">
+                                @Html.TextBoxFor(x => x.FirstName,
+                                        new
+                                        {
+                                            @class = "form-field__input form-field__input--text" + " " + rFirstName,
+                                            @name = "first-name",
+                                            @id = "form-field-fname",
+                                            @placeholder = Translate.Text("movein.companyplaceholder"),
+                                            @required = "",
+                                            @data_parsley_error_message = Translate.Text("movein.companyerrormessage"),
+                                            @data_parsley_errors_container = "#description-for-fname",
+                                            @aria_describedby = "description-for-fname",
+                                            @data_parsley_pattern = "/^[a-zA-Z0-9 \\@&'/:.,\\-()\"]*$/"
+                                        })
+                            </span>
+                        }
+                        <div id="description-for-fname" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.FirstName, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+
+                    if (Model.CustomerCategory == "P")
+                    {
+                        <div class="form-field form-field--text " id="divlname">
+                            <label for="form-field-lname" class="form-field__label">@Translate.Text("movein.lastname")@("(" + Translate.Text("optional") + ")") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                            <span class="form-field__input-wrapper">
+
+                                @Html.TextBoxFor(x => x.LastName,
+                               new
+                               {
+                                   @class = "form-field__input form-field__input--text" + " " + rLastName,
+                                   @name = "LastName",
+                                   @id = "form-field-lname",
+                                   @placeholder = Translate.Text("movein.lastnameplaceholder"),
+                                   @data_parsley_error_message = Translate.Text("movein.lastnameerror"),
+                                   @data_parsley_errors_container = "#description-for-lname",
+                                   @aria_describedby = "description-for-lname",
+                                   @data_parsley_name = "",
+                                   @data_parsley_id = "8",
+                                   @step = "any"
+
+                               })
+
+                            </span>
+                            <div id="description-for-lname" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.LastName, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    if (!Model.IsDeptid)
+                    {
+                        <div class="form-field form-field--select form-field--select-single">
+                            <label for="form-field-govtype" class="form-field__label">
+                                @Translate.Text("movein.accountregister.govtype")
+                                <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("required"))</span>
+                            </label>
+                            <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                                @Html.DropDownListFor(x => x.departmentnameid, (IEnumerable<SelectListItem>
+                           )Model.GovernmentDDList,
+                           Translate.Text("Select from dropdown"),
+                           new
+                           {
+                               @class = "form-field__input form-field__input--select form-field__input--select-full",
+                               @id = "form-field-govtype",
+                               @name = "departmentnameid",
+                               @aria_describedby = "description-for-govtype",
+                               @aria_required = "true",
+                               @required = "",
+                               @data_parsley_error_message = @Translate.Text("movein.accountregister.govtypeerrormessage"),
+                               @data_parsley_errors_container = "#description-for-govtype"
+                           })
+                            </span>
+                            <div id="description-for-govtype" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.departmentnameid, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                        <div class="form-field form-field--text @departmentother" id="departmentother">
+                            <label for="form-field-departmentnameothers" class="form-field__label">@Translate.Text("movein.departmentnameothers") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                            <span class="form-field__input-wrapper">
+
+                                @Html.TextBoxFor(x => x.departmentnameothers,
+                      new
+                      {
+                          @class = "form-field__input form-field__input--text",
+                          @name = "departmentnameothers",
+                          @id = "form-field-departmentnameothers",
+                          @placeholder = Translate.Text("Enter departmentnameothers"),
+                          @required = "",
+                          @data_parsley_error_message = Translate.Text("Please enter a departmentnameothers"),
+                          @data_parsley_errors_container = "#description-for-departmentnameothers",
+                          @aria_describedby = "description-for-departmentnameothers",
+                          @data_parsley_id = "8",
+                          @step = "any"
+
+                      })
+
+                            </span>
+                            <div id="description-for-departmentnameothers" class="form-field__messages">
+                                @Html.ValidationMessageFor(x => x.departmentnameothers, "", new { @class = "parsley-errors-list" })
+                            </div>
+                        </div>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(prefilleddepartmentid))
+                    {
+                        @Html.HiddenFor(m => m.departmentnameid)
+                        <div class="form-field form-field--text  ">
+                            <label for="form-field-govtypedeptnameid" class="form-field__label">
+                                @Translate.Text("movein.accountregister.govtype")
+                                <span class="form-field__label-required aria-only">(required)</span>
+                            </label>
+                            <span class="form-field__input-wrapper">
+                                <input class="form-field__input form-field__input--text"
+                                       id="form-field-govtypedeptnameid"
+                                       name="govtypedeptnameid"
+                                       type="text"
+                                       placeholder="govtypedeptnameid"
+                                       aria-describedby="description-for-govtypedeptnameid"
+                                       data-parsley-errors-container="#description-for-govtypedeptnameid"
+                                       data-parsley-id="8"
+                                       value="@prefilleddepartmentid"
+                                       readonly="readonly">
+                            </span>
+                            <div id="description-for-govtypedeptnameid" class="form-field__messages">
+                            </div>
+                        </div>
+                    }
+                }
+                <div class="form-field form-field--text ">
+                    <label for="form-field-MobilePhone" class="form-field__label">@Translate.Text("movein.mobilenumber") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                    <span class="form-field__input-wrapper form-field__input-wrapper--prefixed form-field__input-wrapper--mobile-number">
+                        @Html.TextBoxFor(x => x.MobilePhone,
+                        new
+                        {
+                            @type = "tel",
+                            @class = "form-field__input form-field__input--text form-field__input--prefixed" + " " + rMobilePhone,
+                            @name = "MobilePhone",
+                            @id = "form-field-MobilePhone",
+                            @placeholder = Translate.Text("Enter UAE mobile number"),
+                            @required = "",
+                            @data_parsley_error_message = Translate.Text("Please enter a valid UAE mobile number"),
+                            @data_parsley_errors_container = "#description-for-MobilePhone",
+                            @aria_describedby = "description-for-MobilePhone",
+                            @data_parsley_id = "14",
+                            @data_parsley_type = "digits",
+                            @data_parsley_mobilenumber = "",
+                            @step = "any",
+                            @style = direction.Equals("rtl") ? "direction: ltr; text-align: right;" : ""
+                        })
+
+                    </span>
+                    <div id="description-for-MobilePhone" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.MobilePhone, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--text ">
+                    <label for="form-field-EmailAddress" class="form-field__label">@Translate.Text("Email ID") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                    <span class="form-field__input-wrapper">
+                        @Html.TextBoxFor(x => x.EmailAddress,
+                        new
+                        {
+                            @class = "form-field-EmailAddress" + " " + rEmailAddress,
+                            @id = "form-field-EmailAddress",
+                            @placeholder = Translate.Text("Enter email ID"),
+                            @required = "",
+                            @data_parsley_error_message = Translate.Text("movein.Enter a valid Email ID"),
+                            @data_parsley_errors_container = "#description-for-EmailAddress",
+                            @aria_describedby = "description-for-EmailAddress",
+                            @data_parsley_id = "14",
+                            @step = "any",
+                            @data_parsley_email = "",
+                            @type = "email"
+                        })
+
+                    </span>
+                    <div id="description-for-EmailAddress" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.EmailAddress, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--text ">
+                    <label for="form-field-pobox" class="form-field__label">@Translate.Text("PO Box") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                    <span class="form-field__input-wrapper">
+
+                        @Html.TextBoxFor(x => x.PoBox,
+                        new
+                        {
+                            @class = "form-field__input form-field__input--text" + " " + rPoBox,
+                            @name = "PoBox",
+                            @id = "form-field-pobox",
+                            @placeholder = Translate.Text("movein.enterpoboxnumber"),
+                            @required = "",
+                            @data_parsley_error_message = Translate.Text("movein.enterpoboxnumbererror"),
+                            @data_parsley_errors_container = "#description-for-pobox",
+                            @aria_describedby = "description-for-pobox",
+                            @data_parsley_id = "14",
+                            @type = "number",
+                            @lang = "en",
+                            @minlengh = 6,
+                            @maxlength = 6,
+                            @data_parsley_pobox = "",
+                            @step = "any"
+                        })
+
+                    </span>
+                    <div id="description-for-pobox" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.PoBox, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+                <div class="form-field form-field--select form-field--select-single">
+                    <label for="form-field-emirate" class="form-field__label">@Translate.Text("Emirate") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+                    <span class="form-field__input-wrapper form-field__input-wrapper--select">
+                        @Html.DropDownListFor(x => x.Emirate, (IEnumerable<SelectListItem>)Model.RegionList,
+                            Sitecore.Globalization.Translate.Text("Select from dropdown"),
+                            new
+                            {
+                                @class = "form-field__input form-field__input--select form-field__input--select-full",
+                                @id = "form-field-emirate",
+                                @name = "RegionList",
+                                @aria_describedby = "description-for-emirate",
+                                @required = "",
+                                @data_parsley_error_message = @Translate.Text("movein.emirateserror"),
+                                @data_parsley_errors_container = "#description-for-emirate",
+                                @data_parsley_id = "14"
+                            })
+                    </span>
+                    <div id="description-for-emirate" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.Emirate, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+
+
+                @if (Model.CustomerCategory == "P" && Model.CustomerType == "U" && !string.IsNullOrWhiteSpace(Model.ShowDiscount))
+                {
+                    <p class="mt24 mb24">@Translate.Text("movein.selectanycard")</p>
+                    <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field__checkbox   first">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox"
+                                           id="form-field-checkbox_isnationalsocialcard"
+                                           aria-label="form-field-checkbox_isnationalsocialcard"
+                                           name="isnationalsocialcard"
+                                           type="checkbox"
+                                           value="true"
+                                           aria-describedby="description-for-isnationalsocialcard"
+                                           data-parsley-errors-container="#description-for-isnationalsocialcard">
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        @Translate.Text("movein.nationalsocialcard")
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="description-for-isnationalsocialcard" class="form-field__messages">
+
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset class="fieldset hidden nationalsocialcard">
+                        <legend class="legend">@Translate.Text("movein.nationalsocialcard")</legend>
+                        <div class="form-field form-field--upload" id="nationalsocialcard">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="nationalsocialcard">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-nationalsocialcard" class="form-field__label">
+                                        @*<strong class="form-field__label-description" id="nationalsocialcard">@Translate.Text("nationalsocialcard")</strong>*@
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.nationalsocialcard,
+                 new
+                 {
+                     type = "file",
+                     @class = "form-field__input form-field__input--upload",
+                     @id = "form-field-nationalsocialcard",
+                     @aria_label = "form-field-nationalsocialcard",
+                     @name = @Translate.Text("upload"),
+                     @aria_describedby = "description-for-nationalsocialcard",
+                     @required = "",
+                     @data_parsley_error_message = @Translate.Text("movein.errornationalsocialcard"),
+                     @data_parsley_required_message = @Translate.Text("movein.errornationalsocialcard"),
+                     @data_parsley_errors_container = "#errors-for-nationalsocialcard",
+                     @data_uploader_field = "nationalsocialcard",
+                     @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                     @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                     @data_size = @AttachmentValidation.maximumFileSize,
+                     @data_parsley_id = "16"
+                 })
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="nationalsocialcard"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="nationalsocialcard">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-nationalsocialcard" class="form-field__messages">
+                                <div id="errors-for-nationalsocialcard">
+                                    @Html.ValidationMessageFor(x => x.nationalsocialcard, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="form-field form-field--text nationalsocialcard hidden mt12">
+                        <label for="form-field-nationalsocialcardnumber" class="form-field__label">@Translate.Text("movein.nationalsocialcardnumber") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                        <label class="form-field__input-wrapper">
+
+                            @Html.TextBoxFor(x => x.nationalsocialcardnumber,
+                  new
+                  {
+                      @class = "form-field__input form-field__input--text",
+                      @name = "nationalsocialcardnumber",
+                      @id = "form-field-nationalsocialcardnumber",
+                      @placeholder = Translate.Text("Enter nationalsocialcardnumber"),
+                      @required = "",
+                      @data_parsley_type = "alphanum",
+                      @data_parsley_error_message = Translate.Text("Please enter a nationalsocialcardnumber"),
+                      @data_parsley_errors_container = "#description-for-nationalsocialcardnumber",
+                      @aria_describedby = "description-for-nationalsocialcardnumber",
+                      @data_parsley_id = "8",
+                      @step = "any"
+
+                  })
+
+                        </label>
+                        <div id="description-for-nationalsocialcardnumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.nationalsocialcardnumber, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field__checkbox   first">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox"
+                                           id="form-field-checkbox_isthukercard"
+                                           name="isthukercard"
+                                           type="checkbox"
+                                           value="true"
+                                           aria-describedby="description-for-isthukercard"
+                                           data-parsley-errors-container="#description-for-isthukercard">
+
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        @Translate.Text("movein.thukercard")
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="description-for-isthukercard" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset class="fieldset hidden thukercard">
+                        <legend class="legend">@Translate.Text("movein.thukercard")</legend>
+                        <div class="form-field form-field--upload" id="thukercard">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="thukercard">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-thukercard" class="form-field__label">
+
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.thukercard,
+                     new
+                     {
+                         type = "file",
+                         @class = "form-field__input form-field__input--upload",
+                         @id = "form-field-thukercard",
+                         @name = @Translate.Text("upload"),
+                         @aria_describedby = "description-for-thukercard",
+                         @required = "",
+                         @data_parsley_error_message = @Translate.Text("movein.errorthukercard"),
+                         @data_parsley_required_message = @Translate.Text("movein.errorthukercard"),
+                         @data_parsley_errors_container = "#errors-for-thukercard",
+                         @data_uploader_field = "thukercard",
+                         @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                         @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                         @data_size = @AttachmentValidation.maximumFileSize,
+                         @data_parsley_id = "16"
+                     })
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="thukercard"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="thukercard">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-thukercard" class="form-field__messages">
+                                <div id="errors-for-thukercard">
+                                    @Html.ValidationMessageFor(x => x.thukercard, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="form-field form-field--text thukercard hidden mt12">
+                        <label for="form-field-thukercardnumber" class="form-field__label">@Translate.Text("movein.thukercardnumber") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                        <label class="form-field__input-wrapper">
+
+                            @Html.TextBoxFor(x => x.thukercardnumber,
+              new
+              {
+                  @class = "form-field__input form-field__input--text",
+                  @name = "thukercardnumber",
+                  @id = "form-field-thukercardnumber",
+                  @placeholder = Translate.Text("Enter thukercardnumber"),
+                  @required = "",
+                  @data_parsley_type = "alphanum",
+                  @data_parsley_error_message = Translate.Text("Please enter a thukercardnumber"),
+                  @data_parsley_errors_container = "#description-for-thukercardnumber",
+                  @aria_describedby = "description-for-thukercardnumber",
+                  @data_parsley_id = "8",
+                  @step = "any"
+
+              })
+
+                        </label>
+                        <div id="description-for-thukercardnumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.thukercardnumber, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    <div class="form-field form-field--toggles">
+                        <fieldset class="fieldset">
+                            <legend class="legend-color">.</legend>
+                            <div class="form-field__checkbox   first">
+                                <label>
+                                    <input class="form-field__input form-field__input--checkbox"
+                                           id="form-field-checkbox_issanadsmartcard"
+                                           aria-label="form-field-checkbox_issanadsmartcard"
+                                           name="issanadsmartcard"
+                                           type="checkbox"
+                                           value="true"
+                                           aria-describedby="description-for-issanadsmartcard"
+                                           data-parsley-errors-container="#description-for-issanadsmartcard">
+
+                                    <span class="form-field__fakecheckbox focus-enabled">
+                                        @Translate.Text("movein.sanadsmartcard")
+                                    </span>
+                                </label>
+                            </div>
+                            <div id="description-for-issanadsmartcard" class="form-field__messages">
+                            </div>
+                        </fieldset>
+                    </div>
+                    <fieldset class="fieldset hidden sanadsmartcard">
+                        <legend class="legend">@Translate.Text("movein.sanadsmartcard")</legend>
+                        <div class="form-field form-field--upload" id="sanadsmartcard">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="sanadsmartcard">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-sanadsmartcard" class="form-field__label">
+                                        <strong class="form-field__label-description" id="sanadsmartcard"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.sanadsmartcard,
+             new
+             {
+                 type = "file",
+                 @class = "form-field__input form-field__input--upload",
+                 @id = "form-field-sanadsmartcard",
+                 @name = @Translate.Text("upload"),
+                 @aria_describedby = "description-for-sanadsmartcard",
+                 @required = "",
+                 @data_parsley_error_message = @Translate.Text("movein.errorsanadsmartcard"),
+                 @data_parsley_required_message = @Translate.Text("movein.errorsanadsmartcard"),
+                 @data_parsley_errors_container = "#errors-for-sanadsmartcard",
+                 @data_uploader_field = "sanadsmartcard",
+                 @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                 @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                 @data_size = @AttachmentValidation.maximumFileSize,
+                 @data_parsley_id = "16"
+
+             })
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="sanadsmartcard"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="sanadsmartcard">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-sanadsmartcard" class="form-field__messages">
+                                <div id="errors-for-sanadsmartcard">
+                                    @Html.ValidationMessageFor(x => x.sanadsmartcard, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="form-field form-field--text sanadsmartcard hidden mt12">
+                        <label for="form-field-sanadsmartcardnumber" class="form-field__label">@Translate.Text("movein.sanadsmartcardnumber") <span class="form-field__label-required aria-only">(@Translate.Text("required"))</span></label>
+
+                        <label class="form-field__input-wrapper">
+
+                            @Html.TextBoxFor(x => x.sanadsmartcardnumber,
+        new
+        {
+          @class = "form-field__input form-field__input--text",
+          @name = "sanadsmartcardnumber",
+          @id = "form-field-sanadsmartcardnumber",
+          @placeholder = Translate.Text("Enter sanadsmartcardnumber"),
+          @required = "",
+          @data_parsley_type = "alphanum",
+          @data_parsley_error_message = Translate.Text("Please enter a sanadsmartcardnumber"),
+          @data_parsley_errors_container = "#description-for-sanadsmartcardnumber",
+          @aria_describedby = "description-for-sanadsmartcardnumber",
+          @data_parsley_id = "8",
+          @step = "any"
+
+        })
+
+                        </label>
+                        <div id="description-for-sanadsmartcardnumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.thukercardnumber, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                }
+                @if (Model.CustomerCategory == "O")
+                {
+                    <div class="form-field form-field--text" id="vatnumberdiv">
+                        <label for="form-field-vatnumber" id="vatnumber" class="form-field__label">
+                            @Translate.Text("movein.accountregister.vatnumber")@("(" + Translate.Text("optional") + ")")
+                            <span class="form-field__label-required aria-only">(@Sitecore.Globalization.Translate.Text("optional"))</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input class="form-field__input form-field__input--text @rvatnumber"
+                                   id="form-field-vatnumber"
+                                   name="vatnumber"
+                                   placeholder="@Translate.Text("movein.accountregister.vatnumbererrormessage")"
+                                   aria-describedby="description-for-vatnumber"
+                                   data-parsley-errors-container="#description-for-vatnumber"
+                                   data_parsley_type="alphanum"
+                                   value="@Model.Vatnumber" />
+                        </span>
+                        <div id="description-for-vatnumber" class="form-field__messages">
+                            @Html.ValidationMessageFor(x => x.Vatnumber, "", new { @class = "parsley-errors-list" })
+                        </div>
+                    </div>
+                    if (!Model.IsVATNumber)
+                    {
+                        <fieldset class="fieldset form-field" id="vatdocumentdiv">
+                            <legend class="legend">@Translate.Text("movein.vatdocument")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="vatdocument">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-vatdocument" class="form-field__label">
+                                            <strong class="form-field__label-description"></strong>
+                                        </label>
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.VatDocument,
+                         new
+                         {
+                             @type = "file",
+                             @class = "form-field__input form-field__input--upload",
+                             @id = "form-field-vatdocument",
+                             @name = @Translate.Text("upload"),
+                             @aria_describedby = "description-for-vatdocument",
+                             @data_parsley_error_message = @Translate.Text("movein.vatdocumentrequiredmessage"),
+                             @data_parsley_required_message = @Translate.Text("movein.vatdocumentrequiredmessage"),
+                             @data_parsley_errors_container = "#errors-for-vatdocument",
+                             @data_uploader_field = "vatdocument",
+                             @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                             @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                             @data_size = @AttachmentValidation.maximumFileSize,
+                             @data_parsley_id = "16"
+                         })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="vatdocument"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="vatdocument">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-vatdocument" class="form-field__messages">
+                                    <div id="errors-for-vatdocument">
+                                        @Html.ValidationMessageFor(x => x.VatDocument, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    }
+                    if (!Model.IsIdNumber || (!string.IsNullOrEmpty(Model.CustomerTypeForNonIndividual) && Model.CustomerTypeForNonIndividual == "D"))
+                    {
+                        <fieldset class="fieldset form-field">
+                            <legend class="legend">@Translate.Text("movein.contact.tradelicense")</legend>
+                            <div class="form-field form-field--upload">
+                                <div class="form-field__input-wrapper">
+                                    <div class="form-field__preview-wrapper">
+                                        <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="tradelicense">
+                                    </div>
+                                    <div class="form-field__uploader-details">
+                                        <label for="form-field-tradelicense" class="form-field__label">
+
+                                        </label>
+                                        <div>
+                                            <label>
+                                                @Html.TextBoxFor(m => m.TradeLicense,
+            new
+            {
+                type = "file",
+                @class = "form-field__input form-field__input--upload",
+                @id = "form-field-tradelicense",
+                @name = @Translate.Text("upload"),
+                @aria_describedby = "description-for-tradelicense",
+                @required = "",
+                @data_parsley_error_message = @Translate.Text("movein.tradelicenserequiredmessage"),
+                @data_parsley_errors_container = "#errors-for-tradelicense",
+                @data_uploader_field = "tradelicense",
+                @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                @data_size = @AttachmentValidation.maximumFileSize,
+                @data_parsley_id = "16"
+            })
+
+                                                <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                            </label>
+                                        </div>
+                                        <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                        <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                        <p class="form-field__input--upload-filename" data-uploader-filename="tradelicense"></p>
+                                        <p>
+                                            <button class="button button--text button--remove hidden" data-uploader-remove="tradelicense">@Translate.Text("Remove")</button>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="description-for-tradelicense" class="form-field__messages">
+                                    <div id="errors-for-tradelicense">
+                                        @Html.ValidationMessageFor(x => x.TradeLicense, "", new { @class = "parsley-errors-list" })
+                                    </div>
+                                    <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                                </div>
+                            </div>
+                        </fieldset>
+                    }
+                }
+                @if ((!Model.isEjari || (Model.Owner && !string.IsNullOrWhiteSpace(Model.Propertyid) && !Model.CustomerCategory.Equals("G"))) && ((!Model.Isfirstname && !Model.Islastname) || Model.loggedinuser))
+                {
+                    string purchaseagreementerrmsg = string.Empty;
+                    <fieldset class="fieldset form-field">
+                        @if (Model.Owner && !string.IsNullOrWhiteSpace(Model.Propertyid) && Model.Propertyid == "PA")
+                        {
+                            purchaseagreementerrmsg = Translate.Text("movein.purchaseagreementrequiredmessage");
+                            <legend class="legend">@Html.Raw(Translate.Text("movein.contact.purchaseagreement"))</legend>
+                        }
+                        else if (Model.Owner && !string.IsNullOrWhiteSpace(Model.Propertyid) && Model.Propertyid == "TD")
+                        {
+                            purchaseagreementerrmsg = Translate.Text("movein.titledeedrequiredmessage");
+                            <legend class="legend">@Html.Raw(Translate.Text("movein.contact.titledeed"))</legend>
+                        }
+                        else if (!Model.isEjari)
+                        {
+                            purchaseagreementerrmsg = Translate.Text("movein.tenancycontractrequiredmessage");
+                            <legend class="legend">@Translate.Text("movein.contact.tenancycontract")</legend>
+                        }
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="purchaseagreement">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-purchaseagreement" class="form-field__label">
+
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.tenancycontract,
+        new
+        {
+            type = "file",
+            @class = "form-field__input form-field__input--upload",
+            @id = "form-field-purchaseagreement",
+            @name = @Translate.Text("upload"),
+            @aria_describedby = "description-for-purchaseagreement",
+            @required = "",
+            @data_parsley_error_message = @purchaseagreementerrmsg,
+            @data_parsley_errors_container = "#errors-for-purchaseagreement",
+            @data_uploader_field = "purchaseagreement",
+            @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+            @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            @data_size = @AttachmentValidation.maximumFileSize,
+            @data_parsley_id = "16"
+        })
+
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="purchaseagreement"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="purchaseagreement">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-purchaseagreement" class="form-field__messages">
+                                <div id="errors-for-purchaseagreement">
+                                    @Html.ValidationMessageFor(x => x.tenancycontract, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                }
+
+
+                <fieldset class="fieldset form-field hidden" id="iduploaddiv">
+                    <legend class="legend">@Translate.Text("movein.IDUpload")</legend>
+                    <div class="form-field form-field--upload">
+                        <div class="form-field__input-wrapper">
+                            <div class="form-field__preview-wrapper">
+                                <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="idupload">
+                            </div>
+                            <div class="form-field__uploader-details">
+                                <label for="form-field-idupload" class="form-field__label">
+                                    <strong class="form-field__label-description" id="idupload"></strong>
+                                </label>
+                                <div>
+                                    <label>
+                                        @Html.TextBoxFor(m => m.idupload,
+                     new
+                     {
+                         type = "file",
+                         @class = "form-field__input form-field__input--upload",
+                         @id = "form-field-idupload",
+                         @name = @Translate.Text("upload"),
+                         @aria_describedby = "description-for-idupload",
+                         @required = "",
+                         @data_parsley_error_message = @Translate.Text("movein.erroridupload"),
+                         @data_parsley_required_message = @Translate.Text("movein.erroridupload"),
+                         @data_parsley_errors_container = "#errors-for-idupload",
+                         @data_uploader_field = "idupload",
+                         @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                         @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                         @data_size = @AttachmentValidation.maximumFileSize,
+                         @data_parsley_id = "16"
+                     })
+                                        <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                    </label>
+                                </div>
+                                <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                <p class="form-field__input--upload-filename" data-uploader-filename="idupload"></p>
+                                <p>
+                                    <button class="button button--text button--remove hidden" data-uploader-remove="idupload">@Translate.Text("Remove")</button>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="description-for-idupload" class="form-field__messages">
+                            <div id="errors-for-idupload">
+                                @Html.ValidationMessageFor(x => x.idupload, "", new { @class = "parsley-errors-list" })
+                            </div>
+                            <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                        </div>
+                    </div>
+                </fieldset>
+                @if (!string.IsNullOrWhiteSpace(Model.Guranteeletterflag))
+                {
+                    @*if (!Model.CustomerCategory.Equals("G"))
+                        {
+                            <div class="form-field form-field--toggles">
+                                <fieldset class="fieldset">
+                                    <div class="form-field__checkbox   first">
+                                        <label>
+                                            <input class="form-field__input form-field__input--checkbox"
+                                                   id="form-field-checkbox_isguaranteeleter"
+                                                   name="isguaranteeleter"
+                                                   type="checkbox"
+                                                   value="True"
+                                                   aria-describedby="description-for-isguaranteeleter"
+                                                   data-parsley-errors-container="#description-for-isguaranteeleter">
+
+                                            <span class="form-field__fakecheckbox focus-enabled">
+                                                @Translate.Text("movein.guaranteeleter")
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div id="description-for-isguaranteeleter" class="form-field__messages">
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }*@
+                    <fieldset class="fieldset guaranteeleter">
+                        <legend class="legend">@Translate.Text("movein.guaranteeleter")</legend>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="guranteeleter">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-guranteeleter" class="form-field__label">
+                                        <strong class="form-field__label-description" id="guranteeleter"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.guranteeleter,
+                                         new
+                                         {
+                                             type = "file",
+                                             @class = "form-field__input form-field__input--upload",
+                                             @id = "form-field-guranteeleter",
+                                             @name = @Translate.Text("upload"),
+                                             @aria_describedby = "description-for-guranteeleter",
+                                             @required = "",
+                                             @data_parsley_error_message = @Translate.Text("movein.errorguranteeleter"),
+                                             @data_parsley_required_message = @Translate.Text("movein.errorguranteeleter"),
+                                             @data_parsley_errors_container = "#errors-for-guranteeleter",
+                                             @data_uploader_field = "guranteeleter",
+                                             @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                                             @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                             @data_size = @AttachmentValidation.maximumFileSize,
+                                             @data_parsley_id = "16"
+                                         })
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="guranteeleter"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="guranteeleter">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-guranteeleter" class="form-field__messages">
+                                <div id="errors-for-guranteeleter">
+                                    @Html.ValidationMessageFor(x => x.guranteeleter, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                }
+                @if (Model.CustomerCategory.Equals("G"))
+                {
+                    <fieldset class="fieldset form-field hidden" id="decreeletterdiv">
+                        <legend class="legend">@Translate.Text("movein.Decreeletter")</legend>
+                        <div class="form-field form-field--upload">
+                            <div class="form-field__input-wrapper">
+                                <div class="form-field__preview-wrapper">
+                                    <img src="/images/preview@2x.png" data-src="/images/preview@2x.png" class="form-field__preview" aria-hidden="true" role="presentation" alt="" data-uploader-image="Decreeletter">
+                                </div>
+                                <div class="form-field__uploader-details">
+                                    <label for="form-field-Decreeletter" class="form-field__label">
+                                        <strong class="form-field__label-description" id="Decreeletter"></strong>
+                                    </label>
+                                    <div>
+                                        <label>
+                                            @Html.TextBoxFor(m => m.Decreeletter,
+                     new
+                     {
+                         type = "file",
+                         @class = "form-field__input form-field__input--upload",
+                         @id = "form-field-Decreeletter",
+                         @name = @Translate.Text("upload"),
+                         @aria_describedby = "description-for-Decreeletter",
+                         @required = "",
+                         @data_parsley_error_message = @Translate.Text("movein.errorDecreeletter"),
+                         @data_parsley_required_message = @Translate.Text("movein.errorDecreeletter"),
+                         @data_parsley_errors_container = "#errors-for-Decreeletter",
+                         @data_uploader_field = "Decreeletter",
+                         @data_accepts = "\"jpg\",\"bmp\",\"gif\",\"png\",\"jpeg\",\"pdf\",\"doc\",\"docx\",\"xls\",\"csv\",\"xlsx\"",
+                         @accept = "image/png,image/x-png,image/jpeg,image/jpg,image/bmp,image/gif,application/pdf,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                         @data_size = @AttachmentValidation.maximumFileSize,
+                         @data_parsley_id = "16"
+                     })
+                                            <span class="button button--primary button--next button--small focus-enabled">@Translate.Text("Choose")</span>
+                                        </label>
+                                    </div>
+                                    <p class="form-field__input--upload-format-error-message" data-uploader-format-error="error-message">@Translate.Text("invalid file type validation message")</p>
+                                    <p class="form-field__input--upload-size-error-message" data-uploader-size-error="error-message">@Translate.Text("file too large validation message")</p>
+                                    <p class="form-field__input--upload-filename" data-uploader-filename="Decreeletter"></p>
+                                    <p>
+                                        <button class="button button--text button--remove hidden" data-uploader-remove="Decreeletter">@Translate.Text("Remove")</button>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="description-for-Decreeletter" class="form-field__messages">
+                                <div id="errors-for-Decreeletter">
+                                    @Html.ValidationMessageFor(x => x.Decreeletter, "", new { @class = "parsley-errors-list" })
+                                </div>
+                                <p class="form-field__description">@Translate.Text(DictionaryKeys.MoveIn.MaxFileSize)</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.SkiptoPayment))
+                {
+                    <div class="form-field form-field--toggles inline-terms" id="moveinagreeModal">
+                        <div class="form-field__checkbox  last">
+                            <label>
+                                <input class="form-field__input form-field__input--checkbox" id="form-field-checkbox_1_1" name="AgreedToPayment1" type="checkbox" value="true" aria-describedby="description-for-accept-terms1" required="" data-parsley-error-message="@Translate.Text("Error Terms Agreement")" data-parsley-errors-container="#description-for-accept-terms1" data-parsley-multiple="checkbox_1_1" data-parsley-id="23">
+                                <span class="form-field__fakecheckbox focus-enabled tnc_cbox">&nbsp;</span>
+                            </label>
+                        </div>
+                        <fieldset class="fieldset m39-modal__tnc">
+                            <legend class="legend-color">.</legend>
+                            <span class="text">@Translate.Text("updateiban.Iagree")</span>
+                            @if (Model.CustomerType.Equals("U"))
+                            {
+                                @Html.Sitecore().Placeholder("uaenational")
+                            }
+                            else
+                            {
+                                @Html.Sitecore().Placeholder("expat")
+                            }
+                            @*<a href="@termslink" target="_blank" class="link">@Translate.Text("Terms and Conditions")</a>*@
+                        </fieldset>
+                        <div id="description-for-accept-terms1" class="form-field__messages"></div>
+                        <input type="hidden" name="AgreedToPayment1" value="false" />
+                    </div>
+                }
+            </fieldset>
+            <div class="form-field__button">
+                <button type="submit" id="subBtn" class="button button--primary button--next" data-submission-text="@Translate.Text("Submitting")...">@Translate.Text("movein.contact.continue")</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    docReady(function () {
+        //jQuery("input[name='MobilePhone']").attr('data-parsley-mobile_number', "");
+        //jQuery('#form-field-emirate').val('DXB');
+        var valid = true;
+        var $idtype = jQuery('#form-field-IdType');
+        var errIdNumber = jQuery('#description-for-IdNumber');
+        var $idnumber = jQuery('#idnumber');
+        var $idnumberfield = jQuery('#form-field-IdNumber');
+        var fname = jQuery('#form-field-fname');
+        var lname = jQuery('#form-field-lname');
+        var email = jQuery('#form-field-EmailAddress');
+        var uid = jQuery('form-field-uidnumber');
+        var mobile = jQuery('#form-field-MobilePhone');
+        var pobox = jQuery('#form-field-pobox');
+        var emirate = jQuery('#form-field-emirate');
+        var nationality = jQuery('#form-field-nationality');
+        var $content = jQuery('#load_img');
+        var $submitBtn = jQuery('#subBtn');
+        var isnationalsocialcard = jQuery("#form-field-checkbox_isnationalsocialcard");
+        var isthukercard = jQuery("#form-field-checkbox_isthukercard");
+        var issanadsmartcard = jQuery("#form-field-checkbox_issanadsmartcard");
+        //var isguaranteeleter = jQuery("#form-field-checkbox_isguaranteeleter");
+
+        var nationalsocialcard = jQuery(".nationalsocialcard");
+        var thukercard = jQuery(".thukercard");
+        var sanadsmartcard = jQuery(".sanadsmartcard");
+        //var guaranteeleter = jQuery(".guaranteeleter");
+        var IssuingAuthority = jQuery("#IssuingAuthority");
+        var $IssuingAuthority = jQuery("#form-field-IssuingAuthority");
+        var $govtype = jQuery("#form-field-govtype");
+        var $IssuingAuthorityName = jQuery("#form-field-IssuingAuthorityName");
+        var IssuingAuthorityName = jQuery("#IssuingAuthorityName");
+        var $govtypename = jQuery("#departmentother");
+        var vatnumber = jQuery('#form-field-vatnumber');
+        var vatdocument = jQuery('#form-field-vatdocument');
+
+
+        $('#subBtn').click(function (event) {
+            try {
+
+                if ($('#ExpiryDate').val() != '') {
+                    const today = new Date();
+                    const inputValue = new Date($('#ExpiryDate').val());
+
+                    const inputDateOnly = new Date(inputValue.getFullYear(), inputValue.getMonth(), inputValue.getDate());
+
+                    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+
+
+                    if (inputDateOnly < todayDateOnly) {
+
+                        $('#_dateerror').show();
+
+                        event.preventDefault();
+
+                    } else {
+
+                        $('#_dateerror').hide();
+
+                    }
+                }
+            }
+            catch (e) {}
+        }
+        );
+
+
+
+        if ('@Model.IsIdNumber' == "False" && '@Model.CustomerCategory' == "P") {
+            $('#iduploaddiv').show();
+        }
+        if ('@(Model.FirstnameHide)' == "True") {
+            fname.attr('readonly', true);
+            jQuery("#divfname").hide();
+            $('#iduploaddiv').hide();
+        }
+        if ('@(Model.LastnameHide)' == "True") {
+            fname.attr('readonly', true);
+            jQuery("#divlname").hide();
+        }
+        if ($idtype.val() == "ED") {
+            if ('@Model.IsIdNumber' == 'False') {
+                // $idnumberfield.placeholder = "@Translate.Text("movein.accountregister.nonresenteridnumber")";
+                $idnumberfield.removeAttr("type")
+                $idnumberfield.removeAttr("data-parsley-type");
+                $idnumberfield.attr("type", "number");
+                $idnumberfield.attr("data-parsley-emiratesid", "");
+                $idnumberfield.attr("maxlength", "15");
+                $idnumberfield.attr("data-parsley-maxlength", "15");
+
+
+            }
+         //New requirement from S4 UAT with business
+            $('#datepicker-container-ExpiryDate').hide();
+            $('#datepicker-container-DateOfBirth').hide();
+
+            $('#idnumber').removeClass('form-field--6-mobile_full');
+            $('#idnumber').removeClass('remove form-field--6');
+
+            $('.natBig').removeClass('form-field--6-mobile_full');
+            $('.natBig').removeClass('remove form-field--6');
+
+            $('#ExpiryDate').val('');
+            $('#DateOfBirth').val('');
+
+            //////////////
+        }
+        else if ($idtype.val() == "TN" || $idtype.val() == "IA") {
+            IssuingAuthority.show();
+        }
+        else {
+            jQuery('#uiddiv').show();
+            $idnumberfield.attr("data-parsley-type", "alphanum");
+            $idnumberfield.removeAttr("type", "number");
+            $idnumberfield.removeAttr("data-parsley-emiratesid");
+            $idnumberfield.removeAttr("maxlength");
+            $idnumberfield.removeAttr("data-parsley-maxlength");
+            if ('@Model.CustomerCategory' != "G") {
+                Idtypelabelchange($idtype.val());
+            }
+        }
+
+         //New requirement from S4 UAT with business
+        if ($idtype.val() == "PN") {
+
+            $('#idnumber').addClass('form-field--6-mobile_full');
+            $('#idnumber').addClass('remove form-field--6');
+
+            $('.natBig').addClass('form-field--6-mobile_full');
+            $('.natBig').addClass('remove form-field--6');
+
+            $('#datepicker-container-ExpiryDate').show();
+            $('#datepicker-container-DateOfBirth').show();
+
+
+        }
+        //////////////////
+
+        $idtype.on('change', function () {
+            if (jQuery(this).val() != "") {
+                if ('@Model.CustomerCategory' != "G") {
+                    Idtypelabelchange(jQuery(this).val());
+                }
+                $idnumber.show();
+                $('#datepicker-container-ExpiryDate').show();
+
+                if ('@Model.isEjari' == "False") {
+                    clearidfields();
+                }
+                else {
+                    $idnumberfield.val("");
+                }
+                if (jQuery(this).val() == "IA" || jQuery(this).val() == "TN") {
+                    IssuingAuthority.show();
+                } else {
+                    IssuingAuthority.hide();
+                }
+                $('#errors-for-idupload').html('');
+                if (jQuery(this).val() == "ED") {
+                    $('#iduploaddiv').find('legend').html("@Translate.Text("movein.IDUpload")");
+                    $('#form-field-idupload').attr("data-parsley-error-message", "@Translate.Text("movein.erroridupload")");
+                    $('#form-field-idupload').attr("data-parsley-required-message","@Translate.Text("movein.erroridupload")");
+                    $('#iduploaddiv').show();
+                    // $idnumberfield.placeholder = "@Translate.Text("movein.accountregister.nonresenteridnumber")";
+                    jQuery('#uiddiv').hide();
+
+                    $idnumberfield.removeAttr("type")
+                    $idnumberfield.removeAttr("data-parsley-type");
+                    $idnumberfield.attr("type", "number");
+                    $idnumberfield.attr("data-parsley-emiratesid", "");
+                    $idnumberfield.attr("maxlength", "15");
+                    $idnumberfield.attr("data-parsley-maxlength", "15");
+
+                    //New requirement from S4 UAT with business
+                    $('#datepicker-container-ExpiryDate').hide();
+                    $('#datepicker-container-DateOfBirth').hide();
+
+                    $('#idnumber').removeClass('form-field--6-mobile_full');
+                    $('#idnumber').removeClass('remove form-field--6');
+
+                    $('.natBig').removeClass('form-field--6-mobile_full');
+                    $('.natBig').removeClass('remove form-field--6');
+
+                    $('#ExpiryDate').val('');
+                    $('#DateOfBirth').val('');
+                    //////////////////////////////
+                }
+                else if (jQuery(this).val() == "PN") {
+                    $('#iduploaddiv').find('legend').html("@Translate.Text("Passport")");
+                    $('#form-field-idupload').attr("data-parsley-error-message", "@Translate.Text("upload passport")");
+                    $('#form-field-idupload').attr("data-parsley-required-message","@Translate.Text("upload passport")");
+                    $('#iduploaddiv').show();
+                    jQuery('#uiddiv').show();
+                    $idnumberfield.attr("data-parsley-type", "alphanum");
+                    $idnumberfield.removeAttr("type", "number");
+                    $idnumberfield.removeAttr("data-parsley-emiratesid");
+                    $idnumberfield.removeAttr("maxlength");
+                    $idnumberfield.removeAttr("data-parsley-maxlength");
+
+                     //New requirement from S4 UAT with business
+                    $('#idnumber').addClass('form-field--6-mobile_full');
+                    $('#idnumber').addClass('remove form-field--6');
+
+                    $('.natBig').addClass('form-field--6-mobile_full');
+                    $('.natBig').addClass('remove form-field--6');
+
+                    $('#datepicker-container-ExpiryDate').show();
+                    $('#datepicker-container-DateOfBirth').show();
+                    ///////////////////////
+
+                }
+                else {
+                    jQuery('#uiddiv').hide();
+                    $idnumberfield.attr("data-parsley-type", "alphanum");
+                    $idnumberfield.removeAttr("type", "number");
+                    $idnumberfield.removeAttr("data-parsley-emiratesid");
+                    $idnumberfield.removeAttr("maxlength");
+                    $idnumberfield.removeAttr("data-parsley-maxlength");
+                }
+            } else {
+                $idnumber.hide();
+                $('#datepicker-container-ExpiryDate').hide();
+            }
+        });
+        function Idtypelabelchange(selectedvalue) {
+            if (selectedvalue != "") {
+                if (selectedvalue == "TN") {
+                    jQuery('#idnumber_label').text('@Translate.Text("movein.idnumber.tradelicense")');
+                    jQuery('#form-field-IdNumber')[0].placeholder = "@Translate.Text("movein.idnumber.tradelicenseplaceholder")";
+                    jQuery('#form-field-IdNumber').attr("data-parsley-error-message", "@Translate.Text("movein.idtnnumbererrormessage")");
+                }
+                else if (selectedvalue == "IA") {
+                    jQuery('#idnumber_label').text('@Translate.Text("movein.idnumber.initialapproval")');
+                    jQuery('#form-field-IdNumber')[0].placeholder = "@Translate.Text("movein.idnumber.initialapprovalplaceholder")";
+                    jQuery('#form-field-IdNumber').attr("data-parsley-error-message", "@Translate.Text("movein.idianumbererrormessage")");
+                }
+                else {
+                    jQuery('#idnumber_label').text('@Translate.Text("movein.idlabel")');
+                    jQuery('#form-field-IdNumber')[0].placeholder = "@Translate.Text("movein.idplaceholder")";
+                    jQuery('#form-field-IdNumber').attr("data-parsley-error-message", "@Translate.Text("movein.idnumbererrormessage")");
+                }
+            }
+        }
+
+        var _dval = '';
+        var _internalTim;
+        $('#ExpiryDate').on('blur', function () {
+
+            _internalTim = setInterval(validateExp, 300);
+        });
+
+        function validateExp() {
+            try {
+
+
+                if ($('#ExpiryDate').val() != '') {
+                    const today = new Date();
+                    const inputValue = new Date($('#ExpiryDate').val());
+
+                    const inputDateOnly = new Date(inputValue.getFullYear(), inputValue.getMonth(), inputValue.getDate());
+
+                    const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+
+
+                    if (inputDateOnly < todayDateOnly) {
+
+                        $('#_dateerror').show();
+
+                    } else {
+
+                        $('#_dateerror').hide();
+                        clearInterval(_internalTim);
+
+                    }
+
+
+
+
+                    _dval = $('#ExpiryDate').val();
+
+
+                }
+            }
+            catch (e) { }
+
+        }
+
+        $IssuingAuthority.on('change', function () {
+            if (jQuery(this).val() != "" && jQuery(this).val() == "OTH") {
+                IssuingAuthorityName.show();
+            } else {
+                IssuingAuthorityName.hide();
+            }
+        });
+
+        $govtype.on('change', function () {
+            if (jQuery(this).val() != "" && jQuery(this).val() == "1111111111") {
+                $govtypename.show();
+                jQuery('#decreeletterdiv').show();
+            } else {
+                $govtypename.hide();
+                jQuery('#decreeletterdiv').hide();
+            }
+        });
+        $idnumberfield.on('focusout', function () {
+           getiddetails();
+        });
+
+
+        $idnumberfield.on("keypress", function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                getiddetails();
+                return false; // prevent the button click from happening
+            }
+        });
+
+
+
+        @*if ("@Model.CustomerCategory" == "G") {
+            guaranteeleter.show();
+            isguaranteeleter.attr('value', 'True');
+        }
+        if (("@Model.CustomerCategory" == "P" && "@Model.CustomerType" == "U" && "@Model.Owner" == "True" && "@Model.PremiseAccount.Count()" == "1") || ("@Model.CustomerCategory" == "B" && "@Model.Owner" == "True" && "@Model.PremiseAccount.Count()" == "1") || ("@Model.CustomerCategory" == "G" && "@Model.Owner" == "False")) {
+            if ("@Model.isguaranteeleter" == "True") {
+                guaranteeleter.show();
+                isguaranteeleter.attr('value', 'True');
+            }
+            isguaranteeleter.on('change', function () {
+                guaranteeleter.hide();
+                if ($(this).is(':checked')) {
+                    guaranteeleter.show();
+                    isguaranteeleter.attr('value', 'True');
+                } else { isguaranteeleter.attr('value', 'False'); }
+            });
+        }*@
+        if ("@Model.CustomerCategory" == "P" && "@Model.CustomerType" == "U" && "@Model.ShowDiscount" != "null" && "@Model.ShowDiscount" != "") {
+
+            if ("@Model.isnationalsocialcard" == "True") {
+                nationalsocialcard.show();
+                isnationalsocialcard.attr('value', 'True');
+            }
+            if ("@Model.isthukercard" == "True") {
+                thukercard.show();
+                isthukercard.attr('value', 'True');
+
+            }
+            if ("@Model.issanadsmartcard" == "True") {
+                sanadsmartcard.show();
+                issanadsmartcard.attr('value', 'True');
+
+            }
+
+            isnationalsocialcard.on('change', function () {
+                nationalsocialcard.hide();
+                if ($(this).is(':checked')) {
+                    nationalsocialcard.show();
+                    isnationalsocialcard.attr('value', 'True');
+
+                } else { isnationalsocialcard.attr('value', 'False'); }
+            });
+            isthukercard.on('change', function () {
+                thukercard.hide();
+                if ($(this).is(':checked')) {
+                    thukercard.show();
+                    isthukercard.attr('value', 'True');
+
+                } else { isthukercard.attr('value', 'False'); }
+            });
+            issanadsmartcard.on('change', function () {
+                sanadsmartcard.hide();
+                if ($(this).is(':checked')) {
+                    sanadsmartcard.show();
+                    issanadsmartcard.attr('value', 'True');
+
+                } else { issanadsmartcard.attr('value', 'False'); }
+            });
+
+
+        }
+        function getiddetails() {
+            if ($idnumberfield.val() != "") {
+                var form = $('#contactdetails');
+                var token = $('input[name="__RequestVerificationToken"]', form).val();
+                var url = "/api/sitecore/MoveIn/GetDetails";
+                jQuery.ajax({
+                    url: url,
+                    traditional: true,
+                    data: {
+                        __RequestVerificationToken: token,
+                        idtype: $idtype.val(),
+                        idnumber: $idnumberfield.val()
+                    },
+                    beforeSend: function () {
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                        $('body').removeClass('unscrollable').addClass('unscrollable');
+                        $content.show();
+                        $submitBtn.attr('disabled', true);
+                        errIdNumber.html('');
+                    },
+                    complete: function () {
+                        $content.hide();
+                        jQuery('.j105-drrg--loader').hide();
+                        $('body').removeClass('unscrollable');
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                    success:function (response) {
+                    //console.log(response);
+
+                    if (response != null) {
+                        if (response.Message != "") {
+                            valid = false;
+                            //$idnumberfield.parsley().addError('forcederror', { message: response.Message, updateClass: true });
+                            errIdNumber.html('<ul class="parsley-errors-list filled"><li class="parsley-custom-error-message">' + response.Message + '</li></ul>');
+                        } else {
+                            valid = true;
+
+
+                            if ('@Model.FirstName' == "" || '@Model.FirstnameHide' == "True") {
+                                jQuery("#divfname").show();
+                                if (response.FirstName != "") {
+                                    fname.attr('readonly', true);
+                                    jQuery("#divfname").hide();
+
+                                    if ('@Model.CustomerCategory' == "P") {
+                                        $('#iduploaddiv').hide();
+                                    }
+                                }
+                                else {
+                                    fname.val(response.FirstName);
+                                    fname.removeAttr("readonly");
+                                    // fname.attr('readonly', "");
+
+                                    if ('@Model.CustomerCategory' == "P") {
+                                        $('#iduploaddiv').show();
+                                    }
+                                }
+
+                            }
+                            else {
+                                if ('@Model.CustomerCategory' == "P") {
+                                    $('#iduploaddiv').show();
+                                }
+                            }
+                            if (response.FirstName != "") {
+                                if ('@Model.CustomerCategory' == "P") {
+                                    $('#iduploaddiv').hide();
+                                }
+                            }
+                            if ('@Model.LastName' == "" || '@Model.LastnameHide' == "True") {
+                                jQuery("#divlname").show();
+                                if (response.LastName != "") {
+                                    lname.attr('readonly', true);
+                                    jQuery("#divlname").hide();
+                                }
+                                else {
+                                    lname.val(response.LastName);
+                                    lname.removeAttr("readonly");
+                                    //lname.attr('readonly', "");
+                                }
+
+                            }
+                            if ('@Model.isEjari' == "False") {
+                                mobile.val(response.MobilePhone);
+                                email.val(response.EmailAddress);
+                                nationality.val(response.Nationality);
+                                pobox.val(response.PoBox);
+                                emirate.val(response.Emirate);
+                            }
+                            else {
+                                if (mobile.val() == "") {
+                                    mobile.val(response.MobilePhone);
+                                }
+                                if (email.val() == "") {
+                                    email.val(response.EmailAddress);
+                                }
+                                if (pobox.val() == "") {
+                                    pobox.val(response.PoBox);
+                                }
+                                if (nationality.val() == "") {
+                                    nationality.val(response.Nationality);
+                                }
+                                if (emirate.val() == "") {
+                                    emirate.val(response.Emirate);
+                                }
+                            }
+
+                            if (mobile.val() != "" && mobile.val().indexOf('*') != -1) {
+                                mobile.attr("type", "text");
+                                mobile.removeAttr("data-parsley-type");
+                                mobile.removeAttr('data-parsley-mobilenumber');
+                            }
+                            if (email.val() != "" && email.val().indexOf('*') != -1) {
+                                email.removeAttr("data-parsley-email");
+                                email.attr("type", "text");
+                            }
+                            $submitBtn.attr('disabled', false);
+                        }
+                    }
+                }
+                });
+            }
+        }
+        if ('@Model.IsIdNumber' == 'True') {
+            removevalidate();
+        }
+        if ('@Model.IsDeptid' == 'True') {
+            removevalidate();
+        }
+        if ('@Model.IsIdNumber' == "False" && '@Model.CustomerCategory' == "P" && '@Model.IdNumber' != "") {
+            if (mobile.val() != "" && mobile.val().indexOf('*') != -1) {
+                mobile.attr("type", "text");
+                mobile.removeAttr("data-parsley-type");
+                mobile.removeAttr('data-parsley-mobilenumber');
+                //mobile.removeAttr("required");
+            }
+            if (email.val() != "" && email.val().indexOf('*') != -1) {
+                email.removeAttr("data-parsley-email");
+                email.attr("type", "text");
+            }
+        }
+        function clearidfields() {
+            fname.val("");
+            $idnumberfield.val("");
+            lname.val("");
+            email.val("");
+            mobile.val("");
+            pobox.val("");
+            emirate.val("");
+            nationality.val("");
+            uid.val();
+        }
+        function removevalidate() {
+            if (fname.val() != "") {
+                fname.attr('readonly', "");
+                if (lname.val() != "") {
+                    lname.attr('readonly', "");
+                }
+                if ($idtype.val() != "" && $idnumberfield.val() != "") {
+                    if ("@Model.CustomerType" == "G") {
+
+                    } else {
+                        $idnumberfield.attr('readonly', '');
+                        //$idtype.attr('disabled', true);
+                        $idtype.attr("style", "pointer-events: none;");
+                        $idnumberfield.off('focusout');
+                    }
+                }
+            }
+            if (mobile.val() != "" && mobile.val().indexOf('*') != -1) {
+                mobile.attr("type", "text");
+                mobile.removeAttr("data-parsley-type");
+                mobile.removeAttr('data-parsley-mobilenumber');
+                //mobile.removeAttr("required");
+            }
+            if (email.val() != "" && email.val().indexOf('*') != -1) {
+                email.removeAttr("data-parsley-email");
+                email.attr("type", "text");
+            }
+        }
+        vatnumber.on("focusout", function (e) {
+            if (vatnumber.val().length > 1) {
+                vatdocument.attr("required", "true");
+            }
+            else {
+                vatdocument.removeAttr("required");
+            }
+        });
+        mobile.on("keyup", function (e) {
+            if ((e.keyCode == 8 || e.keyCode == 46) && (mobile.val().length < 9) && !(mobile.attr("type") == "tel")) {
+                mobile.attr("type", "tel");
+                mobile.attr("data-parsley-type", "digits");
+                mobile.attr('data-parsley-mobilenumber', "");
+            }
+        });
+
+        email.on("keyup", function (e) {
+            if ((e.keyCode == 8 || e.keyCode == 46)) {
+                email.attr('data-parsley-email', "");
+                email.attr("type", "email");
+            }
+        });
+
+
+        $('form').on('submit', function () {
+            //$idtype.attr('disabled', false);
+            $submitBtn.prop('disabled', false);
+        });
+    });
+</script>
+<script src="~/scripts/External/nml/form-submit-validate.js"></script>

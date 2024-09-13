@@ -1,0 +1,171 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using DEWAXP.Foundation.Content
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@model DEWAXP.Foundation.Content.Models.Payment.ServiceActivationPaymentCompletionModel
+
+@Html.Sitecore().Placeholder("j25/page-title")
+@{
+    string timeFix = "";
+    if (@Language.Current.Name.ToLowerInvariant() == "ar-ae")
+    {
+        timeFix = "\u200F";
+    }
+}
+
+
+@*<div class="grid__row noprint">
+        <div class="grid__column grid__column--12">
+            @Html.Sitecore().Placeholder("payment-confirmation/page-title")
+        </div>
+    </div>*@
+<div class="grid__row">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Sitecore().Placeholder("step-tracker")
+    </div>
+</div>
+
+@if (Model.Succeeded)
+{
+    <div class="grid__row">
+        <div class="grid__column grid__column--12 grid__column--form">
+
+            <div class="m40-status-message m40-status-message--success icon icon-new-success-message " data-component="m40-status-message">
+                <div class="m40-status-message__title">@Translate.Text("Payment completed")</div>
+                <div class="m40-status-message__text">@Translate.Text("movein.SuccessPaid")</div>
+                <p>
+                    <button class="button button--text button--printer noprint" data-print="page">@Translate.Text("Print this page")</button>
+                </p>
+            </div>
+        </div>
+    </div>
+    if (!string.IsNullOrWhiteSpace(Model.MoveInNotificationNumber))
+    {
+    <div class="grid__row">
+
+        <div class="grid__column grid__column--12 grid__column--form">
+            <fieldset class="fieldset ">
+                <legend class="legend-color">.</legend>
+                <div class="form-field form-field--account-details">
+                    <div class="m42-keyvalue">
+                        <dl>
+                            <dt class="m42-keyvalue__key">@Translate.Text("Movein.referrence")</dt>
+                            <dd class="m42-keyvalue__value">@Model.MoveInNotificationNumber</dd>
+                        </dl>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    }
+    <div class="grid__row">
+
+        <div class="grid__column grid__column--12 grid__column--form">
+            <h2 class="text__section-title success-subtitle__h2">@Translate.Text("Transaction_Details")</h2>
+
+            <div class="m42-keyvalue success-page">
+                <dl>
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("payment date and time label")</dt>
+                    @if (Language.Current.Name.ToLowerInvariant() == "ar-ae")
+                    {
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "ss:" + timeFix + "mm:" + timeFix + "HH", Sitecore.Context.Culture)</dd>
+                    }
+                    else
+                    {
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentDate.ToString("dd MMM yyyy | " + timeFix + "HH:" + timeFix + "mm:" + timeFix + "ss", Sitecore.Context.Culture)</dd>
+                    }
+
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("deg transaction id label")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.DegTransactionId</dd>
+
+                    <dt class="m42-keyvalue__key--stacked">@Translate.Text("dewa transaction id label")</dt>
+                    <dd class="m42-keyvalue__value--stacked tran-details">@Model.DewaTransactionId</dd>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.FullName))
+                    {
+                        <dt class="m42-keyvalue__key--stacked">@Translate.Text("movein.Paymentcustomername")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.FullName</dd>
+                    }
+
+                    @*<dt class="m42-keyvalue__key--stacked">@Translate.Text("Total amount")</dt>
+                        <dd class="m42-keyvalue__value--stacked tran-details">@Model.PaymentAmount.ToString("N2") @Translate.Text("AED")</dd>*@
+                </dl>
+
+            </div>
+        </div>
+    </div>
+    if (Model.premiseAmountDetails != null && Model.premiseAmountDetails.Count > 0)
+    {
+        <div class="grid__row">
+            <div class="transaction-history--wrapper grid__column grid__column--12 grid__column--form">
+                <h3 class="text__section-title success-subtitle__h2">@Translate.Text("movein.payment.accountdetails")</h3>
+                @foreach (var receipt in Model.premiseAmountDetails)
+                {
+                    <div class="transaction-history b0">
+                        <div class="transaction-history__item">
+                            <div class="transaction-history__title">@(!string.IsNullOrWhiteSpace(receipt.contractaccountnumber) && !receipt.contractaccountnumber.Equals(receipt.premise) ? Translate.Text("Movein.Contractaccountnumber") : Translate.Text("DEWA Premise No"))</div>
+                            <span class="transaction-history__detail-amount--bill">
+                                <span class="transaction-history__detail-item--content">@Convert.ToDecimal(receipt.amount).ToString("0,0.00") @Translate.Text("AED")</span>
+                            </span>
+                            <ul class="transaction-history__detail mt24" style="margin-top: 24px;">
+                                <li class="transaction-history__detail-item green">
+                                    <span class="transaction-history__detail-item--content">@(!string.IsNullOrWhiteSpace(receipt.contractaccountnumber) && !receipt.contractaccountnumber.Equals(receipt.premise) ? receipt.contractaccountnumber : receipt.premise)</span>
+                                </li>
+                                @if (!string.IsNullOrWhiteSpace(receipt.premise) && !receipt.contractaccountnumber.Equals(receipt.premise))
+                                {
+                                    <li class="transaction-history__detail-item">(@Translate.Text("DEWA Premise No") - @receipt.premise)</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+                <div class="transaction-history m40-status-message--success b0">
+                    <div class="transaction-history__item">
+                        <div class="transaction-history__title">@Translate.Text("Total amount")</div>
+                        <span class="transaction-history__detail-amount--bill">
+
+                            <span class="transaction-history__detail-item--content">@((Model.PaymentAmount+Model.SuqiaAmount).ToString("N2")) @Translate.Text("AED")</span>
+                        </span>
+                        @*<ul class="transaction-history__detail mt24" style="margin-top: 24px;">
+                                <li class="transaction-history__detail-item">(@Translate.Text("movein.confirmation.contractaccounts") @Model.premiseAmountDetails.Count)</li>
+                            </ul>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+}
+
+<div class="grid__row noprint">
+    <div class="grid__column grid__column--12 grid__column--form">
+        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaSuccessPayment.cshtml", Model.SuqiaAmount)
+    </div>
+    <div class="grid__column grid__column--12 grid__column--centered noprint mt12">
+        <h2 class="text__section-title summary-footer__title">@Translate.Text("What_Next")</h2>
+
+        @*@if (Convert.ToBoolean(Model.landloardmsg))
+            {
+            @Translate.Text("movein.landlordrequesttext whatnext")
+            }
+            else
+            {
+            @Html.Raw(Sitecore.Context.Database.GetItem(SitecoreItemIdentifiers.J10_SUPPLIMENTARY).Fields["Confirmation Blurb"])
+            }*@
+        @if (Model.Whatsnexttext != null && Model.Whatsnexttext.Length > 0)
+        {
+            foreach (var txt in Model.Whatsnexttext)
+            {
+                <p class="text__content-copy">@txt</p>
+            }
+        }
+        <div class="button-container--single">
+            <a role="button" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J69_CUSTOMER_DASHBOARD)" class="button button--primary button--next" role="button">@Translate.Text(DictionaryKeys.Global.Home)</a>
+        </div>
+
+
+    </div>
+</div>

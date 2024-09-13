@@ -1,0 +1,143 @@
+﻿@using Newtonsoft.Json
+@using Newtonsoft.Json.Serialization;
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Helpers;
+@using DEWAXP.Foundation.Content;
+
+@{ var direction = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "rtl" : "ltr";
+    //JavaScriptSerializer js = new JavaScriptSerializer();
+    string jsonMonthString = JsonConvert.SerializeObject(DEWAXP.Foundation.Content.Helpers.DateHelper.GetStaticMonthList().Select(x => x.Text).ToList());
+}
+<div class="grid" id="billcomparecomponent">
+    <div class="grid__row mb24">
+        <div class="grid__column grid__column--12">
+            <div class="m84-bills-compare" data-component="m84-bills-compare">
+                <form id="billcompare-component-form">
+                    @Html.AntiForgeryToken()
+                </form>
+                <div class="m84-bills-compare--header">
+                    <div class="m84-bills-compare--header_title">
+                        @Translate.Text("billcomp.How My Bills Compare")
+                    </div>
+                    <div class="m84-bills-compare--header_buttons">
+                        <div class="m84-bills-compare--header_buttoni m84-bills-compare--header_buttona" data-target="m84-bills-compare--graph_billed">@Translate.Text("billcomp.billedamounttab")</div>
+                        <div class="m84-bills-compare--header_buttoni" data-target="m84-bills-compare--graph_paid">@Translate.Text("billcomp.paidamounttab")</div>
+                    </div>
+                    @*<div class="m84-bills-compare--header_download">
+                            <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_PAST_BILLS)" class="button button--text button--next green">
+                                @Translate.Text("billcomp.View all my bills")
+                            </a>
+                        </div>*@
+                </div>
+                <div class="m84-bills-compare--tools">
+                    <div>
+                        <div class="m84-bills-compare--graph_billed m84-bills-compare--tools_filter button button--senary button--very_small icon-filter" id="m84-bills-compare--tools_filter">
+                            @Translate.Text("billcomp.Filter By")
+                        </div>
+                        <div class="m84-bills-compare--filter">
+                            <div class="m84-bills-compare--filter_radio" data-default-text="Filter by">
+                                <div class="form-field">
+                                    <fieldset class="fieldset">
+                                        <p class="form-field__radio ">
+                                            <label>
+                                                <input class="form-field__input form-field__input--radio" id="form-field-radio_1_1" name="radios_group1" type="radio"
+                                                       value="@Translate.Text("billcomp.Electricity")"
+                                                       series-type="electricity" aria-describedby="description-for-chn7ey9gl" data-parsley-errors-container="#description-for-chn7ey9gl">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    @Translate.Text("billcomp.Electricity")
+                                                </span>
+                                            </label>
+                                        </p>
+                                        <p class="form-field__radio">
+                                            <label>
+                                                <input class="form-field__input form-field__input--radio" id="form-field-radio_1_2" name="radios_group1"
+                                                       type="radio" value="@Translate.Text("billcomp.Water")"
+                                                       series-type="water" aria-describedby="description-for-chn7ey9gl" data-parsley-errors-container="#description-for-chn7ey9gl">
+                                                <span class="form-field__fakeradio focus-enabled">
+                                                    @Translate.Text("billcomp.Water")
+                                                </span>
+                                            </label>
+                                        </p>
+                                        <div id="description-for-chn7ey9gl" class="form-field__messages">
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="m84-bills-compare--filter_buttons">
+                                <span class="m84-bills-compare--filter_clear">@Translate.Text("billcomp.Clear")</span>
+                                <button class="button button--primary button--very_small m84-bills-compare--filter_apply">
+                                    @Translate.Text("billcomp.Apply")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="button button--senary button--very_small icon-download m84-bills-compare--tools_download">
+                        @Translate.Text("billcomp.Download")
+                    </button>
+                    <div class="m84-bills-compare--download_panel hidden">
+                        @*<div class="m84-bills-compare--download-btn m84-bills-compare--download--pdf">
+                                @Translate.Text("billcomp.Download PDF")
+                            </div>*@
+                        <div class="m84-bills-compare--download-btn m84-bills-compare--download--xls">
+                            @Translate.Text("billcomp.Download XLS")
+                        </div>
+                    </div>
+                </div>
+                <div id="bill-compare-component"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var _fnbillcompare = function (accountNumber) {
+        if (accountNumber) {
+            var url = "/api/sitecore/Dashboard/BillCompare";
+            jQuery.ajax({
+                type: 'POST',
+                url: url,
+                traditional: true,
+                datatype: 'application/json',
+                data: AddForgeryToken({
+                    account: accountNumber,
+                }, "billcompare-component-form"),
+                beforeSend: function (jqXHR) {
+                    xhrPool.push(jqXHR);
+                    jQuery('#bill-compare-component').empty();
+                    window.attachSpinner('#bill-compare-component', { bgColor: '#fff', opacity: 0.6, minHeight: 600 });
+                },
+                complete: function () {
+                    jQuery(window).trigger('resize');
+                    getGaguageLoadSettting("_billcompare").isComplete = 1;
+                    window.detachSpinner('#bill-compare-component');
+                },
+                success: function (result) {
+                    if (result != null && result != "") {
+                        jQuery('#bill-compare-component').append(result);
+                        jQuery(window).trigger('init_m84');
+                        jQuery(window).trigger('init_m84');
+                        window.initComponents('receiptmodalslist');
+                    }
+                },
+                error: function (jqXHR, exception) {
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                        msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                        msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                        msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                        msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                        msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                        msg = 'Ajax request aborted.';
+                    } else {
+                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                    }
+                }
+            });
+        }
+    }
+</script>

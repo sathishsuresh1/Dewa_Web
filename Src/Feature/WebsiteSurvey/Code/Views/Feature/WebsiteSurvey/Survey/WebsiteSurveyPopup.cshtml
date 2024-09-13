@@ -1,0 +1,76 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using DEWAXP.Feature.WebsiteSurvey.Models.Survey
+@using Sitecore.Data.Items
+@using Glass.Mapper.Sc
+@using System.Globalization
+@using Glass.Mapper.Sc.Web
+@using DEWAXP.Foundation.Content.Repositories
+@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@using _scPageItemId = DEWAXP.Foundation.Content.ScPageItemId
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    var surveyPopupData = _contentRepository.GetItem<WebsiteSurveyModel>(new GetItemByIdOptions(Guid.Parse(SitecoreItemIdentifiers.WebsiteSurveyConfigId)));
+    if (surveyPopupData != null)
+    {
+        var surveyLink = surveyPopupData.SurveyLink != null ? surveyPopupData.SurveyLink.Url : "#";
+        var surveyTitle = surveyPopupData.Title != null ? surveyPopupData.Title : string.Empty;
+        var isActive = surveyPopupData.IsActive;
+        var description = surveyPopupData.Description != null ? surveyPopupData.Description : string.Empty;
+        var backgroundImage = surveyPopupData.BackgroundImage != null ? surveyPopupData.BackgroundImage.Src : string.Empty;
+        var surveyLinkText = surveyPopupData.LinkText != null ? surveyPopupData.LinkText : string.Empty;
+        var closeText = surveyPopupData.CloseText != null ? surveyPopupData.CloseText : string.Empty;
+        string[] expiryDays = null;
+        var currentDate = "25 Dec 2050 12:00:00";
+        if (surveyPopupData.ExpiryDays != null)
+        {
+            expiryDays = surveyPopupData.ExpiryDays.Split(',');
+
+            foreach (var item in expiryDays)
+            {
+                if (Convert.ToInt32(item) > DateTime.Now.Day)
+                {
+                    int dayOfYear = Convert.ToInt32(item);
+                    int year = DateTime.Now.Year; //Or any year you want
+                    int month = DateTime.Now.Month;
+                    DateTime theDate = new DateTime(year, month, 1).AddDays(dayOfYear - 1);
+                    currentDate = theDate.ToString("dd MMM yyyy hh:mm:ss");   // The date in requested format
+                    break;
+                }
+            }
+
+        }
+        if (isActive)
+        {
+            <div class="m74-rammas_expand m74-rammas_expand--auto" data-component="m74-rammas_expand" data-expiry="@currentDate UTC">
+                <div class="m74-rammas_expand--container">
+                    <div class="m74-rammas_expand--details">
+                        <div class="m74-rammas_expand--highlight green">
+                            @surveyTitle
+                        </div>
+                        @if (backgroundImage != null)
+                        {
+                            @Html.Glass().RenderImage(surveyPopupData, x => x.BackgroundImage, new { @class = "m74-rammas_expand--bg tooltipstered" }, true, false)
+                        }
+
+                        <div class="m74-rammas_expand--text">
+                            @description
+                        </div>
+                    </div>
+                    @using (Html.Glass().BeginRenderLink(surveyPopupData, x => x.SurveyLink, attributes: new { @class = "button button--primary button--very_small m74-rammas_expand--link" }))
+                    {
+                        @surveyLinkText
+                    }
+                    <div class="button button--outline button--very_small m74-rammas_expand--close">
+                        @closeText
+                    </div>
+                </div>
+                <div class="m74-rammas_expand--icon">
+                </div>
+            </div>
+        }
+    }
+}

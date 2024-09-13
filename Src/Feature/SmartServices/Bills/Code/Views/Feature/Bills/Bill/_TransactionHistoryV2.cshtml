@@ -1,0 +1,781 @@
+﻿@using DEWAXP.Foundation.Content.Models.Bills
+@using Sitecore.Globalization
+@using Sitecore.Mvc
+@using DEWAXP.Foundation.Content
+@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc
+@using Glass.Mapper.Sc.Web
+@using Sitecore.Data.Items
+@using DEWAXP.Foundation.Content.Repositories
+@using System.Web.Optimization
+@using RequestContext = Glass.Mapper.Sc.Web.RequestContext
+@{
+    IRequestContext _requestContext = new RequestContext(new SitecoreService(Sitecore.Context.Database));
+    IContentRepository _contentRepository = new ContentRepository(_requestContext);
+    IContextRepository _contextRepository = new ContextRepository(_requestContext);
+    var currentitem = _contextRepository.GetCurrentItem<Item>();
+    var lang = currentitem.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+}
+@Html.Sitecore().Placeholder("billcompare")
+
+<div class="grid" id="paymenthistory">
+    <div class="j105-drrg">
+        <div class="m66-preloader j105-drrg--loader hidden">
+            <div class="grid">
+                <div class="grid__row">
+                    <div class="grid__column grid__column--12">
+                        <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid__row mt48">
+        <div class="grid__column grid__column--12">
+
+            <div class="m82-payment-history" data-component="m82-payment-history">
+                <div class="m82-payment-history--header">
+                    <div class="m82-payment-history--header_title">
+                        @Translate.Text("SL.Payment_History_title")
+                    </div>
+                    <div class="m82-payment-history--header_buttons form-transaction-filter">
+                        @if (ViewBag.TransactionFilters != null && (List<SelectListItem>)ViewBag.TransactionFilters != null)
+                        {
+                            int i = 1;
+                            foreach (var item in (List<SelectListItem>)ViewBag.TransactionFilters)
+                            {
+                                <div class="m82-payment-history--header_buttoni @(i==1?"m82-payment-history--header_buttona":string.Empty)" data-value="@item.Value">@item.Text</div>
+                                i++;
+                            }
+                        }
+                    </div>
+
+                    <div class="m82-payment-history--header_download">
+                        <button class="button button--very_small button--senary icon-download" id="downloadstmtbutton">
+                            @Translate.Text("Download Statement of Accounts")
+                        </button>
+                    </div>
+                    <div class="m39-modal" data-component="m39-modal" id="downloadstmt">
+                        <a data-trigger="true" class="m39-modal__trigger m39-modal__triggerDownload" type="button" id="_xcetvlagg_trigger" aria-controls="_xcetvlagg_content"></a>
+                        <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="false" id="_xcetvlagg_content" aria-labelledby="_xcetvlagg_trigger">
+                            <div class="m39-modal__dialog">
+                                <div class="m39-modal__header">
+                                    <div class="m39-modal__title">@Translate.Text("Select period to download statement of accounts")</div>
+                                    <a data-close="true" class="m39-modal__button--close" id="_xcetvlagg_close" aria-controls="_xcetvlagg_content">@Translate.Text("TH.Close")</a>
+                                </div>
+                                <div class="m39-modal__content m39-modal__monthpicker" data-journey="j01-transaction-history">
+                                    <div class="j01-transaction-history-select">
+                                        <form method="get" class="form" data-form="true" action="#">
+                                            <div class="form-field">
+                                                <fieldset class="fieldset">
+                                                    <legend class="legend-color">.</legend>
+                                                    @{
+                                                        int loop = 0;
+                                                    }
+                                                    @foreach (var options in (IEnumerable<SelectListItem>)ViewBag.DownloadHistory)
+                                                    {
+                                                        <p class="form-field__radio ">
+                                                            <label>
+                                                                <input class="form-field__input form-field__input--radio" id="form-field-radio"
+                                                                       name="j01_radio"
+                                                                       type="radio"
+                                                                       value="@options.Value"
+                                                                       aria-describedby="description-for-j68abowfq"
+                                                                       data-parsley-errors-container="#description-for-j68abowfq"
+                                                                       @(loop == 0 ? "checked" : string.Empty)>
+                                                                <span class="form-field__fakeradio focus-enabled">
+                                                                    @options.Text
+                                                                </span>
+                                                            </label>
+                                                        </p>
+                                                        { loop++; }
+                                                    }
+                                                    <div id="description-for-j68abowfq" class="form-field__messages">
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="j01-transaction-history-selectdate hidden">
+                                        <div class="form-field form-field--text  ">
+                                            <label for="form-field-From" class="form-field__label">
+                                                @Translate.Text("TH.From")
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--monthpicker">
+                                                <input class="form-field__input form-field__input--text form-field__input--monthpicker" required
+                                                       id="form-field-From"
+                                                       name="text-optional"
+                                                       type="text"
+                                                       placeholder="@Translate.Text("TH.Placeholder_Fromdate")"
+                                                       aria-describedby="description-for-From"
+                                                       data-parsley-errors-container="#description-for-From"
+                                                       data-parsley-error-message="@Translate.Text("TH.errorMessage_Fromdate")" />
+                                            </span>
+                                            <div id="description-for-From" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--text  ">
+                                            <label for="form-field-To" class="form-field__label">
+                                                @Translate.Text("TH.To")
+                                            </label>
+                                            <span class="form-field__input-wrapper form-field__input-wrapper--monthpicker">
+                                                <input class="form-field__input form-field__input--text  form-field__input--monthpicker"
+                                                       id="form-field-To"
+                                                       name="text-optional"
+                                                       type="text"
+                                                       placeholder="@Translate.Text("TH.Placeholder_Todate")"
+                                                       aria-describedby="description-for-To"
+                                                       data-parsley-errors-container="#description-for-To"
+                                                       data-parsley-error-message="@Translate.Text("TH.errorMessage_Todate")" />
+                                            </span>
+                                            <div id="description-for-To" class="form-field__messages">
+                                            </div>
+                                        </div>
+                                        <p style="padding: 0px 25px 14px 25px;clear:both;">@Translate.Text("TransitionHistoryNote")</p>
+                                    </div>
+
+                                    <div id="downloaderror" class="form-field__messages parsley-errors-list hidden"></div>
+                                </div>
+                                <div class="m39-modal__footer">
+                                    <button id="transactionhistorydownload" class="button button--primary j01-transaction-history-download__button">@Translate.Text("TH.Download")</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m39-modal__overlay"> </div>
+                    </div>
+                </div>
+                <div class="m82-payment-history-error no-transactions-wrapper hidden">
+                    <div class="m14-richtext centered mt24">
+                        <h3>@Translate.Text("no transactions text")</h3>
+                    </div>
+                </div>
+
+                <div class="m82-payment-history-error error-transactions-wrapper hidden">
+                    <div class="m14-richtext centered mt24">
+                        <h3>@Translate.Text("timeout error message")</h3>
+                    </div>
+                </div>
+
+                <div id="transaction-history-placeholder" class="ajax-placeholder">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script id="transaction-item-template" type="text/x-handlebars-template">
+
+        {{#transactions}}
+        {{#showdiv @@index}}
+        <div class="m82-payment-history--cardrow">
+            {{/showdiv}}
+            {{this.length}}
+            {{#if isInvoice}}
+            <div class="m82-payment-history--cardwrapper">
+                <div class="m82-payment-history--card">
+                    <div class="m82-payment-history--card_header">
+                        <div class="m82-payment-history--card_date">
+                            {{shortDate}}
+                        </div>
+                        <div class="m82-payment-history--card_invoice">
+                            @Translate.Text("invoice label"): {{degRef}}
+                        </div>
+
+                        <a class="" href="/api/billdownloads/account/{{degRef}}" target="_blank">
+                            <div class="m82-payment-history--card_icon">
+                                <img src="/images/greenbill_logo.png" class="tooltipstered">
+                            </div>
+                        </a>
+
+                    </div>
+                    <div class="m82-payment-history--card_list">
+                        <ul>
+
+                            {{#unless dewaamountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                <img src="/images/dewa.png" class="tooltipstered">
+                                @Translate.Text("SL.DEWA")
+                                <span class="m82-payment-history--card_listamount">{{dewaamount}}</span>
+                            </li>
+                            {{/unless}}
+                            {{#unless dmamountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                <img src="/images/dm.png" class="tooltipstered">
+                                @Translate.Text("SL.Dubai_Municipality")
+                                <span class="m82-payment-history--card_listamount">{{dmamount}}</span>
+                            </li>
+                            {{/unless}}
+                            {{#unless nakamountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                <img src="/images/nakheel.png" class="tooltipstered">
+                                @Translate.Text("SL.Nakheel")
+                                <span class="m82-payment-history--card_listamount">{{nakamount}}</span>
+                            </li>
+                            {{/unless}}
+                            {{#unless otheramountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                @*<img src="/images/others.png" class="tooltipstered">*@
+                                @Translate.Text("SL.Othersbill")
+                                <span class="m82-payment-history--card_listamount">{{otheramount}}</span>
+                            </li>
+                            {{/unless}}
+                            {{#unless adjamountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                @Translate.Text("SL.Adjustmentbill")
+                                <span class="m82-payment-history--card_listamount">{{adjamount}}</span>
+                            </li>
+                            {{/unless}}
+                            {{#unless previousamountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                @*<img src="/images/previous.png" class="tooltipstered">*@
+                                @Translate.Text("SL.Previous")
+                                <span class="m82-payment-history--card_listamount">{{previousamount}}</span>
+                            </li>
+                            {{/unless}}
+                            {{#unless paidamountflag}}
+                            <li class="m82-payment-history--card_listitem">
+                                @Translate.Text("SL.Paidbill")
+                                <span class="m82-payment-history--card_listamount green">{{paidamount}}</span>
+                            </li>
+                            {{/unless}}
+                        </ul>
+                    </div>
+                    <div class="m82-payment-history--card_total">
+                        @Translate.Text("TH.Billed Amount")
+                        <span class="m82-payment-history--card_totalamount">{{amount}}</span>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <div class="m82-payment-history--cardwrapper">
+                <div class="m82-payment-history--card">
+                    <div class="m82-payment-history--card_header">
+                        <div class="m82-payment-history--card_date">
+                            {{shortDate}}
+                        </div>
+
+                        {{#if noreceipt}}
+                        {{#if istransactionid}}
+                        <a class="" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_RECEIPT)?id={{degref}}&date={{nonformatdate}}&type={{paymenttype}}">
+                            <div class="m82-payment-history--card_icon">
+                                <img src="/images/paidbill_logo.png" class="tooltipstered">
+                            </div>
+                        </a>
+                        {{else}}
+                        <a class="" href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.J1_VIEW_RECEIPT)?docnumber={{documentnumber}}">
+                            <div class="m82-payment-history--card_icon">
+                                <img src="/images/paidbill_logo.png" class="tooltipstered">
+                            </div>
+                        </a>
+
+                        {{/if}}
+                        {{/if}}
+
+                    </div>
+
+                    <div class="m82-payment-history--card_list">
+                        <ul>
+                            <li class="m82-payment-history--card_listitem2">
+                                @Translate.Text("TH.Partner transaction id")
+                                <span class="m82-payment-history--card_listamount">
+                                    {{#if istransactionid}}
+                                    {{degref}}
+                                    {{else}}
+                                    {{documentnumber}}
+                                    {{/if}}
+                                </span>
+                            </li>
+                            <li class="m82-payment-history--card_listitem2">
+                                @Translate.Text("TH.Channel")
+                                <span class="m82-payment-history--card_listamount">{{channel}}</span>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <div class="m82-payment-history--card_total">
+                        @Translate.Text("TH.Paid Amount")
+                        <span class="m82-payment-history--card_totalamount green">{{amount}}</span>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{#showenddiv @@last @@index}}
+        </div>
+        {{/showenddiv}}
+        {{/transactions}}
+        <div class="m82-payment-history--cardrow clear_both">
+            <div id="pagination-list">
+            </div>
+        </div>
+    </script>
+
+
+    <script id="transaction-pagination-template" type="text/x-handlebars-template">
+        <div class="m34-pagination">
+            <div class="m34-pagination__content">
+                {{#if previouspage}}
+                <a onclick="ajaxSelection({{firstpagenumber}})" class="pagination--first" role="button" aria-label="@Translate.Text(" First")">
+                    <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev"></span>
+                    <span role="button" aria-label="Prev" class="button button--text button--back m34-pagination__button--prev second"></span>
+                </a>
+                {{/if}}
+                {{#if previouspage}}
+                <a onclick="ajaxSelection({{previouspagenumber}})" role="button" aria-label="@Translate.Text(" Previous")" class="button button--text button--back m34-pagination__button--prev pagination--prev">@Translate.Text("Previous")</a>
+                {{/if}}
+                <ul class="m34-pagination__page-list">
+                    {{#pagenumbers}}
+                    {{#ifCond ../page this}}
+                    <li data-index="{{this}}" class="m34-pagination__page-list-item  m34-pagination__page-list-item--active">
+                        <a onclick="ajaxSelection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                    </li>
+                    {{else}}
+                    <li data-index="{{this}}" class="m34-pagination__page-list-item">
+                        <a onclick="ajaxSelection({{this}})" role="button" aria-label="" class="button button--text button--icon-none m34-pagination__button--page">{{this}}</a>
+                    </li>
+                    {{/ifCond}}
+                    {{/pagenumbers}}
+                </ul>
+                {{#if nextpage}}
+                <a onclick="ajaxSelection({{nextpagenumber}})" role="button" aria-label="@Translate.Text(" Next")" class="button button--text button--next m34-pagination__button--next pagination--next">@Translate.Text("Next")</a>
+                {{/if}}
+                {{#if nextpage}}
+                <a onclick="ajaxSelection({{lastpagenumber}})" class="pagination--last" role="button" aria-label="@Translate.Text(" Last")">
+                    <span aria-label="Next" class="button button--text button--next m34-pagination__button--next"></span>
+                    <span aria-label="Next" class="button button--text button--next m34-pagination__button--next second"></span>
+                </a>
+                {{/if}}
+            </div>
+        </div>
+    </script>
+
+
+    <script type="text/javascript">
+    var xhrPool = []; // no need to use **var**
+    var gaguageLoadSettting =
+        [
+            //{ name: "_totalamountdue", enabled: false, isComplete: null, functionname:"_totalamountdueHandler" },
+            { name: "_billcompare", evapplicable: "3",enabled: false, isComplete :null, functionname:"_fnbillcompare" },
+            { name: "_besHandler", evapplicable: "3",enabled: false, isComplete: null, functionname:"_besHandler" },
+            { name: "_paymenthistory", evapplicable: "3",enabled: false, isComplete: null, functionname:"transactionSelection" },
+        ];
+    var accountNumber = '';
+    var bpNumber = '';
+    var cat = '';
+    var flag = '';
+    var isvisited = '';
+    var _graphInitiate = false
+    docReady(function () {
+       // require(['datepicker'], function () {
+            var fromdate = "", todate = "";
+            var date = new Date(),
+                    dateMinYear = new Date(),
+                    fromDate;
+
+        dateMinYear.setMonth(dateMinYear.getMonth() - 47)
+
+        var setMonthTo = function (dateRest) {
+
+            var _setMaxDate = new Date(dateRest.toISOString()),
+                addMonths = 11,
+                thisYear = new Date().getFullYear(),
+                prevYear = new Date().getFullYear() - 1,
+                selectedYear = dateRest.getFullYear();
+
+                 if (selectedYear == thisYear) {
+                    addMonths = new Date().getMonth() - dateRest.getMonth()
+                 }
+                if (selectedYear == prevYear) {
+                    if (dateRest.getMonth() > new Date().getMonth()) {
+                        var balMonths = addMonths - dateRest.getMonth();
+
+                            addMonths = balMonths + (new Date().getMonth()+1);
+                    }
+                }
+
+            _setMaxDate.setMonth(_setMaxDate.getMonth() + addMonths)
+            //var _setMaxDate = new Date(dateRest.toISOString());
+            //_setMaxDate.setMonth(_setMaxDate.getMonth() + 11)
+
+                jQuery('#form-field-To').datepicker({
+                    language: '@lang',
+                    minView: 'months',
+                    view: 'months',
+                    dateFormat: 'MM yyyy',
+                    maxDate: _setMaxDate,
+                    position: 'top left',
+                    minDate: dateRest,
+                    onSelect: function (formattedDate, date, inst) {
+                        todate = '';
+                        if (date != '') {
+                            var toselectdate = date.getMonth() + 1;
+                            todate = date.getFullYear() + '/' + ('0' + toselectdate).slice(-2);
+                            jQuery('#form-field-To').parsley().validate();
+                            //console.log(todate);
+                        }
+                    }
+                });
+
+
+
+            };
+
+        jQuery('#form-field-From').datepicker({
+            language: '@lang',
+            minView: 'months',
+            view: 'months',
+            dateFormat: 'MM yyyy',
+            position: 'top left',
+            maxDate: date,
+            minDate: dateMinYear,
+            onSelect: function (formattedDate, date, inst) {
+                fromdate = '';
+                if (date != '') {
+                    date.setMonth(date.getMonth());
+                    jQuery('#form-field-To').datepicker().data('datepicker').clear();
+                    setMonthTo(date);
+                    var frmdate = date.getMonth() + 1;
+                    fromdate = date.getFullYear() + '/' + ('0' + frmdate).slice(-2);
+                    jQuery('#form-field-From').parsley().validate();
+                }
+            }
+        });
+
+        setMonthTo(dateMinYear);
+        $('input[name=j01_radio]').change(function () {
+            jQuery('#downloaderror').hide();
+            var selected = $('input[name=j01_radio]:checked').val();
+            if (selected == 'custom') {
+                jQuery('#form-field-From').attr("required", "");
+                jQuery('#form-field-To').attr("required", "");
+            }
+            else {
+                fromdate = ""; todate = "";
+                jQuery('#form-field-From').removeAttr("required");
+                jQuery('#form-field-To').removeAttr("required");
+            }
+           // console.log(selected);
+        });
+
+        jQuery("#transactionhistorydownload").on('click', function (event) {
+            var selValue = $('input[name=j01_radio]:checked').val();
+
+            if (selValue == 'custom') {
+                jQuery('#form-field-From').parsley().validate();
+                jQuery('#form-field-To').parsley().validate();
+            }
+            if (selValue!= 'custom' || (selValue == 'custom' && jQuery('#form-field-From').parsley().isValid() && jQuery('#form-field-To').parsley().isValid()))
+            {
+
+                if (selValue != 'custom') {
+                    fromdate = ""; todate = "";
+                }
+                else
+                {
+                    selValue = "";
+                }
+                var accountNumber = getAccountNumber();
+                var url = "/api/transactionstatementdownload/account/";
+                jQuery.ajax({
+                    type: 'GET',
+                    url: url,
+                    traditional: true,
+                    data: {
+                        id: accountNumber,
+                        numberofmonths: selValue,
+                        frommonth: fromdate,
+                        tomonth: todate
+                    },
+                    beforeSend: function () {
+                        jQuery('#downloaderror').hide();
+                        jQuery('.j105-drrg--loader').show();
+                        jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    },
+                    complete: function () {
+                        jQuery('.j105-drrg--loader').hide();
+                    },
+                    //dataType: 'json',
+                    method: 'GET',
+                    success: function (response) {
+                        if (response != undefined && response != "") {
+                            if (response.success) {
+                               // window.open(response.url, '_blank');
+                                var a = document.createElement('a');
+                                a.href = response.url;
+                                a.setAttribute('target', '_blank');
+                                a.click();
+                            }
+                            else
+                            {
+                                jQuery('#downloaderror').show();
+                                jQuery('#downloaderror').html(response.Message);
+                            }
+                        }
+                    },
+                    error: function () {
+                        jQuery('#downloaderror').show();
+                        jQuery('#downloaderror').html(response.Message);
+                    }
+                });
+            }
+
+        });
+        Handlebars.registerHelper('ifCond', function (v1, v2, options) {
+            if (v1 == v2) {
+                return options.fn(this);
+            }
+            return options.inverse(this);
+        });
+        Handlebars.registerHelper("showdiv", function (index_count, block) {
+            if (parseInt(index_count) % 4 === 0) {
+                return block.fn(this);
+            }
+        });
+        Handlebars.registerHelper("showenddiv", function (lastitem, index_count, block) {
+            if (lastitem){
+                return block.fn(this);
+            }
+            if (parseInt(index_count+1) % 4 === 0) {
+                return block.fn(this);
+            }
+        });
+        jQuery('#form-account-selector').off("submit").submit(function (e) {
+            handleAccountSelection(e, gaguageLoadSettting);
+            e.preventDefault();
+            return false;
+        });
+        AbortAllAjaxCall();
+        fnInitializeDashBoardComponent(gaguageLoadSettting);
+        //jQuery('#form-account-selector').submit(handleAccountSelection);
+        //jQuery('#form-account-selector').submit();
+        jQuery('.m82-payment-history--header_buttoni').on('click', function() {
+            var type = jQuery(this).attr('data-value');
+            ajaxSelection(1, type);
+        });
+        jQuery("#downloadstmtbutton").on('click', function (event) {
+            event.preventDefault();
+            document.querySelector('.m39-modal__triggerDownload').click();
+        });
+    });
+
+
+
+    function getAccountNumber() {
+        return jQuery('#form-account-selector').find('input[name="SelectedAccountNumber"]:checked').val();
+    }
+
+    function transactionSelection() {
+        ajaxSelection(1);
+        return false;
+    }
+
+    function ajaxSelection(page, sortby) {
+        if (typeof (sortby) === 'undefined')
+            sortby = jQuery('.m82-payment-history--header_buttona').attr('data-value');
+        var accountNumber = getAccountNumber();
+        if (accountNumber) {
+            jQuery('a[href*="?a="]').each(function () {
+                var $a = jQuery(this);
+                var $href = $a.attr('href');
+                var $newHref = $href.replace(/(\?a=\d*)/g, '?a={accnum}'.replace('{accnum}', accountNumber));
+
+                $a.attr('href', $newHref);
+            });
+            var url = "/api/transactions/account/";
+            jQuery.ajax({
+                type: 'GET',
+                url: url,
+                traditional: true,
+
+                data: {
+                    id: accountNumber,
+                    page: page,
+                    sortby: sortby
+                },
+                beforeSend: function () {
+                    jQuery('.m82-payment-history--header_buttons').find('.m82-payment-history--header_buttoni').each(function () {
+                        $(this).removeClass('m82-payment-history--header_buttona');
+                    });
+                    jQuery('#transaction-history-placeholder').removeClass('hidden').empty();
+                    jQuery('.transaction-list-wrapper').show();
+                    jQuery('.no-transactions-wrapper, .error-transactions-wrapper, .form-transaction-filter, #downloadstmtbutton').hide();
+
+                    window.attachSpinner('#transaction-history-placeholder', { minHeight: 100 });
+                },
+                complete: function () {
+                    window.detachSpinner('#transaction-history-placeholder');
+                },
+                dataType: 'json',
+                method: 'GET',
+                success: function (response) {
+                   var evaccountselected = jQuery('input[name="SelectedAccountNumber"]:checked').attr("data-evaccount");
+                    if (evaccountselected == 'False') {
+                        if (response.downloadstmt) {
+                            jQuery('#downloadstmtbutton').show();
+                        }
+                    }
+
+                    if ((!response || response.Transactions.length === 0) && sortby == "") {
+                        jQuery('.no-transactions-wrapper').show();
+                        jQuery('.transaction-list-wrapper, .error-transactions-wrapper, .form-transaction-filter').hide();
+                    }
+                    else if ((!response || response.Transactions.length === 0) && sortby != "") {
+                        jQuery('.no-transactions-wrapper, .form-transaction-filter').show();
+                        jQuery('select[name="transaction-filter"]').val(response.sortby);
+                        jQuery('#transaction-history-placeholder').addClass('hidden');
+                    }
+                    else {
+                        jQuery('.no-transactions-wrapper, .error-transactions-wrapper').hide();
+                        jQuery('.transaction-list-wrapper, .form-transaction-filter').show();
+
+                        if (response.sortby != "" && response.sortby != null) {
+                            jQuery('.m82-payment-history--header_buttons').find('.m82-payment-history--header_buttoni').each(function () {
+                                if ($(this).attr('data-value') == response.sortby) {
+                                    $(this).addClass('m82-payment-history--header_buttona');
+                                }
+                            });
+                            }
+                            else {
+                            jQuery('.m82-payment-history--header_buttons').find('.m82-payment-history--header_buttoni:first-child').addClass('m82-payment-history--header_buttona');
+                            }
+                        jQuery('select[name="transaction-filter"]').val(response.sortby);
+                        var context = {
+                            transactions: function () {
+                                return _.map(response.Transactions, transform);
+                            }
+                        };
+                        renderHistory(context);
+
+                        if (response.pagination) {
+                            var pagedata = {
+                                previouspage: function () {
+                                    if (response.page > 1)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                nextpage: function () {
+                                    if (response.page < response.totalpage)
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                page: response.page,
+                                firstpagenumber:1,
+                                lastpagenumber: response.totalpage,
+                                previouspagenumber: response.page - 1,
+                                nextpagenumber: response.page + 1,
+                                pagenumbers: response.pagenumbers,
+                                totalpage: response.totalpage
+                            }
+                            renderSearchPagination(pagedata);
+                        }
+                    }
+                },
+                error: function () {
+                    jQuery('.no-transactions-wrapper, .transaction-list-wrapper, .form-transaction-filter').hide();
+                    jQuery('.error-transactions-wrapper').show();
+                }
+            });
+        }
+        return false;
+    }
+
+    function handleFilterSelection() {
+        var type = jQuery(this).attr('data-value');
+        ajaxSelection(1, type);
+    }
+
+    function sanitize(accountNumber) {
+        if (accountNumber) {
+            if (accountNumber.substring(0, 2) === '00') {
+                return accountNumber.substring(2);
+            }
+        }
+        return accountNumber;
+        }
+
+    function amountformat(amount) {
+        if (amount) {
+            return numeral(amount).format('0,0.00')
+        }
+        return amount;
+    }
+
+    function transform(transaction) {
+        var t = {
+            shortDate: transaction.FormattedDate,
+            date: transaction.FormattedDateTime,
+            amount: amountformat(transaction.Amount),
+            degRef: transaction.DegTransactionReference,
+
+            isInvoice: transaction.IsInvoice,
+            isReceipt: transaction.IsReceipt
+        }
+
+        if (transaction.IsReceipt) {
+            t.dewaRef = transaction.DewaTransactionReference;
+            t.businessPartnerNumber = transaction.BusinessPartnerNumber;
+            t.accountNumber = sanitize(transaction.AccountNumber);
+            t.receiptId = transaction.ReceiptId;
+            t.degref = transaction.DegTransactionReference;
+            t.nonformatdate = transaction.NonFormattedDate;
+            t.istransactionid = transaction.IsTransactionId;
+                t.paymenttype = transaction.paymenttype;
+                t.timestamp = transaction.timestamp;
+                t.channel = transaction.channel;
+                t.documentnumber = transaction.documentnumber;
+                t.amountpaid = transaction.Amount;
+                t.noreceipt = transaction.noreceipt;
+        }
+
+        if (transaction.IsInvoice) {
+            t.dewaamount = amountformat(transaction.dewaamount);
+            t.dewaamountflag =numeral(transaction.dewaamount) == 0;
+            t.dmamount = amountformat(transaction.dmamount);
+            t.dmamountflag = numeral(transaction.dmamount) == 0;
+            t.electricityamount = amountformat(transaction.electricityamount);
+            t.nakamount = amountformat(transaction.nakamount);
+            t.nakamountflag = numeral(transaction.nakamount) == 0;
+            t.otheramount = amountformat(transaction.otheramount);
+            t.otheramountflag = numeral(transaction.otheramount) == 0;
+            t.paidamount = amountformat(transaction.paidamount);
+            t.paidamountflag = numeral(transaction.paidamount) == 0;
+            t.previousamount = amountformat(transaction.previousamount);
+            t.previousamountflag =numeral(transaction.previousamount) == 0;
+            t.wateramount = amountformat(transaction.wateramount);
+            t.adjamount = amountformat(transaction.adjamount);
+            t.adjamountflag =numeral(transaction.adjamount) == 0;
+        }
+
+        return t;
+    }
+
+    function renderHistory(context) {
+        var markup = jQuery('#transaction-item-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#transaction-history-placeholder').html(rendering);
+
+        window.initComponents('transaction-history-placeholder');
+        //console.log("render done");
+    }
+
+    function renderSearchPagination(context) {
+        var markup = jQuery('#transaction-pagination-template').html();
+        var template = Handlebars.compile(markup);
+
+        var rendering = template(context);
+        jQuery('#pagination-list').html(rendering);
+
+        //window.initComponents('pagination-list');
+    }
+    </script>
+    @Scripts.Render("~/bundles/dashboard")
+    @Scripts.Render("~/bundles/bes")
+</div>

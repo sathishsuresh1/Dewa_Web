@@ -1,0 +1,130 @@
+﻿@using Glass.Mapper.Sc.Web.Mvc
+@using Sitecore.Mvc.Presentation
+@using DEWAXP.Foundation.Helpers
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.ShamsDubai.Models.ShamsDubaiTraining
+@model ApplicationTrackingModel
+
+
+<div class="j105-drrg">
+    <div class="m66-preloader j105-drrg--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("J100.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="grid">
+
+    <div class="grid__row">
+        <div class="grid__column grid__column--12" id="divIdtrackapplication">
+            @using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName,
+        FormMethod.Post, new
+        {
+            @class = "form",
+            @id = "Idtrackapplication",
+            data_form = "true",
+            data_parsley_focus = "none",
+            @data_submit_validate = "enabled",
+            enctype = "multipart/form-data",
+            @autocomplete = "off"
+        }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SubmissionError.cshtml")
+                <div class="form-field form-field--text">
+                    <label for="form-field-requestnumber" class="form-field__label">
+                        @Translate.Text("PVCC_Request_Number")
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text"
+                               id="form-field-requestnumber"
+                               name="RequestNumber"
+                               type="number"
+                               required=""
+                               placeholder="@Translate.Text("PVCC_EnterRequest_Number")"
+                               aria-describedby="description-for-requestnumber"
+                               data-parsley-errors-container="#description-for-requestnumber"
+                               data-parsley-required-message="@Translate.Text("PVCC_EnterRequest_Number")"
+                               oninput="javascript: if (this.value.length > 8) this.value = this.value.slice(0, 8);"
+                               data-parsley-trigger="focusout">
+                    </span>
+                    <div id="description-for-requestnumber" class="form-field__messages">
+                    </div>
+                </div>
+                <div class="form-field form-field--text  ">
+                    <label for="form-field-emiratesid" class="form-field__label">
+                        @Translate.Text("PVCC_EmiratesId")
+                        <span class="form-field__label-required aria-only">@Translate.Text("Epass.Required")</span>
+                    </label>
+                    <span class="form-field__input-wrapper">
+                        <input class="form-field__input form-field__input--text form-field__binding"
+                               id="form-field-emiratesid"
+                               name="EmiratesID"
+                               type="number"
+                               required=""
+                               data-parsley-required-message="@Translate.Text("PVCC_EnterEmiratesId")"
+                               placeholder="@Translate.Text("PVCC_EnterEmiratesId")"
+                               aria-describedby="description-for-emiratesid"
+                               data-parsley-errors-container="#description-for-emiratesid"
+                               data-parsley-emiratesid=""
+                               data-parsley-trigger="focusout"
+                               data-parsley-emiratesid-message="@Translate.Text("PVCC_EnterValidEmiratesId")">
+                    </span>
+                    <div id="description-for-emiratesid" class="form-field__messages">
+                        @Html.ValidationMessageFor(x => x.EmiratesID, "", new { @class = "parsley-errors-list" })
+                    </div>
+                </div>
+
+                <div class="form-field__button">
+                    @*<button type="submit" id="btnSearch" class="button button--primary" data-submission-text="@Translate.Text("Finding")...">@Translate.Text("Find Status")</button>*@
+                    <a id="btnTrackingSearch" href="#" onclick="TrackingList()" class="button button--primary button--fullwidth-mobile" data-submission-text="@Translate.Text("PVCC_Finding")...">@Translate.Text("PVCC_Find_Status")</a>
+                </div>
+            }
+            <div class="m23-table m23-table--green mt12" id="ApplicationtrackingList" data-component="m23-table" style="display:none">
+                @{ Html.RenderPartial("~/Views/Feature/ShamsDubai/ShamsDubaiTraining/ApplicationTrackingList.cshtml", Model); }
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+   
+    function TrackingList() {
+        jQuery("#Idtrackapplication").parsley().validate();
+        var isValid = jQuery("#Idtrackapplication").parsley().isValid();
+        var requestNumber = jQuery('#form-field-requestnumber').val();
+        var emiratesId = jQuery('#form-field-emiratesid').val();
+        var url = "/api/sitecore/ShamsDubaiTraining/ApplicationTracking";
+        if (isValid) {
+        if ((requestNumber != null && requestNumber != "") || (emiratesId != "" && emiratesId != null)) {
+            jQuery.ajax({
+                url: url,
+                type: 'POST',
+                datatype: 'application/json',
+                traditional: true,
+                data: AddForgeryToken({ RequestNumber: requestNumber, EmiratesID: emiratesId }, "Idtrackapplication"),
+                beforeSend: function () {
+                    jQuery('.j105-drrg--loader').show();
+                    jQuery('.j105-drrg--loader').css('top', $(window).scrollTop());
+                    $('body').removeClass('unscrollable').addClass('unscrollable');
+                },
+                complete: function () {
+                    jQuery('.j105-drrg--loader').hide();
+                    $('body').removeClass('unscrollable');
+                },
+                success: function (response) {
+                    jQuery('#ApplicationtrackingList').show();
+                    jQuery('#ApplicationtrackingList').html('');
+                    jQuery('#ApplicationtrackingList').html(response);
+                }
+            });
+            }
+        }
+        return false;
+    }
+</script>

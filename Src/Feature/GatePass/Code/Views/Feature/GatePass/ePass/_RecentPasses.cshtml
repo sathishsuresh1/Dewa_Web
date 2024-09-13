@@ -1,0 +1,255 @@
+﻿@using DEWAXP.Foundation.Helpers
+@using Glass.Mapper.Sc.Fields
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Configuration
+@using Sitecore.Globalization
+@using DEWAXP.Feature.GatePass.Models.ePass
+@using DEWAXP.Foundation.Content
+@using Roles = DEWAXP.Foundation.Content.Roles
+@model IEnumerable<DEWAXP.Feature.GatePass.Models.ePass.SecurityPassViewModel>
+
+@{
+    /**/
+
+    string linkurl = string.Empty;
+    if (ViewBag.role != null && (string)ViewBag.role == Roles.DewaSupplier)
+    {
+        linkurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWDETAILS);
+    }
+    else
+    {
+        linkurl = LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_SHOWPENDINGAPPROVALDETAILS);
+    }
+}
+<style>
+    .j113-epass .j113-epass--status.pendingapproval {
+        background-color: #E8CA94;
+    }
+</style>
+<div class="j113-epass">
+    <div class="m66-preloader j113-epass--loader hidden">
+        <div class="grid">
+            <div class="grid__row">
+                <div class="grid__column grid__column--12">
+                    <h2 class="text__section-subtitle">@Translate.Text("Epass.Pleasewait")</h2>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div style="margin-top:15px">
+        <button class="button button--primary j113-epass-downloadbutton" id="multipleDownloads" type="button" data-submission-text="@Translate.Text("Download")...">Download</button>
+    </div>*@
+@using (Html.BeginRouteForm(MvcSettings.SitecoreRouteName, FormMethod.Post, new { @class = "form static-form", data_form = "true", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+}
+<table class="j113-epass--table">
+    <thead class="j113-epass--table_header">
+        <tr>
+            @*<th class="j113-epass--table_cell"></th>*@
+            <th class="j113-epass--table_cell">@Translate.Text("Epass.Pass")</th>
+            <th class="j113-epass--table_cell">@Translate.Text("Group Pass")</th>
+            <th class="j113-epass--table_cell j113-epass--table_cell--name">@Translate.Text("Epass.IndName")</th>
+            <th class="j113-epass--table_cell">@Translate.Text("Epass.Expirydate")</th>
+            <th class="j113-epass--table_cell">@Translate.Text("Epass.PassType")</th>
+            <th class="j113-epass--table_cell">@Translate.Text("Epass.Status")</th>
+            @if ((string)ViewBag.role == Roles.DewaSupplier)
+            {
+                <th class="j113-epass--table_cell">@Translate.Text("Epass.Action")</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr class="j113-epass--table_row">
+                <td class="j113-epass--table_cell" colspan="6">
+                    <p class='centered'>@Translate.Text("Epass.Noresultsfound")</p>
+                </td>
+
+            </tr>
+        }
+        else
+        {
+            foreach (var item in Model)
+            {
+                <tr class="j113-epass--table_row">
+                    <td class="j113-epass--table_cell">
+                        <a class="j113-epass--table_cell--pnumber button--text" href="@linkurl?passNumber=@item.mainpassNumber">@item.passNumber</a>
+                    </td>
+                    <td class="j113-epass--table_cell">
+                        @if (item.grouppass)
+                        {
+                            <a class="j113-epass--table_cell--pnumber button--text" href="@linkurl?passNumber=@item.grouppassid">@item.grouppassid</a>
+                        }
+                        else
+                        {
+                            @item.grouppassid
+                        }
+                    </td>
+                    <td class="j113-epass--table_cell">
+                        @item.name
+                    </td>
+                    <td class="j113-epass--table_cell j113-epass--table_cell--date">
+                        @Html.DisplayFor(model => item.strpassExpiryDate)
+                    </td>
+                    <td class="j113-epass--table_cell">
+                        @item.passType
+                    </td>
+                    <td class="j113-epass--table_cell">
+                        <div class="j113-epass--status @item.strclass.ToLower()">@(item.strstatus)</div>
+                    </td>
+                    @if ((string)ViewBag.role == Roles.DewaSupplier)
+                    {
+                        <td class="j113-epass--table_cell">
+                            @if (!item.wppass && (item.status == SecurityPassStatus.Active || item.status == SecurityPassStatus.SoontoExpire))
+                            {
+                                <a href="#" class="link j113-epass-sharelink icon-share" data-id="@item.passNumber">@Translate.Text("Epass.Share") </a>
+                            }
+                            else if (!item.wppass && item.status == SecurityPassStatus.Rejected)
+                            {
+                                if (item.passTypeText.Equals("Device"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_DEVICE_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+
+                                }
+                                else if (item.passTypeText.Equals("Night"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_NIGHT_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+
+                                }
+                                else if (item.passTypeText.Equals("Holiday"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_HOLIDAY_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+                                }
+                                else if (item.passTypeText.Equals("Material"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MATERIAL_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+                                }
+                                else
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_PERMANENT_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+                                }
+                            }
+                            else if (item.status == SecurityPassStatus.UnderApprovalinWorkPermit || item.status == SecurityPassStatus.PendingApprovalwithCoordinator || item.status == SecurityPassStatus.PendingApprovalwithSecurity)
+                            {
+                                if (!item.wppass || (item.wppass && !item.grouppass))
+                                {
+                                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-type="@(item.wppass ? "workpermit" : "")" data-groupid="@item.grouppassid" data-id="@item.passNumber">@Translate.Text("Epass.Cancel")</a>
+                                }
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+
+        }
+
+    </tbody>
+</table>
+
+<div class="j113-epass--keypair">
+
+    @if (!Model.Any())
+    {
+        <br />
+        <p class='centered'>@Translate.Text("Epass.Noresultsfound")</p>
+    }
+    else
+    {
+
+
+        foreach (var item in Model)
+        {
+            <div class="m42-keyvalue">
+                <dl>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Pass")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"><a class="j113-epass--table_cell--pnumber button--text" href="@linkurl?passNumber=@item.passNumber"> @item.passNumber</a></dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Group Pass")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                        @if (item.grouppass)
+                        {
+                            <a class="j113-epass--table_cell--pnumber button--text" href="@linkurl?passNumber=@item.grouppassid"> @item.grouppassid</a>
+                        }
+                        else
+                        {
+                            @item.grouppassid
+                        }
+                    </dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.IndName")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.name</dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Expirydate")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                        @Html.DisplayFor(model => item.strpassExpiryDate)
+                        @*@if (ViewBag.role != null && (string)ViewBag.role == Roles.DewaonedayInitiator)
+                            {
+
+                            }
+                            else
+                            {
+                                @Html.DisplayFor(model => item.passExpiryDate)
+                            }*@
+                    </dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.PassType")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">@item.passType</dd>
+                    <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Status")</dt>
+                    <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+                        <div class="j113-epass--status @item.strclass.ToLower()">
+                            @(item.strstatus)
+                        </div>
+                    </dd>
+                    @if ((string)ViewBag.role == Roles.DewaSupplier)
+                    {
+                        <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">@Translate.Text("Epass.Action")</dt>
+                        <dd class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd">
+
+                            @if (item.status == SecurityPassStatus.Active || item.status == SecurityPassStatus.SoontoExpire)
+                            {
+                                <a href="#" class="link j113-epass-sharelink  icon-share" data-id="@item.passNumber">@Translate.Text("Epass.Share") </a>
+                            }
+                            else if (!item.wppass && item.status == SecurityPassStatus.Rejected)
+                            {
+                                if (item.passTypeText.Equals("Device"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_DEVICE_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+
+                                }
+                                else if (item.passTypeText.Equals("Night"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_NIGHT_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+
+                                }
+                                else if (item.passTypeText.Equals("Holiday"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_HOLIDAY_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+                                }
+                                else if (item.passTypeText.Equals("Material"))
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_MATERIAL_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+                                }
+                                else
+                                {
+                                    <a href="@LinkHelper.GetItemUrl(SitecoreItemIdentifiers.EPASS_PERMANENT_PASS)?passNo=@item.passNumber" class="link icon-edit" data-id="@item.passNumber">@Translate.Text("Epass.Edit")</a>
+                                }
+                            }
+                            else if (item.status == SecurityPassStatus.UnderApprovalinWorkPermit || item.status == SecurityPassStatus.PendingApprovalwithCoordinator || item.status == SecurityPassStatus.PendingApprovalwithSecurity)
+                            {
+                                if (!item.wppass || (item.wppass && !item.grouppass))
+                                {
+                                    <a href="#" class="link j113-epass--records_remove icon-cancel" data-type="@(item.wppass ? "workpermit" : "")" data-groupid="@item.grouppassid" data-id="@item.passNumber">@Translate.Text("Epass.Cancel")</a>
+                                }
+                            }
+                        </dd>
+                    }
+
+                </dl>
+            </div>
+        }
+
+    }
+</div>
+@Html.Partial("~/Views/Feature/GatePass/ePass/Module/_SharePasses.cshtml")
+@Html.Partial("~/Views/Feature/GatePass/ePass/Module/_CancelPasses.cshtml")
+

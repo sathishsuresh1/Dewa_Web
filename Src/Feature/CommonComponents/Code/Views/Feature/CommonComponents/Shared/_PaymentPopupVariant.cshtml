@@ -1,0 +1,762 @@
+﻿@using Sitecore.Globalization
+@using DEWAXP.Foundation.Content
+@model string
+@{
+    var lang = Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en";
+    var PaymentList = DEWAXP.Foundation.Helpers.PaymentHelper.UAEPGSList(Sitecore.Context.Language.CultureInfo.TextInfo.IsRightToLeft ? "ar" : "en", HttpContext.Current.Request.Headers["User-Agent"]);
+}
+<style type="text/css">
+    .form-field__radio.disabled {
+        opacity: 0.5;
+    }
+
+    .j105-drrg--loader {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 99999999999;
+        top: 0 !important;
+    }
+</style>
+@Html.Partial("~/Views/Feature/CommonComponents/Shared/_Loader.cshtml")
+<div class="m39-modal" data-component="m39-modal" id="modal_true">
+    <button data-trigger="true" class="m39-modal__trigger hidden btnmodaltrigger" type="button"></button>
+    <div data-content="true" class="m39-modal__container" role="dialog" aria-expanded="true" id="divnoqodimodel_content" aria-labelledby="divnoqodimodel_trigger">
+        <div class="m39-modal__dialog  m39-modal__dialog--payment m39-modal__dialog--payment_2">
+            <div class="m39-modal__header">
+                <div class="m39-modal__title">@Translate.Text("PM_Paymethod")</div>
+                <button data-close="true" class="m39-modal__button--close" id="divnoqodimodel_close" aria-controls="divnoqodimodel_content">@Translate.Text("Close")</button>
+                @*<div class="m39-modal__subtitle">@Translate.Text("PM_TypePaymethod")</div>*@
+            </div>
+            <div class="m39-modal__content" style="top: 120px;">
+                <div class="m39-model__payment-option-list first">
+                    <div class="form-field" id="divPaymentAmountVal" data-value="">
+                        <fieldset class="fieldset" style="margin-top:2px">
+                            <legend class="legend-color">.</legend>
+                            <p class="form-field__radio  form-field__radio__0 hidden" id="samsungpay">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio samsungpay-option"
+                                           id="form-field-radio_1_7"
+                                           name="paymentMethod"
+                                           type="radio"
+                                           value="7"
+                                           aria-describedby="description-for-paymentMethod"
+                                           data-parsley-errors-container="#description-for-paymentMethod"
+                                           data-input="radio">
+                                    <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                                        <span class="payment-option-wrapper align_left">
+                                            <span class="flex-center">
+                                                <img src="/images/Payment/samsung-pay-logo.png"
+                                                     alt="@Translate.Text("Samsung pay")" class="" style="width: auto; height: 24px; margin: 0 8px;">
+                                                <span class="payment-option-name">
+                                                    @Translate.Text("Samsung pay")
+                                                </span>
+                                            </span>
+                                            <span class="payment-option-text enbdtext p0">
+                                                @Translate.Text("VAT Charges ENBD")
+                                            </span>
+                                        </span>
+                                    </span>
+                                </label>
+                            </p>
+                            @*<p class="form-field__radio form-field__radio__1 hidden" id="applepay">
+                                    <label>
+                                        <input class="form-field__input form-field__input--radio applepay-option"
+                                               id="form-field-radio_1_2"
+                                               name="paymentMethod"
+                                               type="radio"
+                                               value="2"
+                                               aria-describedby="description-for-paymentMethod"
+                                               data-parsley-errors-container="#description-for-paymentMethod"
+                                               data-input="radio">
+                                        <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                                            <span class="payment-option-wrapper align_left">
+                                                <span class="flex-center">
+                                                    <img src="/images/Payment/apple-pay-logo.png"
+                                                         alt="@Translate.Text("Apple pay")" class="" style="width: auto; height: 24px; margin: 0 8px;">
+                                                    <span class="payment-option-name">
+                                                        @Translate.Text("Apple pay")
+                                                    </span>
+                                                </span>
+                                                <span class="payment-option-text enbdtext p0">
+                                                    @Translate.Text("VAT Charges ENBD")
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </p>*@
+                            <p class="form-field__radio form-field__radio__2">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio"
+                                           id="form-field-radio_1_5"
+                                           name="paymentMethod"
+                                           type="radio"
+                                           value="5"
+                                           checked="checked"
+                                           aria-describedby="description-for-paymentMethod"
+                                           data-parsley-errors-container="#description-for-paymentMethod"
+                                           data-input="radio">
+                                    <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled">
+                                        <span class="payment-option-wrapper align_left">
+                                            <span class="flex-center">
+                                                <img src="/images/Noqodi/CreditCard_logo-01@2x.png" alt="@Translate.Text("Credit / Debit Card")" class="" style="width: auto; height: 24px; margin: 0 8px;">
+                                                <span class="payment-option-name">
+                                                    @Translate.Text("Credit / Debit Card")
+                                                </span>
+                                            </span>
+                                            <span class="payment-option-text enbdtext p0">
+                                                @Translate.Text("VAT Charges ENBD")
+                                            </span>
+
+                                        </span>
+                                    </span>
+                                </label>
+                            </p>
+
+                            <p class="form-field__radio form-field__radio__4" id="netbanking">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio"
+                                           id="form-field-radio_1_6"
+                                           name="paymentMethod"
+                                           type="radio"
+                                           value="6"
+                                           aria-describedby="description-for-paymentMethod"
+                                           data-parsley-errors-container="#description-for-paymentMethod"
+                                           data-input="radio">
+                                    <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled mt24">
+                                        <span class="payment-option-wrapper align_left">
+                                            <span class="flex-center">
+                                                <img src="/images/Noqodi/NetBanking_logo-01@2x.png" alt="@Translate.Text("PM_PaythrouNetbanking")" class="" style="width: auto; height: 24px; margin: 0 8px;">
+                                                <span class="payment-option-name">
+                                                    @Translate.Text("PM_PaythrouNetbanking")
+                                                </span>
+                                            </span>
+
+                                        </span>
+                                    </span>
+                                </label>
+                            </p>
+                            <p class="form-field__radio form-field__radio__5">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio"
+                                           id="form-field-radio_1_3"
+                                           name="paymentMethod"
+                                           type="radio"
+                                           value="3"
+                                           aria-describedby="description-for-paymentMethod"
+                                           data-parsley-errors-container="#description-for-paymentMethod"
+                                           data-input="radio">
+                                    <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled mt24">
+                                        <span class="payment-option-wrapper align_left">
+                                            <span class="flex-center">
+                                                <img src="/images/Noqodi/noqodi-@(lang)-2x.png" alt="@Translate.Text("PM_PaythrouNetbanking")" class="" style="width: auto; height: 24px; margin: 0 8px;">
+                                                <span class="payment-option-name">
+                                                    @Translate.Text("PM_PaythrouNetbanking")
+                                                </span>
+                                            </span>
+                                            <span class="payment-option-text p0">
+                                                @Translate.Text("PM_VatAdditicharges")
+                                            </span>
+                                        </span>
+                                    </span>
+                                </label>
+                            </p>
+                            <p class="form-field__radio form-field__radio__6">
+                                <label>
+                                    <input class="form-field__input form-field__input--radio"
+                                           id="form-field-radio_1_4"
+                                           name="paymentMethod"
+                                           type="radio"
+                                           value="4"
+                                           aria-describedby="description-for-paymentMethod"
+                                           data-parsley-errors-container="#description-for-paymentMethod"
+                                           data-input="radio">
+                                    <span class="form-field__fakeradio form-field__fakeradio--right focus-enabled mt24">
+                                        <span class="payment-option-wrapper align_left">
+                                            <span class="flex-center">
+                                                <img src="/images/Noqodi/noqodi-@(lang)-2x.png" alt="@Translate.Text(" PM_PaythrouNoqoewallet")" class="" style="width: auto; height: 24px; margin: 0 8px;">
+                                                <span class="payment-option-name">
+                                                    @Translate.Text("PM_PaythrouNoqoewallet")
+                                                </span>
+                                            </span>
+                                            <span class="payment-option-text p0">
+                                                @Translate.Text("PM_VatChargesNoqoewallet")
+                                            </span>
+                                        </span>
+                                    </span>
+                                </label>
+                            </p>
+                        </fieldset>
+                        @Html.Partial("~/Views/Feature/CommonComponents/Shared/_SuqiaDonation.cshtml")
+                    </div>
+                </div>
+                <div class="m39-model__payment-option-list second" style="display: none; height: 100%;">
+                    <div class="button button--text button--back" id="backtofirst">
+                        @Translate.Text("Back")
+                    </div>
+                    <div class="form-field form-field--text mb24">
+                        <label class="form-field__label" for="form-field-mrzbmulpx">
+                            <span class="aria-only">@Translate.Text("Search")</span>
+                        </label>
+                        <span class="form-field__input-wrapper">
+                            <input type="text" data-parsley-errors-container="#description-for-mrzbmulpx"
+                                   data-parsley-error-message="Enter a value"
+                                   aria-describedby="description-for-mrzbmulpx"
+                                   data-parsley-excluded=""
+                                   placeholder="@Translate.Text("Search")" name="map_search_desktop"
+                                   id="form-field-mrzbmulpx"
+                                   class="form-field__input form-field__input--text pac-target-input"
+                                   data-parsley-trigger="focusout"
+                                   data-parsley-id="10"
+                                   autocomplete="off" aria-invalid="true">
+                        </span>
+                        <div class="form-field__messages" id="description-for-mrzbmulpx">
+                        </div>
+                    </div>
+                    <div class="payment-banklist">
+                        @if (PaymentList != null && PaymentList.Count > 0)
+                        {
+                            foreach (var bank in PaymentList)
+                            {
+                                <a href="javascript:void(0)" data-burl="@bank.Url" data-bkey="@bank.Bankkey" class="flex-center mb24 paymentbankkey">
+                                    <span class="payment-banklist-icon" style="background-image: url('@bank.Imagelink');"></span>
+                                    <span class="payment-option-name payment-banklist-title">@bank.Bankname</span>
+                                </a>
+                            }
+                            <input type="hidden" name="bankkey" class="bankkey" />
+                        }
+                        <p class="payment-option--noresult @((PaymentList != null && PaymentList.Count > 0)?"hidden":string.Empty)">@Translate.Text("Payment No Match Found")</p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="m39-modal__footer">
+
+                <div class="payment-modal-bottom">
+                    <div class="m42-keyvalue m42-keyvalue-payment">
+                        <dl>
+                            <dt class="m42-keyvalue__key m42-keyvalue__key--secondary m42-keyvalue--justified-dt">Total Amount </dt>
+                            <dd id="continue-button" class="m42-keyvalue__value m42-keyvalue__value--secondary m42-keyvalue--justified-dd"
+                                data-amount="@Model" data-numeric-format="0,0.00" data-currency="@Translate.Text(" AED")" data-acc-detail="">@Model</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <p class="m39-modal__accsel-error hidden" data-modal="errormessage" aria-hidden="true" tabindex="0" data-min-error="@Translate.Text(" PM_Selectatleast")">@Translate.Text("PM_Selectatleast")</p>
+                    <button class="button button--primary button--pay mb12" type="submit">@Translate.Text("easypay.pay")</button>
+                    <input name="details" id="details" class="hidden" />
+                    <div class="button button--primary button--samsungpay hidden" id="samsungpaybutton">
+                        <img src="/images/Payment/samsung-pay-button.png">
+                    </div>
+                    <div class="button button--primary button--applepay hidden" id="applypaybutton">
+                        <img src="/images/Payment/apple-pay-button.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+
+        $('#netbanking').on('click', function () {
+            if ($('#netbanking').hasClass("disabled") != true) {
+                $('.m39-model__payment-option-list.first').fadeOut();
+                $(this).closest('.m39-modal').find('.m39-modal__footer').fadeOut();
+                setTimeout(function () {
+                    $('#form-field-mrzbmulpx').val('');
+                    $('#form-field-mrzbmulpx').trigger('keyup');
+                    $('.m39-model__payment-option-list.second').fadeIn();
+                }, 400);
+            }
+        });
+
+        $('#backtofirst').on('click', function () {
+            $('.m39-model__payment-option-list.second').fadeOut();
+
+            var total = jQuery('#divPaymentAmountVal').data('value');
+            setPaymentMethod(total);
+
+            $(this).closest('.m39-modal').find('.m39-modal__footer').fadeIn();
+            setTimeout(function () {
+                $('.m39-model__payment-option-list.first').fadeIn();
+            }, 400);
+            jQuery(this).closest('.samsungApplePayForm').off('submit.temp');
+        });
+
+        setTimeout(function () {
+            jQuery('#backtofirst').closest('.m39-modal').find('.m39-modal__trigger').on('click', function () {
+                $('#backtofirst').click();
+            });
+        }, 100)
+
+        jQuery('#form-field-mrzbmulpx').on('keydown', function (event) {
+            jQuery(this).closest('.samsungApplePayForm').on('submit.temp', function (e) {
+                e.preventDefault()
+            });
+            setTimeout(function () {
+                jQuery(this).closest('.samsungApplePayForm').off('submit.temp');
+            }, 500)
+        });
+
+        $('#form-field-mrzbmulpx').off('keyup.j155').on('keyup.j155', function () {
+            if ($(this).val().length != 0) {
+                //console.log($(this).val());
+                var input, filter, files, a, i, txtValue, results;
+
+                input = $(this);
+                filter = input.val().toUpperCase();
+                files = $('.m39-model__payment-option-list.second').find('.flex-center');
+                results = 0;
+
+                // Loop through all list items, and hide those who don't match the search query
+                for (i = 0; i < files.length; i++) {
+                    a = $(files[i]).find('.payment-option-name').text();
+                    txtValue = a;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        $(files[i]).show();
+
+                        results++;
+                    } else {
+                        $(files[i]).hide();
+                    }
+                };
+
+                if (results == 0) {
+                    $('.payment-option--noresult').show();
+                } else {
+                    $('.payment-option--noresult').hide();
+                }
+            } else {
+                $('.m39-model__payment-option-list.second').find('.flex-center').each(function () {
+                    $(this).show();
+                });
+            };
+        })
+
+        function setPaymentMethod(total) {
+            if (numeral(total) > @PaymentConstants.EasyMaximumAllowedPaymentAmount) {
+                //defaulty enable noqodi netbanking only
+                jQuery('#form-field-radio_1_5').attr("disabled", true);
+                jQuery('#form-field-radio_1_5').closest('.form-field__radio').addClass('disabled');
+                jQuery('#form-field-radio_1_7').attr("disabled", true);
+                jQuery('#form-field-radio_1_7').closest('.form-field__radio').addClass('disabled');
+                //jQuery('#form-field-radio_1_2').attr("disabled", true);
+                //jQuery('#form-field-radio_1_2').closest('.form-field__radio').addClass('disabled');
+
+                jQuery('#form-field-radio_1_6').attr("disabled", true);
+                jQuery('#form-field-radio_1_6').closest('.form-field__radio').addClass('disabled');
+                if (!($('#form-field-radio_1_3').prop('checked') || $('#form-field-radio_1_4').prop('checked'))) {
+                    jQuery('input[name="paymentMethod"]:radio').each(function () {
+                        jQuery(this).attr("checked", false);
+                        jQuery(this).prop('checked', false);
+                        jQuery(this).removeAttr("checked");
+
+                        if (jQuery(this).attr('id') == 'form-field-radio_1_3') {
+                            jQuery('#form-field-radio_1_3').click();
+                        }
+                    });
+                }
+
+                jQuery('.enbdtext').show();
+            } else if (numeral(total) > @PaymentConstants.MinimumAllowedPaymendAmount) {
+                //defaulty enable netbanking only
+                jQuery('#form-field-radio_1_5').attr("disabled", true);
+                jQuery('#form-field-radio_1_5').closest('.form-field__radio').addClass('disabled');
+
+                jQuery('#form-field-radio_1_6').attr("disabled", false);
+                jQuery('#form-field-radio_1_6').closest('.form-field__radio').removeClass('disabled');
+
+
+                if (!($('#form-field-radio_1_3').prop('checked') || $('#form-field-radio_1_4').prop('checked'))) {
+                    jQuery('input[name="paymentMethod"]:radio').each(function () {
+                        jQuery(this).attr("checked", false);
+                        jQuery(this).prop('checked', false);
+                        jQuery(this).removeAttr("checked");
+
+                        if (jQuery(this).attr('id') == 'form-field-radio_1_6') {
+                            jQuery('#form-field-radio_1_6').click();
+                            jQuery(".button--pay").hide();
+                        }
+                    });
+                };
+
+                jQuery('.enbdtext').show();
+
+            }
+            else {
+                jQuery('#form-field-radio_1_5').removeAttr("disabled");
+                jQuery('#form-field-radio_1_5').closest('.form-field__radio').removeClass('disabled');
+                jQuery('#form-field-radio_1_7').removeAttr("disabled");
+                jQuery('#form-field-radio_1_7').closest('.form-field__radio').removeClass('disabled');
+                //jQuery('#form-field-radio_1_2').removeAttr("disabled");
+                //jQuery('#form-field-radio_1_2').closest('.form-field__radio').removeClass('disabled');
+                if (!($('#form-field-radio_1_3').prop('checked') || $('#form-field-radio_1_4').prop('checked'))) {
+
+                    jQuery('input[name="paymentMethod"]:radio').each(function () {
+                        jQuery(this).attr("checked", false);
+                        jQuery(this).prop('checked', false);
+                        jQuery(this).removeAttr("checked");
+
+                        //if(jQuery(this).attr('id') == 'form-field-radio_1_5'){
+                        // jQuery('#form-field-radio_1_5').prop("checked", true);
+                        //}
+
+                        jQuery('.m39-model__payment-option-list .form-field__radio').each(function (index) {
+                            if (!$(this).hasClass('hidden')) {
+                                $(this).find('.form-field__input--radio').prop('checked', true);
+                                return false
+                            }
+
+                        })
+                        jQuery('.m39-model__payment-option-list .form-field__radio .form-field__input--radio').trigger('change')
+                    });
+                };
+
+                jQuery('.enbdtext').hide();
+            }
+        }
+        docReady(function () {
+
+
+            var handleAccountSelection = function (e) {
+                //alert("submit triggered");
+                e.preventDefault();
+                //var selectedpayment = $('input[name=paymentMethod]:checked').val();
+                //selectedpayment="7";
+                var _suqiaAmoutOk = (jQuery('#form-field-SuqiaDonationAmt:visible').length > 0 && jQuery('#form-field-SuqiaDonationAmt:visible').parsley().isValid());
+                if(jQuery('#form-field-SuqiaDonationAmt:visible').length == 0 || _suqiaAmoutOk)
+                {
+                    beforesendfnc();
+                    //if(selectedpayment!="7")
+                    //{
+                    jQuery('.samsungApplePayForm').off("submit").submit();
+                    //}
+                }
+                //else if(selectedpayment=="7")
+                //{
+                //jQuery('.samsungApplePayForm').off("submit").submit();
+                //samsungpay();
+                //paysubmit();
+                //}
+                return false;
+            };
+
+
+
+            //jQuery('.ReviewAccountSelectionform').submit(handleAccountSelection);
+
+            jQuery('.paymentbankkey').on('click', function () {
+                var bkey = jQuery(this).data("bkey");
+                jQuery(".bankkey").val(bkey);
+                jQuery(".button--pay").trigger("click");
+            })
+
+            jQuery("input[name='paymentMethod']").on("change", function () {
+                jQuery(".button--pay").show();
+                if ($(this).val() == 6) {
+                    jQuery(".button--pay").hide();
+                }
+            })
+            jQuery('.samsungApplePayForm').submit(handleAccountSelection);
+        })
+    </script>
+
+    <script>
+        const SAMSUNG_PAY = 'https://spay.samsung.com';
+        if (!window.PaymentRequest) {
+            // PaymentRequest API is not available - forwarding to legacy form based experience.
+            console.log('no samsung pay');
+            return;
+        }
+        // Setup
+        var supportedInstruments = [{
+            supportedMethods: [SAMSUNG_PAY], // 'https://spay.samsung.com'
+            data: {
+                "version": "1",
+                "productId": "9107015a124c4643a4fdc1", //Service id from partner portal
+                "allowedCardNetworks": ['mastercard', 'visa'],
+                "orderNumber": "1233123",
+                "merchantName": "Dewa Samsung pay", //Merchant name in partner portal
+
+            },
+            "isRecurring": false,
+            "billingAddressRequired": false,
+            "paymentProtocol": "PROTOCOL_3DS"
+        }, {
+            supportedMethods: ['basic-card'],
+            data: {
+                supportedNetworks: ['mastercard', 'visa'],
+                supportedTypes: ['credit']
+            }
+        }];
+        var details = {
+            displayItems: [{
+                label: 'DEWA Bill Payment',
+                amount: { currency: 'AED', value: '1.00' }
+            }],
+            total: {
+                label: 'Total due',
+                amount: { currency: 'AED', value: '1.00' }
+            }
+        };
+        var options = {
+            requestShipping: false,
+            requestPayerEmail: false,
+            requestPayerPhone: false,
+            requestPayerName: false
+        };
+        docReady(function () {
+            // Initialization
+            var modalpopFooter = jQuery('.m39-modal__dialog--payment .m39-modal__footer');
+
+            jQuery('.m39-model__payment-option-list .form-field__radio .form-field__input--radio').change(function () {
+                if (jQuery('.m39-model__payment-option-list .form-field__radio .form-field__input--radio:checked').hasClass('samsungpay-option')) {
+                    modalpopFooter.find('.button').addClass('hidden');
+                    modalpopFooter.find('.button--samsungpay').removeClass('hidden');
+                }
+                else if (jQuery('.m39-model__payment-option-list .form-field__radio .form-field__input--radio:checked').hasClass('applepay-option')) {
+                    modalpopFooter.find('.button').addClass('hidden');
+                    modalpopFooter.find('.button--applepay').removeClass('hidden');
+                } else {
+                    modalpopFooter.find('.button').addClass('hidden');
+                    modalpopFooter.find('.button--pay').removeClass('hidden');
+                }
+            });
+            try {
+                var request = new PaymentRequest(supportedInstruments, details, options);
+                if (request.canMakePayment) {
+                    canMakePaymentPromise = request.canMakePayment();
+                }
+                canMakePaymentPromise.then((result) => {
+                    if (!result) {
+                        //jQuery("#samsungpay").show();
+                        // jQuery("#samsungpay").removeClass('hidden');
+                        //jQuery(".samsungpay-option").click();
+                        //jQuery("#samsungpay").hide();
+                        //console.log('no samsung pay');
+                        return;
+                    }
+                    jQuery("#samsungpay").show();
+                    jQuery("#samsungpay").removeClass('hidden');
+                    jQuery(".samsungpay-option").click();
+                    //
+                    //console.log('has samsung pay');
+                }).catch((err) => {
+                });
+            } catch (e) {
+                console.log(e);
+            }
+
+            jQuery('#samsungpaybutton').on('click', function (e) {
+                samsungpay();
+            });
+
+            function samsungpay() {
+                const SAMSUNG_PAY = 'https://spay.samsung.com';
+                if (!window.PaymentRequest) {
+                    // PaymentRequest API is not available - forwarding to legacy form based experience.
+                    console.log('no samsung pay');
+                    return;
+                }
+                // Setup
+                var total = jQuery('#divPaymentAmountVal').data('value');
+
+                details = {
+                    displayItems: [{
+                        label: 'DEWA Bill Payment',
+                        amount: { currency: 'AED', value: total }
+                    }],
+                    total: {
+                        label: 'Total due',
+                        amount: { currency: 'AED', value: total }
+                    }
+                };
+
+                // Initialization
+                var request = new PaymentRequest(supportedInstruments, details, options);
+                if (request.canMakePayment) {
+                    canMakePaymentPromise = request.canMakePayment();
+                }
+                canMakePaymentPromise.then((result) => {
+                    if (!result) {
+                        //console.log('no samsung pay');
+                        return;
+                    }
+                    // TODO: The user has a payment - call show().
+                    //console.log('has samsung pay');
+                    // Show UI then continue with user payment info
+                    request.show().then(result => {
+                        // POST the result to the server
+                        return fetch('/validatePayment', {
+                            method: 'POST',
+                            credentials: 'include', headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(result.toJSON())
+                        }).then(res => {
+                            // Only if successful
+                            if (res.status === 200) {
+                                jQuery("#details").val(JSON.stringify(result.toJSON()));
+                                jQuery(".samsungApplePayForm").submit();
+                                return res.complete('success');
+                            } else {
+                                throw 'Failure';
+                            }
+                        }).catch(() => {
+                            return result.complete('fail');
+                        });
+                    }).catch(function (err) {
+                        jQuery(".samsungApplePayForm").submit();
+                        //console.error('Uh oh, something bad happened: ' + err.message);
+                    });
+                })
+                    .catch((err) => {
+                        jQuery(".samsungApplePayForm").submit();
+                    });
+            };
+        });
+    </script>
+
+    @*<script>
+            docReady(function () {
+                jQuery('#applypaybutton').on('click', function (e) {
+                    handleApplePayPayment();
+                });
+                checkApplePaySupport();
+
+                function checkApplePaySupport() {
+                    if (window.ApplePaySession) {
+                        var merchantIdentifier = 'merchant.sandboxenbd.ae.gov.dewa';
+                        var promise = window.ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier);
+                        promise.then(function (canMakePayments) {
+                            if (canMakePayments) {
+                                jQuery("#applepay").show();
+                                jQuery("#applepay").removeClass('hidden');
+                                jQuery(".applepay-option").click();
+                                //alert("supported device");
+                            } else {
+                                //alert("Activecard payment not supported on this device.")
+                            }
+                        });
+                    } else {
+                        //alert("Apple pay session not supported on this device.")
+                    }
+                }
+
+                function handleApplePayPayment() {
+                    try {
+
+                        var subtotal = "10.00";
+                        var delivery = "0.01";
+                        var deliveryTotal = (Number(subtotal) + Number(delivery)).toString();
+
+                        var totalForCollection = {
+                            label: "DEWA",
+                            amount: subtotal
+                        };
+
+                        var lineItemsForCollection = [
+                            { label: "Subtotal", amount: subtotal, type: "final" }
+                        ];
+
+                        var totalForDelivery = {
+                            label: "DEWA",
+                            amount: deliveryTotal
+                        };
+
+                        var lineItemsForDelivery = [
+                            { label: "Subtotal", amount: subtotal, type: "final" },
+                            { label: "Delivery", amount: delivery, type: "final" }
+                        ];
+
+                        // Create the Apple Pay payment request as appropriate.
+                        var paymentRequest = {
+                            countryCode: "AE",
+                            currencyCode: 'AED',
+                            merchantCapabilities: ["supports3DS"],
+                            supportedNetworks: ["amex", "masterCard", "visa"],
+                            //lineItems: lineItemsForDelivery,
+                            total: totalForDelivery,
+                            //requiredBillingContactFields: ["name", "postalAddress"],
+                            //requiredShippingContactFields: ["name", "postalAddress"],
+                            //shippingType: "delivery",
+                            //shippingMethods: [
+                            //    { label: "Delivery", amount: delivery, identifier: "delivery", detail: "Delivery to you" },
+                            //    { label: "Collection", amount: "1.00", identifier: "collection", detail: "Collect from the store" }
+                            //]
+                        };
+
+                        var session = new window.ApplePaySession(14, paymentRequest);
+
+                        session.begin();
+
+                    session.onvalidatemerchant = function (event) {
+                        //var merchantSession = requestApplePaymentSession(event.validationURL);
+                        var merchantSession = { "epochTimestamp": 1679130029563, "expiresAt": 1679133629563, "merchantSessionIdentifier": "SSHE4B8D52AA00543599188B9A843D03B18_916523AAED1343F5BC5815E12BEE9250AFFDC1A17C46B0DE5A943F0F94927C24", "nonce": "c6e86413", "merchantIdentifier": "0A375753580EB419DADC313A17017221AE6F4459C99FD8BAF39F3766CEE9EA69", "domainName": "webqa.dewa.gov.ae", "displayName": "Dewa", "signature": "308006092a864886f70d010702a0803080020101310d300b0609608648016503040201308006092a864886f70d0107010000a080308203e330820388a00302010202084c304149519d5436300a06082a8648ce3d040302307a312e302c06035504030c254170706c65204170706c69636174696f6e20496e746567726174696f6e204341202d20473331263024060355040b0c1d4170706c652043657274696669636174696f6e20417574686f7269747931133011060355040a0c0a4170706c6520496e632e310b3009060355040613025553301e170d3139303531383031333235375a170d3234303531363031333235375a305f3125302306035504030c1c6563632d736d702d62726f6b65722d7369676e5f5543342d50524f4431143012060355040b0c0b694f532053797374656d7331133011060355040a0c0a4170706c6520496e632e310b30090603550406130255533059301306072a8648ce3d020106082a8648ce3d03010703420004c21577edebd6c7b2218f68dd7090a1218dc7b0bd6f2c283d846095d94af4a5411b83420ed811f3407e83331f1c54c3f7eb3220d6bad5d4eff49289893e7c0f13a38202113082020d300c0603551d130101ff04023000301f0603551d2304183016801423f249c44f93e4ef27e6c4f6286c3fa2bbfd2e4b304506082b0601050507010104393037303506082b060105050730018629687474703a2f2f6f6373702e6170706c652e636f6d2f6f63737030342d6170706c65616963613330323082011d0603551d2004820114308201103082010c06092a864886f7636405013081fe3081c306082b060105050702023081b60c81b352656c69616e6365206f6e207468697320636572746966696361746520627920616e7920706172747920617373756d657320616363657074616e6365206f6620746865207468656e206170706c696361626c65207374616e64617264207465726d7320616e6420636f6e646974696f6e73206f66207573652c20636572746966696361746520706f6c69637920616e642063657274696669636174696f6e2070726163746963652073746174656d656e74732e303606082b06010505070201162a687474703a2f2f7777772e6170706c652e636f6d2f6365727469666963617465617574686f726974792f30340603551d1f042d302b3029a027a0258623687474703a2f2f63726c2e6170706c652e636f6d2f6170706c6561696361332e63726c301d0603551d0e041604149457db6fd57481868989762f7e578507e79b5824300e0603551d0f0101ff040403020780300f06092a864886f76364061d04020500300a06082a8648ce3d0403020349003046022100be09571fe71e1e735b55e5afacb4c72feb445f30185222c7251002b61ebd6f55022100d18b350a5dd6dd6eb1746035b11eb2ce87cfa3e6af6cbd8380890dc82cddaa63308202ee30820275a0030201020208496d2fbf3a98da97300a06082a8648ce3d0403023067311b301906035504030c124170706c6520526f6f74204341202d20473331263024060355040b0c1d4170706c652043657274696669636174696f6e20417574686f7269747931133011060355040a0c0a4170706c6520496e632e310b3009060355040613025553301e170d3134303530363233343633305a170d3239303530363233343633305a307a312e302c06035504030c254170706c65204170706c69636174696f6e20496e746567726174696f6e204341202d20473331263024060355040b0c1d4170706c652043657274696669636174696f6e20417574686f7269747931133011060355040a0c0a4170706c6520496e632e310b30090603550406130255533059301306072a8648ce3d020106082a8648ce3d03010703420004f017118419d76485d51a5e25810776e880a2efde7bae4de08dfc4b93e13356d5665b35ae22d097760d224e7bba08fd7617ce88cb76bb6670bec8e82984ff5445a381f73081f4304606082b06010505070101043a3038303606082b06010505073001862a687474703a2f2f6f6373702e6170706c652e636f6d2f6f63737030342d6170706c65726f6f7463616733301d0603551d0e0416041423f249c44f93e4ef27e6c4f6286c3fa2bbfd2e4b300f0603551d130101ff040530030101ff301f0603551d23041830168014bbb0dea15833889aa48a99debebdebafdacb24ab30370603551d1f0430302e302ca02aa0288626687474703a2f2f63726c2e6170706c652e636f6d2f6170706c65726f6f74636167332e63726c300e0603551d0f0101ff0404030201063010060a2a864886f7636406020e04020500300a06082a8648ce3d040302036700306402303acf7283511699b186fb35c356ca62bff417edd90f754da28ebef19c815e42b789f898f79b599f98d5410d8f9de9c2fe0230322dd54421b0a305776c5df3383b9067fd177c2c216d964fc6726982126f54f87a7d1b99cb9b0989216106990f09921d00003182018730820183020101308186307a312e302c06035504030c254170706c65204170706c69636174696f6e20496e746567726174696f6e204341202d20473331263024060355040b0c1d4170706c652043657274696669636174696f6e20417574686f7269747931133011060355040a0c0a4170706c6520496e632e310b300906035504061302555302084c304149519d5436300b0609608648016503040201a08193301806092a864886f70d010903310b06092a864886f70d010701301c06092a864886f70d010905310f170d3233303331383039303032395a302806092a864886f70d010934311b3019300b0609608648016503040201a10a06082a8648ce3d040302302f06092a864886f70d0109043122042063e0d63d4d4a67ddefea114d0842e29d2e8c88c4b2a226859ac62f1612786e34300a06082a8648ce3d0403020446304402205a3559cc961f714c4863e438a315d2a610bc6b2014a6318136cb766d4ad3dbda022035b8bdeeeb588e7f4dd6968c675e40fdfd7a3827b68241e84a7b43c6b8218dab000000000000", "operationalAnalyticsIdentifier": "Dewa:0A375753580EB419DADC313A17017221AE6F4459C99FD8BAF39F3766CEE9EA69", "retries": 0, "pspId": "0A375753580EB419DADC313A17017221AE6F4459C99FD8BAF39F3766CEE9EA69" };
+                        //session.completeMerchantValidation(merchantSession);
+                        session.completeMerchantValidation(merchantSession);
+                    };
+
+
+
+                        session.onpaymentauthorized = function (event) {
+
+                            var payment = event.payment
+
+                            var token = event.payment.token.paymentData;
+
+
+                            var authorizationResult = {
+                                status: ApplePaySession.STATUS_SUCCESS,
+                                errors: []
+                            };
+
+                            // Do something with the payment to capture funds and
+                            // then dismiss the Apple Pay sheet for the session with
+                            // the relevant status code for the payment's authorization.
+                            session.completePayment(authorizationResult);
+
+
+                            alert(JSON.stringify(payment));
+
+                            alert("Payment success");
+                        };
+
+
+
+
+                    } catch (e) {
+                        alert("error:" + e);
+                    }
+                }
+
+                function requestApplePaymentSession(validationUrl) {
+                    var merchantSession = '';
+                    var token = $('input[name="__RequestVerificationToken"]').val();
+
+                    var params = {
+                        __RequestVerificationToken: token,
+                        ValidationUrl: validationUrl
+                    }
+
+                    $.ajax({
+                        url: "/api/sitecore/Apple/Validate",
+                        type: "POST",
+                        cache: false,
+                        data: params,
+                        success: function (result) {
+
+                            merchantSession = result;
+                        },
+                        error: function (xhr) {
+                            merchantSession = '';
+                            alert('Request Status: ' + xhr.status + ' Status Text: ' + xhr.statusText + ' ' + xhr.responseText);
+                        }
+                    });
+
+                    return merchantSession;
+                }
+
+            });
+        </script>*@
