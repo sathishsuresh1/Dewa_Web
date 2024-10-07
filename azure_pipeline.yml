@@ -1,49 +1,125 @@
 trigger:
-- main
+- development  # Trigger on development branch, adjust as needed
 
 pool:
-  name: 'DEWASERV10564'
+  vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release'
+  buildConfiguration: 'Release'  # Set your build configuration (e.g., Release, Debug)
+  buildPlatform: 'Any CPU' 
+steps:
+# 1. Install the .NET SDK
 
-stages:
-- stage: PreBuild
-  displayName: PreBuild 
-  jobs:
-  - job: PreBuild
-    displayName: PreBuild
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'  # Replace with the specific version you need
+    installationPath: $(Agent.ToolsDirectory)/dotnet
 
-    steps:
-    # - task: UseDotNet@2
-    #   displayName: 'Install .NET Core SDK'
-    #   inputs:
-    #     version: 8.x
-    #     packageType: sdk
-    #     performMultiLevelLookup: true
-    #     includePreviewVersions: true # Required for preview versions
+# 2. Install NuGet Tool
+
+- task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: '5.x'  # Adjust version as needed
 
 
+# 3. Restore NuGet Packages
+# Add the -SolutionDirectory option
+
+ # Ensure correct directory is passed
+
+# Alternatively, if you're using packages.config, add -PackagesDirectory
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/packages.config'  # Use packages.config if applicable
+    feedsToUse: 'config'
+    nugetConfigPath: 'nuget.config'
+    packagesDirectory: '$(Build.SourcesDirectory)/packages'  # Specify packages directory
+
+# 4. Build the solution
+
+- task: MSBuild@1
+  displayName: 'Build using MSBuild'
+  inputs:
+    solution: '**/*.sln'  # Adjust this path if necessary
+    msbuildArchitecture: 'x86'
+    configuration: '$(buildConfiguration)'
+    platform: 'Any CPU'
+# 5. Copy Files
+
+- task: CopyFiles@2
+  inputs:
+    contents: '**/bin/Release/**/*'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# 6. Archieve the artifacts
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'  # Directory containing files to zip
+    includeRootFolder: false  # Set to true if you want to include the root folder
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to save the zip file
+    replaceExistingArchive: true
+
+# 7. Publish Artifacts
+
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to the zip file
+    artifactName: 'drop'
+    publishLocation: 'Container'
+    
+
+
+# 3. Restore NuGet Packages
+# Add the -SolutionDirectory option
+
+
+ # Ensure correct directory is passed
+
+# Alternatively, if you're using packages.config, add -PackagesDirectory
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/packages.config'  # Use packages.config if applicable
+    feedsToUse: 'config'
+    nugetConfigPath: 'nuget.config'
+    packagesDirectory: '$(Build.SourcesDirectory)/packages'  # Specify packages directory
+
+# 4. Build the solution
+
+- task: MSBuild@1
+  displayName: 'Build using MSBuild'
+  inputs:
+    solution: '**/*.sln'  # Adjust this path if necessary
+    msbuildArchitecture: 'x86'
+    configuration: '$(buildConfiguration)'
+    platform: 'Any CPU'
+# 5. Copy Files
+
+- task: CopyFiles@2
+  inputs:
+    contents: '**/bin/Release/**/*'
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# 6. Archieve the artifacts
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'  # Directory containing files to zip
+    includeRootFolder: false  # Set to true if you want to include the root folder
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to save the zip file
+    replaceExistingArchive: true
+
+# 7. Publish Artifacts
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to the zip file
+    artifactName: 'drop'
+    publishLocation: 'Container'
 
     
-    - task: DotNetCoreCLI@2
-      inputs:
-        command: 'restore'
-        feedsToUse: 'select'
-        vstsFeed: 'my-vsts-feed' # A series of numbers and letters
-    - task: Npm@1
-      inputs:
-        command: 'install'
-   
-    - task: NuGetCommand@2
-      inputs:
-        command: 'restore'
-        restoreSolution: '**/*.sln'
-        feedsToUse: 'select'
-    - task: DotNetCoreCLI@2
-      displayName: Build
-      inputs:
-        command: build
-        projects: '**/*.csproj'
-        arguments: '--configuration $(buildConfiguration)' # Update this to match your needs
-    
+
