@@ -5,121 +5,128 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release'  # Set your build configuration (e.g., Release, Debug)
-  buildPlatform: 'Any CPU' 
-steps:
-# 1. Install the .NET SDK
+  buildConfiguration: 'Release'
+  buildPlatform: 'Any CPU'
 
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '8.x'  # Replace with the specific version you need
-    installationPath: $(Agent.ToolsDirectory)/dotnet
+stages:
 
-# 2. Install NuGet Tool
+# 1. Build Stage
+- stage: Build
+  displayName: 'Build Stage'
+  jobs:
+    - job: BuildJob
+      displayName: 'Build Job'
+      steps:
+        # 1. Install the .NET SDK
+        - task: UseDotNet@2
+          inputs:
+            packageType: 'sdk'
+            version: '8.x'
+            installationPath: $(Agent.ToolsDirectory)/dotnet
 
-- task: NuGetToolInstaller@1
-  inputs:
-    versionSpec: '5.x'  # Adjust version as needed
+        # 2. Install NuGet Tool
+        - task: NuGetToolInstaller@1
+          inputs:
+            versionSpec: '5.x'
 
+        # 3. Restore NuGet Packages
+        - task: NuGetCommand@2
+          inputs:
+            command: 'restore'     
+            restoreSolution: '**/packages.config'
+            feedsToUse: 'config'
+            nugetConfigPath: 'nuget.config'
+            packagesDirectory: '$(Build.SourcesDirectory)/packages'
 
-# 3. Restore NuGet Packages
-# Add the -SolutionDirectory option
+        # 4. Build the solution 
+        - task: MSBuild@1
+          displayName: 'Build using MSBuild' 
+          inputs:
+            solution: '**/*.sln'
+            msbuildArchitecture: 'x86'
+            configuration: '$(buildConfiguration)'
+            platform: 'Any CPU'
 
- # Ensure correct directory is passed
+        # 5. Copy Files
+        - task: CopyFiles@2
+          inputs:
+            contents: '**/bin/Release/**/*'
+            targetFolder: '$(Build.ArtifactStagingDirectory)'
 
-# Alternatively, if you're using packages.config, add -PackagesDirectory
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: '**/packages.config'  # Use packages.config if applicable
-    feedsToUse: 'config'
-    nugetConfigPath: 'nuget.config'
-    packagesDirectory: '$(Build.SourcesDirectory)/packages'  # Specify packages directory
+        # 6. Archive the artifacts
+        - task: ArchiveFiles@2
+          inputs:
+            rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+            includeRootFolder: false
+            archiveType: 'zip'
+            archiveFile: '$(Build.ArtifactStagingDirectory)/Release.zip'
+            replaceExistingArchive: true
 
-# 4. Build the solution
+        # 7. Publish Artifacts
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathToPublish: '$(Build.ArtifactStagingDirectory)/Release.zip'
+            artifactName: 'drop'
+            publishLocation: 'Container'
 
-- task: MSBuild@1
-  displayName: 'Build using MSBuild'
-  inputs:
-    solution: '**/*.sln'  # Adjust this path if necessary
-    msbuildArchitecture: 'x86'
-    configuration: '$(buildConfiguration)'
-    platform: 'Any CPU'
-# 5. Copy Files
+# 2. QA Stage
+- stage: QA
+  displayName: 'QA Approval Stage'
+  dependsOn: Build  # QA stage runs after Build stage
+  condition: succeeded()
+  jobs:
+    - deployment: QADeployment
+      displayName: 'Deploy to QA'
+      environment: 'QA'  # Ensure the QA environment exists in Azure DevOps
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              # Step 1: Wait for QA approval
+              # - task: ManualValidation@1
+              #   inputs:
+              #     instructions: 'Awaiting QA approval to proceed with deployment..'
+              #     notifyUsers: 'Sathish S'
+                  
 
-- task: CopyFiles@2
-  inputs:
-    contents: '**/bin/Release/**/*'
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
+              # Step 2: Download the artifacts
+              - download: current
+                artifact: 'drop'  # Name of the published artifact
+                displayName: 'Download build artifacts'
 
-# 6. Archieve the artifacts
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'  # Directory containing files to zip
-    includeRootFolder: false  # Set to true if you want to include the root folder
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to save the zip file
-    replaceExistingArchive: true
+              # Step 3: Add QA-approved tag after download  
+              # - task: BuildTags@1
+              #   displayName: 'Add QA-approved tag'
+              #   inputs:
+              #     tags: 'QA-approved'
+              
+  # 3. Staging Stage
+- stage: Staging
+  displayName: 'Staging Approval Stage'
+  dependsOn: QA  # Staging stage runs after QA approval
+  condition: succeeded()
+  jobs:
+    - deployment: StagingDeployment
+      displayName: 'Deploy to Staging'
+      environment: 'Staging'  # Ensure the Staging environment exists in Azure DevOps
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              # Step 1: Wait for Staging approval
+              # - task: ManualValidation@1
+              #   inputs:
+              #     instructions: 'Awaiting Staging approval to proceed with deployment.'
+              #     notifyUsers: 'Sathish S'
 
-# 7. Publish Artifacts
-
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to the zip file
-    artifactName: 'drop'
-    publishLocation: 'Container'
-    
-
-
-# 3. Restore NuGet Packages
-# Add the -SolutionDirectory option
-
-
- # Ensure correct directory is passed
-
-# Alternatively, if you're using packages.config, add -PackagesDirectory
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: '**/packages.config'  # Use packages.config if applicable
-    feedsToUse: 'config'
-    nugetConfigPath: 'nuget.config'
-    packagesDirectory: '$(Build.SourcesDirectory)/packages'  # Specify packages directory
-
-# 4. Build the solution
-
-- task: MSBuild@1
-  displayName: 'Build using MSBuild'
-  inputs:
-    solution: '**/*.sln'  # Adjust this path if necessary
-    msbuildArchitecture: 'x86'
-    configuration: '$(buildConfiguration)'
-    platform: 'Any CPU'
-# 5. Copy Files
-
-- task: CopyFiles@2
-  inputs:
-    contents: '**/bin/Release/**/*'
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
-
-# 6. Archieve the artifacts
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'  # Directory containing files to zip
-    includeRootFolder: false  # Set to true if you want to include the root folder
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to save the zip file
-    replaceExistingArchive: true
-
-# 7. Publish Artifacts
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)/Release.zip'  # Path to the zip file
-    artifactName: 'drop'
-    publishLocation: 'Container'
-
-    
-
+              # Step 2: Download the artifacts for Staging
+              - download: current
+                artifact: 'drop'
+                displayName: 'Download build artifacts for Staging'
+              
+              # Step 3: Add QA-approved tag after download
+              # - task: BuildTags@1
+              #   displayName: 'Add QA-approved tag'
+              #   inputs:
+              #     tags: 'QA-approved'
+              
